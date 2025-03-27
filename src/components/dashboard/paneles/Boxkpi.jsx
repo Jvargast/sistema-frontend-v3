@@ -28,7 +28,7 @@ const Boxkpi = ({ title, value }) => {
   );
 };
 
-Kpibox.propTypes = {
+Boxkpi.propTypes = {
   title: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
