@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">AguasValentinoERP</string>
+    <string name="title_activity_main">AguasValentinoERP</string>
+    <string name="package_name">com.aguasvalentino.erp</string>
+    <string name="custom_url_scheme">com.aguasvalentino.erp</string>
+</resources>
