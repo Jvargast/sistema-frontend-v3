@@ -8,13 +8,13 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
-import KPIBox from "../../components/dashboard/paneles/kpibox";
 import SalesChart from "../../components/dashboard/paneles/SalesChart";
 import OrdersPieChart from "../../components/dashboard/paneles/OrdersPieChart";
 import RevenueTrendChart from "../../components/dashboard/paneles/RevenueTrendChart";
 import BestSellingProductsChart from "../../components/dashboard/paneles/BestSellingProductsChart";
 import { useGetKpiVentasPorFechaQuery } from "../../store/services/ventasEstadisticasApi";
 import dayjs from "dayjs";
+import KPIBox from "../../components/dashboard/paneles/kpibox";
 
 // 📌 Definición de KPIs
 
