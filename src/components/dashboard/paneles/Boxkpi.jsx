@@ -1,7 +1,7 @@
 import { Typography, Box } from "@mui/material";
 import PropTypes from "prop-types";
 
-const Kpibox = ({ title, value }) => {
+const Boxkpi = ({ title, value }) => {
   return (
     <Box
       sx={{
@@ -33,4 +33,4 @@ Kpibox.propTypes = {
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
 
-export default Kpibox;
+export default Boxkpi;
