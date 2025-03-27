@@ -72,7 +72,7 @@ const Sidebar = ({
     try {
       await logout().unwrap();
       dispatch(resetCacheAndLogout());
-      //navigate("/login");
+      navigate("/login");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }
