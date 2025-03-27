@@ -14,7 +14,7 @@ import RevenueTrendChart from "../../components/dashboard/paneles/RevenueTrendCh
 import BestSellingProductsChart from "../../components/dashboard/paneles/BestSellingProductsChart";
 import { useGetKpiVentasPorFechaQuery } from "../../store/services/ventasEstadisticasApi";
 import dayjs from "dayjs";
-import Kpibox from "../../components/dashboard/paneles/kpibox";
+import Boxkpi from "../../components/dashboard/paneles/Boxkpi";
 
 // 📌 Definición de KPIs
 
@@ -131,7 +131,7 @@ const DashboardCentral = () => {
                   }}
                 >
                   <CardContent>
-                    <Kpibox title={kpi.title} value={kpi.value} />
+                    <Boxkpi title={kpi.title} value={kpi.value} />
                   </CardContent>
                 </Card>
               </div>
