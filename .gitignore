@@ -39,7 +39,5 @@ Thumbs.db
 *.sln
 
 # Env config
-.env
-.env.local
-.env.*.local
-.env.production
+# Ignorar TODOS los archivos .env
+.env*
