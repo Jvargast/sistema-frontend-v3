@@ -1,9 +1,10 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import autoprefixer from "autoprefixer";
 import tailwindcss from "tailwindcss";
 
 export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
   const isDev = mode === "development";
 
   return {
@@ -23,13 +24,13 @@ export default defineConfig(({ mode }) => {
           strictPort: true,
           proxy: {
             "/api": {
-              target: "http://192.168.1.121:8080", // local backend
+              target: env.VITE_API_URL,
               changeOrigin: true,
               secure: false,
             },
           },
         }
-      : undefined, // No necesitas `server` en producción (lo ignora)
+      : undefined,
     build: {
       outDir: "dist",
     },
