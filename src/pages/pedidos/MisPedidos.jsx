@@ -57,6 +57,9 @@ const MisPedidos = () => {
     fecha: formatFecha(fechaSeleccionada), 
   });
 
+  console.log(pedidos)
+  console.log(fechaHoy)
+
   const [confirmarPedido, { isLoading: isConfirming }] =
     useConfirmarPedidoMutation();
   const [confirmado, setConfirmado] = useState({});
