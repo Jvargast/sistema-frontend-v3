@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 import Login from "./pages/login";
 import UnauthorizedPage from "./pages/unauthorized";
 import ProtectedRoute from "./components/utils/ProtectedRoute";
@@ -44,7 +44,7 @@ import VerPago from "./pages/pagos/VerPago";
 import Analisis from "./pages/analisis";
 
 // Configuración de rutas
-const router = createBrowserRouter([
+const router = HashRouter([
   {
     path: "/login",
     element: <Login />,
@@ -264,8 +264,16 @@ const router = createBrowserRouter([
           },
           { path: "entregas", element: <EntregasManagement /> },
           
-          { path: "agendas", element: <AgendaManagement /> },
+          
           { path: "agendas/editar/:id", element: <AgendaDetail /> },*/
+          /* {
+            path: "agendas",
+            element: (
+              <RoleBasedRoute requiredPermission="ver_agenda_carga">
+                < />
+              </RoleBasedRoute>
+            ),
+          }, */
           {
             path: "viajes",
             element: (

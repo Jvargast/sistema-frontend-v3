@@ -4,14 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --mode development",
     "start": "electron .",
     "build": "cross-env NODE_ENV=production vite build && electron-builder",
-    "build:web": "vite build",                    
+    "build:web": "vite build --mode production",
     "build:electron": "vite build && electron-builder",
-    "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "preview": "vite preview --mode production",
+    "predeploy": "npm run build:web",
+   "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@capacitor/android": "^7.1.0",
