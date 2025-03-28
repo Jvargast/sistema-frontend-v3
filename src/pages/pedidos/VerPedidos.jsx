@@ -54,6 +54,7 @@ const PedidosBoard = () => {
         "Confirmado",
         "En Preparación",
         "En Entrega",
+        "Pendiente"
       ];
 
       // Agrupar pedidos según id_chofer

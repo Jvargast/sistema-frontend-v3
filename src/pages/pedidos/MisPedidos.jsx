@@ -103,7 +103,7 @@ const MisPedidos = () => {
   const pedidosPendientes =
     pedidos?.data?.filter(
       (pedido) =>
-        pedido.EstadoPedido.nombre_estado === "Pendiente de Confirmación"
+        pedido?.EstadoPedido?.nombre_estado === "Pendiente de Confirmación"
     ) || [];
 
   if (isLoading) {
