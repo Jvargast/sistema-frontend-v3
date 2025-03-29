@@ -37,7 +37,6 @@ import { useNavigate } from "react-router-dom";
 import { useLogoutMutation } from "../../store/services/authApi";
 import { resetCacheAndLogout } from "../../store/reducers/authSlice";
 import FlexBetween from "./FlexBetween";
-import { showNotification } from "../../store/reducers/notificacionSlice";
 import { modulesData } from "../../utils/modulesData";
 import { markAllAsRead } from "../../store/reducers/notificacionesSlice";
 import NotificationsMenu from "./NotificationMenu";
@@ -135,17 +134,16 @@ const Navbar = ({ user, rol, isSidebarOpen, setIsSidebarOpen }) => {
             </IconButton>
             <IconButton
               aria-label="Ver notificaciones"
-              onClick={() =>
-                dispatch(
-                  showNotification({
-                    message: "Método no implementado",
-                    severity: "info",
-                  })
-                )
-              }
+              onClick={handleOpenNotificationsMenu}
             >
-              <NotificationsNoneOutlinedIcon sx={{ fontSize: "25px" }} />
+              <Badge
+                badgeContent={notificaciones.filter((n) => !n.leida).length}
+                color="secondary"
+              >
+                <NotificationsNoneOutlinedIcon sx={{ fontSize: "25px" }} />
+              </Badge>
             </IconButton>
+
             <IconButton aria-label="Abrir configuración">
               <SettingsOutlined sx={{ fontSize: "25px" }} />
             </IconButton>
@@ -212,13 +210,6 @@ const Navbar = ({ user, rol, isSidebarOpen, setIsSidebarOpen }) => {
               </Badge>
             </IconButton>
             {/* Menu de notificaciones */}
-            <NotificationsMenu
-              anchorEl={anchorNoti}
-              open={isNotiOpen}
-              onClose={handleCloseNoti}
-              notifications={notificaciones}
-              onSelectNotification={handleSelectNotification}
-            />
             <IconButton aria-label="Abrir configuración">
               <SettingsOutlined sx={{ fontSize: "25px" }} />
             </IconButton>
@@ -266,6 +257,13 @@ const Navbar = ({ user, rol, isSidebarOpen, setIsSidebarOpen }) => {
             </Menu>
           </FlexBetween>
         )}
+        <NotificationsMenu
+          anchorEl={anchorNoti}
+          open={isNotiOpen}
+          onClose={handleCloseNoti}
+          notifications={notificaciones}
+          onSelectNotification={handleSelectNotification}
+        />
       </Toolbar>
       <Drawer
         anchor="left"

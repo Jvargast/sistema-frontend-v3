@@ -1,8 +1,15 @@
 import PropTypes from "prop-types";
 import { Draggable } from "@hello-pangea/dnd"; // <-- Cambio aquí
-import { Card, CardContent, ClickAwayListener, Popper, Typography } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  ClickAwayListener,
+  Popper,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
 import PedidoTooltip from "./PedidoToolTip";
+import { obtenerFechaChile, obtenerHoraChile } from "../../utils/formatearHora";
 
 const PedidoCard = ({ pedido, index }) => {
   const coloresEstado = {
@@ -54,14 +61,21 @@ const PedidoCard = ({ pedido, index }) => {
             }}
           >
             <CardContent className="p-4">
-              <Typography
-                variant="subtitle1"
-                className="font-bold text-pink-600 tracking-wide"
-              >
-                ID Pedido: {pedido.id_pedido}
-              </Typography>
+              <div className="flex justify-between items-center mb-2">
+                <Typography
+                  variant="subtitle1"
+                  className="font-bold text-pink-600 tracking-wide"
+                >
+                  ID Pedido: {pedido.id_pedido}
+                </Typography>
 
-              <Typography variant="body2" className="mt-2 text-gray-700">
+                <div className="flex flex-col items-end bg-indigo-100 text-indigo-700 text-xs font-medium px-2 py-1 rounded">
+                  <span>{obtenerFechaChile(pedido.fecha_pedido)}</span>
+                  <span>{obtenerHoraChile(pedido.fecha_pedido)}</span>
+                </div>
+              </div>
+
+              <Typography variant="body2" className="text-gray-700">
                 <span className="text-pink-500 font-semibold">Cliente:</span>{" "}
                 {pedido?.Cliente?.nombre ?? "Desconocido"}
               </Typography>
@@ -69,8 +83,7 @@ const PedidoCard = ({ pedido, index }) => {
                 <span className="text-pink-500 font-semibold">Estado:</span>{" "}
                 {pedido?.EstadoPedido?.nombre_estado}
               </Typography>
-
-              <Typography variant="body2" className="mt-1 text-gray-700">
+              <Typography variant="body2" className="mt-2 text-gray-700">
                 <span className="text-pink-500 font-semibold">Dirección:</span>{" "}
                 {pedido.direccion_entrega}
               </Typography>
@@ -100,6 +113,7 @@ PedidoCard.propTypes = {
       nombre_estado: PropTypes.string,
     }),
     direccion_entrega: PropTypes.string.isRequired,
+    fecha_pedido: PropTypes.string.isRequired,
   }).isRequired,
   index: PropTypes.number.isRequired,
 };

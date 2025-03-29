@@ -1,7 +1,7 @@
 import { Box, Typography, Button, CircularProgress } from "@mui/material";
 import PropTypes from "prop-types";
 
-const PedidoResumen = ({ total, isLoading, error, onSubmit }) => {
+const PedidoResumen = ({ total, isLoading, error, onSubmit, submitLabel }) => {
   return (
     <Box
       sx={{
@@ -36,12 +36,12 @@ const PedidoResumen = ({ total, isLoading, error, onSubmit }) => {
         {isLoading ? (
           <CircularProgress size={24} color="inherit" />
         ) : (
-          "Crear Pedido"
+          submitLabel
         )}
       </Button>
       {error && (
         <Typography variant="body2" color="error" sx={{ mt: 2 }}>
-          Error: {error.message}
+          Error: {error?.data?.message }
         </Typography>
       )}
     </Box>
@@ -53,6 +53,7 @@ PedidoResumen.propTypes = {
   isLoading: PropTypes.bool.isRequired,
   error: PropTypes.object,
   onSubmit: PropTypes.func.isRequired,
+  submitLabel: PropTypes.string,
 };
 
 export default PedidoResumen;

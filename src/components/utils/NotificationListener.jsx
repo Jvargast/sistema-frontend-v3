@@ -3,11 +3,11 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { socket } from "../../socket";
 import { addNotificacion } from "../../store/reducers/notificacionesSlice";
+import { emitRefetchMisPedidos } from "../../utils/eventBus";
 
 function NotificationListener() {
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
-
 
   useEffect(() => {
     console.log("NotificationListener useEffect corriendo...");
@@ -25,8 +25,14 @@ function NotificationListener() {
       dispatch(addNotificacion(data));
     });
 
+    socket.on("actualizar_mis_pedidos", () => {
+      console.log("📡 WS: Recibido evento 'actualizar_mis_pedidos'");
+      emitRefetchMisPedidos(); 
+    });
+
     return () => {
       socket.off("nueva_notificacion");
+      socket.off("actualizar_mis_pedidos");
     };
   }, [isAuthenticated, user, dispatch]);
 

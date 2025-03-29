@@ -16,8 +16,11 @@ import {
 import PropTypes from "prop-types";
 import { useAsignarChoferMutation } from "../../store/services/camionesApi";
 import { useGetAllChoferesQuery } from "../../store/services/usuariosApi";
+import { useDispatch } from "react-redux";
+import { showNotification } from "../../store/reducers/notificacionSlice";
 
 const AsignarChoferModal = ({ open, onClose, camionId }) => {
+  const dispatch = useDispatch();
   const {
     data: choferes = [],
     isLoading: loadingChoferes,
@@ -42,6 +45,12 @@ const AsignarChoferModal = ({ open, onClose, camionId }) => {
         id_chofer: choferSeleccionado,
       }).unwrap();
       onClose();
+      dispatch(
+        showNotification({
+          message: "Se ha asignado correctamente",
+          severity: "success",
+        })
+      );
     } catch (error) {
       console.error("Error al asignar chofer", error);
     }

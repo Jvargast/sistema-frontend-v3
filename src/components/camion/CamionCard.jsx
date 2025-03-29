@@ -7,6 +7,7 @@ import {
   Chip,
   Box,
   Divider,
+  IconButton,
 } from "@mui/material";
 import { Edit, Delete, LocalShipping, PersonAdd } from "@mui/icons-material";
 import PropTypes from "prop-types";
@@ -14,10 +15,42 @@ import InventarioCamion from "./InventarioCamion";
 import { useState } from "react";
 import AsignarChoferModal from "./AsignarChoferModal";
 import EditarCamionModal from "./EditarCamionModal";
+import RemoveCircleOutlineOutlinedIcon from "@mui/icons-material/RemoveCircleOutlineOutlined";
+import AlertDialog from "../common/AlertDialog";
+import { useDispatch } from "react-redux";
+import { showNotification } from "../../store/reducers/notificacionSlice";
+import { useDesasignarChoferMutation } from "../../store/services/camionesApi";
 
 const CamionCard = ({ camion, onDelete, isDeleting }) => {
   const [openModal, setOpenModal] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
+  const [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
+
+  const [desasignarChofer] = useDesasignarChoferMutation();
+
+  const handleDesasignarChofer = async () => {
+    try {
+      await desasignarChofer({ id: camion?.id_camion }).unwrap();
+      dispatch(
+        showNotification({
+          message: "Chofer removido éxitosamente.",
+          severity: "success",
+          duration: 3000,
+        })
+      );
+      setOpen(false);
+    } catch (error) {
+      dispatch(
+        showNotification({
+          message: `No se pudo desasignar, error: ${error?.data?.error}`,
+          severity: "error",
+          duration: 3000,
+        })
+      );
+      setOpen(false);
+    }
+  };
 
   return (
     <Card
@@ -93,20 +126,28 @@ const CamionCard = ({ camion, onDelete, isDeleting }) => {
                 borderRadius: "8px",
                 width: "fit-content",
                 textAlign: "center",
+                display: "flex",
               }}
             >
-              <Typography
-                sx={{
-                  fontSize: "0.9rem",
-                  fontWeight: "bold",
-                  color: "#1565C0",
-                }}
-              >
-                Chofer: {camion.chofer?.nombre}
-              </Typography>
-              <Typography sx={{ fontSize: "0.85rem", color: "#444" }}>
-                Rut: {camion.id_chofer_asignado}
-              </Typography>
+              <Box>
+                <Typography
+                  sx={{
+                    fontSize: "0.9rem",
+                    fontWeight: "bold",
+                    color: "#1565C0",
+                  }}
+                >
+                  Chofer: {camion.chofer?.nombre}
+                </Typography>
+                <Typography sx={{ fontSize: "0.85rem", color: "#444" }}>
+                  Rut: {camion.id_chofer_asignado}
+                </Typography>
+              </Box>
+              <Box>
+                <IconButton onClick={() => setOpen(true)}>
+                  <RemoveCircleOutlineOutlinedIcon sx={{ color: "red" }} />
+                </IconButton>
+              </Box>
             </Box>
           )}
         </Box>
@@ -215,6 +256,13 @@ const CamionCard = ({ camion, onDelete, isDeleting }) => {
         open={openEdit}
         onClose={() => setOpenEdit(false)}
         camion={camion}
+      />
+      <AlertDialog
+        openAlert={open}
+        onCloseAlert={() => setOpen(false)}
+        onConfirm={handleDesasignarChofer}
+        message="¿Estás seguro que deseas remover el chofer?"
+        title="Remover Chofer"
       />
     </Card>
   );

@@ -1,42 +1,29 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Box, Typography } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
-import { useCreatePedidoMutation } from "../../store/services/pedidosApi";
+import { useCreateCotizacionMutation } from "../../store/services/cotizacionesApi";
 import { addItem, clearCart } from "../../store/reducers/cartSlice";
 import { showNotification } from "../../store/reducers/notificacionSlice";
-
 import PedidoForm from "../../components/pedido/PedidoForm";
-import PedidoResumen from "../../components/pedido/PedidoResumen";
-import PedidoProductos from "../../components/pedido/PedidoProductos";
 import PedidoCategorias from "../../components/pedido/PedidoCategorias";
+import PedidoProductos from "../../components/pedido/PedidoProductos";
 import PedidoCarrito from "../../components/pedido/PedidoCarrito";
+import PedidoResumen from "../../components/pedido/PedidoResumen";
 
-const CrearPedido = () => {
-  // Estados para los datos del pedido
-  const [selectedCliente, setSelectedCliente] = useState(null);
-  const [direccionEntrega, setDireccionEntrega] = useState("");
-  const [metodoPago, setMetodoPago] = useState(null);
-  const [notas, setNotas] = useState("");
 
-  // Redux
+const CrearCotizacion = () => {
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart.items);
   const total = useSelector((state) => state.cart.total);
 
-  // RTK Query para crear el pedido
-  const [createPedido, { isLoading, error }] = useCreatePedidoMutation();
+  const [selectedCliente, setSelectedCliente] = useState(null);
+  const [fechaVencimiento, setFechaVencimiento] = useState("");
+  const [notas, setNotas] = useState("");
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("all");
 
-  // Categoría seleccionada (para filtrar productos)
-  const [category, setCategory] = useState("all");
+  const [createCotizacion, { isLoading, error }] =
+    useCreateCotizacionMutation();
 
-  // Si el cliente tiene dirección, se usa por defecto
-  useEffect(() => {
-    if (selectedCliente && selectedCliente.direccion) {
-      setDireccionEntrega(selectedCliente.direccion);
-    }
-  }, [selectedCliente]);
-
-  // Función para agregar producto al carrito (incluyendo el campo "tipo")
   const handleAddToCart = (product) => {
     dispatch(
       addItem({
@@ -49,48 +36,45 @@ const CrearPedido = () => {
     );
   };
 
-  // Función para crear el pedido
-  const handleCreatePedido = async () => {
-    if (!selectedCliente) {
+  const handleCreateCotizacion = async () => {
+    if (!selectedCliente || cart.length === 0 || !fechaVencimiento) {
       dispatch(
         showNotification({
-          message: "Selecciona un cliente antes de continuar.",
+          message:
+            "Cliente, productos y fecha de vencimiento son obligatorios.",
           severity: "warning",
         })
       );
       return;
     }
 
-    const pedidoData = {
+    const cotizacionData = {
       id_cliente: selectedCliente.id_cliente,
-      direccion_entrega: direccionEntrega,
-      metodo_pago: metodoPago,
+      fecha_vencimiento: fechaVencimiento,
       productos: cart.map((item) => ({
         id_producto: item.id_producto,
         cantidad: item.cantidad,
-        tipo: item.tipo,
+        precio_unitario: item.precio_unitario,
+        descuento_porcentaje: 0,
       })),
       notas,
+      impuesto: 0.19, // podrías dejarlo fijo o permitir configurarlo
+      descuento_total_porcentaje: 0,
     };
 
     try {
-      await createPedido(pedidoData).unwrap();
+      await createCotizacion(cotizacionData).unwrap();
       dispatch(clearCart());
-      setSelectedCliente(null);
-      setDireccionEntrega("");
-      setMetodoPago(null);
-      setNotas("");
       dispatch(
         showNotification({
-          message: "Éxito al crear pedido",
+          message: "Cotización creada con éxito",
           severity: "success",
         })
       );
     } catch (err) {
-      console.error("Error al crear el pedido:", err);
       dispatch(
         showNotification({
-          message: `Error al crear pedido: ${
+          message: `Error al crear cotización: ${
             err?.data?.message || err.message
           }`,
           severity: "error",
@@ -105,37 +89,47 @@ const CrearPedido = () => {
         maxWidth: 1200,
         mx: "auto",
         p: 4,
-        backgroundColor: "#fff",
-        borderRadius: 2,
         display: "grid",
         gridTemplateRows: "auto auto 1fr",
         gap: 4,
         minHeight: "80vh",
       }}
     >
-      {/* Fila 1: Formulario completo */}
       <Box>
         <Typography variant="h4" fontWeight={700} textAlign="center" mb={3}>
-          Crear Pedido
+          Crear Cotización
         </Typography>
+
         <PedidoForm
           selectedCliente={selectedCliente}
           setSelectedCliente={setSelectedCliente}
-          direccionEntrega={direccionEntrega}
-          setDireccionEntrega={setDireccionEntrega}
-          metodoPago={metodoPago}
-          setMetodoPago={setMetodoPago}
+          direccionEntrega={null}
+          setDireccionEntrega={() => {}}
+          metodoPago={null}
+          setMetodoPago={() => {}}
           notas={notas}
           setNotas={setNotas}
+          extraFields={
+            <>
+              {/* Campo fecha vencimiento */}
+              <label style={{ fontWeight: "bold", marginTop: "1rem" }}>
+                Fecha de vencimiento:
+              </label>
+              <input
+                type="date"
+                value={fechaVencimiento}
+                onChange={(e) => setFechaVencimiento(e.target.value)}
+                style={{ display: "block", marginTop: 8, marginBottom: 16 }}
+              />
+            </>
+          }
         />
       </Box>
 
-      {/* Fila 2: Selector de Categorías */}
       <Box>
-        <PedidoCategorias onSelectCategory={setCategory} />
+        <PedidoCategorias onSelectCategory={setCategoriaSeleccionada} />
       </Box>
 
-      {/* Fila 3: Dos columnas */}
       <Box
         sx={{
           display: "grid",
@@ -144,7 +138,7 @@ const CrearPedido = () => {
         }}
       >
         <PedidoProductos
-          selectedCategory={category}
+          selectedCategory={categoriaSeleccionada}
           onAddToCart={handleAddToCart}
         />
 
@@ -154,8 +148,8 @@ const CrearPedido = () => {
             total={total}
             isLoading={isLoading}
             error={error}
-            onSubmit={handleCreatePedido}
-            submitLabel="Generar Pedido"
+            onSubmit={handleCreateCotizacion}
+            submitLabel="Generar Cotización"
           />
         </Box>
       </Box>
@@ -163,4 +157,4 @@ const CrearPedido = () => {
   );
 };
 
-export default CrearPedido;
+export default CrearCotizacion;

@@ -42,6 +42,7 @@ import PanelViajeChofer from "./pages/viajes/PanelViajesChofer";
 import ListarPagos from "./pages/pagos";
 import VerPago from "./pages/pagos/VerPago";
 import Analisis from "./pages/analisis";
+import CrearCotizacion from "./pages/cotizaciones";
 
 // Configuración de rutas
 const router = createHashRouter([
@@ -51,11 +52,11 @@ const router = createHashRouter([
   },
   {
     path: "/",
-    element: <ProtectedRoute />, // Rutas protegidas
+    element: <ProtectedRoute />, 
     children: [
       {
         path: "/",
-        element: <Layout />, // Layout principal
+        element: <Layout />, 
         children: [
           {
             path: "dashboard",
@@ -86,6 +87,14 @@ const router = createHashRouter([
             element: (
               <RoleBasedRoute requiredPermission="ver_ventas">
                 <VerVenta />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "cotizaciones",
+            element: (
+              <RoleBasedRoute requiredPermission="ver_cotizaciones">
+                <CrearCotizacion />
               </RoleBasedRoute>
             ),
           },
@@ -148,8 +157,7 @@ const router = createHashRouter([
           },
           /*            { path: "facturas", element: <Facturas /> },
           { path: "facturas/editar/:id", element: <EditarFactura /> },
-          { path: "pagos", element: <Pagos /> },
-          { path: "pagos/editar/:id", element: <EditarPago /> },
+          
           { path: "cotizaciones", element: <Cotizaciones /> },
           {
             path: "cotizaciones/editar/:id",
