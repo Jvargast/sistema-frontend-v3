@@ -54,7 +54,7 @@ const PedidosBoard = () => {
         "Confirmado",
         "En Preparación",
         "En Entrega",
-        "Pendiente"
+        "Pendiente",
       ];
 
       // Agrupar pedidos según id_chofer
@@ -69,13 +69,6 @@ const PedidosBoard = () => {
             newColumns[rutChofer].push(pedido);
           }
         }
-
-        /* else {
-          const rutChofer = pedido.Chofer?.rut;
-          if (rutChofer && newColumns[rutChofer]) {
-            newColumns[rutChofer].push(pedido);
-          }
-        } */
       });
 
       setColumnsState(newColumns);
@@ -86,37 +79,46 @@ const PedidosBoard = () => {
   const onDragEnd = async (result) => {
     const { source, destination } = result;
     if (!destination) return;
-    console.log("Destino droppableId:", destination.droppableId);
-
-    // Si se suelta en la misma posición, no hacemos nada
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
+  
+    const sourceId = source.droppableId;
+    const destId = destination.droppableId;
+  
+    // ⚠️ Si el item se soltó en la misma posición exacta, no hacemos nada
+    if (sourceId === destId && source.index === destination.index) {
       return;
     }
-
-    // Copias de las columnas
+  
+    const movedItem = columnsState[sourceId][source.index];
+  
+    // ⚠️ Si el item ya está en la columna de destino (por ID), evitamos duplicarlo
+    if (
+      sourceId === destId &&
+      columnsState[destId].some((p) => p.id_pedido === movedItem.id_pedido)
+    ) {
+      console.warn("🔁 Intento de soltar en el mismo lugar, se cancela");
+      return;
+    }
+  
+    // 🧠 Crear copias de los arrays para mutar
     const newColumns = { ...columnsState };
-    const sourceItems = Array.from(newColumns[source.droppableId]);
-    const destItems = Array.from(newColumns[destination.droppableId]);
-
-    // Sacar el item de la columna de origen
-    const [movedItem] = sourceItems.splice(source.index, 1);
-    // Ahora sí, podemos hacer el console.log
-    console.log("Pedido que se mueve:", movedItem);
-    // Insertar en la columna de destino
+    const sourceItems = Array.from(newColumns[sourceId]);
+    const destItems = Array.from(newColumns[destId]);
+  
+    // ✂️ Sacar de la columna original
+    sourceItems.splice(source.index, 1);
+  
+    // 🧩 Insertar en la nueva posición
     destItems.splice(destination.index, 0, movedItem);
-
-    newColumns[source.droppableId] = sourceItems;
-    newColumns[destination.droppableId] = destItems;
-
-    // Actualizar el estado para reflejar el cambio inmediato en la UI
+  
+    newColumns[sourceId] = sourceItems;
+    newColumns[destId] = destItems;
+  
+    // ✅ Actualizamos el estado local para reflejar visualmente el cambio
     setColumnsState(newColumns);
-
-    // Llamar a la API para asignar/desasignar en el backend
+  
+    // 🌐 Backend: asignar o desasignar según destino
     try {
-      if (destination.droppableId === "sinAsignar") {
+      if (destId === "sinAsignar") {
         await desasignarPedido(movedItem.id_pedido).unwrap();
         dispatch(
           showNotification({
@@ -128,18 +130,18 @@ const PedidosBoard = () => {
       } else {
         await asignarPedido({
           id_pedido: movedItem.id_pedido,
-          id_chofer: destination.droppableId,
+          id_chofer: destId,
         }).unwrap();
         dispatch(
           showNotification({
-            message: `Pedido #${movedItem.id_pedido} asignado a chofer: ${destination.droppableId}`,
+            message: `Pedido #${movedItem.id_pedido} asignado a chofer: ${destId}`,
             severity: "success",
             duration: 3000,
           })
         );
       }
     } catch (error) {
-      console.error("Error asignando/desasignando pedido:", error);
+      console.error("❌ Error asignando/desasignando pedido:", error);
       dispatch(
         showNotification({
           message: "Ocurrió un error al asignar/desasignar el pedido",
@@ -147,9 +149,9 @@ const PedidosBoard = () => {
           duration: 4000,
         })
       );
-      // Opcional: revertir en caso de error
     }
   };
+  
 
   // 7. Render
   return (
@@ -184,17 +186,6 @@ const PedidosBoard = () => {
             Cargando datos...
           </div>
         )}
-
-        {/* Columna para cada chofer */}
-        {/* {!choferesLoading &&
-          choferesData?.map((chofer) => (
-            <Column
-              key={chofer.rut}
-              droppableId={chofer.rut}
-              title={chofer.nombre}
-              pedidos={columnsState[chofer.rut] || []}
-            />
-          ))} */}
         {!choferesLoading &&
           choferesData?.map((chofer) => (
             <Column

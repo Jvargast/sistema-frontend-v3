@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -22,6 +22,7 @@ import PedidoCard from "../../components/pedido/PedidoCard";
 import HistorialPedidos from "../../components/pedido/HistorialPedidos";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
+import { onRefetchMisPedidos } from "../../utils/eventBus";
 
 const MisPedidos = () => {
   const dispatch = useDispatch();
@@ -49,16 +50,23 @@ const MisPedidos = () => {
 
   const {
     data: pedidos,
+    refetch,
     isLoading,
     isError,
   } = useGetMisPedidosQuery({
     page: 1,
     limit: 10,
-    fecha: formatFecha(fechaSeleccionada), 
+    fecha: formatFecha(fechaSeleccionada),
   });
+  
 
-  console.log(pedidos)
-  console.log(fechaHoy)
+  useEffect(() => {
+    onRefetchMisPedidos(() => {
+      console.log("🔄 Refetch ejecutado en MisPedidos.jsx");
+      refetch();
+    });
+  }, [refetch]);
+
 
   const [confirmarPedido, { isLoading: isConfirming }] =
     useConfirmarPedidoMutation();
@@ -75,7 +83,7 @@ const MisPedidos = () => {
     )
       return;
 
-    setFechaSeleccionada(nuevaFecha); 
+    setFechaSeleccionada(nuevaFecha);
   };
 
   const handleConfirmar = async (idPedido) => {

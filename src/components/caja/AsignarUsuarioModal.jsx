@@ -3,18 +3,31 @@ import {
   Box,
   Modal,
   Typography,
-  TextField,
   Button,
   Backdrop,
   Fade,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  ListItemText,
+  ListItemIcon,
 } from "@mui/material";
 import PropTypes from "prop-types";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useAssignCajaMutation } from "../../store/services/cajaApi";
+import { useGetAllUsersQuery } from "../../store/services/usuariosApi";
+import PersonIcon from "@mui/icons-material/Person";
 
 const AsignarUsuarioModal = ({ caja, onClose }) => {
-  const [rutUsuario, setRutUsuario] = useState("");
+  const {
+    data: usuarios,
+    isLoading: cargandoUsuarios,
+    isError,
+  } = useGetAllUsersQuery();
+  const [rutUsuario, setRutUsuario] = useState(caja?.usuario_asignado || "");
   const [updateCaja, { isLoading }] = useAssignCajaMutation();
   const dispatch = useDispatch();
 
@@ -66,14 +79,60 @@ const AsignarUsuarioModal = ({ caja, onClose }) => {
           <Typography variant="h6" mb={2}>
             Asignar Usuario a Caja #{caja.id_caja}
           </Typography>
-          <TextField
-            label="RUT Usuario"
-            variant="outlined"
-            fullWidth
-            value={rutUsuario}
-            onChange={(e) => setRutUsuario(e.target.value)}
-            sx={{ mb: 2 }}
-          />
+          {cargandoUsuarios ? (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              height="100px"
+            >
+              <CircularProgress />
+            </Box>
+          ) : isError || usuarios?.usuarios.length === 0 ? (
+            <Typography color="error" textAlign="center">
+              No hay usuarios disponibles.
+            </Typography>
+          ) : (
+            <FormControl
+              fullWidth
+              margin="normal"
+              sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+            >
+              <InputLabel
+                id="chofer-label"
+                sx={{ color: "black" }}
+                shrink={true}
+              >
+                Seleccionar Usuario
+              </InputLabel>
+
+              <Select
+                value={rutUsuario}
+                onChange={(e) => setRutUsuario(e.target.value)}
+                labelId="chofer-label"
+                label="Seleccionar Chofer"
+                id="chofer-asignado-select"
+                sx={{ bgcolor: "white", borderRadius: 1 }}
+              >
+                <MenuItem value="">
+                  <ListItemText primary="-- Selecciona Usuario --" />
+                </MenuItem>
+                {usuarios?.usuarios.map((user) => (
+                  <MenuItem key={user.rut} value={user.rut}>
+                    <ListItemIcon>
+                      <PersonIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={`${user.nombre} ${user.apellido}`}
+                      secondary={`Rol: ${user.rol.nombre}${
+                        caja.usuario_asignado === user.rut ? " (Asignado)" : ""
+                      }`}
+                    />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
           <Button
             variant="contained"
             color="primary"

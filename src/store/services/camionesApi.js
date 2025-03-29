@@ -72,6 +72,15 @@ export const camionesApi = createApi({
       invalidatesTags: ["Camion"],
     }),
 
+    desasignarChofer: builder.mutation({
+      query: ({ id, id_chofer }) => ({
+        url: `/camiones/${id}/desasignar-chofer`,
+        method: "PATCH",
+        body: { id_chofer },
+      }),
+      invalidatesTags: ["Camion"],
+    }),
+
     // Eliminar un camión
     deleteCamion: builder.mutation({
       query: (id) => ({
@@ -93,5 +102,6 @@ export const {
   useUpdateCamionMutation,
   useAsignarChoferMutation,
   useDeleteCamionMutation,
+  useDesasignarChoferMutation
 } = camionesApi;
 
