@@ -1,4 +1,4 @@
-import { HashRouter } from "react-router-dom";
+import { createHashRouter } from "react-router-dom";
 import Login from "./pages/login";
 import UnauthorizedPage from "./pages/unauthorized";
 import ProtectedRoute from "./components/utils/ProtectedRoute";
@@ -44,7 +44,7 @@ import VerPago from "./pages/pagos/VerPago";
 import Analisis from "./pages/analisis";
 
 // Configuración de rutas
-const router = HashRouter([
+const router = createHashRouter([
   {
     path: "/login",
     element: <Login />,
