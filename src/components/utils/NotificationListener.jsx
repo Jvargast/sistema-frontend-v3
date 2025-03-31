@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { socket } from "../../socket";
 import { addNotificacion } from "../../store/reducers/notificacionesSlice";
-import { emitRefetchMisPedidos } from "../../utils/eventBus";
+import { emitRefetchMisPedidos, emitRefetchAgendaViajes } from "../../utils/eventBus";
 
 function NotificationListener() {
   const dispatch = useDispatch();
@@ -21,7 +21,7 @@ function NotificationListener() {
     socket.emit("subscribe", user.id);
 
     socket.on("nueva_notificacion", (data) => {
-      console.log("Notificación WS recibida:", data);
+      console.log("📡 WS: Recibido evento", data);
       dispatch(addNotificacion(data));
     });
 
@@ -30,9 +30,15 @@ function NotificationListener() {
       emitRefetchMisPedidos(); 
     });
 
+    socket.on("actualizar_agenda_chofer", () => {
+      console.log("📡 WS: Recibido evento 'actualizar_agenda_chofer'");
+      emitRefetchAgendaViajes();
+    });
+
     return () => {
       socket.off("nueva_notificacion");
       socket.off("actualizar_mis_pedidos");
+      socket.off("actualizar_agenda_chofer");
     };
   }, [isAuthenticated, user, dispatch]);
 

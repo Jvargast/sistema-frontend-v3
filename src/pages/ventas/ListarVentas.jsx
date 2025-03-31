@@ -8,6 +8,8 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { useGetAllVentasQuery } from "../../store/services/ventasApi";
 import HistorialVentas from "./HistorialVentas";
+import EmptyState from "../../components/common/EmptyState";
+import { Navigate } from "react-router";
 
 const ListaVentas = () => {
   const theme = useTheme();
@@ -52,6 +54,16 @@ const ListaVentas = () => {
     );
   }
 
+  if (!isLoading && ventas.length === 0) {
+    return (
+      <EmptyState
+        title="Aún no tienes ventas"
+        subtitle="Puedes comenzar creando una venta para tus clientes."
+        buttonText="Crear Ventas"
+        onAction={() => Navigate("/punto-venta")}
+      />
+    );
+  }
   if (isError || !ventas.length) {
     return (
       <Box textAlign="center" mt={5}>

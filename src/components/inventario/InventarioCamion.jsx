@@ -38,22 +38,33 @@ const InventarioCamion = ({
     );
   }
 
-  const { capacidad_total, disponible, reservados, retorno, vacios } =
-    data.data;
+  // 🔹 Cambio aquí: ajustado según la nueva respuesta del backend
+  const {
+    capacidad_total,
+    disponibles,
+    reservados_retornables,
+    reservados_no_retornables,
+    retorno,
+    vacios,
+  } = data.data;
 
   const columnas = isTablet ? 6 : 10;
 
+  // 🔹 Cambio aquí: tipos diferenciados
   const espaciosCamion = [
-    ...Array(reservados).fill({ tipo: "Reservado" }),
-    ...Array(disponible).fill({ tipo: "Disponible" }),
+    ...Array(reservados_retornables).fill({ tipo: "ReservadoRetornable" }),
+    ...Array(reservados_no_retornables).fill({ tipo: "ReservadoNoRetornable" }),
+    ...Array(disponibles).fill({ tipo: "Disponible" }),
     ...Array(retorno).fill({ tipo: "Retorno" }),
     ...Array(vacios).fill({ tipo: "Vacío" }),
   ];
 
   const getColor = (tipo) => {
     switch (tipo) {
-      case "Reservado":
+      case "ReservadoRetornable":
         return "orange";
+      case "ReservadoNoRetornable":
+        return "purple";
       case "Disponible":
         return "green";
       case "Retorno":
@@ -73,7 +84,7 @@ const InventarioCamion = ({
         borderRadius: 2,
         textAlign: "center",
         mt: 2,
-        overflowX: "auto", // Permite desplazamiento horizontal en pantallas pequeñas
+        overflowX: "auto",
       }}
     >
       <Typography variant="h6" mb={2}>
@@ -84,11 +95,12 @@ const InventarioCamion = ({
         display="grid"
         gridTemplateColumns={`repeat(${columnas}, 1fr)`}
         gap={1}
+        justifyContent="center"
       >
         {espaciosCamion.map((item, index) => (
           <Box
             key={index}
-            width={40} // Ajustado para mejor responsividad
+            width={40}
             height={40}
             display="flex"
             alignItems="center"
@@ -99,12 +111,12 @@ const InventarioCamion = ({
             fontSize="12px"
             fontWeight="bold"
           >
-            {item.tipo.charAt(0)} {/* Muestra la primera letra del estado */}
+            {item.tipo.charAt(0)}
           </Box>
         ))}
       </Box>
 
-      {/* Leyenda con cantidades */}
+      {/* 🔹 Leyenda actualizada */}
       <Box
         mt={2}
         display="flex"
@@ -114,26 +126,33 @@ const InventarioCamion = ({
       >
         <Typography variant="body2">
           <strong style={{ color: "orange" }}>
-            ■ Reservado (R): {reservados}
+            ■ Reservado Retornable: {reservados_retornables}
+          </strong>
+        </Typography>
+        <Typography variant="body2">
+          <strong style={{ color: "purple" }}>
+            ■ Reservado No Retornable: {reservados_no_retornables}
           </strong>
         </Typography>
         <Typography variant="body2">
           <strong style={{ color: "green" }}>
-            ■ Disponible (D): {disponible}
+            ■ Disponible: {disponibles}
           </strong>
         </Typography>
         <Typography variant="body2">
-          <strong style={{ color: "blue" }}>■ Retorno (T): {retorno}</strong>
+          <strong style={{ color: "blue" }}>■ Retorno: {retorno}</strong>
         </Typography>
         <Typography variant="body2">
-          <strong style={{ color: "lightgray" }}>■ Vacío (V): {vacios}</strong>
+          <strong style={{ color: "lightgray" }}>■ Vacío: {vacios}</strong>
         </Typography>
       </Box>
 
-      {/* 🔹 Agregamos el componente de validación de capacidad */}
+      {/* 🔹 Validación ajustada según retornables */}
       <CapacidadCargaCamion
         capacidadTotal={capacidad_total}
-        vacios={vacios}
+        reservadosRetornables={reservados_retornables}
+        disponibles={disponibles}
+        retorno={retorno}
         productos={productos}
         productosReservados={productosReservados}
         onValidezCambio={onValidezCambio}
@@ -145,9 +164,8 @@ const InventarioCamion = ({
 InventarioCamion.propTypes = {
   idCamion: PropTypes.number.isRequired,
   productos: PropTypes.array.isRequired,
-  productosReservados: PropTypes.array.isRequired,
+  productosReservados: PropTypes.number.isRequired, // 🔸 Asegúrate que sea número aquí
   onValidezCambio: PropTypes.func.isRequired,
-  
 };
 
 export default InventarioCamion;

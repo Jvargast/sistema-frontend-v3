@@ -26,6 +26,7 @@ import { documentoApi } from "./documentoApi";
 import { pedidosEstadisticasApi } from "./pedidosEstadisticasApi";
 import { ventasEstadisticasApi } from "./ventasEstadisticasApi";
 import { productosEstadisticasApi } from "./productosEstadisticasApi";
+import { cotizacionesApi } from "./cotizacionesApi";
 
 export const apiMiddleware = [
   authApi.middleware,
@@ -44,6 +45,7 @@ export const apiMiddleware = [
   cajaApi.middleware,
   movimientoCajaApi.middleware,
   ventasApi.middleware,
+  cotizacionesApi.middleware,
   camionesApi.middleware,
   inventarioCamionApi.middleware,
   pedidosApi.middleware,
@@ -75,6 +77,7 @@ export const apiReducers = {
   [cajaApi.reducerPath]: cajaApi.reducer,
   [movimientoCajaApi.reducerPath]: movimientoCajaApi.reducer,
   [ventasApi.reducerPath]: ventasApi.reducer,
+  [cotizacionesApi.reducerPath]: cotizacionesApi.reducer,
   [camionesApi.reducerPath]: camionesApi.reducer,
   [inventarioCamionApi.reducerPath]: inventarioCamionApi.reducer,
   [pedidosApi.reducerPath]: pedidosApi.reducer,
@@ -106,6 +109,7 @@ const apiServices = {
   cajaApi,
   movimientoCajaApi,
   ventasApi,
+  cotizacionesApi,
   camionesApi,
   inventarioCamionApi,
   pedidosApi,

@@ -8,7 +8,7 @@ export const cotizacionesApi = createApi({
   tagTypes: ["Cotizaciones"],
   endpoints: (builder) => ({
     // Obtener todas las cotizaciones
-    getCotizaciones: builder.query({
+    getAllCotizaciones: builder.query({
       query: (params) => ({
         url: "/cotizaciones/",
         method: "GET",
@@ -44,7 +44,7 @@ export const cotizacionesApi = createApi({
 });
 
 export const {
-  useGetCotizacionesQuery,
+  useGetAllCotizacionesQuery,
   useGetCotizacionByIdQuery,
   useCreateCotizacionMutation,
   useGetCotizacionPdfQuery

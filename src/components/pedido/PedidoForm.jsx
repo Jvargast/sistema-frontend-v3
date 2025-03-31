@@ -8,7 +8,7 @@ import {
   Paper,
   Checkbox,
   FormControlLabel,
-  Typography
+  Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PedidoClienteSelector from "./PedidoClienteSelector";
@@ -21,8 +21,10 @@ const PedidoForm = ({
   setDireccionEntrega,
   metodoPago,
   setMetodoPago,
+  mostrarMetodoPago = true,
   notas,
   setNotas,
+  extraFields,
 }) => {
   const [openClienteModal, setOpenClienteModal] = useState(false);
   const [useClientAddress, setUseClientAddress] = useState(true);
@@ -47,7 +49,10 @@ const PedidoForm = ({
         background: "linear-gradient(135deg, #f5f7fa, #c3cfe2)",
       }}
     >
-      <Typography variant="h6" sx={{ mb: 3, fontWeight: "bold", color: "#333" }}>
+      <Typography
+        variant="h6"
+        sx={{ mb: 3, fontWeight: "bold", color: "#333" }}
+      >
         Datos del Pedido
       </Typography>
 
@@ -111,24 +116,26 @@ const PedidoForm = ({
       />
 
       {/* Método de pago: usar IDs numéricos */}
-      <TextField
-        select
-        fullWidth
-        label="Método de Pago"
-        value={metodoPago || ""}
-        onChange={(e) => setMetodoPago(Number(e.target.value))}
-        variant="outlined"
-        sx={{
-          mb: 3,
-          backgroundColor: "#fff",
-          borderRadius: 1,
-        }}
-      >
-        <MenuItem value={1}>Efectivo</MenuItem>
-        <MenuItem value={2}>Tarjeta crédito</MenuItem>
-        <MenuItem value={3}>Tarjeta débito</MenuItem>
-        <MenuItem value={4}>Transferencia</MenuItem>
-      </TextField>
+      {mostrarMetodoPago && (
+        <TextField
+          select
+          fullWidth
+          label="Método de Pago"
+          value={metodoPago || ""}
+          onChange={(e) => setMetodoPago(Number(e.target.value))}
+          variant="outlined"
+          sx={{
+            mb: 3,
+            backgroundColor: "#fff",
+            borderRadius: 1,
+          }}
+        >
+          <MenuItem value={1}>Efectivo</MenuItem>
+          <MenuItem value={2}>Tarjeta crédito</MenuItem>
+          <MenuItem value={3}>Tarjeta débito</MenuItem>
+          <MenuItem value={4}>Transferencia</MenuItem>
+        </TextField>
+      )}
 
       {/* Notas del pedido */}
       <TextField
@@ -145,6 +152,7 @@ const PedidoForm = ({
           borderRadius: 1,
         }}
       />
+      {extraFields && <Box mt={2}>{extraFields}</Box>}
     </Paper>
   );
 };
@@ -155,9 +163,11 @@ PedidoForm.propTypes = {
   direccionEntrega: PropTypes.string,
   setDireccionEntrega: PropTypes.func.isRequired,
   metodoPago: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  mostrarMetodoPago: PropTypes.bool,
   setMetodoPago: PropTypes.func.isRequired,
   notas: PropTypes.string,
   setNotas: PropTypes.func.isRequired,
+  extraFields: PropTypes.node,
 };
 
 export default PedidoForm;

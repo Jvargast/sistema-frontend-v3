@@ -1,8 +1,5 @@
 import { useState, useEffect } from "react";
-
-// CAMBIO: Importar desde "@hello-pangea/dnd"
 import { DragDropContext } from "@hello-pangea/dnd";
-
 import {
   useGetAllPedidosQuery,
   useAsignarPedidoMutation,
@@ -16,26 +13,20 @@ import { Typography } from "@mui/material";
 import EmptyColumn from "../../components/chofer/EmptyColumn";
 
 const PedidosBoard = () => {
-  // 1. Obtenemos TODOS los pedidos (asignados y sin asignar)
   const { data: allPedidosData, isLoading: allPedidosLoading } =
     useGetAllPedidosQuery();
 
-  // 2. Obtenemos la lista de choferes
   const { data: choferesData, isLoading: choferesLoading } =
     useGetAllChoferesQuery();
 
-  // 3. Mutations para asignar/desasignar pedidos
   const [asignarPedido] = useAsignarPedidoMutation();
   const [desasignarPedido] = useDesasignarPedidoMutation();
 
-  // 4. Estado local para agrupar pedidos por columna
   const [columnsState, setColumnsState] = useState({
-    // Empezamos con la columna sinAsignar para que exista su droppable de inmediato
     sinAsignar: [],
   });
 
   const dispatch = useDispatch();
-  // 5. Efecto: cuando tenemos datos, llenamos las columnas
   useEffect(() => {
     if (!allPedidosLoading && !choferesLoading) {
       const allPedidos = allPedidosData?.pedidos || [];
@@ -57,7 +48,6 @@ const PedidosBoard = () => {
         "Pendiente",
       ];
 
-      // Agrupar pedidos según id_chofer
       allPedidos.forEach((pedido) => {
         if (!pedido.id_chofer) {
           newColumns.sinAsignar.push(pedido);
@@ -75,7 +65,6 @@ const PedidosBoard = () => {
     }
   }, [allPedidosLoading, choferesLoading, allPedidosData, choferesData]);
 
-  // 6. Función que se dispara al soltar un item
   const onDragEnd = async (result) => {
     const { source, destination } = result;
     if (!destination) return;
@@ -83,14 +72,12 @@ const PedidosBoard = () => {
     const sourceId = source.droppableId;
     const destId = destination.droppableId;
   
-    // ⚠️ Si el item se soltó en la misma posición exacta, no hacemos nada
     if (sourceId === destId && source.index === destination.index) {
       return;
     }
   
     const movedItem = columnsState[sourceId][source.index];
   
-    // ⚠️ Si el item ya está en la columna de destino (por ID), evitamos duplicarlo
     if (
       sourceId === destId &&
       columnsState[destId].some((p) => p.id_pedido === movedItem.id_pedido)
@@ -99,24 +86,16 @@ const PedidosBoard = () => {
       return;
     }
   
-    // 🧠 Crear copias de los arrays para mutar
     const newColumns = { ...columnsState };
     const sourceItems = Array.from(newColumns[sourceId]);
     const destItems = Array.from(newColumns[destId]);
-  
-    // ✂️ Sacar de la columna original
     sourceItems.splice(source.index, 1);
-  
-    // 🧩 Insertar en la nueva posición
     destItems.splice(destination.index, 0, movedItem);
   
     newColumns[sourceId] = sourceItems;
     newColumns[destId] = destItems;
   
-    // ✅ Actualizamos el estado local para reflejar visualmente el cambio
     setColumnsState(newColumns);
-  
-    // 🌐 Backend: asignar o desasignar según destino
     try {
       if (destId === "sinAsignar") {
         await desasignarPedido(movedItem.id_pedido).unwrap();
@@ -152,8 +131,6 @@ const PedidosBoard = () => {
     }
   };
   
-
-  // 7. Render
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex flex-col items-start justify-between mb-4 px-4">
@@ -173,14 +150,12 @@ const PedidosBoard = () => {
           min-h-screen
         "
       >
-        {/* Columna sin asignar (siempre presente) */}
         <Column
           droppableId="sinAsignar"
           title="Sin Asignar"
           pedidos={columnsState.sinAsignar || []}
         />
 
-        {/* Si estamos cargando, mostramos un spinner/indicador */}
         {(allPedidosLoading || choferesLoading) && (
           <div className="flex items-center justify-center text-gray-600">
             Cargando datos...

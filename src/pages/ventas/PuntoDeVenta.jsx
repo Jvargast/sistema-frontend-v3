@@ -66,12 +66,12 @@ const PuntoDeVenta = () => {
   const [createVenta, { isLoading: isCreating }] = useCreateVentaMutation();
 
   const { estado, isLoading, error } = useVerificarCaja(selectedVendedor);
-  const [setCajaAbierta] = useState(false);
+  const [cajaAbierta, setCajaAbierta] = useState(false);
   const usuario = useSelector((state) => state.auth);
   const [cajaCerrando, setCajaCerrando] = useState(false);
   const [openAlert, setOpenAlert] = useState(false);
 
-  const [taxRate, setTaxRate] = useState(0); // 🔹 Inicia con 19% por defecto
+  const [taxRate, setTaxRate] = useState(0);
 
   const [tipoDocumento, setTipoDocumento] = useState("boleta");
   const [tipoEntrega, setTipoEntrega] = useState("retiro_en_sucursal");
@@ -268,12 +268,13 @@ const PuntoDeVenta = () => {
       return;
     }
 
-    const cajaSeleccionada = vendedores?.find((v) => v.rut === rut)?.caja;
+    const cajaSeleccionada = vendedores?.find((v) => v.rut === rut)?.cajasAsignadas[0];
 
-    if (cajaSeleccionada && !isCajaDeHoy(cajaSeleccionada.fecha_apertura)) {
+
+    /* if (cajaSeleccionada && !isCajaDeHoy(cajaSeleccionada.fecha_apertura)) {
       alert("⚠️ La caja seleccionada no es del día de hoy. Elige otra.");
       return;
-    }
+    } */
 
     setSelectedVendedor(rut);
     setTimeout(() => setOpenModal(false), 200);
@@ -353,10 +354,29 @@ const PuntoDeVenta = () => {
   };
 
   const handleCerrarCaja = async () => {
+    let cajaId;
+    if (usuario?.rol === "administrador") {
+      const vendedorSeleccionado = vendedores?.find(
+        (v) => v.rut === selectedVendedor
+      );
+      cajaId = vendedorSeleccionado?.cajasAsignadas[0]?.id_caja;
+    } else {
+      // Usa la caja propia (para rol vendedor)
+      cajaId = estado?.asignada?.id_caja;
+    }
+    if (!cajaId) {
+      dispatch(
+        showNotification({
+          message: "No hay caja seleccionada para cerrar",
+          severity: "error",
+        })
+      );
+      return;
+    }
     if (!estado?.asignada?.id_caja) return;
     setCajaCerrando(true);
     try {
-      await closeCaja({ idCaja: estado?.asignada?.id_caja });
+      await closeCaja({ idCaja: cajaId });
       setCajaCerrando(false);
       setCajaAbierta(false);
       dispatch(
@@ -376,6 +396,16 @@ const PuntoDeVenta = () => {
       );
     }
   };
+
+  if (usuario?.rol === "vendedor" && !cajaAbierta) {
+    return (
+      <AperturaCajaModal
+        caja={estado.asignada}
+        onCajaAbierta={handleCajaAbierta}
+        onClose={handleClose}
+      />
+    );
+  }
 
   if (selectedVendedor && estado.fechaInvalida) {
     return (

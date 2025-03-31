@@ -9,6 +9,7 @@ import {
   Modal,
   Paper,
 } from "@mui/material";
+import { useRef } from "react";
 import {
   CalendarMonth,
   ArrowBackIos,
@@ -48,25 +49,55 @@ const MisPedidos = () => {
   const fechaHoy = formatFecha(today);
   const fechaAyer = formatFecha(yesterday);
 
+  const isMounted = useRef(false);
+  const isQueryReady = useRef(false);
+  const refetchRef = useRef(null);
+
+  // En tu primer useEffect
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false; // evitar llamada si está desmontado
+    };
+  }, []);
+
   const {
     data: pedidos,
     refetch,
     isLoading,
     isError,
-  } = useGetMisPedidosQuery({
-    page: 1,
-    limit: 10,
-    fecha: formatFecha(fechaSeleccionada),
-  });
-  
+  } = useGetMisPedidosQuery(
+    {
+      page: 1,
+      limit: 10,
+      fecha: formatFecha(fechaSeleccionada),
+    },
+    { refetchOnMountOrArgChange: true }
+  );
 
+  // Cuando la query se monta y está lista
   useEffect(() => {
-    onRefetchMisPedidos(() => {
-      console.log("🔄 Refetch ejecutado en MisPedidos.jsx");
-      refetch();
-    });
+    if (refetch) {
+      refetchRef.current = refetch;
+      isQueryReady.current = true;
+    }
   }, [refetch]);
 
+  useEffect(() => {
+    const unsubscribe = onRefetchMisPedidos(() => {
+      console.log("🔄 Refetch ejecutado en MisPedidos.jsx");
+
+      if (typeof refetch === "function") {
+        refetch();
+      } else {
+        console.warn("⛔ refetch no está disponible.");
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [refetch]);
 
   const [confirmarPedido, { isLoading: isConfirming }] =
     useConfirmarPedidoMutation();

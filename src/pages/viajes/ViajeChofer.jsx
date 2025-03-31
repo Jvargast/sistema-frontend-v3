@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Container, Fab } from "@mui/material";
 import DoneIcon from "@mui/icons-material/Done";
@@ -14,16 +14,26 @@ import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventar
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import ModalVentaRapida from "../../components/venta_rapida_chofer/ModalVentaRapida";
 import { useLayout } from "../../context/LayoutContext";
+import { onRefetchAgendaViajes } from "../../utils/eventBus";
 import PropTypes from "prop-types";
+import DetallePedidoModal from "../../components/entregas/DetallePedidoModal";
+import { useGetPedidoByIdQuery } from "../../store/services/pedidosApi";
+import { useTheme, useMediaQuery } from "@mui/material";
 
 const ViajeChofer = ({ viaje }) => {
   const dispatch = useDispatch();
   const { drawerWidth } = useLayout();
-  /*   const {
-    data: viaje,
-    isLoading,
-    error,
-  } = useGetAgendaViajeChoferQuery({ id_chofer: usuario?.id }); */
+  const theme = useTheme();
+  const isTabletOrMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  const {
+    data: entregasData,
+    refetch: refetchEntregas,
+    isError: errorEntregas,
+  } = useGetEntregasByAgendaIdQuery({
+    id_agenda_viaje: viaje?.id_agenda_viaje,
+  });
+
   const {
     data: inventarioCamion,
     isLoading: cargandoInventario,
@@ -31,18 +41,81 @@ const ViajeChofer = ({ viaje }) => {
   } = useGetEstadoInventarioCamionQuery(viaje?.id_camion, {
     skip: !viaje?.id_camion,
   });
-  const {
-    data: entregasData,
-/*     isLoading: cargandoEntregas, */
-    isError: errorEntregas,
-  } = useGetEntregasByAgendaIdQuery({
-    id_agenda_viaje: viaje?.id_agenda_viaje,
-  });
+
+  // Refs
+  const isMounted = useRef(false);
+  const isInventarioReady = useRef(false);
+  const isEntregasReady = useRef(false);
+  const refetchInventarioRef = useRef(null);
+  const refetchEntregasRef = useRef(null);
+
+  // Montaje
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  // Guardar refs
+  useEffect(() => {
+    if (refetchInventario) {
+      refetchInventarioRef.current = refetchInventario;
+      isInventarioReady.current = true;
+    }
+  }, [refetchInventario]);
+
+  useEffect(() => {
+    if (refetchEntregas) {
+      refetchEntregasRef.current = refetchEntregas;
+      isEntregasReady.current = true;
+    }
+  }, [refetchEntregas]);
+
+  // Listener WebSocket
+  useEffect(() => {
+    const refrescarDatos = () => {
+      console.log("🔄 Refetch ejecutado en ViajeChofer");
+
+      if (
+        isMounted.current &&
+        isInventarioReady.current &&
+        typeof refetchInventarioRef.current === "function"
+      ) {
+        refetchInventarioRef.current();
+      } else {
+        console.warn("⚠️ Inventario no listo para refetch.");
+      }
+
+      if (
+        isMounted.current &&
+        isEntregasReady.current &&
+        typeof refetchEntregasRef.current === "function"
+      ) {
+        refetchEntregasRef.current();
+      } else {
+        console.warn("⚠️ Entregas no listas para refetch.");
+      }
+    };
+
+    const unsubscribe = onRefetchAgendaViajes(refrescarDatos);
+    return () => unsubscribe();
+  }, []);
+
   const [finalizarViaje] = useFinalizarViajeMutation();
   const [entregas, setEntregas] = useState({});
   const [modalOpen, setModalOpen] = useState(false);
   const [destinoSeleccionado, setDestinoSeleccionado] = useState(null);
   const [modalVentaRapidaOpen, setModalVentaRapidaOpen] = useState(false);
+  const [detallePedidoOpen, setDetallePedidoOpen] = useState(false);
+  const [pedidoSeleccionadoId, setPedidoSeleccionadoId] = useState(null);
+  const {
+    data: pedidoCompleto,
+    isFetching: loadingPedido,
+    isSuccess: successPedido,
+  } = useGetPedidoByIdQuery(pedidoSeleccionadoId, {
+    skip: !pedidoSeleccionadoId,
+  });
 
   useEffect(() => {
     if (viaje?.destinos) {
@@ -101,18 +174,14 @@ const ViajeChofer = ({ viaje }) => {
       );
     }
   };
+  const handleVerDetallePedido = (destino) => {
+    setPedidoSeleccionadoId(destino.id_pedido);
+    setDetallePedidoOpen(true);
+  };
 
   const entregasCompletadas = Object.values(entregas).filter(
     (e) => e.entregado
   ).length;
-
-  /*   if (isLoading)
-    return <Typography textAlign="center">Cargando viaje...</Typography>;
-  if (error)
-    return (
-      <Typography color="error">Error al cargar la agenda de viaje.</Typography>
-    );
-  if (!viaje) return <SinAgendaAsignada />; */
 
   const todasEntregasCompletadas =
     viaje?.destinos?.length > 0 &&
@@ -130,6 +199,7 @@ const ViajeChofer = ({ viaje }) => {
         destinos={viaje.destinos}
         entregas={entregas}
         onOpenEntrega={handleOpenEntrega}
+        onVerDetallePedido={handleVerDetallePedido}
       />
       <InventarioCargado
         inventario={inventarioCamion?.data}
@@ -141,8 +211,8 @@ const ViajeChofer = ({ viaje }) => {
           color="success"
           sx={{
             position: "fixed",
-            bottom: 24,
-            right: 24,
+            bottom: isTabletOrMobile ? 80 : 24,
+            right: isTabletOrMobile ? 16 : 24,
             zIndex: 1000,
           }}
           onClick={handleFinalizarViaje}
@@ -160,13 +230,25 @@ const ViajeChofer = ({ viaje }) => {
         />
       )}
 
+      {detallePedidoOpen && successPedido && (
+        <DetallePedidoModal
+          open={detallePedidoOpen}
+          onClose={() => {
+            setDetallePedidoOpen(false);
+            setPedidoSeleccionadoId(null);
+          }}
+          pedido={pedidoCompleto}
+          loading={loadingPedido}
+        />
+      )}
+
       {viaje?.estado === "En Tránsito" && (
         <Fab
           color="primary"
           sx={{
             position: "fixed",
-            bottom: 24,
-            left: `${drawerWidth + 20}px`,
+            bottom: 16,
+            left: isTabletOrMobile ? 16 : `${drawerWidth + 20}px`,
             zIndex: 1000,
           }}
           onClick={() => setModalVentaRapidaOpen(true)}
