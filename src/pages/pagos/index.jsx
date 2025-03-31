@@ -4,6 +4,7 @@ import { IconButton, Chip } from "@mui/material";
 import { Visibility, Edit } from "@mui/icons-material";
 import { useGetAllPagosQuery } from "../../store/services/pagosApi";
 import DataTable from "../../components/common/DataTable";
+import EmptyState from "../../components/common/EmptyState";
 
 const estadoColores = {
   Pendiente: "warning",
@@ -106,6 +107,17 @@ const ListarPagos = () => {
       ),
     },
   ];
+
+  if (!isLoading && pagos.length === 0) {
+    return (
+      <EmptyState
+        title="Aún no tienes pagos"
+        subtitle="Puedes comenzar esperando ventas."
+        buttonText="Crear Venta"
+        onAction={() => navigate("/punto-venta")}
+      />
+    );
+  }
 
   return (
     <DataTable

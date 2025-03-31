@@ -35,7 +35,7 @@ export const modulesData = [
       {
         text: "Cotizaciones",
         icon: <RequestQuoteOutlinedIcon />,
-        path: "cotizaciones",
+        path: "punto-cotizacion",
         permission: "ver_cotizaciones",
       },
       {

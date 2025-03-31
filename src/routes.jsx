@@ -43,6 +43,9 @@ import ListarPagos from "./pages/pagos";
 import VerPago from "./pages/pagos/VerPago";
 import Analisis from "./pages/analisis";
 import CrearCotizacion from "./pages/cotizaciones";
+import PreviewCotizacion from "./pages/cotizaciones/PreviewCotizacion";
+import ListarCotizaciones from "./pages/cotizaciones/ListarCotizaciones";
+import AdminHistorialViajes from "./pages/viajes/AdminHistorialViajes";
 
 // Configuración de rutas
 const router = createHashRouter([
@@ -52,11 +55,11 @@ const router = createHashRouter([
   },
   {
     path: "/",
-    element: <ProtectedRoute />, 
+    element: <ProtectedRoute />,
     children: [
       {
         path: "/",
-        element: <Layout />, 
+        element: <Layout />,
         children: [
           {
             path: "dashboard",
@@ -91,10 +94,26 @@ const router = createHashRouter([
             ),
           },
           {
-            path: "cotizaciones",
+            path: "punto-cotizacion",
             element: (
               <RoleBasedRoute requiredPermission="ver_cotizaciones">
                 <CrearCotizacion />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "cotizaciones",
+            element: (
+              <RoleBasedRoute requiredPermission="ver_cotizaciones">
+                <ListarCotizaciones />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "cotizaciones/ver/:id",
+            element: (
+              <RoleBasedRoute requiredPermission="ver_cotizaciones">
+                <PreviewCotizacion />
               </RoleBasedRoute>
             ),
           },
@@ -287,6 +306,14 @@ const router = createHashRouter([
             element: (
               <RoleBasedRoute requiredPermission="ver_agenda_carga">
                 <PanelViajeChofer />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "admin-viajes",
+            element: (
+              <RoleBasedRoute requiredPermission="ver_agenda_carga">
+                <AdminHistorialViajes />
               </RoleBasedRoute>
             ),
           },

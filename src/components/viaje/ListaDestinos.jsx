@@ -15,7 +15,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PropTypes from "prop-types";
 
-const ListaDestinos = ({ destinos, entregas, onOpenEntrega }) => {
+const ListaDestinos = ({ destinos, entregas, onOpenEntrega, onVerDetallePedido }) => {
   return (
     <Card elevation={3} sx={{ mb: 4 }}>
       <CardContent>
@@ -101,6 +101,15 @@ const ListaDestinos = ({ destinos, entregas, onOpenEntrega }) => {
                           ? "Entregado"
                           : "Registrar Entrega"}
                       </Button>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        sx={{ textTransform: "none", fontWeight: 500 }}
+                        onClick={() => onVerDetallePedido(destino)}
+                      >
+                        Ver Detalle
+                      </Button>
                     </Box>
                   </Stack>
                 </Paper>
@@ -130,6 +139,7 @@ ListaDestinos.propTypes = {
     })
   ).isRequired,
   onOpenEntrega: PropTypes.func.isRequired,
+  onVerDetallePedido: PropTypes.func.isRequired,
 };
 
 export default ListaDestinos;

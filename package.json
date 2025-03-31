@@ -11,7 +11,7 @@
     "build:electron": "vite build && electron-builder",
     "preview": "vite preview --mode production",
     "predeploy": "npm run build:web",
-   "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@capacitor/android": "^7.1.0",
@@ -40,7 +40,7 @@
     "autoprefixer": "^10.4.20",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",
-    "framer-motion": "^11.15.0",
+    "framer-motion": "^11.18.2",
     "isbot": "^5.1.17",
     "js-cookie": "^3.0.5",
     "leaflet": "^1.9.4",

@@ -4,6 +4,7 @@ import { IconButton, Chip } from "@mui/material";
 import { Visibility, Edit } from "@mui/icons-material";
 import { useGetAllPedidosQuery } from "../../store/services/pedidosApi";
 import DataTable from "../../components/common/DataTable";
+import EmptyState from "../../components/common/EmptyState";
 
 const ListarPedidos = () => {
   const navigate = useNavigate();
@@ -102,6 +103,16 @@ const ListarPedidos = () => {
       ),
     },
   ];
+  if (!isLoading && pedidos.length === 0) {
+    return (
+      <EmptyState
+        title="Aún no tienes pedidos"
+        subtitle="Puedes comenzar creando un pedido para tus clientes."
+        buttonText="Crear pedido"
+        onAction={() => navigate("/punto-pedido")}
+      />
+    );
+  }
 
   return (
     <DataTable

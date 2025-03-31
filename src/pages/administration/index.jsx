@@ -14,6 +14,8 @@ import AttachMoneyOutlinedIcon from '@mui/icons-material/AttachMoneyOutlined';
 import BusinessIcon from "@mui/icons-material/Business";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/common/Header";
+import AirportShuttleOutlinedIcon from '@mui/icons-material/AirportShuttleOutlined';
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 
 const navItems = [
   {
@@ -33,6 +35,12 @@ const navItems = [
     icon: <LocalShippingOutlinedIcon className="text-amber-500" />,
     description: "Gestión de pedidos",
     path: "/pedidos",
+  },
+  {
+    text: "Cotizaciones",
+    icon: <ArticleOutlinedIcon className="text-text-indigo-500" />,
+    description: "Gestión de cotizaciones",
+    path: "/cotizaciones",
   },
   {
     text: "Almacén",
@@ -63,6 +71,12 @@ const navItems = [
     icon: <PointOfSaleOutlined className="text-emerald-500" />,
     description: "Cajas de la sucursal",
     path: "/cajas",
+  },
+  {
+    text: "Viajes",
+    icon: <AirportShuttleOutlinedIcon className="text-lime-400" />,
+    description: "Gestión de viajes",
+    path: "/admin-viajes",
   },
   {
     text: "Usuarios",

@@ -24,6 +24,11 @@ export const agendaViajesApi = createApi({
       query: ({ id_chofer }) => `/agenda-viajes/historial/${id_chofer}`,
       providesTags: ["AgendaViajes"],
     }),
+
+    getAllViajes: builder.query({
+      query: () => `/agenda-viajes/historial`,
+      providesTags: ["AgendaViajes"],
+    }),
   }),
 });
 
@@ -31,4 +36,5 @@ export const {
   useGetAgendaViajeChoferQuery,
   useFinalizarViajeMutation,
   useGetHistorialViajesQuery,
+  useGetAllViajesQuery
 } = agendaViajesApi;

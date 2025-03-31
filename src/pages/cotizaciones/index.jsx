@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Box, Button, TextField, Typography } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { useCreateCotizacionMutation } from "../../store/services/cotizacionesApi";
 import { addItem, clearCart } from "../../store/reducers/cartSlice";
@@ -9,20 +9,37 @@ import PedidoCategorias from "../../components/pedido/PedidoCategorias";
 import PedidoProductos from "../../components/pedido/PedidoProductos";
 import PedidoCarrito from "../../components/pedido/PedidoCarrito";
 import PedidoResumen from "../../components/pedido/PedidoResumen";
-
+import { useNavigate } from "react-router";
 
 const CrearCotizacion = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const cart = useSelector((state) => state.cart.items);
   const total = useSelector((state) => state.cart.total);
+  const user = useSelector((state) => state.auth.user);
+  const [impuesto, setImpuesto] = useState(0.19);
+  const [descuentoPorcentaje, setDescuentoPorcentaje] = useState(0);
 
   const [selectedCliente, setSelectedCliente] = useState(null);
+  const [direccionEntrega, setDireccionEntrega] = useState("");
   const [fechaVencimiento, setFechaVencimiento] = useState("");
   const [notas, setNotas] = useState("");
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("all");
 
   const [createCotizacion, { isLoading, error }] =
     useCreateCotizacionMutation();
+
+  const calcularFechaVencimiento = (dias) => {
+    const hoy = new Date();
+    hoy.setDate(hoy.getDate() + dias);
+    return hoy.toISOString().split("T")[0];
+  };
+
+  useEffect(() => {
+    if (selectedCliente && selectedCliente.direccion) {
+      setDireccionEntrega(selectedCliente.direccion);
+    }
+  }, [selectedCliente]);
 
   const handleAddToCart = (product) => {
     dispatch(
@@ -36,7 +53,7 @@ const CrearCotizacion = () => {
     );
   };
 
-  const handleCreateCotizacion = async () => {
+  const handleCreateAndRedirect = async () => {
     if (!selectedCliente || cart.length === 0 || !fechaVencimiento) {
       dispatch(
         showNotification({
@@ -50,6 +67,7 @@ const CrearCotizacion = () => {
 
     const cotizacionData = {
       id_cliente: selectedCliente.id_cliente,
+      id_sucursal: user?.id_sucursal,
       fecha_vencimiento: fechaVencimiento,
       productos: cart.map((item) => ({
         id_producto: item.id_producto,
@@ -58,19 +76,16 @@ const CrearCotizacion = () => {
         descuento_porcentaje: 0,
       })),
       notas,
-      impuesto: 0.19, // podrías dejarlo fijo o permitir configurarlo
-      descuento_total_porcentaje: 0,
+      impuesto,
+      descuento_total_porcentaje: descuentoPorcentaje,
     };
 
     try {
-      await createCotizacion(cotizacionData).unwrap();
+      const result = await createCotizacion(cotizacionData).unwrap();
       dispatch(clearCart());
-      dispatch(
-        showNotification({
-          message: "Cotización creada con éxito",
-          severity: "success",
-        })
-      );
+      navigate(`/cotizaciones/ver/${result.cotizacion.id_cotizacion}`);
+      setSelectedCliente(null);
+      setDireccionEntrega("");
     } catch (err) {
       dispatch(
         showNotification({
@@ -103,23 +118,58 @@ const CrearCotizacion = () => {
         <PedidoForm
           selectedCliente={selectedCliente}
           setSelectedCliente={setSelectedCliente}
-          direccionEntrega={null}
-          setDireccionEntrega={() => {}}
-          metodoPago={null}
+          direccionEntrega={direccionEntrega}
+          setDireccionEntrega={setDireccionEntrega}
+          metodoPago={""}
           setMetodoPago={() => {}}
           notas={notas}
+          mostrarMetodoPago={false}
           setNotas={setNotas}
           extraFields={
             <>
-              {/* Campo fecha vencimiento */}
-              <label style={{ fontWeight: "bold", marginTop: "1rem" }}>
+              <Typography sx={{ fontWeight: "bold", mt: 2 }}>
                 Fecha de vencimiento:
-              </label>
-              <input
+              </Typography>
+              <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+                {[15, 30, 60].map((dias) => (
+                  <Button
+                    key={dias}
+                    variant="outlined"
+                    onClick={() =>
+                      setFechaVencimiento(calcularFechaVencimiento(dias))
+                    }
+                  >
+                    +{dias} días
+                  </Button>
+                ))}
+              </Box>
+              <TextField
                 type="date"
-                value={fechaVencimiento}
+                label="Fecha de vencimiento"
+                value={fechaVencimiento || ""}
                 onChange={(e) => setFechaVencimiento(e.target.value)}
-                style={{ display: "block", marginTop: 8, marginBottom: 16 }}
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+                sx={{ mb: 3 }}
+              />
+              <TextField
+                label="Impuesto (%)"
+                type="number"
+                value={impuesto * 100}
+                onChange={(e) => setImpuesto(parseFloat(e.target.value) / 100)}
+                fullWidth
+                sx={{ mb: 3 }}
+              />
+
+              <TextField
+                label="Descuento total (%)"
+                type="number"
+                value={descuentoPorcentaje}
+                onChange={(e) =>
+                  setDescuentoPorcentaje(parseFloat(e.target.value))
+                }
+                fullWidth
+                sx={{ mb: 3 }}
               />
             </>
           }
@@ -148,8 +198,8 @@ const CrearCotizacion = () => {
             total={total}
             isLoading={isLoading}
             error={error}
-            onSubmit={handleCreateCotizacion}
-            submitLabel="Generar Cotización"
+            onSubmit={handleCreateAndRedirect}
+            submitLabel="Ver Cotización"
           />
         </Box>
       </Box>
