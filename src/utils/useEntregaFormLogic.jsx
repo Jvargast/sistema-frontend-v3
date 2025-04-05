@@ -51,6 +51,7 @@ function useEntregaFormLogic({
           detallePedido?.detalle.map((item) => ({
             id_producto: item.id_producto,
             cantidad: item.cantidad,
+            es_retornable: item.es_retornable || false,
           })) || [];
 
         const botellonesRetorno =

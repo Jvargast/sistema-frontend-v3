@@ -27,7 +27,6 @@ const EntregaBotellonesStep = ({
 
   useEffect(() => {
     if (clienteTrae) {
-      // Solo setear si el arreglo está vacío (primera vez)
       if (items.length === 0) {
         const inicial = productos.map((p) => ({
           id_producto: p.id_producto,
@@ -43,7 +42,7 @@ const EntregaBotellonesStep = ({
       setItems([]);
       onChange([]);
     }
-  }, [clienteTrae, productos]); // 🔁 quitamos 'items' y 'onChange' para evitar loops innecesarios
+  }, [clienteTrae, productos]);
 
   const actualizarItem = (index, campo, valor) => {
     const copia = [...items];

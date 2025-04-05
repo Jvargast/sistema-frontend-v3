@@ -1,4 +1,4 @@
-import { Box, Divider, Paper, Typography } from "@mui/material";
+import { Box, Divider, Paper, TextField, Typography } from "@mui/material";
 import PropTypes from "prop-types";
 
 const formatoCLP = (valor) =>
@@ -6,60 +6,113 @@ const formatoCLP = (valor) =>
     style: "currency",
     currency: "CLP",
     minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(valor);
 
-const DetallesCotizacion = ({ detalles }) => (
-  <Paper variant="outlined" sx={{ mb: 4, p: 3 }}>
-    <Typography variant="h6" gutterBottom>
-      Detalles de Productos
-    </Typography>
-    <Divider sx={{ mb: 2 }} />
+const DetallesCotizacion = ({ detalles, modoEdicion, onDetalleChange }) => {
+  // Convertimos cada campo para asegurarnos de que sean números
+  const detallesNumericos = detalles.map((item) => ({
+    ...item,
+    cantidad: Number(item.cantidad),
+    precio_unitario: Number(item.precio_unitario),
+  }));
 
-    {/* Encabezado de columnas */}
-    <Box
-      display="flex"
-      justifyContent="space-between"
-      py={1}
-      sx={{ borderBottom: "2px solid #ddd", fontWeight: "bold", color: "#555" }}
-    >
-      <Typography flex={3}>Producto</Typography>
-      <Typography flex={1} textAlign="center">
-        Cantidad
+  return (
+    <Paper variant="outlined" sx={{ mb: 4, p: 3 }}>
+      <Typography variant="h6" gutterBottom>
+        Detalles de Productos
       </Typography>
-      <Typography flex={1} textAlign="center">
-        P/U
-      </Typography>
-      <Typography flex={1} textAlign="right">
-        Total
-      </Typography>
-    </Box>
+      <Divider sx={{ mb: 2 }} />
 
-    {/* Detalles de productos */}
-    {detalles.map((item, index) => {
-      const subtotal = item.cantidad * item.precio_unitario;
-      return (
-        <Box
-          key={index}
-          display="flex"
-          justifyContent="space-between"
-          py={1}
-          sx={{ borderBottom: "1px solid #eee" }}
-        >
-          <Typography flex={3}>{item.producto.nombre_producto}</Typography>
-          <Typography flex={1} textAlign="center">
-            {item.cantidad}
-          </Typography>
-          <Typography flex={1} textAlign="center">
-            {formatoCLP(item.precio_unitario)}
-          </Typography>
-          <Typography flex={1} textAlign="right" fontWeight="bold">
-            {formatoCLP(subtotal)}
-          </Typography>
-        </Box>
-      );
-    })}
-  </Paper>
-);
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        py={1}
+        sx={{
+          borderBottom: "2px solid #ddd",
+          fontWeight: "bold",
+          color: "#555",
+        }}
+      >
+        <Typography flex={3}>Producto</Typography>
+        <Typography flex={1} textAlign="center">
+          Cantidad
+        </Typography>
+        <Typography flex={1} textAlign="center">
+          P/U
+        </Typography>
+        <Typography flex={1} textAlign="right">
+          Total
+        </Typography>
+      </Box>
+
+      {detallesNumericos.map((item, index) => {
+        const subtotal = item.cantidad * item.precio_unitario;
+
+        return (
+          <Box
+            key={item.id_detalle || index}
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            py={1}
+            sx={{ borderBottom: "1px solid #eee" }}
+          >
+            <Typography flex={3}>{item.producto.nombre_producto}</Typography>
+
+            <Box flex={1} textAlign="center">
+              {modoEdicion ? (
+                <TextField
+                  type="number"
+                  value={item.cantidad}
+                  onChange={(e) =>
+                    onDetalleChange(
+                      index,
+                      "cantidad",
+                      e.target.value === ""
+                        ? ""
+                        : Math.max(0, parseFloat(e.target.value))
+                    )
+                  }
+                  size="small"
+                  inputProps={{ min: 0 }}
+                />
+              ) : (
+                item.cantidad
+              )}
+            </Box>
+
+            <Box flex={1} textAlign="center">
+              {modoEdicion ? (
+                <TextField
+                  type="number"
+                  value={item.precio_unitario}
+                  onChange={(e) =>
+                    onDetalleChange(
+                      index,
+                      "precio_unitario",
+                      e.target.value === ""
+                        ? ""
+                        : Math.max(0, parseFloat(e.target.value))
+                    )
+                  }
+                  size="small"
+                  inputProps={{ min: 0 }}
+                />
+              ) : (
+                formatoCLP(item.precio_unitario)
+              )}
+            </Box>
+
+            <Typography flex={1} textAlign="right" fontWeight="bold">
+              {formatoCLP(subtotal)}
+            </Typography>
+          </Box>
+        );
+      })}
+    </Paper>
+  );
+};
 
 DetallesCotizacion.propTypes = {
   detalles: PropTypes.arrayOf(
@@ -71,6 +124,8 @@ DetallesCotizacion.propTypes = {
       precio_unitario: PropTypes.number.isRequired,
     })
   ).isRequired,
+  modoEdicion: PropTypes.bool,
+  onDetalleChange: PropTypes.func,
 };
 
 export default DetallesCotizacion;

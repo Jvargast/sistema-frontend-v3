@@ -1,17 +1,19 @@
 import {
   Popover,
-  Paper,
   Typography,
   Divider,
   Chip,
   CircularProgress,
   Box,
+  Button,
 } from "@mui/material";
 import PropTypes from "prop-types";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import PaidIcon from "@mui/icons-material/Paid";
 import InfoIcon from "@mui/icons-material/Info";
 import { useGetDocumentoByIdQuery } from "../../store/services/documentoApi";
+import { Link } from "react-router-dom";
+import Fade from "@mui/material/Fade";
 
 const DocumentoPopover = ({ anchorEl, onClose, idDocumento }) => {
   const open = Boolean(anchorEl);
@@ -20,7 +22,7 @@ const DocumentoPopover = ({ anchorEl, onClose, idDocumento }) => {
     isLoading,
     isError,
   } = useGetDocumentoByIdQuery(idDocumento, {
-    skip: !open, 
+    skip: !open,
   });
 
   const colorChip =
@@ -37,7 +39,16 @@ const DocumentoPopover = ({ anchorEl, onClose, idDocumento }) => {
       onClose={onClose}
       anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       transformOrigin={{ vertical: "top", horizontal: "left" }}
-      PaperProps={{ sx: { p: 2, maxWidth: 350 } }}
+      TransitionComponent={Fade}
+      PaperProps={{
+        sx: {
+          p: 2,
+          maxWidth: 360,
+          border: "1px solid #e0e0e0",
+          borderRadius: 2,
+          boxShadow: 3,
+        },
+      }}
     >
       {isLoading ? (
         <Box display="flex" justifyContent="center" alignItems="center" p={2}>
@@ -46,37 +57,29 @@ const DocumentoPopover = ({ anchorEl, onClose, idDocumento }) => {
       ) : isError || !documento ? (
         <Typography color="error">Error al cargar documento.</Typography>
       ) : (
-        <Paper elevation={0}>
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            mb={1}
-            color="primary"
-            display="flex"
-            alignItems="center"
-            gap={1}
-          >
-            <ReceiptLongIcon fontSize="small" />
-            {documento.tipo_documento.toUpperCase()} #{documento.numero}
-          </Typography>
+        <Box>
+          <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <ReceiptLongIcon color="primary" />
+            <Typography variant="h6" fontWeight="bold" color="primary">
+              {documento.tipo_documento.toUpperCase()} #{documento.numero}
+            </Typography>
+          </Box>
 
           <Divider sx={{ mb: 1 }} />
 
-          <Typography variant="body2" gutterBottom>
+          <Typography variant="body2" mb={0.5}>
             <strong>Fecha:</strong>{" "}
-            {new Date(documento.fecha_emision).toLocaleString()}
+            {new Date(documento.fecha_emision).toLocaleDateString("es-CL")}
           </Typography>
-
-          <Typography variant="body2" gutterBottom>
+          <Typography variant="body2" mb={0.5}>
             <strong>Cliente:</strong> {documento.cliente?.nombre || "N/A"}
           </Typography>
-
-          <Typography variant="body2" gutterBottom>
+          <Typography variant="body2" mb={0.5}>
             <strong>Emitido por:</strong> {documento.creador?.nombre} (
             {documento.creador?.rut})
           </Typography>
 
-          <Typography variant="body2" component="div" gutterBottom>
+          <Typography variant="body2" mb={1}>
             <strong>Estado:</strong>{" "}
             <Chip
               label={documento.estadoPago?.nombre}
@@ -88,29 +91,57 @@ const DocumentoPopover = ({ anchorEl, onClose, idDocumento }) => {
 
           <Divider sx={{ my: 1 }} />
 
-          <Typography variant="body2" gutterBottom>
+          <Box display="flex" alignItems="center" mb={0.5}>
             <PaidIcon fontSize="small" sx={{ mr: 1 }} />
-            Subtotal: ${documento.subtotal}
-          </Typography>
+            <Typography variant="body2">
+              Subtotal:{" "}
+              <strong>
+                ${Number(documento.subtotal).toLocaleString("es-CL")}
+              </strong>
+            </Typography>
+          </Box>
           <Typography variant="body2" mb={1}>
-            Total: ${documento.total}
+            Total:{" "}
+            <strong>${Number(documento.total).toLocaleString("es-CL")}</strong>
           </Typography>
 
           {documento.observaciones && (
             <>
               <Divider sx={{ my: 1 }} />
-              <Typography
-                variant="body2"
-                display="flex"
-                alignItems="center"
-                gap={1}
-              >
-                <InfoIcon fontSize="small" />
-                <strong>Observaciones:</strong> {documento.observaciones}
-              </Typography>
+              <Box display="flex" alignItems="flex-start" gap={1}>
+                <InfoIcon fontSize="small" sx={{ mt: 0.5 }} />
+                <Typography variant="body2">
+                  <strong>Observaciones:</strong> {documento.observaciones}
+                </Typography>
+              </Box>
             </>
           )}
-        </Paper>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Box display="flex" justifyContent="center">
+            <Button
+              component={Link}
+              to={`/documentos/ver/${documento.id_documento}`}
+              variant="contained"
+              size="small"
+              sx={{
+                textTransform: "none",
+                fontWeight: "bold",
+                borderRadius: 2,
+                px: 2,
+                backgroundColor: "#1e88e5",
+                color: "#fff",
+                "&:hover": {
+                  backgroundColor: "#1565c0",
+                },
+              }}
+              onClick={onClose}
+            >
+              Ver Detalle Completo
+            </Button>
+          </Box>
+        </Box>
       )}
     </Popover>
   );

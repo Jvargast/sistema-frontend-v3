@@ -15,6 +15,27 @@ import { useLoginMutation } from "../../store/services/authApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { getInitialRoute } from "../../utils/navigationUtils";
 
+const formatRut = (value) => {
+  const cleanValue = value.replace(/[^0-9kK]/gi, "");
+  if (cleanValue.length < 2) return cleanValue;
+
+  const body = cleanValue.slice(0, -1);
+  const dv = cleanValue.slice(-1);
+  let formatted = "";
+  let i = 0;
+
+  for (let j = body.length - 1; j >= 0; j--) {
+    formatted = body[j] + formatted;
+    i++;
+    if (i === 3 && j !== 0) {
+      formatted = "." + formatted;
+      i = 0;
+    }
+  }
+
+  return `${formatted}-${dv}`;
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -22,9 +43,15 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [login, { isLoading }] = useLoginMutation();
   const { isAuthenticated, rol, permisos } = useSelector((state) => state.auth);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCredentials({ ...credentials, [name]: value });
+    if (name === "rut") {
+      const raw = value.replace(/[^0-9kK]/gi, "");
+      setCredentials((prev) => ({ ...prev, [name]: formatRut(raw) }));
+    } else {
+      setCredentials((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -33,31 +60,15 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      if (isAuthenticated) {
-        const initialRoute = getInitialRoute(rol, permisos);
-        navigate(initialRoute, { replace: true });
-      }
+      const initialRoute = getInitialRoute(rol, permisos);
+      navigate(initialRoute, { replace: true });
     }
   }, [isAuthenticated, navigate, permisos, rol]);
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // importante para evitar recarga
     try {
       await login(credentials).unwrap();
-      /* console.log("Esperando para asegurar que la cookie se registre...");
-      await new Promise((resolve) => setTimeout(resolve, 300)); // Espera 300ms
-      const meResponse = await fetch(`${apiUrl || apiUrlWeb}/auth/me`, {
-        method: "GET",
-        credentials: "include",
-      }).then((res) => res.json());
-      dispatch(setUser(meResponse)); */
-
-      /* console.log(meResponse);
-
-      const { rol, permisos } = meResponse;
-      const initialRoute = getInitialRoute(rol, permisos); */
-
-     /*  navigate(initialRoute, { replace: true }); */
       dispatch(
         showNotification({
           message: "Inicio de sesión exitoso.",
@@ -97,6 +108,8 @@ const Login = () => {
         />
       </Box>
       <Box
+        component="form"
+        onSubmit={handleLogin}
         display="flex"
         flexDirection="column"
         gap="1.5rem"
@@ -120,14 +133,17 @@ const Login = () => {
           label="Rut"
           name="rut"
           value={credentials.rut}
-          onChange={handleInputChange}
-          fullWidth
-          InputLabelProps={{
-            shrink: true,
-            style: { fontSize: "1.2rem" },
+          autoComplete="username" 
+          onChange={(e) => {
+            const raw = e.target.value.replace(/[^0-9kK.-]/g, "");
+            setCredentials((prev) => ({ ...prev, rut: raw }));
           }}
-          InputProps={{ style: { fontSize: "1.2rem" } }}
-          autoComplete="username"
+          onBlur={() =>
+            setCredentials((prev) => ({
+              ...prev,
+              rut: formatRut(prev.rut.replace(/[^0-9kK]/gi, "")),
+            }))
+          }
         />
         <TextField
           label="Contraseña"
@@ -154,7 +170,7 @@ const Login = () => {
         />
         <Button
           variant="contained"
-          onClick={handleLogin}
+          type="submit"
           fullWidth
           sx={{
             fontSize: "1.2rem",

@@ -1,5 +1,13 @@
 import { useParams } from "react-router-dom";
-import { Box, Typography, Paper, Grid, Divider, Chip, IconButton } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  Divider,
+  Chip,
+  IconButton,
+} from "@mui/material";
 import BackButton from "../../components/common/BackButton";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
@@ -9,6 +17,13 @@ import LoaderComponent from "../../components/common/LoaderComponent";
 import DocumentoPopover from "../../components/documento/DocumentoPopover";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useState } from "react";
+
+const CLP = (valor) =>
+  new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: "CLP",
+    maximumFractionDigits: 0,
+  }).format(Number(valor));
 
 const VerPago = () => {
   const { id } = useParams();
@@ -61,8 +76,7 @@ const VerPago = () => {
               display="flex"
               alignItems="center"
             >
-              <MonetizationOnIcon sx={{ mr: 1 }} /> $
-              {Number(pago.monto).toFixed(2)}
+              <MonetizationOnIcon sx={{ mr: 1 }} /> {CLP(pago.monto)}
             </Typography>
           </Grid>
 

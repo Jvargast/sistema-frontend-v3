@@ -12,15 +12,20 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { useCreateNewUserMutation, useGetAllUsersQuery } from "../../../store/services/usuariosApi";
-import { useGetAllEmpresasQuery, useGetAllSucursalsQuery } from "../../../store/services/empresaApi";
+import {
+  useCreateNewUserMutation,
+  useGetAllUsersQuery,
+} from "../../../store/services/usuariosApi";
+import {
+  useGetAllEmpresasQuery,
+  useGetAllSucursalsQuery,
+} from "../../../store/services/empresaApi";
 import { useGetAllRolesQuery } from "../../../store/services/rolesApi";
 import { showNotification } from "../../../store/reducers/notificacionSlice";
 import LoaderComponent from "../../../components/common/LoaderComponent";
 import BackButton from "../../../components/common/BackButton";
 import ModalForm from "../../../components/common/ModalForm";
 import usePaginatedData from "../../../utils/usePaginateData";
-
 
 const UserManagement = () => {
   const navigate = useNavigate();
@@ -32,9 +37,11 @@ const UserManagement = () => {
   const {
     data: usuarios,
     isLoading: isLoadingUsuarios,
-    paginacion: usuariosPaginacion,
+    page,
+    pageSize,
+    paginacion,
     handlePageChange,
-  } = usePaginatedData(useGetAllUsersQuery);
+  } = usePaginatedData(useGetAllUsersQuery, 10);
 
   const { data: empresas, isLoading: isLoadingEmpresas } =
     useGetAllEmpresasQuery();
@@ -43,20 +50,22 @@ const UserManagement = () => {
   const { data: rolesData, isLoading: isLoadingRoles } = useGetAllRolesQuery();
 
   // Transform data
-  const rolesOptions = rolesData?.roles?.map((role) => ({
-    value: role.id,
-    label: role.nombre,
-  })) || [];
+  const rolesOptions =
+    rolesData?.roles?.map((role) => ({
+      value: role.id,
+      label: role.nombre,
+    })) || [];
 
-  const usuariosMapped = usuarios?.map((user) => ({
-    ...user,
-    rol: user?.rol?.nombre || "Sin rol",
-    Empresa: user?.Empresa?.nombre || "Sin empresa",
-    Sucursal: user?.Sucursal?.nombre || "Sin sucursal",
-    ultimo_login: user?.ultimo_login
-      ? new Date(user.ultimo_login).toLocaleString()
-      : "Nunca",
-  })) || [];
+  const usuariosMapped =
+    usuarios?.map((user) => ({
+      ...user,
+      rol: user?.rol?.nombre || "Sin rol",
+      Empresa: user?.Empresa?.nombre || "Sin empresa",
+      Sucursal: user?.Sucursal?.nombre || "Sin sucursal",
+      ultimo_login: user?.ultimo_login
+        ? new Date(user.ultimo_login).toLocaleString()
+        : "Nunca",
+    })) || [];
 
   const columns = [
     { field: "sequentialId", headerName: "ID", flex: 0.15 },
@@ -88,7 +97,12 @@ const UserManagement = () => {
     { name: "rut", label: "RUT", type: "text", defaultValue: "" },
     { name: "nombre", label: "Nombre", type: "text", defaultValue: "" },
     { name: "apellido", label: "Apellido", type: "text", defaultValue: "" },
-    { name: "password", label: "Contraseña", type: "password", defaultValue: "" },
+    {
+      name: "password",
+      label: "Contraseña",
+      type: "password",
+      defaultValue: "",
+    },
     { name: "email", label: "Email", type: "text", defaultValue: "" },
     {
       name: "rolId",
@@ -101,19 +115,21 @@ const UserManagement = () => {
       name: "id_empresa",
       label: "Empresa",
       type: "select",
-      options: empresas?.map((empresa) => ({
-        value: empresa.id_empresa,
-        label: empresa.nombre,
-      })) || [],
+      options:
+        empresas?.map((empresa) => ({
+          value: empresa.id_empresa,
+          label: empresa.nombre,
+        })) || [],
     },
     {
       name: "id_sucursal",
       label: "Sucursal",
       type: "select",
-      options: sucursales?.map((sucursal) => ({
-        value: sucursal.id_sucursal,
-        label: sucursal.nombre,
-      })) || [],
+      options:
+        sucursales?.map((sucursal) => ({
+          value: sucursal.id_sucursal,
+          label: sucursal.nombre,
+        })) || [],
     },
   ];
 
@@ -184,16 +200,13 @@ const UserManagement = () => {
             getRowId={(row) => row?.rut}
             pagination
             paginationMode="server"
-            rowCount={usuariosPaginacion?.totalItems || 0}
-            pageSize={usuariosPaginacion?.pageSize || 10}
-            page={usuariosPaginacion?.currentPage - 1 || 0}
-            onPageChange={(newPage) =>
-              handlePageChange(newPage, usuariosPaginacion?.pageSize)
-            }
-            onPageSizeChange={(newPageSize) =>
-              handlePageChange(0, newPageSize)
+            rowCount={paginacion.totalItems}
+            paginationModel={{ page, pageSize }}
+            onPaginationModelChange={({ page, pageSize }) =>
+              handlePageChange(page, pageSize)
             }
             rowsPerPageOptions={[5, 10, 20, 50]}
+            pageSizeOptions={[5, 10, 20, 50]}
             disableSelectionOnClick
           />
         </CardContent>

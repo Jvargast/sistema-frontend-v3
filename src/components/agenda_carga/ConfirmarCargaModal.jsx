@@ -7,6 +7,7 @@ import {
   TextField,
   CircularProgress,
   Grid,
+  Box,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
@@ -111,13 +112,13 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
     <Modal open={open} onClose={handleClose}>
       <Paper
         sx={{
-          width: { xs: "95%", md: "70%" }, // Más ancho en tablets
+          width: { xs: "95%", md: "70%" },
           maxWidth: 800,
-          p: { xs: 2, md: 4 }, // Ajuste de padding
+          p: { xs: 2, md: 4 },
           mx: "auto",
           mt: { xs: 3, md: 5 },
           borderRadius: 3,
-          bgcolor: "#f9f9f9", // Color de fondo más suave
+          bgcolor: "#f9f9f9",
           boxShadow: 3,
         }}
       >
@@ -131,74 +132,85 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
           ✅ Confirmar Carga del Camión
         </Typography>
 
-        {productosAgrupados.map((producto) => {
-          const yaEnCamion =
-            producto.cantidadReservada + producto.cantidadDisponible;
-          const restante = Math.max(producto.cantidadTotal - yaEnCamion, 0);
-          const deshabilitado = restante === 0;
+        {/* Aquí está el ajuste importante */}
+        <Box sx={{ maxHeight: "60vh", overflowY: "auto", px: 1 }}>
+          {productosAgrupados.map((producto) => {
+            const yaEnCamion =
+              producto.cantidadReservada + producto.cantidadDisponible;
+            const restante = Math.max(producto.cantidadTotal - yaEnCamion, 0);
+            const deshabilitado = restante === 0;
 
-          return (
-            <Paper
-              key={producto.id_producto}
-              sx={{
-                p: 2,
-                mb: 3,
-                borderRadius: 3,
-                border: "1px solid #ccc",
-                backgroundColor: "#ffffff",
-              }}
-            >
-              <Typography variant="h6" fontWeight="bold">
-                {producto.nombre_producto.toUpperCase()}
-              </Typography>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={6} md={4}>
-                  <Typography variant="body1">
-                    🧾 Planificado: <strong>{producto.cantidadTotal}</strong>
-                  </Typography>
+            return (
+              <Paper
+                key={producto.id_producto}
+                sx={{
+                  p: 2,
+                  mb: 3,
+                  borderRadius: 3,
+                  border: "1px solid #ccc",
+                  backgroundColor: "#ffffff",
+                }}
+              >
+                <Typography variant="h6" fontWeight="bold">
+                  {producto.nombre_producto.toUpperCase()}
+                </Typography>
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={6} md={4}>
+                    <Typography variant="body1">
+                      🧾 Planificado: <strong>{producto.cantidadTotal}</strong>
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} md={4}>
+                    <Typography variant="body1">
+                      📦 En camión (Reservado):{" "}
+                      <strong>{producto.cantidadReservada}</strong>
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <Typography variant="body1">
+                      ✅ Disponible:{" "}
+                      <strong>{producto.cantidadDisponible}</strong>
+                    </Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs={6} md={4}>
-                  <Typography variant="body1">
-                    📦 En camión (Reservado):{" "}
-                    <strong>{producto.cantidadReservada}</strong>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <Typography variant="body1">
-                    ✅ Disponible:{" "}
-                    <strong>{producto.cantidadDisponible}</strong>
-                  </Typography>
-                </Grid>
-              </Grid>
 
-              <TextField
-                type="number"
-                label="Cantidad a confirmar"
-                size="medium"
-                fullWidth
-                sx={{ mt: 2 }}
-                disabled={deshabilitado}
-                value={
-                  productosCargados[producto.id_producto] !== undefined
-                    ? productosCargados[producto.id_producto]
-                    : ""
-                }
-                onChange={(e) =>
-                  handleChangeCantidad(producto.id_producto, e.target.value)
-                }
-              />
-              {deshabilitado && (
+                <TextField
+                  type="number"
+                  label="Cantidad a confirmar"
+                  size="medium"
+                  fullWidth
+                  sx={{ mt: 2 }}
+                  disabled={deshabilitado}
+                  value={productosCargados[producto.id_producto] ?? ""}
+                  inputProps={{
+                    min: 0,
+                    max: restante,
+                  }}
+                  onChange={(e) =>
+                    handleChangeCantidad(producto.id_producto, e.target.value)
+                  }
+                />
                 <Typography
                   variant="caption"
-                  color="success"
-                  sx={{ display: "block", mt: 1 }}
+                  color="text.secondary"
+                  sx={{ mt: 0.5 }}
                 >
-                  Ya se encuentra completamente cargado.
+                  Máximo permitido: {restante}
                 </Typography>
-              )}
-            </Paper>
-          );
-        })}
+
+                {deshabilitado && (
+                  <Typography
+                    variant="caption"
+                    color="success"
+                    sx={{ display: "block", mt: 1 }}
+                  >
+                    Ya se encuentra completamente cargado.
+                  </Typography>
+                )}
+              </Paper>
+            );
+          })}
+        </Box>
 
         <TextField
           label="Notas del Chofer"

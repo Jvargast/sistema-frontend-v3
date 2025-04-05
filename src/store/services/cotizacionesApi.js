@@ -34,11 +34,22 @@ export const cotizacionesApi = createApi({
     }),
 
     getCotizacionPdf: builder.query({
-      query: (id) => ({
-        url: `/cotizaciones/${id}/pdf`,
+      query: ({ id, mostrarImpuestos = true }) => ({
+        url: `/cotizaciones/${id}/pdf?mostrarImpuestos=${mostrarImpuestos}`,
         method: "GET",
-        responseHandler: (response) => response.blob(), // para obtener el archivo PDF como blob
+        responseHandler: (response) => response.blob(),
       }),
+    }),
+
+    updateCotizacion: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/cotizaciones/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Cotizaciones", id },
+      ],
     }),
   }),
 });
@@ -47,5 +58,6 @@ export const {
   useGetAllCotizacionesQuery,
   useGetCotizacionByIdQuery,
   useCreateCotizacionMutation,
-  useGetCotizacionPdfQuery
+  useGetCotizacionPdfQuery,
+  useUpdateCotizacionMutation,
 } = cotizacionesApi;

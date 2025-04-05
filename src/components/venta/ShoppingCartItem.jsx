@@ -1,4 +1,4 @@
-import { Box, Typography, IconButton, TextField } from "@mui/material";
+import { Box, Typography, IconButton, TextField, Stack } from "@mui/material";
 import { Add, Remove, Delete } from "@mui/icons-material";
 import PropTypes from "prop-types";
 import { useState } from "react";
@@ -18,117 +18,131 @@ const ShoppingCartItem = ({
     onPriceChange(item.id_producto, item.tipo, newPrice);
   };
 
+  const total = item.cantidad * precioEditable;
+
   return (
     <Box
       sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        justifyContent: "space-between",
         p: 2,
         mb: 2,
         borderRadius: 2,
-        boxShadow: "0px 3px 10px rgba(0,0,0,0.1)",
-        backgroundColor: "#F9F9F9",
-        borderLeft: "6px solid #4CAF50",
+        backgroundColor: "#FAFAFA", // Cambia el fondo
+        border: "1px solid #E0E0E0", // Sutil
+        boxShadow: "none", // Quitamos la sombra
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
       }}
     >
-      {/* Información del producto */}
-      <Box
-        sx={{
-          flex: { xs: "1 1 100%", md: "1 1 40%" },
-          minWidth: "150px",
-          mb: { xs: 1, md: 0 },
-        }}
+      {/* Nombre del producto */}
+      <Typography
+        variant="subtitle1"
+        fontWeight="bold"
+        sx={{ color: "#2E2E2E" }}
       >
-        <Typography variant="h6" fontWeight="bold" sx={{ color: "#424242" }}>
-          {item.nombre}
-        </Typography>
-        <TextField
-          type="number"
-          variant="outlined"
-          size="small"
-          value={precioEditable}
-          onChange={handlePriceChange}
-          sx={{
-            width: "80px",
-            mt: 1,
-            "& input": { textAlign: "center", fontSize: "1rem" },
-          }}
-        />
-      </Box>
+        {item.nombre}
+      </Typography>
 
       {/* Controles de cantidad */}
-      <Box
-        sx={{
-          flex: { xs: "1 1 100%", md: "1 1 40%" },
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 1,
-          mb: { xs: 1, md: 0 },
-        }}
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="flex-start"
+        spacing={1.5}
       >
         <IconButton
-          size="medium"
+          onClick={() => onRemove(item.id_producto, item.tipo)}
+          sx={{
+            backgroundColor: "#fce4ec",
+            color: "#c62828",
+            "&:hover": { backgroundColor: "#f8bbd0" },
+            width: 36,
+            height: 36,
+          }}
+        >
+          <Delete fontSize="small" />
+        </IconButton>
+
+        <IconButton
           onClick={() =>
             onQuantityChange(item.id_producto, item.tipo, item.cantidad - 1)
           }
           disabled={item.cantidad <= 1}
           sx={{
             backgroundColor: "#f5f5f5",
-            borderRadius: 1,
             "&:hover": { backgroundColor: "#e0e0e0" },
+            width: 36,
+            height: 36,
           }}
         >
-          <Remove fontSize="medium" />
+          <Remove />
         </IconButton>
 
-        <Typography
-          fontWeight="bold"
-          sx={{ width: "40px", textAlign: "center", fontSize: "1.2rem" }}
-        >
+        <Typography fontWeight="bold" sx={{ fontSize: "1.2rem", mx: 1 }}>
           {item.cantidad}
         </Typography>
 
         <IconButton
-          size="medium"
           onClick={() =>
             onQuantityChange(item.id_producto, item.tipo, item.cantidad + 1)
           }
           sx={{
-            backgroundColor: "#4CAF50",
-            color: "#fff",
-            borderRadius: 1,
-            "&:hover": { backgroundColor: "#388E3C" },
+            backgroundColor: "#C8E6C9",
+            color: "#2E7D32",
+            "&:hover": { backgroundColor: "#A5D6A7" },
+            width: 36,
+            height: 36,
           }}
         >
-          <Add fontSize="medium" />
+          <Add />
         </IconButton>
-      </Box>
+      </Stack>
 
-      {/* Botón de eliminar */}
-      <Box
-        sx={{
-          flex: { xs: "1 1 100%", md: "1 1 15%" },
-          display: "flex",
-          justifyContent: "flex-end",
-          mt: { xs: 1, md: 0 },
-        }}
+      {/* Precio y total alineados */}
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        sx={{ mt: 1 }}
       >
-        <IconButton
-          color="error"
-          onClick={() => onRemove(item.id_producto, item.tipo)}
-          sx={{
-            backgroundColor: "#FFCDD2",
-            borderRadius: 1,
-            "&:hover": { backgroundColor: "#E57373" },
-            ml: { md: 2 },
-          }}
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ display: "flex", alignItems: "center", gap: 1 }}
         >
-          <Delete />
-        </IconButton>
-      </Box>
+          Precio unitario
+          <TextField
+            type="number"
+            value={precioEditable}
+            onChange={handlePriceChange}
+            variant="standard"
+            inputProps={{
+              min: 0,
+              style: {
+                textAlign: "right",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                padding: 0,
+              },
+            }}
+            sx={{
+              width: "60px",
+              "& .MuiInputBase-root::before": { borderBottom: "none" },
+              "& .MuiInputBase-root:hover::before": { borderBottom: "none" },
+              "& .MuiInputBase-root.Mui-focused::before": {
+                borderBottom: "none",
+              },
+              "& input": {
+                backgroundColor: "transparent",
+              },
+            }}
+          />
+        </Typography>
+
+        <Typography variant="h6" fontWeight="bold" sx={{ color: "#000" }}>
+          ${total.toLocaleString("es-CL")}
+        </Typography>
+      </Stack>
     </Box>
   );
 };

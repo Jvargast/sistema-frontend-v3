@@ -46,6 +46,8 @@ import CrearCotizacion from "./pages/cotizaciones";
 import PreviewCotizacion from "./pages/cotizaciones/PreviewCotizacion";
 import ListarCotizaciones from "./pages/cotizaciones/ListarCotizaciones";
 import AdminHistorialViajes from "./pages/viajes/AdminHistorialViajes";
+import ListarCuentasPorCobrar from "./pages/facturas";
+import VerCuentaPorCobrar from "./pages/facturas/VerCuentaPorCobrar";
 
 // Configuración de rutas
 const router = createHashRouter([
@@ -174,18 +176,23 @@ const router = createHashRouter([
               </RoleBasedRoute>
             ),
           },
-          /*            { path: "facturas", element: <Facturas /> },
-          { path: "facturas/editar/:id", element: <EditarFactura /> },
-          
-          { path: "cotizaciones", element: <Cotizaciones /> },
           {
-            path: "cotizaciones/editar/:id",
-            element: <EditarCotizacion />,
+            path: "facturas",
+            element: (
+              <RoleBasedRoute requiredPermission="ver_pagos">
+                <ListarCuentasPorCobrar />
+              </RoleBasedRoute>
+            ),
           },
-          { path: "pedidos", element: <Pedidos /> },
-          { path: "pedidos/editar/:id", element: <EditarPedido /> },
-          ,
-          { path: "ventas/editar/:id", element: <EditarVenta /> }, */
+
+          {
+            path: "facturas/ver/:id",
+            element: (
+              <RoleBasedRoute requiredPermission="ver_pagos">
+                <VerCuentaPorCobrar />
+              </RoleBasedRoute>
+            ),
+          },
           {
             path: "clientes",
             element: (

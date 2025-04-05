@@ -13,6 +13,13 @@ const estadoColores = {
   Rechazado: "error",
 };
 
+const formatCLP = (valor) =>
+  new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: "CLP",
+    maximumFractionDigits: 0,
+  }).format(Number(valor));
+
 const ListarPagos = () => {
   const navigate = useNavigate();
 
@@ -49,7 +56,7 @@ const ListarPagos = () => {
       id: "monto",
       label: "Monto",
       format: "currency",
-      render: (row) => `$${Number(row.monto).toFixed(2)}`,
+      render: (row) => formatCLP(row.monto),
     },
     {
       id: "metodo_pago",
