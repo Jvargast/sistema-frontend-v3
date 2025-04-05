@@ -68,16 +68,16 @@ const PedidosBoard = () => {
   const onDragEnd = async (result) => {
     const { source, destination } = result;
     if (!destination) return;
-  
+
     const sourceId = source.droppableId;
     const destId = destination.droppableId;
-  
+
     if (sourceId === destId && source.index === destination.index) {
       return;
     }
-  
+
     const movedItem = columnsState[sourceId][source.index];
-  
+
     if (
       sourceId === destId &&
       columnsState[destId].some((p) => p.id_pedido === movedItem.id_pedido)
@@ -85,16 +85,16 @@ const PedidosBoard = () => {
       console.warn("🔁 Intento de soltar en el mismo lugar, se cancela");
       return;
     }
-  
+
     const newColumns = { ...columnsState };
     const sourceItems = Array.from(newColumns[sourceId]);
     const destItems = Array.from(newColumns[destId]);
     sourceItems.splice(source.index, 1);
     destItems.splice(destination.index, 0, movedItem);
-  
+
     newColumns[sourceId] = sourceItems;
     newColumns[destId] = destItems;
-  
+
     setColumnsState(newColumns);
     try {
       if (destId === "sinAsignar") {
@@ -130,7 +130,7 @@ const PedidosBoard = () => {
       );
     }
   };
-  
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex flex-col items-start justify-between mb-4 px-4">
@@ -152,7 +152,15 @@ const PedidosBoard = () => {
       >
         <Column
           droppableId="sinAsignar"
-          title="Sin Asignar"
+          title={
+            <>
+              <span className="font-semibold text-black">Chofer</span>
+              <br />
+              <span className="text-sm font-normal text-gray-500">
+                Sin Asignar
+              </span>
+            </>
+          }
           pedidos={columnsState.sinAsignar || []}
         />
 

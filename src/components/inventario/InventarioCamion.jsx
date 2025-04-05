@@ -7,8 +7,11 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import PropTypes from "prop-types";
+import { motion } from "framer-motion";
 import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
 import CapacidadCargaCamion from "../agenda_carga/CapacidadCargaCamion";
+
+const MotionBox = motion(Box);
 
 const InventarioCamion = ({
   idCamion,
@@ -38,7 +41,6 @@ const InventarioCamion = ({
     );
   }
 
-  // 🔹 Cambio aquí: ajustado según la nueva respuesta del backend
   const {
     capacidad_total,
     disponibles,
@@ -50,13 +52,22 @@ const InventarioCamion = ({
 
   const columnas = isTablet ? 6 : 10;
 
-  // 🔹 Cambio aquí: tipos diferenciados
+  const espaciosReservadosProyectados = productosReservados.reduce(
+    (total, prod) => total + prod.cantidad,
+    0
+  );
+
   const espaciosCamion = [
     ...Array(reservados_retornables).fill({ tipo: "ReservadoRetornable" }),
     ...Array(reservados_no_retornables).fill({ tipo: "ReservadoNoRetornable" }),
     ...Array(disponibles).fill({ tipo: "Disponible" }),
     ...Array(retorno).fill({ tipo: "Retorno" }),
-    ...Array(vacios).fill({ tipo: "Vacío" }),
+    ...Array(espaciosReservadosProyectados).fill({
+      tipo: "ReservadoParaCarga",
+    }),
+    ...Array(Math.max(0, vacios - espaciosReservadosProyectados)).fill({
+      tipo: "Vacío",
+    }),
   ];
 
   const getColor = (tipo) => {
@@ -69,6 +80,8 @@ const InventarioCamion = ({
         return "green";
       case "Retorno":
         return "blue";
+      case "ReservadoParaCarga":
+        return "#e57373";
       case "Vacío":
         return "lightgray";
       default:
@@ -98,7 +111,7 @@ const InventarioCamion = ({
         justifyContent="center"
       >
         {espaciosCamion.map((item, index) => (
-          <Box
+          <MotionBox
             key={index}
             width={40}
             height={40}
@@ -110,13 +123,22 @@ const InventarioCamion = ({
             borderRadius={1}
             fontSize="12px"
             fontWeight="bold"
+            animate={
+              item.tipo === "ReservadoParaCarga"
+                ? { scale: [0.9, 1.1, 0.9], opacity: [0.8, 1, 0.8] }
+                : {}
+            }
+            transition={
+              item.tipo === "ReservadoParaCarga"
+                ? { repeat: Infinity, duration: 2 }
+                : {}
+            }
           >
             {item.tipo.charAt(0)}
-          </Box>
+          </MotionBox>
         ))}
       </Box>
 
-      {/* 🔹 Leyenda actualizada */}
       <Box
         mt={2}
         display="flex"
@@ -143,11 +165,15 @@ const InventarioCamion = ({
           <strong style={{ color: "blue" }}>■ Retorno: {retorno}</strong>
         </Typography>
         <Typography variant="body2">
+          <strong style={{ color: "#e57373" }}>
+            ■ A cargar (Proyectado): {espaciosReservadosProyectados}
+          </strong>
+        </Typography>
+        <Typography variant="body2">
           <strong style={{ color: "lightgray" }}>■ Vacío: {vacios}</strong>
         </Typography>
       </Box>
 
-      {/* 🔹 Validación ajustada según retornables */}
       <CapacidadCargaCamion
         capacidadTotal={capacidad_total}
         reservadosRetornables={reservados_retornables}
@@ -164,7 +190,15 @@ const InventarioCamion = ({
 InventarioCamion.propTypes = {
   idCamion: PropTypes.number.isRequired,
   productos: PropTypes.array.isRequired,
-  productosReservados: PropTypes.number.isRequired, // 🔸 Asegúrate que sea número aquí
+  productosReservados: PropTypes.arrayOf(
+    PropTypes.shape({
+      id_pedido: PropTypes.number.isRequired,
+      id_producto: PropTypes.number.isRequired,
+      nombre_producto: PropTypes.string.isRequired,
+      cantidad: PropTypes.number.isRequired,
+      es_retornable: PropTypes.bool,
+    })
+  ).isRequired,
   onValidezCambio: PropTypes.func.isRequired,
 };
 

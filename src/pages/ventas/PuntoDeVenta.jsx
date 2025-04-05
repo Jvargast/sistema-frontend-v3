@@ -91,6 +91,7 @@ const PuntoDeVenta = () => {
   const [closeCaja, { isLoading: isClosing }] = useCloseCajaMutation();
 
   const armarVentaData = (productosRetornablesSeleccionados = null) => {
+    const isFactura = tipoDocumento === "factura";
     const data = {
       id_cliente: selectedCliente,
       id_vendedor: usuario.user.id,
@@ -112,10 +113,10 @@ const PuntoDeVenta = () => {
         precio_unitario: item.precio_unitario,
         descuento_porcentaje: item.descuento_porcentaje || 0,
       })),
-      id_metodo_pago: null,
+      id_metodo_pago: isFactura ? null : undefined,
       notas: "",
       tipo_documento: tipoDocumento,
-      pago_recibido: null,
+      pago_recibido: isFactura ? null : undefined,
     };
 
     if (
@@ -142,12 +143,46 @@ const PuntoDeVenta = () => {
   const handleProceedToPayment = () => {
     const productosRetornablesEnCarrito = cart.filter(
       (item) => item.es_retornable
-    ); // 🔹 Filtrar
-    if (productosRetornablesEnCarrito.length > 0) {
+    );
+    const isFactura = tipoDocumento === "factura";
+
+    if (isFactura) {
+      const cliente = clientes?.clientes?.find(
+        (c) => c.id_cliente === selectedCliente
+      );
+
+      if (!cliente || !cliente.razon_social || !cliente.rut) {
+        dispatch(
+          showNotification({
+            message:
+              "Debes seleccionar un cliente con razón social y RUT de empresa para emitir una factura.",
+            severity: "warning",
+          })
+        );
+        return;
+      }
+    }
+
+    // 💡 Validar si ya se confirmaron los retornables
+    const yaConfirmados = productosRetornables.length > 0;
+
+    if (productosRetornablesEnCarrito.length > 0 && !yaConfirmados) {
       setProductosRetornables(productosRetornablesEnCarrito);
       setOpenRetornablesModal(true);
+      return; // ⚠️ Detener aquí hasta que se confirme el modal
+    }
+
+    const venta = armarVentaData(productosRetornables); // Usa lo ya confirmado
+    setVentaData(venta);
+
+    if (isFactura) {
+      handleConfirmPayment({
+        montoPago: null,
+        metodoPago: null,
+        notas: "Factura emitida, pago pendiente",
+        referencia: null,
+      });
     } else {
-      setVentaData(armarVentaData());
       setOpenPagoModal(true);
     }
   };
@@ -157,9 +192,21 @@ const PuntoDeVenta = () => {
       (p) => p.cantidad > 0
     );
     setProductosRetornables(productosValidos);
-    setVentaData(armarVentaData(productosValidos));
+    const venta = armarVentaData(productosValidos);
+    setVentaData(venta);
+
     setOpenRetornablesModal(false);
-    setOpenPagoModal(true);
+
+    if (tipoDocumento === "factura") {
+      handleConfirmPayment({
+        montoPago: null,
+        metodoPago: null,
+        notas: "Factura emitida, pago pendiente",
+        referencia: null,
+      });
+    } else {
+      setOpenPagoModal(true);
+    }
   };
 
   const handleConfirmPayment = async ({
@@ -170,12 +217,23 @@ const PuntoDeVenta = () => {
   }) => {
     if (!ventaData) return;
 
+    const isFactura = ventaData.tipo_documento === "factura";
+
     const ventaFinal = {
       ...ventaData,
-      id_metodo_pago: metodoPago,
-      notas,
-      pago_recibido: montoPago,
-      ...(metodoPago !== "Efectivo" && { referencia }),
+      // Solo se agregan estos campos si NO es factura
+      ...(isFactura
+        ? {
+            id_metodo_pago: null,
+            pago_recibido: null,
+            notas: notas || "Factura generada. Pago pendiente.",
+          }
+        : {
+            id_metodo_pago: metodoPago,
+            pago_recibido: montoPago,
+            notas,
+            ...(metodoPago !== 1 && { referencia }),
+          }),
     };
 
     console.log("Venta Final JSON:", ventaFinal);
@@ -186,7 +244,9 @@ const PuntoDeVenta = () => {
       dispatch(clearCart());
       dispatch(
         showNotification({
-          message: "Venta creada éxitosamente",
+          message: isFactura
+            ? "Factura registrada como pendiente"
+            : "Venta creada exitosamente",
           severity: "success",
         })
       );
@@ -207,7 +267,7 @@ const PuntoDeVenta = () => {
       dispatch(
         showNotification({
           message: `Error al crear la venta: ${error.message || error}`,
-          severity: "success",
+          severity: "error",
         })
       );
     }
@@ -268,13 +328,13 @@ const PuntoDeVenta = () => {
       return;
     }
 
-    const cajaSeleccionada = vendedores?.find((v) => v.rut === rut)?.cajasAsignadas[0];
+    const cajaSeleccionada = vendedores?.find((v) => v.rut === rut)
+      ?.cajasAsignadas[0];
 
-
-    /* if (cajaSeleccionada && !isCajaDeHoy(cajaSeleccionada.fecha_apertura)) {
+    if (cajaSeleccionada && !isCajaDeHoy(cajaSeleccionada.fecha_apertura)) {
       alert("⚠️ La caja seleccionada no es del día de hoy. Elige otra.");
       return;
-    } */
+    }
 
     setSelectedVendedor(rut);
     setTimeout(() => setOpenModal(false), 200);
@@ -458,7 +518,6 @@ const PuntoDeVenta = () => {
     );
   }
 
-  // Manejo de carga de datos y errores
   if (
     isLoading ||
     loadingProductos ||

@@ -67,9 +67,8 @@ const CreateAgendaCargaForm = () => {
   const [prioridad, setPrioridad] = useState("Media");
   const [notas, setNotas] = useState("");
   const [descargarRetornables, setDescargarRetornables] = useState(false);
-  const [productos, setProductos] = useState([]); // Lista de productos seleccionados
-  const [productosReservados, setProductosReservados] = useState(0);
-
+  const [productos, setProductos] = useState([]); 
+  const [productosReservados, setProductosReservados] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [puedeCrearAgenda, setPuedeCrearAgenda] = useState(true);
 

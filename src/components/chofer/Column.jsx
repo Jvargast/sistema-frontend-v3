@@ -1,24 +1,27 @@
 import PropTypes from "prop-types";
-import { Droppable } from "@hello-pangea/dnd"; // <-- Cambio principal
-import { Paper, Typography } from "@mui/material";
+import { Droppable } from "@hello-pangea/dnd";
+import { Paper, Typography, Box } from "@mui/material";
 import PedidoCard from "./PedidoCard";
 
 const Column = ({ droppableId, title, pedidos }) => {
+  const EMPTY_SLOT_COUNT = 4; // o más si deseas
+  const showEmptySlots = pedidos.length < EMPTY_SLOT_COUNT;
+
   return (
     <Droppable droppableId={droppableId}>
       {(provided, snapshot) => (
         <Paper
           component="div"
-          elevation={2}
+          elevation={1}
           ref={provided.innerRef}
           {...provided.droppableProps}
           className={
             "w-72 max-h-[80vh] overflow-y-auto rounded-lg " +
-            "p-4 shadow-md flex flex-col " +
-            // Cambia el color de fondo si algo se arrastra encima
+            "p-4 shadow-sm flex flex-col " +
             (snapshot.isDraggingOver ? "bg-pink-50" : "bg-white")
           }
         >
+          {/* Título */}
           <div className="text-center mb-4">
             <Typography
               variant="h6"
@@ -26,11 +29,11 @@ const Column = ({ droppableId, title, pedidos }) => {
             >
               {title}
             </Typography>
-            {/* Pequeña “barra” debajo del título a modo de divider */}
             <div className="mx-auto mt-1 mb-2 h-[2px] w-16 bg-indigo-200"></div>
           </div>
 
-          <div className="flex flex-col gap-3">
+          {/* Contenido */}
+          <div className="flex flex-col gap-3 min-h-[240px]">
             {pedidos.map((pedido, index) => (
               <PedidoCard
                 key={pedido.id_pedido}
@@ -39,7 +42,23 @@ const Column = ({ droppableId, title, pedidos }) => {
               />
             ))}
 
-            {/* Placeholder para el espacio dinámico al arrastrar */}
+            {/* Slots visuales vacíos */}
+            {showEmptySlots &&
+              Array.from({
+                length: EMPTY_SLOT_COUNT - pedidos.length,
+              }).map((_, idx) => (
+                <Box
+                  key={`slot-${idx}`}
+                  sx={{
+                    height: 130,
+                    borderRadius: 2,
+                    backgroundColor: "#F5F5F5",
+                    border: "1px dashed #E0E0E0",
+                    opacity: 0.6,
+                  }}
+                />
+              ))}
+
             {provided.placeholder}
           </div>
         </Paper>

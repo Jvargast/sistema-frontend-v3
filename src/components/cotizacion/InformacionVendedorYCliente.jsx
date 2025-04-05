@@ -9,7 +9,7 @@ const InformacionVendedorYCliente = ({ vendedor, cliente }) => {
           Vendedor
         </Typography>
         <Typography>
-          {vendedor?.nombre} {vendedor?.apellido}
+          Nombre: {vendedor?.nombre} {vendedor?.apellido}
         </Typography>
         <Typography>RUT: {vendedor?.rut}</Typography>
       </Grid>

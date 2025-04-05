@@ -29,20 +29,26 @@ const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
   useEffect(() => {
     if (pedidos) {
       setPedidosConfirmados(pedidos);
-      // 🔹 Calcular la cantidad total de productos reservados
-      const totalReservados = pedidos.reduce(
-        (total, pedido) =>
-          total +
-          pedido.productos.reduce((sum, prod) => sum + prod.cantidad, 0),
-        0
+      const productosReservadosDetalle = pedidos.flatMap((pedido) =>
+        pedido.productos
+          .filter((prod) => prod.es_retornable)
+          .map((prod) => ({
+            id_pedido: pedido.id_pedido,
+            id_producto: prod.id_producto,
+            nombre_producto: prod.nombre_producto,
+            cantidad: prod.cantidad,
+            es_retornable: prod.es_retornable
+          }))
       );
 
-      // 🔹 Pasamos el total al estado en CreateAgendaCargaForm
-      setProductosReservados(totalReservados);
+      console.log(productosReservadosDetalle)
+      setProductosReservados(productosReservadosDetalle);
     }
   }, [pedidos, setProductosReservados]);
 
-  if (!idChofer) return null; // No mostrar el componente si no hay chofer seleccionado
+  if (!idChofer) return null;
+
+  
 
   return (
     <Box mt={3}>

@@ -21,6 +21,27 @@ import ProductDetails from "../venta/ProductDetails";
 import PropTypes from "prop-types";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
+const formatRut = (value) => {
+  const cleanValue = value.replace(/[^0-9kK]/gi, "");
+  if (cleanValue.length < 2) return cleanValue;
+
+  const body = cleanValue.slice(0, -1);
+  const dv = cleanValue.slice(-1);
+  let formatted = "";
+  let i = 0;
+
+  for (let j = body.length - 1; j >= 0; j--) {
+    formatted = body[j] + formatted;
+    i++;
+    if (i === 3 && j !== 0) {
+      formatted = "." + formatted;
+      i = 0;
+    }
+  }
+
+  return `${formatted}-${dv}`;
+};
+
 const ModalForm = ({
   open,
   onClose,
@@ -112,7 +133,7 @@ const ModalForm = ({
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
+      <DialogContent component="form" onSubmit={(e) => e.preventDefault()}>
         {fields.map((field) => {
           if (field.name === "detalles") {
             return (
@@ -137,9 +158,26 @@ const ModalForm = ({
                   name={field.name}
                   type={field.type}
                   value={formData[field.name]}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    const { value } = e.target;
+                    const raw = value.replace(/[^0-9kK.-]/g, "");
+                    setFormData((prev) => ({
+                      ...prev,
+                      [field.name]: field.name === "rut" ? raw : value,
+                    }));
+                  }}
+                  onBlur={() => {
+                    if (field.name === "rut") {
+                      setFormData((prev) => ({
+                        ...prev,
+                        [field.name]: formatRut(
+                          prev[field.name].replace(/[^0-9kK]/gi, "")
+                        ),
+                      }));
+                    }
+                  }}
                   disabled={field.disabled}
-                  autoComplete="off"
+                  autoComplete={field.name === "rut" ? "username" : "off"}
                 />
               );
             case "password":

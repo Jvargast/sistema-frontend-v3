@@ -1,96 +1,104 @@
 import PropTypes from "prop-types";
-import { Draggable } from "@hello-pangea/dnd"; // <-- Cambio aquí
-import {
-  Card,
-  CardContent,
-  ClickAwayListener,
-  Popper,
-  Typography,
-} from "@mui/material";
+import { Draggable } from "@hello-pangea/dnd";
+import { Box, Typography, ClickAwayListener, Popper } from "@mui/material";
 import { useState } from "react";
 import PedidoTooltip from "./PedidoToolTip";
 import { obtenerFechaChile, obtenerHoraChile } from "../../utils/formatearHora";
 
 const PedidoCard = ({ pedido, index }) => {
   const coloresEstado = {
-    "Pendiente de Confirmación": "border-gray-400",
-    Confirmado: "border-blue-400",
-    "En Preparación": "border-orange-400",
-    "En Entrega": "border-yellow-400",
+    "Pendiente de Confirmación": "#BDBDBD",
+    Confirmado: "#42A5F5",
+    "En Preparación": "#FFA726",
+    "En Entrega": "#FFEB3B",
   };
-  const estiloBorde = pedido?.id_chofer
-    ? coloresEstado[pedido.EstadoPedido.nombre_estado] || "border-green-400"
-    : "border-rose-500";
+
+  const borderColor = pedido?.id_chofer
+    ? coloresEstado[pedido.EstadoPedido.nombre_estado] || "#81C784"
+    : "#EF5350";
 
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const handleMouseEnter = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMouseLeave = () => {
-    setAnchorEl(null);
-  };
-
-  const handleClick = (event) => {
+  const handleMouseEnter = (event) => setAnchorEl(event.currentTarget);
+  const handleMouseLeave = () => setAnchorEl(null);
+  const handleClick = (event) =>
     setAnchorEl(anchorEl ? null : event.currentTarget);
-  };
+
   const open = Boolean(anchorEl);
 
   return (
     <>
       <Draggable draggableId={String(pedido.id_pedido)} index={index}>
         {(provided, snapshot) => (
-          <Card
-            elevation={3}
+          <Box
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleClick}
-            className={
-              "relative border-l-4 rounded-md shadow-sm hover:shadow-md " +
-              "transition-all duration-300 mb-2 " +
-              estiloBorde +
-              (snapshot.isDragging ? " opacity-75" : "")
-            }
-            style={{
-              ...provided.draggableProps.style,
-              // Opcionalmente, más estilos inline
+            sx={{
+              borderLeft: `4px solid ${borderColor}`,
+              border: "1px solid #E0E0E0",
+              backgroundColor: "#FAFAFA",
+              borderRadius: 2,
+              px: 2,
+              py: 1.5,
+/*               mb: 1.5, */
+              transition: "box-shadow 0.2s ease",
+              boxShadow: snapshot.isDragging
+                ? "0 4px 12px rgba(0,0,0,0.12)"
+                : "none",
+              cursor: "pointer",
             }}
           >
-            <CardContent className="p-4">
-              <div className="flex justify-between items-center mb-2">
-                <Typography
-                  variant="subtitle1"
-                  className="font-bold text-pink-600 tracking-wide"
-                >
-                  ID Pedido: {pedido.id_pedido}
-                </Typography>
+            {/* ID y fecha */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                mb: 1,
+              }}
+            >
+              <Typography variant="subtitle2" fontWeight="bold" color="error">
+                ID Pedido: {pedido.id_pedido}
+              </Typography>
 
-                <div className="flex flex-col items-end bg-indigo-100 text-indigo-700 text-xs font-medium px-2 py-1 rounded">
-                  <span>{obtenerFechaChile(pedido.fecha_pedido)}</span>
-                  <span>{obtenerHoraChile(pedido.fecha_pedido)}</span>
-                </div>
-              </div>
+              <Box
+                sx={{
+                  fontSize: "0.75rem",
+                  backgroundColor: "#EDE7F6",
+                  color: "#5E35B1",
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: 1,
+                  textAlign: "right",
+                  fontWeight: "500",
+                }}
+              >
+                <div>{obtenerFechaChile(pedido.fecha_pedido)}</div>
+                <div>{obtenerHoraChile(pedido.fecha_pedido)}</div>
+              </Box>
+            </Box>
 
-              <Typography variant="body2" className="text-gray-700">
-                <span className="text-pink-500 font-semibold">Cliente:</span>{" "}
-                {pedido?.Cliente?.nombre ?? "Desconocido"}
-              </Typography>
-              <Typography variant="body2" className="mt-2 text-gray-700">
-                <span className="text-pink-500 font-semibold">Estado:</span>{" "}
-                {pedido?.EstadoPedido?.nombre_estado}
-              </Typography>
-              <Typography variant="body2" className="mt-2 text-gray-700">
-                <span className="text-pink-500 font-semibold">Dirección:</span>{" "}
-                {pedido.direccion_entrega}
-              </Typography>
-            </CardContent>
-          </Card>
+            {/* Info adicional */}
+            <Typography variant="body2" color="text.secondary">
+              <strong className="text-pink-500">Cliente:</strong>{" "}
+              {pedido?.Cliente?.nombre ?? "Desconocido"}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              <strong className="text-pink-500">Estado:</strong>{" "}
+              {pedido?.EstadoPedido?.nombre_estado}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              <strong className="text-pink-500">Dirección:</strong>{" "}
+              {pedido.direccion_entrega}
+            </Typography>
+          </Box>
         )}
       </Draggable>
+
+      {/* Popper para tooltip */}
       <Popper open={open} anchorEl={anchorEl} placement="right-start">
         <ClickAwayListener onClickAway={() => setAnchorEl(null)}>
           <div>

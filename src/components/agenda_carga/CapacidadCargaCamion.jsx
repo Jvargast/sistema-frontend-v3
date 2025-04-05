@@ -11,34 +11,37 @@ const CapacidadCargaCamion = ({
   productosReservados,
   onValidezCambio,
 }) => {
-  // 🔹 Calcular el espacio realmente disponible para cargar retornables
-  const espacioUsadoActual = reservadosRetornables + disponibles + retorno;
-  const espaciosDisponiblesParaRetornables =
-    capacidadTotal - espacioUsadoActual;
+  const cantidadTotalProductosReservados = productosReservados.reduce(
+    (total, prod) => total + prod.cantidad,
+    0
+  );
 
-  // 🔹 Productos retornables a cargar desde el formulario
+  const espacioUsadoActual = reservadosRetornables + disponibles + retorno;
+
+  // Ahora los espacios disponibles descuentan lo ya reservado (proyectado)
+  const espaciosDisponiblesParaRetornables =
+    capacidadTotal - espacioUsadoActual - cantidadTotalProductosReservados;
+
+  // Productos retornables desde el formulario
   const productosRetornables = productos.filter(
     (p) => p.es_retornable && Number(p.cantidad) > 0
   );
 
-  // 🔹 Cantidad total de retornables nuevos a cargar
+  // Productos a cargar comienzan desde la cantidad proyectada reservada
   const cantidadProductosRetornables = productosRetornables.reduce(
     (total, p) => total + (Number(p.cantidad) || 0),
     0
   );
 
-  // 🔹 Validaciones específicas
   const cantidadNegativa = productosRetornables.some(
     (p) => Number(p.cantidad) < 0
   );
 
   const excedeEspaciosDisponibles =
-    cantidadProductosRetornables + productosReservados >
-    espaciosDisponiblesParaRetornables;
+    cantidadProductosRetornables > espaciosDisponiblesParaRetornables;
 
   const sinEspacio = espaciosDisponiblesParaRetornables <= 0;
 
-  // ✅ Hook para informar validez claramente
   useEffect(() => {
     const esValido =
       !cantidadNegativa && !excedeEspaciosDisponibles && !sinEspacio;
@@ -80,10 +83,12 @@ const CapacidadCargaCamion = ({
         </Typography>
         <Typography variant="body1">
           <strong>Productos ya Reservados (Retornables):</strong>{" "}
-          {productosReservados}
+          {cantidadTotalProductosReservados}
         </Typography>
-        <Typography variant="body1">
-          <strong>Productos Retornables a Cargar Ahora:</strong>{" "}
+        <Typography variant="body1" sx={{color:"#e57373"}}>
+          <strong>
+            Productos Retornables a Cargar Ahora:
+          </strong>{" "}
           {cantidadProductosRetornables}
         </Typography>
         <Typography variant="body1">
@@ -94,7 +99,7 @@ const CapacidadCargaCamion = ({
         </Typography>
       </Box>
 
-      {/* 🔹 Mensajes claros según la validación */}
+      {/* Mensajes claros según la validación */}
       {cantidadNegativa && (
         <Alert severity="error" sx={{ mt: 2 }}>
           ❌ Error: Cantidades negativas no permitidas.
@@ -124,7 +129,15 @@ CapacidadCargaCamion.propTypes = {
   reservadosRetornables: PropTypes.number.isRequired,
   disponibles: PropTypes.number.isRequired,
   retorno: PropTypes.number.isRequired,
-  productosReservados: PropTypes.number.isRequired,
+  productosReservados: PropTypes.arrayOf(
+    PropTypes.shape({
+      id_pedido: PropTypes.number.isRequired,
+      id_producto: PropTypes.number.isRequired,
+      nombre_producto: PropTypes.string.isRequired,
+      cantidad: PropTypes.number.isRequired,
+      es_retornable: PropTypes.bool,
+    })
+  ).isRequired,
   productos: PropTypes.arrayOf(
     PropTypes.shape({
       cantidad: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
