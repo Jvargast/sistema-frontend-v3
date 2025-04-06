@@ -1,24 +1,26 @@
+import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
+import { useTheme, useMediaQuery } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { Container, Fab } from "@mui/material";
-import DoneIcon from "@mui/icons-material/Done";
 import { showNotification } from "../../store/reducers/notificacionSlice";
-import { useFinalizarViajeMutation } from "../../store/services/agendaViajesApi";
+
 import InventarioCargado from "../../components/viaje/InventarioCargado";
 import ListaDestinos from "../../components/viaje/ListaDestinos";
 import InfoGeneral from "../../components/viaje/InfoGeneral";
 import ResumenDelDia from "../../components/viaje/ResumenDelDia";
 import FormularioEntregaModal from "../../components/entregas/FormularioEntregaModal";
-import { useGetEntregasByAgendaIdQuery } from "../../store/services/entregasApi";
-import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
-import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import ModalVentaRapida from "../../components/venta_rapida_chofer/ModalVentaRapida";
+import DetallePedidoModal from "../../components/entregas/DetallePedidoModal";
+
+import DoneIcon from "@mui/icons-material/Done";
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import { useLayout } from "../../context/LayoutContext";
 import { onRefetchAgendaViajes } from "../../utils/eventBus";
-import PropTypes from "prop-types";
-import DetallePedidoModal from "../../components/entregas/DetallePedidoModal";
 import { useGetPedidoByIdQuery } from "../../store/services/pedidosApi";
-import { useTheme, useMediaQuery } from "@mui/material";
+import { useGetEntregasByAgendaIdQuery } from "../../store/services/entregasApi";
+import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
+import { useFinalizarViajeMutation } from "../../store/services/agendaViajesApi";
 
 const ViajeChofer = ({ viaje }) => {
   const dispatch = useDispatch();

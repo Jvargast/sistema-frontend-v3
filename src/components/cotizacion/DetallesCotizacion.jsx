@@ -10,7 +10,6 @@ const formatoCLP = (valor) =>
   }).format(valor);
 
 const DetallesCotizacion = ({ detalles, modoEdicion, onDetalleChange }) => {
-  // Convertimos cada campo para asegurarnos de que sean números
   const detallesNumericos = detalles.map((item) => ({
     ...item,
     cantidad: Number(item.cantidad),
@@ -74,8 +73,31 @@ const DetallesCotizacion = ({ detalles, modoEdicion, onDetalleChange }) => {
                         : Math.max(0, parseFloat(e.target.value))
                     )
                   }
-                  size="small"
-                  inputProps={{ min: 0 }}
+                  variant="standard"
+                  inputProps={{
+                    min: 0,
+                    style: {
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                      padding: 0,
+                    },
+                  }}
+                  sx={{
+                    width: "60px",
+                    color: "error.main",
+                    "& .MuiInputBase-root::before": { borderBottom: "none" },
+                    "& .MuiInputBase-root:hover::before": {
+                      borderBottom: "none",
+                    },
+                    "& .MuiInputBase-root.Mui-focused::before": {
+                      borderBottom: "none",
+                    },
+                    "& input": {
+                      color: "error.main",
+                      backgroundColor: "transparent",
+                    },
+                  }}
                 />
               ) : (
                 item.cantidad
@@ -96,8 +118,31 @@ const DetallesCotizacion = ({ detalles, modoEdicion, onDetalleChange }) => {
                         : Math.max(0, parseFloat(e.target.value))
                     )
                   }
-                  size="small"
-                  inputProps={{ min: 0 }}
+                  variant="standard"
+                  inputProps={{
+                    min: 0,
+                    style: {
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                      padding: 0,
+                    },
+                  }}
+                  sx={{
+                    width: "80px",
+                    color: "error.main",
+                    "& .MuiInputBase-root::before": { borderBottom: "none" },
+                    "& .MuiInputBase-root:hover::before": {
+                      borderBottom: "none",
+                    },
+                    "& .MuiInputBase-root.Mui-focused::before": {
+                      borderBottom: "none",
+                    },
+                    "& input": {
+                      color: "error.main",
+                      backgroundColor: "transparent",
+                    },
+                  }}
                 />
               ) : (
                 formatoCLP(item.precio_unitario)

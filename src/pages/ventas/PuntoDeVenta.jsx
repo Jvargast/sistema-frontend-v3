@@ -23,26 +23,29 @@ import {
   updateItemPrice,
 } from "../../store/reducers/cartSlice";
 
+
+import { SearchOutlined } from "@mui/icons-material";
+
+import { useGetAvailabreProductosQuery } from "../../store/services/productoApi";
+import { useGetAllCategoriasQuery } from "../../store/services/categoriaApi";
+import { useGetAllClientesQuery } from "../../store/services/clientesApi";
+import { useGetAllVendedoresQuery } from "../../store/services/usuariosApi";
+import { useCreateVentaMutation } from "../../store/services/ventasApi";
+import { useCloseCajaMutation } from "../../store/services/cajaApi";
+import { showNotification } from "../../store/reducers/notificacionSlice";
+
 import ProductCard from "../../components/venta/ProductCard";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import ShoppingCartItem from "../../components/venta/ShoppingCartItem";
-import { SearchOutlined } from "@mui/icons-material";
-import { useGetAvailabreProductosQuery } from "../../store/services/productoApi";
 import TotalsDisplay from "../../components/venta/TotalDisplay";
-import { useGetAllCategoriasQuery } from "../../store/services/categoriaApi";
 import CategoryBlock from "../../components/venta/CategoryBlock";
 import AperturaCajaModal from "../../components/caja/AperturaCajaModal";
 import useVerificarCaja from "../../utils/useVerificationCaja";
-import { useCloseCajaMutation } from "../../store/services/cajaApi";
-import { showNotification } from "../../store/reducers/notificacionSlice";
 import AlertDialog from "../../components/common/AlertDialog";
 import CajaInfo from "../../components/caja/CajaInfo";
-import { useGetAllVendedoresQuery } from "../../store/services/usuariosApi";
 import SelectVendedorModal from "../../components/venta/SelectedVendedorModal";
 import ProcesarPagoModal from "../../components/venta/ProcesarPagoModal";
-import { useGetAllClientesQuery } from "../../store/services/clientesApi";
 import SelectClienteModal from "../../components/venta/SelectedClienteModal";
-import { useCreateVentaMutation } from "../../store/services/ventasApi";
 import ProductosRetornablesModal from "../../components/venta/ProductosRetornablesModal";
 
 const PuntoDeVenta = () => {
