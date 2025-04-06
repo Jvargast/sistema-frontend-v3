@@ -42,7 +42,23 @@ const InformacionEmpresaYFechas = ({
               onChange={(e) => onChangeFechaVencimiento(e.target.value)}
               fullWidth
               size="small"
-              sx={{ mt: 1, mb: 1 }}
+              variant="standard"
+              InputProps={{
+                disableUnderline: true,
+                sx: {
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                  backgroundColor: "transparent",
+                  color: "error.main",
+                },
+              }}
+              sx={{
+                mt: 1,
+                mb: 1,
+                "& input": {
+                  backgroundColor: "transparent",
+                },
+              }}
               InputLabelProps={{
                 shrink: true,
               }}

@@ -283,31 +283,6 @@ const router = createHashRouter([
               </RoleBasedRoute>
             ),
           },
-
-          /*,
-          
-          
-          { path: "insumos/editar/:id", element: <EditarInsumo /> },
-          {
-            path: "entregas-completadas",
-            element: <EntregasCompletadas />,
-          },
-          {
-            path: "ventas-chofer",
-            element: <VentasChofer />,
-          },
-          { path: "entregas", element: <EntregasManagement /> },
-          
-          
-          { path: "agendas/editar/:id", element: <AgendaDetail /> },*/
-          /* {
-            path: "agendas",
-            element: (
-              <RoleBasedRoute requiredPermission="ver_agenda_carga">
-                < />
-              </RoleBasedRoute>
-            ),
-          }, */
           {
             path: "viajes",
             element: (

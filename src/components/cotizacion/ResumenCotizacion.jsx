@@ -19,6 +19,29 @@ const ResumenCotizacion = ({
       maximumFractionDigits: 0,
     }).format(valor);
 
+  const estiloEditable = {
+    variant: "standard",
+    fullWidth: true,
+    InputProps: {
+      disableUnderline: true,
+      sx: {
+        color: "error.main",
+        fontWeight: "bold",
+        fontSize: "1rem",
+        backgroundColor: "transparent",
+      },
+    },
+    sx: {
+      maxWidth: 200,
+      "& input": {
+        color: "error.main",
+      },
+      "& textarea": {
+        color: "error.main",
+      },
+    },
+  };
+
   return (
     <Box textAlign="right" pr={1}>
       <Typography sx={{ mb: 1 }}>
@@ -43,8 +66,7 @@ const ResumenCotizacion = ({
                 e.target.value === "" ? "" : parseFloat(e.target.value) / 100
               )
             }
-            size="small"
-            sx={{ maxWidth: 200 }}
+            {...estiloEditable}
           />
 
           <TextField
@@ -57,8 +79,7 @@ const ResumenCotizacion = ({
                 e.target.value === "" ? "" : parseFloat(e.target.value) / 100
               )
             }
-            size="small"
-            sx={{ maxWidth: 200 }}
+            {...estiloEditable}
           />
 
           <TextField
@@ -67,8 +88,8 @@ const ResumenCotizacion = ({
             onChange={(e) => onChange("notas", e.target.value)}
             multiline
             minRows={2}
-            size="small"
-            sx={{ maxWidth: 400 }}
+            {...estiloEditable}
+            sx={{ maxWidth: 400, ...estiloEditable.sx }}
           />
         </Box>
       ) : (
