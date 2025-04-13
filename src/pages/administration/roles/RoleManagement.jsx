@@ -30,9 +30,9 @@ const RoleManagement = () => {
   const [deleteRole] = useDeleteRoleMutation();
 
   // Permisos
-  const canCreateRole = useHasPermission("crear_roles");
-  const canDeleteRole = useHasPermission("eliminar_roles");
-  const canEditRole = useHasPermission("editar_roles");
+  const canCreateRole = useHasPermission("auth.roles.crear");
+  const canDeleteRole = useHasPermission("auth.roles.eliminar");
+  const canEditRole = useHasPermission("auth.roles.editar");
 
   const [openAlert, setOpenAlert] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState(null);

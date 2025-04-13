@@ -92,6 +92,7 @@ export const permisosApi = createApi({
   // Exporta los hooks generados automáticamente
   export const {
     useGetAllpermisosQuery,
+    useLazyGetAllpermisosQuery,
     useGetPermisoByIdQuery,
     useCreatePermisoMutation,
     useUpdatePermisoMutation,

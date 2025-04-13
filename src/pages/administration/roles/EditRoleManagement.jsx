@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Box, Typography, Card, CardContent, Button } from "@mui/material";
-import { FixedSizeList as VirtualizedList } from "react-window";
+import { VariableSizeList as VirtualizedList } from "react-window";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {
@@ -17,52 +17,63 @@ const EditRole = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { data: role, isLoading: isLoadingRole, refetch } = useGetRoleByIdQuery(id);
+  const {
+    data: role,
+    isLoading: isLoadingRole,
+    refetch,
+  } = useGetRoleByIdQuery(id);
   const [updateRole] = useUpdateRoleMutation();
 
-  const [page, setPage] = useState(1);
-  const limit = 80;
   const [allPermisos, setAllPermisos] = useState([]);
   const [selectedPermisos, setSelectedPermisos] = useState([]);
   const [groupedPermisos, setGroupedPermisos] = useState({});
-  const [hasMore, setHasMore] = useState(true);
 
-  // Estado para manejar la carga inicial
-  const { data: permisos, isFetching } = useGetAllpermisosQuery({ page, limit });
+  const { data: permisosData, isFetching } = useGetAllpermisosQuery({
+    page: 1,
+    limit: 9999,
+  });
 
-  const canEditPermisos = useHasPermission("editar_permisos");
+  const canEditPermisos = useHasPermission("auth.permisos.editar");
+  
 
-  // Reinicia estados al cambiar de rol
   useEffect(() => {
-    setPage(1);
-    setAllPermisos([]);
-    setGroupedPermisos({});
-    setHasMore(true);
-  }, [id]);
+    if (permisosData?.permisos) {
+      setAllPermisos(permisosData.permisos);
+    }
+  }, [permisosData]);
 
-  // Inicializa permisos seleccionados
   useEffect(() => {
     if (role?.rolesPermisos) {
-      setSelectedPermisos(role.rolesPermisos.map((rp) => rp.permiso.id));
+      setSelectedPermisos(role.rolesPermisos.map(p => p.permisoId));
     }
   }, [role]);
 
-  // Carga progresiva de permisos
+  
+
+  const listRef = useRef();
+
+  const getItemSize = (index, group) => {
+    const permiso = group[index];
+  
+    const nombreLines = Math.ceil(permiso.nombre.length / 25); 
+    const descripcionLines = Math.ceil(permiso.descripcion.length / 40); 
+  
+    const lineHeight = 20; 
+    const verticalPadding = 30; 
+  
+    const calculatedHeight =
+      verticalPadding + (nombreLines + descripcionLines) * lineHeight;
+  
+    return Math.max(calculatedHeight, 70);
+  };
+  
+
   useEffect(() => {
-    if (permisos?.permisos) {
-      setAllPermisos((prev) => {
-        const newPermisos = permisos.permisos.filter(
-          (permiso) => !prev.some((p) => p.id === permiso.id)
-        );
-        return [...prev, ...newPermisos];
-      });
-
-      const totalPages = permisos.paginacion?.totalPages || 1;
-      setHasMore(page < totalPages);
+    if (listRef.current) {
+      listRef.current.resetAfterIndex(0);
     }
-  }, [permisos, page]);
+  }, [groupedPermisos]);
 
-  // Agrupa los permisos por categoría
   useEffect(() => {
     const grouped = allPermisos.reduce((acc, permiso) => {
       const category = permiso.categoria || "Sin Categoría";
@@ -72,13 +83,6 @@ const EditRole = () => {
     }, {});
     setGroupedPermisos(grouped);
   }, [allPermisos]);
-
-  // Carga todas las páginas necesarias al inicio
-  useEffect(() => {
-    if (hasMore && !isFetching) {
-      setPage((prev) => prev + 1);
-    }
-  }, [hasMore, isFetching]);
 
   const handleSave = async () => {
     try {
@@ -109,11 +113,123 @@ const EditRole = () => {
   };
 
   const handleTogglePermiso = (permisoId) => {
-    setSelectedPermisos((prev) =>
-      prev.includes(permisoId)
-        ? prev.filter((id) => id !== permisoId)
-        : [...prev, permisoId]
-    );
+    setSelectedPermisos((prev) => {
+      const alreadySelected = prev.includes(permisoId);
+
+      // CASO: ACTIVAR (no estaba seleccionado)
+      if (!alreadySelected) {
+        const permisoBase = allPermisos.find((p) => p.id === permisoId);
+        if (!permisoBase) return prev;
+
+        const toActivate = new Set(prev);
+        const stack = [permisoBase];
+
+        // BFS directo en 'Dependencias'
+        while (stack.length > 0) {
+          const current = stack.pop();
+          toActivate.add(current.id);
+
+          if (current.Dependencias?.length) {
+            current.Dependencias.forEach((dep) => {
+              if (!toActivate.has(dep.id)) {
+                const fullDep = allPermisos.find((p) => p.id === dep.id);
+                if (fullDep) {
+                  stack.push(fullDep);
+                }
+              }
+            });
+          }
+        }
+
+        const nuevosPermisos = [...toActivate].filter(
+          (id) => !prev.includes(id)
+        );
+        const dependenciasExtra = nuevosPermisos.filter(
+          (id) => id !== permisoId
+        );
+
+        if (dependenciasExtra.length > 0) {
+          dispatch(
+            showNotification({
+              message: `Se activaron ${dependenciasExtra.length} permiso(s) adicional(es) que dependen de "${permisoBase.nombre}".`,
+              severity: "info",
+            })
+          );
+        }
+
+        return Array.from(toActivate);
+      }
+      // CASO: DESACTIVAR (ya estaba seleccionado)
+      else {
+        const permisoBase = allPermisos.find((p) => p.id === permisoId);
+        if (!permisoBase) return prev;
+
+        // BFS inverso en 'RequierenEste'
+        const toRemove = new Set();
+        const stack = [permisoBase];
+
+        while (stack.length > 0) {
+          const current = stack.pop();
+          if (prev.includes(current.id)) {
+            toRemove.add(current.id);
+
+            if (current.RequierenEste?.length) {
+              current.RequierenEste.forEach((dep) => {
+                if (!toRemove.has(dep.id) && prev.includes(dep.id)) {
+                  stack.push(dep);
+                }
+              });
+            }
+          }
+        }
+
+        // Si se va a remover más de 1 permiso (el principal + algunos dependientes), pedimos confirmación
+        if (toRemove.size > 1) {
+          // Listamos los nombres de los dependientes que se van a remover
+          const dependientes = [...toRemove].filter(
+            (id) => id !== permisoBase.id
+          );
+          const nombres = dependientes.map((id) => {
+            const p = allPermisos.find((pm) => pm.id === id);
+            return p?.nombre || `ID-${id}`;
+          });
+
+          const proceed = window.confirm(
+            `Al desactivar "${
+              permisoBase.nombre
+            }", también se desactivarán:\n${nombres.join(
+              ", "
+            )}\n¿Deseas continuar?`
+          );
+          if (!proceed) {
+            // Si el usuario cancela, no hacemos cambios
+            return prev;
+          }
+        }
+
+        // Procedemos a remover
+        const cantidad = toRemove.size;
+        if (cantidad > 1) {
+          dispatch(
+            showNotification({
+              message: `Se desactivó "${permisoBase.nombre}" y ${
+                cantidad - 1
+              } permiso(s) que dependían de él.`,
+              severity: "info",
+            })
+          );
+        } else {
+          dispatch(
+            showNotification({
+              message: `Se desactivó el permiso "${permisoBase.nombre}".`,
+              severity: "info",
+            })
+          );
+        }
+
+        return prev.filter((id) => !toRemove.has(id));
+      }
+    });
   };
 
   if (isLoadingRole || isFetching) return <Typography>Cargando...</Typography>;
@@ -149,15 +265,17 @@ const EditRole = () => {
                 {category}
               </Typography>
               <VirtualizedList
-                height={group.length > 5 ? 300 : group.length * 60}
+                ref={listRef}
+                height={Math.min(
+                  300,
+                  group.reduce(
+                    (acc, _, index) => acc + getItemSize(index, group),
+                    0
+                  )
+                )}
                 itemCount={group.length}
-                itemSize={60}
+                itemSize={(index) => getItemSize(index, group)}
                 width="100%"
-                onItemsRendered={({ visibleStopIndex }) => {
-                  if (visibleStopIndex >= group.length - 1 && hasMore) {
-                    setPage((prev) => prev + 1);
-                  }
-                }}
               >
                 {({ index, style }) => (
                   <Row

@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
-import { useTheme, useMediaQuery } from "@mui/material";
+import { useTheme, useMediaQuery, Typography } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { Container, Fab } from "@mui/material";
 import { showNotification } from "../../store/reducers/notificacionSlice";
@@ -21,6 +21,8 @@ import { useGetPedidoByIdQuery } from "../../store/services/pedidosApi";
 import { useGetEntregasByAgendaIdQuery } from "../../store/services/entregasApi";
 import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
 import { useFinalizarViajeMutation } from "../../store/services/agendaViajesApi";
+import { useErrorChecker } from "../../utils/useErrorChecker";
+import PermissionMessage from "../../components/common/PermissionMessage";
 
 const ViajeChofer = ({ viaje }) => {
   const dispatch = useDispatch();
@@ -31,7 +33,7 @@ const ViajeChofer = ({ viaje }) => {
   const {
     data: entregasData,
     refetch: refetchEntregas,
-    isError: errorEntregas,
+    error: errorEntregas,
   } = useGetEntregasByAgendaIdQuery({
     id_agenda_viaje: viaje?.id_agenda_viaje,
   });
@@ -40,6 +42,7 @@ const ViajeChofer = ({ viaje }) => {
     data: inventarioCamion,
     isLoading: cargandoInventario,
     refetch: refetchInventario,
+    error: errorInventario
   } = useGetEstadoInventarioCamionQuery(viaje?.id_camion, {
     skip: !viaje?.id_camion,
   });
@@ -115,6 +118,7 @@ const ViajeChofer = ({ viaje }) => {
     data: pedidoCompleto,
     isFetching: loadingPedido,
     isSuccess: successPedido,
+    error: errorPedido,
   } = useGetPedidoByIdQuery(pedidoSeleccionadoId, {
     skip: !pedidoSeleccionadoId,
   });
@@ -189,6 +193,17 @@ const ViajeChofer = ({ viaje }) => {
     viaje?.destinos?.length > 0 &&
     entregasCompletadas === viaje.destinos.length;
 
+  const relevantError = useErrorChecker(
+    errorEntregas,
+    errorInventario,
+    errorPedido
+  );
+
+  if (relevantError.type === "permission") {
+    return <PermissionMessage requiredPermission={relevantError.permission} />;
+  } else if (relevantError.type === "generic") {
+    return <Typography color="error">{relevantError.message}</Typography>;
+  }
   return (
     <Container maxWidth="md" sx={{ mt: 4, pb: 8 }}>
       <InfoGeneral viaje={viaje} />

@@ -18,16 +18,13 @@ const CapacidadCargaCamion = ({
 
   const espacioUsadoActual = reservadosRetornables + disponibles + retorno;
 
-  // Ahora los espacios disponibles descuentan lo ya reservado (proyectado)
   const espaciosDisponiblesParaRetornables =
     capacidadTotal - espacioUsadoActual - cantidadTotalProductosReservados;
 
-  // Productos retornables desde el formulario
   const productosRetornables = productos.filter(
     (p) => p.es_retornable && Number(p.cantidad) > 0
   );
 
-  // Productos a cargar comienzan desde la cantidad proyectada reservada
   const cantidadProductosRetornables = productosRetornables.reduce(
     (total, p) => total + (Number(p.cantidad) || 0),
     0

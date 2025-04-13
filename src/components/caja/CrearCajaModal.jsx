@@ -33,7 +33,11 @@ const CrearCajaModal = ({ onClose }) => {
   const dispatch = useDispatch();
   const [idSucursal, setIdSucursal] = useState("");
   const [createCaja, { isLoading }] = useCreateCajaMutation();
-  const { data: sucursales, isLoading: loadingSucursales, error } = useGetAllSucursalsQuery();
+  const {
+    data: sucursales,
+    isLoading: loadingSucursales,
+    error,
+  } = useGetAllSucursalsQuery();
 
   const handleCrearCaja = async () => {
     if (!idSucursal) {
@@ -43,22 +47,31 @@ const CrearCajaModal = ({ onClose }) => {
 
     try {
       await createCaja({ id_sucursal: idSucursal });
-      dispatch(showNotification({
-        message: "Caja creada con éxito",
-        severity: "success"
-      }))
+      dispatch(
+        showNotification({
+          message: "Caja creada con éxito",
+          severity: "success",
+        })
+      );
       onClose();
     } catch (error) {
       console.log(error);
-      dispatch(showNotification({
-        message: `Error al crear la caja ${error}`,
-        severity: "error"
-      }))
+      dispatch(
+        showNotification({
+          message: `Error al crear la caja ${error}`,
+          severity: "error",
+        })
+      );
     }
   };
 
   return (
-    <Modal open={true} onClose={onClose} closeAfterTransition BackdropComponent={Backdrop}>
+    <Modal
+      open={true}
+      onClose={onClose}
+      closeAfterTransition
+      BackdropComponent={Backdrop}
+    >
       <Fade in={true}>
         <Box sx={modalStyle}>
           <Typography variant="h6" mb={2} fontWeight="bold">
@@ -66,8 +79,14 @@ const CrearCajaModal = ({ onClose }) => {
           </Typography>
 
           {/* Seleccionar Sucursal */}
-          <FormControl fullWidth sx={{ mb: 2 }} disabled={loadingSucursales || error}>
-            <InputLabel htmlFor="sucursal-select">Seleccionar Sucursal</InputLabel>
+          <FormControl
+            fullWidth
+            sx={{ mb: 2 }}
+            disabled={loadingSucursales || error}
+          >
+            <InputLabel htmlFor="sucursal-select">
+              Seleccionar Sucursal
+            </InputLabel>
             <Select
               id="sucursal-select"
               labelId="sucursal-label"
@@ -83,7 +102,10 @@ const CrearCajaModal = ({ onClose }) => {
                 <MenuItem disabled>Error al cargar sucursales</MenuItem>
               ) : sucursales?.length > 0 ? (
                 sucursales.map((sucursal) => (
-                  <MenuItem key={sucursal.id_sucursal} value={sucursal.id_sucursal}>
+                  <MenuItem
+                    key={sucursal.id_sucursal}
+                    value={sucursal.id_sucursal}
+                  >
                     {sucursal.nombre} - {sucursal.direccion}
                   </MenuItem>
                 ))

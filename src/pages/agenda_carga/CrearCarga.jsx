@@ -29,7 +29,6 @@ import { useSelector } from "react-redux";
 import ConfirmarCargaModal from "../../components/agenda_carga/ConfirmarCargaModal";
 
 const CreateAgendaCargaForm = () => {
-  // 1. RTK Query para choferes, camiones y productos
   const {
     data: agendaCarga,
     isLoading: loadingAgenda,
@@ -55,13 +54,11 @@ const CreateAgendaCargaForm = () => {
     isError: errorProductos,
   } = useGetAvailabreProductosQuery();
 
-  // 2. Mutación para crear agenda
   const [createAgenda, { isLoading: loadingCreate }] =
     useCreateAgendaMutation();
 
   const user = useSelector((state) => state.auth);
 
-  // 3. Estados principales del formulario
   const [idChofer, setIdChofer] = useState("");
   const [idCamion, setIdCamion] = useState("");
   const [prioridad, setPrioridad] = useState("Media");
@@ -72,7 +69,6 @@ const CreateAgendaCargaForm = () => {
   const [openModal, setOpenModal] = useState(false);
   const [puedeCrearAgenda, setPuedeCrearAgenda] = useState(true);
 
-  // 4. Manejo de productos
   const handleAddProductRow = () => {
     setProductos((prev) => [
       ...prev,
@@ -92,7 +88,7 @@ const CreateAgendaCargaForm = () => {
               id_producto: Number(newProductId),
               es_retornable: selectedProduct
                 ? selectedProduct.es_retornable
-                : false, // ✅ Asigna correctamente `es_retornable`
+                : false, 
             }
           : prod
       )
@@ -117,7 +113,6 @@ const CreateAgendaCargaForm = () => {
     setProductos((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // 5. Envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
@@ -143,7 +138,6 @@ const CreateAgendaCargaForm = () => {
           severity: "success",
         })
       );
-      // Limpieza
       setIdChofer("");
       setIdCamion("");
       setPrioridad("Media");
@@ -161,7 +155,6 @@ const CreateAgendaCargaForm = () => {
     }
   };
 
-  // 6. Manejo de estados (carga/error)
   if (loadingChoferes || loadingCamiones || loadingProductos) {
     return (
       <Box
@@ -190,7 +183,6 @@ const CreateAgendaCargaForm = () => {
     );
   }
 
-  // Extraer la lista de productos del endpoint (si contiene paginación u otros campos)
   const { productos: listaProductos = [] } = productosDisponibles || {};
 
   return (
@@ -229,7 +221,6 @@ const CreateAgendaCargaForm = () => {
 
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
-            {/* Inputs principales (chofer, camión, prioridad, notas, etc.) */}
             <AgendaCargaFormInputs
               choferes={choferes}
               camiones={camiones}
@@ -259,6 +250,7 @@ const CreateAgendaCargaForm = () => {
             <Box mt={3}>
               <InventarioCamion
                 idCamion={Number(idCamion)}
+                modo="simulación"
                 productos={productos}
                 productosReservados={productosReservados}
                 onValidezCambio={setPuedeCrearAgenda}
