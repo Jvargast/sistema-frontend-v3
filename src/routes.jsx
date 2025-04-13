@@ -48,6 +48,7 @@ import ListarCotizaciones from "./pages/cotizaciones/ListarCotizaciones";
 import AdminHistorialViajes from "./pages/viajes/AdminHistorialViajes";
 import ListarCuentasPorCobrar from "./pages/facturas";
 import VerCuentaPorCobrar from "./pages/facturas/VerCuentaPorCobrar";
+import ListarAgendasCarga from "./pages/agenda_carga/ListarAgendasCarga";
 
 // Configuración de rutas
 const router = createHashRouter([
@@ -66,7 +67,7 @@ const router = createHashRouter([
           {
             path: "dashboard",
             element: (
-              <RoleBasedRoute requiredPermission="ver_dashboard">
+              <RoleBasedRoute requiredPermission="vistas.dashboard.ver">
                 <DashboardCentral />
               </RoleBasedRoute>
             ),
@@ -74,7 +75,7 @@ const router = createHashRouter([
           {
             path: "punto-venta",
             element: (
-              <RoleBasedRoute requiredPermission="registrar_ventas">
+              <RoleBasedRoute requiredPermission="vistas.puntoventa.ver">
                 <PuntoDeVenta />
               </RoleBasedRoute>
             ),
@@ -82,7 +83,7 @@ const router = createHashRouter([
           {
             path: "ventas",
             element: (
-              <RoleBasedRoute requiredPermission="ver_ventas">
+              <RoleBasedRoute requiredPermission="vistas.ventas.ver">
                 <ListarVentas />
               </RoleBasedRoute>
             ),
@@ -90,7 +91,7 @@ const router = createHashRouter([
           {
             path: "ventas/ver/:id",
             element: (
-              <RoleBasedRoute requiredPermission="ver_ventas">
+              <RoleBasedRoute requiredPermission="vistas.ventas.ver">
                 <VerVenta />
               </RoleBasedRoute>
             ),
@@ -98,7 +99,7 @@ const router = createHashRouter([
           {
             path: "punto-cotizacion",
             element: (
-              <RoleBasedRoute requiredPermission="ver_cotizaciones">
+              <RoleBasedRoute requiredPermission="vistas.puntocotizacion.ver">
                 <CrearCotizacion />
               </RoleBasedRoute>
             ),
@@ -106,7 +107,7 @@ const router = createHashRouter([
           {
             path: "cotizaciones",
             element: (
-              <RoleBasedRoute requiredPermission="ver_cotizaciones">
+              <RoleBasedRoute requiredPermission="vistas.cotizaciones.ver">
                 <ListarCotizaciones />
               </RoleBasedRoute>
             ),
@@ -114,16 +115,15 @@ const router = createHashRouter([
           {
             path: "cotizaciones/ver/:id",
             element: (
-              <RoleBasedRoute requiredPermission="ver_cotizaciones">
+              <RoleBasedRoute requiredPermission="vistas.cotizaciones.ver">
                 <PreviewCotizacion />
               </RoleBasedRoute>
             ),
           },
           {
-            //cambiar permiso a crear_pedido
             path: "punto-pedido",
             element: (
-              <RoleBasedRoute requiredPermission="ver_pedidos">
+              <RoleBasedRoute requiredPermission="vistas.puntopedido.ver">
                 <CrearPedido />
               </RoleBasedRoute>
             ),
@@ -131,7 +131,7 @@ const router = createHashRouter([
           {
             path: "admin-pedidos",
             element: (
-              <RoleBasedRoute requiredPermission="ver_pedidos">
+              <RoleBasedRoute requiredPermission="vistas.adminpedidos.ver">
                 <PedidosBoard />
               </RoleBasedRoute>
             ),
@@ -139,7 +139,7 @@ const router = createHashRouter([
           {
             path: "mis-pedidos",
             element: (
-              <RoleBasedRoute requiredPermission="ver_rutas">
+              <RoleBasedRoute requiredPermission="vistas.mispedidos.ver">
                 <MisPedidos />
               </RoleBasedRoute>
             ),
@@ -147,7 +147,7 @@ const router = createHashRouter([
           {
             path: "pedidos",
             element: (
-              <RoleBasedRoute requiredPermission="ver_pedidos">
+              <RoleBasedRoute requiredPermission="vistas.pedidos.ver">
                 <ListarPedidos />
               </RoleBasedRoute>
             ),
@@ -155,7 +155,7 @@ const router = createHashRouter([
           {
             path: "pedidos/ver/:id",
             element: (
-              <RoleBasedRoute requiredPermission="ver_pedidos">
+              <RoleBasedRoute requiredPermission="vistas.pedidos.ver">
                 <VerPedido />
               </RoleBasedRoute>
             ),
@@ -163,7 +163,7 @@ const router = createHashRouter([
           {
             path: "pagos",
             element: (
-              <RoleBasedRoute requiredPermission="ver_pagos">
+              <RoleBasedRoute requiredPermission="vistas.pagos.ver">
                 <ListarPagos />
               </RoleBasedRoute>
             ),
@@ -171,7 +171,7 @@ const router = createHashRouter([
           {
             path: "pagos/ver/:id",
             element: (
-              <RoleBasedRoute requiredPermission="ver_pagos">
+              <RoleBasedRoute requiredPermission="vistas.pagos.ver">
                 <VerPago />
               </RoleBasedRoute>
             ),
@@ -179,7 +179,7 @@ const router = createHashRouter([
           {
             path: "facturas",
             element: (
-              <RoleBasedRoute requiredPermission="ver_pagos">
+              <RoleBasedRoute requiredPermission="vistas.facturas.ver">
                 <ListarCuentasPorCobrar />
               </RoleBasedRoute>
             ),
@@ -188,7 +188,7 @@ const router = createHashRouter([
           {
             path: "facturas/ver/:id",
             element: (
-              <RoleBasedRoute requiredPermission="ver_pagos">
+              <RoleBasedRoute requiredPermission="vistas.facturas.ver">
                 <VerCuentaPorCobrar />
               </RoleBasedRoute>
             ),
@@ -196,7 +196,7 @@ const router = createHashRouter([
           {
             path: "clientes",
             element: (
-              <RoleBasedRoute requiredPermission="ver_clientes">
+              <RoleBasedRoute requiredPermission="vistas.clientes.ver">
                 <Clientes />
               </RoleBasedRoute>
             ),
@@ -204,7 +204,7 @@ const router = createHashRouter([
           {
             path: "clientes/crear",
             element: (
-              <RoleBasedRoute requiredPermission="crear_cliente">
+              <RoleBasedRoute requiredPermission="vistas.clientes.crear">
                 <CrearCliente />{" "}
               </RoleBasedRoute>
             ),
@@ -212,7 +212,7 @@ const router = createHashRouter([
           {
             path: "clientes/ver/:id",
             element: (
-              <RoleBasedRoute requiredPermission="ver_cliente">
+              <RoleBasedRoute requiredPermission="vistas.clientes.ver">
                 <VerCliente />
               </RoleBasedRoute>
             ),
@@ -220,7 +220,7 @@ const router = createHashRouter([
           {
             path: "clientes/editar/:id",
             element: (
-              <RoleBasedRoute requiredPermission="editar_cliente">
+              <RoleBasedRoute requiredPermission="vistas.clientes.editar">
                 <EditarCliente />
               </RoleBasedRoute>
             ),
@@ -228,7 +228,7 @@ const router = createHashRouter([
           {
             path: "categorias",
             element: (
-              <RoleBasedRoute requiredPermission="ver_categorias">
+              <RoleBasedRoute requiredPermission="vistas.categorias.ver">
                 <CategoriaManagement />
               </RoleBasedRoute>
             ),
@@ -237,7 +237,7 @@ const router = createHashRouter([
             //cambiar permiso ver_tipo_insumo
             path: "tipo-insumo",
             element: (
-              <RoleBasedRoute requiredPermission="ver_categorias">
+              <RoleBasedRoute requiredPermission="vistas.tipoinsumos.ver">
                 <TipoInsumoManagement />
               </RoleBasedRoute>
             ),
@@ -245,7 +245,7 @@ const router = createHashRouter([
           {
             path: "productos",
             element: (
-              <RoleBasedRoute requiredPermission="ver_productos">
+              <RoleBasedRoute requiredPermission="vistas.productos.ver">
                 <Productos />
               </RoleBasedRoute>
             ),
@@ -253,7 +253,7 @@ const router = createHashRouter([
           {
             path: "productos/editar/:id",
             element: (
-              <RoleBasedRoute requiredPermission="editar_producto">
+              <RoleBasedRoute requiredPermission="vistas.productos.ver">
                 <EditarProducto />
               </RoleBasedRoute>
             ),
@@ -261,7 +261,7 @@ const router = createHashRouter([
           {
             path: "insumos",
             element: (
-              <RoleBasedRoute requiredPermission="ver_insumos">
+              <RoleBasedRoute requiredPermission="vistas.insumos.ver">
                 <Insumos />
               </RoleBasedRoute>
             ),
@@ -269,7 +269,7 @@ const router = createHashRouter([
           {
             path: "insumos/editar/:id",
             element: (
-              <RoleBasedRoute requiredPermission="ver_insumo">
+              <RoleBasedRoute requiredPermission="vistas.insumos.ver">
                 <EditarInsumo />
               </RoleBasedRoute>
             ),
@@ -278,7 +278,7 @@ const router = createHashRouter([
             //cambiar permiso ver_camiones
             path: "camiones",
             element: (
-              <RoleBasedRoute requiredPermission="ver_insumo">
+              <RoleBasedRoute requiredPermission="vistas.camiones.ver">
                 <CamionesManagement />
               </RoleBasedRoute>
             ),
@@ -286,7 +286,7 @@ const router = createHashRouter([
           {
             path: "viajes",
             element: (
-              <RoleBasedRoute requiredPermission="ver_agenda_carga">
+              <RoleBasedRoute requiredPermission="vistas.viajes.ver">
                 <PanelViajeChofer />
               </RoleBasedRoute>
             ),
@@ -294,7 +294,7 @@ const router = createHashRouter([
           {
             path: "admin-viajes",
             element: (
-              <RoleBasedRoute requiredPermission="ver_agenda_carga">
+              <RoleBasedRoute requiredPermission="vistas.admin.ver">
                 <AdminHistorialViajes />
               </RoleBasedRoute>
             ),
@@ -302,15 +302,23 @@ const router = createHashRouter([
           {
             path: "agenda-carga",
             element: (
-              <RoleBasedRoute requiredPermission="ver_agenda_carga">
+              <RoleBasedRoute requiredPermission="vistas.agendaCarga.crear">
                 <CreateAgendaCargaForm />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "agendas",
+            element: (
+              <RoleBasedRoute requiredPermission="vistas.agendaCarga.ver">
+                <ListarAgendasCarga />
               </RoleBasedRoute>
             ),
           },
           {
             path: "usuarios",
             element: (
-              <RoleBasedRoute requiredPermission="ver_usuarios">
+              <RoleBasedRoute requiredPermission="vistas.usuarios.ver">
                 <UserManagement />
               </RoleBasedRoute>
             ),
@@ -318,7 +326,7 @@ const router = createHashRouter([
           {
             path: "usuarios/editar/:id",
             element: (
-              <RoleBasedRoute requiredPermission="editar_usuarios">
+              <RoleBasedRoute requiredPermission="auth.usuarios.crear">
                 <EditUser />{" "}
               </RoleBasedRoute>
             ),
@@ -326,7 +334,7 @@ const router = createHashRouter([
           {
             path: "miperfil",
             element: (
-              <RoleBasedRoute requiredPermission="iniciar_sesion">
+              <RoleBasedRoute requiredPermission="vistas.perfil.ver">
                 <PerfilUsuario />
               </RoleBasedRoute>
             ),
@@ -334,7 +342,7 @@ const router = createHashRouter([
           {
             path: "admin",
             element: (
-              <RoleBasedRoute requiredPermission="ver_administrador">
+              <RoleBasedRoute requiredPermission="vistas.admin.ver">
                 <Administration />
               </RoleBasedRoute>
             ),
@@ -343,7 +351,7 @@ const router = createHashRouter([
             path: "cajas",
             //cambiar permiso ver_cajas
             element: (
-              <RoleBasedRoute requiredPermission="ver_roles">
+              <RoleBasedRoute requiredPermission="vistas.cajas.ver">
                 <ListarCajas />
               </RoleBasedRoute>
             ),
@@ -351,7 +359,7 @@ const router = createHashRouter([
           {
             path: "roles",
             element: (
-              <RoleBasedRoute requiredPermission="ver_roles">
+              <RoleBasedRoute requiredPermission="vistas.roles.ver">
                 <RoleManagement />
               </RoleBasedRoute>
             ),
@@ -359,7 +367,7 @@ const router = createHashRouter([
           {
             path: "roles/editar/:id",
             element: (
-              <RoleBasedRoute requiredPermission="editar_roles">
+              <RoleBasedRoute requiredPermission="vistas.roles.ver">
                 <EditRole />
               </RoleBasedRoute>
             ),
@@ -367,7 +375,7 @@ const router = createHashRouter([
           {
             path: "seguridad",
             element: (
-              <RoleBasedRoute requiredPermission="configurar_parametros_del_sistema">
+              <RoleBasedRoute requiredPermission="vistas.seguridad.ver">
                 <Seguridad />{" "}
               </RoleBasedRoute>
             ),
@@ -375,7 +383,7 @@ const router = createHashRouter([
           {
             path: "empresa",
             element: (
-              <RoleBasedRoute requiredPermission="ver_empresa">
+              <RoleBasedRoute requiredPermission="vistas.empresas.ver">
                 <Empresa />
               </RoleBasedRoute>
             ),
@@ -383,7 +391,7 @@ const router = createHashRouter([
           {
             path: "empresa/editar/:id",
             element: (
-              <RoleBasedRoute requiredPermission="editar_empresa">
+              <RoleBasedRoute requiredPermission="vistas.empresas.ver">
                 <EditarEmpresa />
               </RoleBasedRoute>
             ),
@@ -391,7 +399,7 @@ const router = createHashRouter([
           {
             path: "analisis",
             element: (
-              <RoleBasedRoute requiredPermission="editar_empresa">
+              <RoleBasedRoute requiredPermission="vistas.analisis.ver">
                 <Analisis />{" "}
               </RoleBasedRoute>
             ),

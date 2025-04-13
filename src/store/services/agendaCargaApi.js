@@ -31,6 +31,22 @@ export const agendaCargaApi = createApi({
         }
       },
     }),
+    // dentro de endpoints: (builder) => ({
+    getAllAgendas: builder.query({
+      query: (params) => {
+        const searchParams = new URLSearchParams(params).toString();
+        return `/agendas?${searchParams}`;
+      },
+      providesTags: ["AgendaCarga"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Error al obtener agendas de carga:", error);
+        }
+      },
+    }),
+
     // Crear nueva agenda
     createAgenda: builder.mutation({
       query: (body) => ({
@@ -70,6 +86,7 @@ export const agendaCargaApi = createApi({
 // Hooks que genera RTK Query
 export const {
   useGetAgendaByIdQuery,
+  useGetAllAgendasQuery,
   useGetAgendaCargaDelDiaQuery,
   useCreateAgendaMutation,
   useConfirmarCargaCamionMutation,

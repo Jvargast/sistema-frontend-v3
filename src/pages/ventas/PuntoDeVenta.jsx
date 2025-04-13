@@ -22,8 +22,6 @@ import {
   calculateTaxes,
   updateItemPrice,
 } from "../../store/reducers/cartSlice";
-
-
 import { SearchOutlined } from "@mui/icons-material";
 
 import { useGetAvailabreProductosQuery } from "../../store/services/productoApi";
@@ -47,6 +45,8 @@ import SelectVendedorModal from "../../components/venta/SelectedVendedorModal";
 import ProcesarPagoModal from "../../components/venta/ProcesarPagoModal";
 import SelectClienteModal from "../../components/venta/SelectedClienteModal";
 import ProductosRetornablesModal from "../../components/venta/ProductosRetornablesModal";
+import PermissionMessage from "../../components/common/PermissionMessage";
+import { getFirstRelevantError } from "../../utils/firstError";
 
 const PuntoDeVenta = () => {
   const [openPagoModal, setOpenPagoModal] = useState(false);
@@ -318,6 +318,13 @@ const PuntoDeVenta = () => {
     error: errorCateogrias,
   } = useGetAllCategoriasQuery();
 
+  const relevantError = getFirstRelevantError(
+    error,
+    errorProductos,
+    errorCateogrias,
+    usuario?.rol === "administrador" ? errorVendedores : null
+  );
+
   const isCajaDeHoy = (fechaApertura) => {
     if (!fechaApertura) return false;
     const fechaCaja = new Date(fechaApertura).toDateString();
@@ -531,13 +538,34 @@ const PuntoDeVenta = () => {
     return <LoaderComponent />;
   }
 
-  if (
-    error ||
-    errorProductos ||
-    errorCateogrias ||
-    (usuario?.rol === "administrador" && errorVendedores)
-  ) {
-    return <Typography>Error al cargar datos.</Typography>;
+  /*   if (error) {
+    if (
+      error.status === 403 &&
+      error.data?.error?.includes("ventas.caja.asignada")
+    ) {
+      return <PermissionMessage requiredPermission="ventas.caja.asignada" />;
+    }
+    // 2) Cualquier otro error
+    return (
+      <Typography>{error.data?.error || "Error al cargar datos."}</Typography>
+    );
+  }
+
+  if (errorProductos) {
+    if (errorProductos.status === 403) {
+      return <PermissionMessage requiredPermission="ventas.caja.asignada" />;
+    }
+    return (
+      <Typography>
+        {errorProductos.data?.error || "Error al cargar productos."}
+      </Typography>
+    );
+  } */
+
+  if (relevantError.type === "permission") {
+    return <PermissionMessage requiredPermission={relevantError.permission} />;
+  } else if (relevantError.type === "generic") {
+    return <Typography color="error">{relevantError.message}</Typography>;
   }
 
   return (

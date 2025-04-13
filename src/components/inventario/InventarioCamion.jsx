@@ -15,6 +15,7 @@ const MotionBox = motion(Box);
 
 const InventarioCamion = ({
   idCamion,
+  modo,
   productos,
   productosReservados,
   onValidezCambio,
@@ -52,19 +53,22 @@ const InventarioCamion = ({
 
   const columnas = isTablet ? 6 : 10;
 
-  const espaciosReservadosProyectados = productosReservados.reduce(
+  const espaciosReservadosProyectados = modo === "simulación" ? productosReservados.reduce(
     (total, prod) => total + prod.cantidad,
     0
-  );
+  ): 0;
+
+  const arrayReservadosCarga = modo === "simulacion"
+  ? Array(espaciosReservadosProyectados).fill({ tipo: "ReservadoParaCarga" })
+  : [];
+
 
   const espaciosCamion = [
     ...Array(reservados_retornables).fill({ tipo: "ReservadoRetornable" }),
     ...Array(reservados_no_retornables).fill({ tipo: "ReservadoNoRetornable" }),
     ...Array(disponibles).fill({ tipo: "Disponible" }),
     ...Array(retorno).fill({ tipo: "Retorno" }),
-    ...Array(espaciosReservadosProyectados).fill({
-      tipo: "ReservadoParaCarga",
-    }),
+    ...arrayReservadosCarga,
     ...Array(Math.max(0, vacios - espaciosReservadosProyectados)).fill({
       tipo: "Vacío",
     }),
@@ -174,32 +178,42 @@ const InventarioCamion = ({
         </Typography>
       </Box>
 
-      <CapacidadCargaCamion
-        capacidadTotal={capacidad_total}
-        reservadosRetornables={reservados_retornables}
-        disponibles={disponibles}
-        retorno={retorno}
-        productos={productos}
-        productosReservados={productosReservados}
-        onValidezCambio={onValidezCambio}
-      />
+      {modo === "simulacion" && (
+        <CapacidadCargaCamion
+          capacidadTotal={capacidad_total}
+          reservadosRetornables={reservados_retornables}
+          disponibles={disponibles}
+          retorno={retorno}
+          productos={productos}
+          productosReservados={productosReservados}
+          onValidezCambio={onValidezCambio}
+        />
+      )}
     </Paper>
   );
 };
 
 InventarioCamion.propTypes = {
   idCamion: PropTypes.number.isRequired,
-  productos: PropTypes.array.isRequired,
+  modo: PropTypes.oneOf(["visual", "simulacion"]),
+  productos: PropTypes.array,
   productosReservados: PropTypes.arrayOf(
     PropTypes.shape({
-      id_pedido: PropTypes.number.isRequired,
-      id_producto: PropTypes.number.isRequired,
-      nombre_producto: PropTypes.string.isRequired,
-      cantidad: PropTypes.number.isRequired,
+      id_pedido: PropTypes.number,
+      id_producto: PropTypes.number,
+      nombre_producto: PropTypes.string,
+      cantidad: PropTypes.number,
       es_retornable: PropTypes.bool,
     })
-  ).isRequired,
-  onValidezCambio: PropTypes.func.isRequired,
+  ),
+  onValidezCambio: PropTypes.func,
 };
+InventarioCamion.defaultProps = {
+  modo: "visual",
+  productos: [],
+  productosReservados: [],
+  onValidezCambio: null,
+};
+
 
 export default InventarioCamion;

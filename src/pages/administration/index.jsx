@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../components/common/Header";
 import AirportShuttleOutlinedIcon from '@mui/icons-material/AirportShuttleOutlined';
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 
 const navItems = [
   {
@@ -77,6 +78,12 @@ const navItems = [
     icon: <AirportShuttleOutlinedIcon className="text-lime-400" />,
     description: "Gestión de viajes",
     path: "/admin-viajes",
+  },
+  {
+    text: "Carga de Agendas",
+    icon: <CalendarMonthOutlinedIcon className="text-fuchsia-700" />,
+    description: "Gestión de viajes",
+    path: "/agendas",
   },
   {
     text: "Usuarios",

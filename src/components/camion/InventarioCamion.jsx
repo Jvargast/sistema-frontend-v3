@@ -9,10 +9,25 @@ import {
 } from "@mui/material";
 import PropTypes from "prop-types";
 import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
+import { LinearProgress } from "@mui/material";
+import { useMemo } from "react";
 
 const InventarioCamion = ({ id_camion }) => {
   const { data, isLoading, error } =
     useGetEstadoInventarioCamionQuery(id_camion);
+
+  const {
+    capacidad_total = 0,
+    reservados_retornables = 0,
+    disponibles = 0,
+  } = data?.data || {};
+
+  const en_uso = reservados_retornables;
+
+  const porcentajeUsado = useMemo(() => {
+    if (!capacidad_total) return 0;
+    return Math.round((en_uso / capacidad_total) * 100);
+  }, [en_uso, capacidad_total]);
 
   if (isLoading) {
     return (
@@ -42,14 +57,14 @@ const InventarioCamion = ({ id_camion }) => {
     );
   }
 
-  const { capacidad_total = 0, en_uso = 0, disponible = 0 } = data?.data || {};
-
   return (
     <Card
       sx={{
         borderRadius: 2,
-        backgroundColor: "#f9f9f9",
-        border: "1px solid #ddd",
+        /*  backgroundColor: "#f9f9f9",
+        border: "1px solid #ddd", */
+        bgcolor: "#F5F9FF",
+        overflow: "hidden",
       }}
     >
       <CardHeader
@@ -68,85 +83,72 @@ const InventarioCamion = ({ id_camion }) => {
       <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
         <Box
           sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr", // Una columna en pantallas pequeñas
-              sm: "1fr 1fr", // Dos columnas en pantallas medianas (iPads)
-              md: "1fr 1fr 1fr", // Tres columnas en pantallas grandes
-            },
+            display: "flex",
+            justifyContent: "space-between",
+            textAlign: "center",
+            px: { xs: 1, sm: 2 },
             gap: { xs: 1, sm: 2 },
             alignItems: "center",
-            textAlign: "center",
           }}
         >
-          <Box sx={{ minWidth: 0, wordBreak: "break-word" }}>
-            <Typography
-              variant="body2"
-              fontWeight="bold"
-              sx={{
-                color: "#424242",
-                fontSize: { xs: "0.7rem", sm: "0.8rem", md: "0.875rem" },
-              }}
-            >
-              Capacidad:
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: "bold",
-                color: "#212121",
-                fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" },
-              }}
-            >
-              {capacidad_total}
-            </Typography>
-          </Box>
-
-          <Box sx={{ minWidth: 0, wordBreak: "break-word" }}>
-            <Typography
-              variant="body2"
-              fontWeight="bold"
-              sx={{
-                color: "#FF9800",
-                fontSize: { xs: "0.7rem", sm: "0.8rem", md: "0.875rem" },
-              }}
-            >
-              En Uso:
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: "bold",
-                color: "#FF9800",
-                fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" },
-              }}
-            >
-              {en_uso}
-            </Typography>
-          </Box>
-
-          <Box sx={{ minWidth: 0, wordBreak: "break-word" }}>
-            <Typography
-              variant="body2"
-              fontWeight="bold"
-              sx={{
-                color: "#388E3C",
-                fontSize: { xs: "0.7rem", sm: "0.8rem", md: "0.875rem" },
-              }}
-            >
-              Disponible:
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: "bold",
-                color: "#388E3C",
-                fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" },
-              }}
-            >
-              {disponible}
-            </Typography>
-          </Box>
+          {[
+            { label: "Capacidad", value: capacidad_total, color: "#212121" },
+            { label: "En Uso", value: en_uso, color: "#EF6C00" },
+            { label: "Disponible", value: disponibles, color: "#2E7D32" },
+          ].map((item) => (
+            <Box key={item.label} flex={1}>
+              <Typography
+                sx={{
+                  fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                  color: "#666",
+                  fontWeight: "medium",
+                  mb: 0.5,
+                }}
+              >
+                {item.label}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: { xs: "1.3rem", sm: "1.6rem" },
+                  fontWeight: "bold",
+                  color: item.color,
+                }}
+              >
+                {item.value}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              mb: 1,
+              color: "#444",
+              fontWeight: "500",
+              textAlign: "center",
+            }}
+          >
+            {en_uso} de {capacidad_total} en uso ({porcentajeUsado}%)
+          </Typography>
+          <LinearProgress
+            variant="determinate"
+            value={porcentajeUsado}
+            sx={{
+              height: 10,
+              borderRadius: 5,
+              [`& .MuiLinearProgress-bar`]: {
+                borderRadius: 5,
+                backgroundColor:
+                  porcentajeUsado < 50
+                    ? "#43A047"
+                    : porcentajeUsado < 80
+                    ? "#FFB300"
+                    : "#E53935",
+              },
+              backgroundColor: "#E0E0E0",
+            }}
+          />
         </Box>
       </CardContent>
       <Divider />

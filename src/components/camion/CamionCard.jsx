@@ -8,8 +8,9 @@ import {
   Box,
   Divider,
   IconButton,
+  Tooltip,
 } from "@mui/material";
-import { Edit, Delete, LocalShipping, PersonAdd } from "@mui/icons-material";
+import { Edit, Delete, LocalShipping, PersonAdd, Visibility } from "@mui/icons-material";
 import PropTypes from "prop-types";
 import InventarioCamion from "./InventarioCamion";
 import { useState } from "react";
@@ -20,11 +21,13 @@ import AlertDialog from "../common/AlertDialog";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useDesasignarChoferMutation } from "../../store/services/camionesApi";
+import ModalInventarioCamion from "../inventario/ModalInventarioCamion";
 
 const CamionCard = ({ camion, onDelete, isDeleting }) => {
   const [openModal, setOpenModal] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [open, setOpen] = useState(false);
+  const [openInventarioVisual, setOpenInventarioVisual] = useState(false);
   const dispatch = useDispatch();
 
   const [desasignarChofer] = useDesasignarChoferMutation();
@@ -171,6 +174,31 @@ const CamionCard = ({ camion, onDelete, isDeleting }) => {
         </Box>
 
         <Box display="flex" justifyContent="center" mt={2}>
+          <Tooltip title="Ver detalle visual" arrow>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => setOpenInventarioVisual(true)}
+              sx={{
+                fontSize: { xs: "0", sm: "0.75rem" },
+                textTransform: "none",
+                px: 2,
+                py: 0.8,
+                borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+              }}
+              startIcon={<Visibility />}
+            >
+              <Box sx={{ display: { xs: "none", sm: "block" } }}>
+                Ver Detalle Visual
+              </Box>
+            </Button>
+          </Tooltip>
+        </Box>
+
+        <Box display="flex" justifyContent="center" mt={2}>
           <Chip
             label={camion.estado}
             color={
@@ -263,6 +291,11 @@ const CamionCard = ({ camion, onDelete, isDeleting }) => {
         onConfirm={handleDesasignarChofer}
         message="¿Estás seguro que deseas remover el chofer?"
         title="Remover Chofer"
+      />
+      <ModalInventarioCamion
+        open={openInventarioVisual}
+        onClose={() => setOpenInventarioVisual(false)}
+        idCamion={camion.id_camion}
       />
     </Card>
   );
