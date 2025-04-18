@@ -49,6 +49,10 @@ import AdminHistorialViajes from "./pages/viajes/AdminHistorialViajes";
 import ListarCuentasPorCobrar from "./pages/facturas";
 import VerCuentaPorCobrar from "./pages/facturas/VerCuentaPorCobrar";
 import ListarAgendasCarga from "./pages/agenda_carga/ListarAgendasCarga";
+import VerAgendaCarga from "./pages/agenda_carga/VerAgendaCarga";
+import ListarMisVentas from "./pages/ventas_chofer/ListarMisVentas";
+import VerVentaChofer from "./pages/ventas_chofer/VerVentaChofer";
+import ListarVentasChofer from "./pages/ventas_chofer/ListarVentasChofer";
 
 // Configuración de rutas
 const router = createHashRouter([
@@ -204,7 +208,7 @@ const router = createHashRouter([
           {
             path: "clientes/crear",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.clientes.crear">
+              <RoleBasedRoute requiredPermission="vistas.clientes.ver">
                 <CrearCliente />{" "}
               </RoleBasedRoute>
             ),
@@ -212,7 +216,7 @@ const router = createHashRouter([
           {
             path: "clientes/ver/:id",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.clientes.ver">
+              <RoleBasedRoute requiredPermission="ventas.cliente.ver">
                 <VerCliente />
               </RoleBasedRoute>
             ),
@@ -220,7 +224,7 @@ const router = createHashRouter([
           {
             path: "clientes/editar/:id",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.clientes.editar">
+              <RoleBasedRoute requiredPermission="ventas.cliente.editar">
                 <EditarCliente />
               </RoleBasedRoute>
             ),
@@ -275,7 +279,6 @@ const router = createHashRouter([
             ),
           },
           {
-            //cambiar permiso ver_camiones
             path: "camiones",
             element: (
               <RoleBasedRoute requiredPermission="vistas.camiones.ver">
@@ -288,6 +291,30 @@ const router = createHashRouter([
             element: (
               <RoleBasedRoute requiredPermission="vistas.viajes.ver">
                 <PanelViajeChofer />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "misventas",
+            element: (
+              <RoleBasedRoute requiredPermission="vistas.viajes.ver">
+                <ListarMisVentas />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "ventas-chofer",
+            element: (
+              <RoleBasedRoute requiredPermission="vistas.ventas.ver">
+                <ListarVentasChofer />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "ventas-chofer/ver/:id",
+            element: (
+              <RoleBasedRoute requiredPermission="vistas.ventas.ver">
+                <VerVentaChofer />
               </RoleBasedRoute>
             ),
           },
@@ -312,6 +339,14 @@ const router = createHashRouter([
             element: (
               <RoleBasedRoute requiredPermission="vistas.agendaCarga.ver">
                 <ListarAgendasCarga />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "agendas/ver/:id",
+            element: (
+              <RoleBasedRoute requiredPermission="vistas.agendaCarga.ver">
+                <VerAgendaCarga />
               </RoleBasedRoute>
             ),
           },
@@ -349,7 +384,6 @@ const router = createHashRouter([
           },
           {
             path: "cajas",
-            //cambiar permiso ver_cajas
             element: (
               <RoleBasedRoute requiredPermission="vistas.cajas.ver">
                 <ListarCajas />

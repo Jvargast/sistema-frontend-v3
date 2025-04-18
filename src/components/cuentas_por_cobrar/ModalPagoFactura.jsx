@@ -66,13 +66,13 @@ const ModalPagoFactura = ({ open, onClose, idCxc }) => {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: "bold", textAlign: "center", mt: 1 }}>
+      <DialogTitle sx={{ fontWeight: "bold", textAlign: "center" }}>
         💳 Registrar Pago de Factura
       </DialogTitle>
 
-      <DialogContent sx={{ px: 4, pt: 2 }}>
+      <DialogContent sx={{ px: 4, pt: 4 }}>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
+          <Grid item xs={12} sx={{ mt: 1 }}>
             <TextField
               label="Monto a Pagar"
               type="text"
@@ -82,7 +82,12 @@ const ModalPagoFactura = ({ open, onClose, idCxc }) => {
               fullWidth
               required
               variant="outlined"
-              InputLabelProps={{ shrink: true }}
+              sx={{
+                "& .MuiInputAdornment-root": {
+                  alignSelf: "center",
+                  mt: 0.5,
+                },
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">

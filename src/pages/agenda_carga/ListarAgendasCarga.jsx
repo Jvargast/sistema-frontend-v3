@@ -32,16 +32,22 @@ const ListarAgendasCarga = () => {
 
   const columns = [
     {
-      id: "id_agenda",
+      id: "id_agenda_carga",
       label: "ID",
-      render: (row) => row.id_agenda,
+      render: (row) => row.id_agenda_carga,
     },
     {
-      id: "fecha_carga",
+      id: "fecha_hora",
       label: "Fecha de Carga",
       render: (row) =>
-        row.fecha_carga
-          ? new Date(row.fecha_carga).toLocaleDateString()
+        row.fecha_hora
+          ? new Date(row.fecha_hora).toLocaleString("es-CL", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
           : "Sin fecha",
     },
     {
@@ -52,7 +58,7 @@ const ListarAgendasCarga = () => {
     {
       id: "camion",
       label: "Camión",
-      render: (row) => row.camion?.patente || "Sin camión",
+      render: (row) => row.camion?.placa || "Sin camión",
     },
     {
       id: "estado",
@@ -75,7 +81,7 @@ const ListarAgendasCarga = () => {
       render: (row) => (
         <IconButton
           color="primary"
-          onClick={() => navigate(`/agendas/ver/${row.id_agenda}`)}
+          onClick={() => navigate(`/agendas/ver/${row.id_agenda_carga}`)}
         >
           <Visibility />
         </IconButton>

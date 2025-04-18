@@ -6,6 +6,7 @@ import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import RequestQuoteOutlinedIcon from "@mui/icons-material/RequestQuoteOutlined";
 import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
 import ConstructionOutlinedIcon from '@mui/icons-material/ConstructionOutlined';
+import AttachMoneyOutlinedIcon from '@mui/icons-material/AttachMoneyOutlined';
 
 export const modulesData = [
   {
@@ -114,7 +115,7 @@ export const modulesData = [
         text: "Agenda Carga",
         icon: <EventIcon />,
         path: "agenda-carga",
-        permission: "vistas.agendaCarga.ver",
+        permission: "vistas.agendaCarga.crear",
       },
       {
         text: "Agenda Viajes",
@@ -126,6 +127,12 @@ export const modulesData = [
         text: "Mis Pedidos",
         icon: <AssignmentOutlinedIcon />, 
         path: "mis-pedidos",
+        permission: "vistas.mispedidos.ver",
+      },
+      {
+        text: "Mis Ventas",
+        icon: <AttachMoneyOutlinedIcon />, 
+        path: "misventas",
         permission: "vistas.mispedidos.ver",
       },
     ],

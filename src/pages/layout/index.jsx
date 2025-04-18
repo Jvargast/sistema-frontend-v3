@@ -8,16 +8,16 @@ import Navbar from "../../components/layout/Navbar";
 import { LayoutContext } from "../../context/LayoutContext";
 
 const Layout = () => {
-  const isNonMobile = useMediaQuery("(min-width: 600px)");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(isNonMobile);
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(isDesktop);
   const drawerWidth = 250;
 
   const { user, rol, isLoading, isError } = useSelector((state) => state.auth);
 
   // Actualizar estado de la barra lateral según el ancho de pantalla
   useEffect(() => {
-    setIsSidebarOpen(isNonMobile);
-  }, [isNonMobile]);
+    setIsSidebarOpen(isDesktop);
+  }, [isDesktop]);
 
   // Manejo de estados de carga y error
   if (isLoading) return <LoaderComponent />;
@@ -30,11 +30,11 @@ const Layout = () => {
 
   return (
     <LayoutContext.Provider value={{ drawerWidth }}>
-      <Box display={isNonMobile ? "flex" : "block"} width="100%" height="100%">
+      <Box display={isDesktop ? "flex" : "block"} width="100%" height="100%">
         <Sidebar
           user={user}
           rol={rol}
-          isNonMobile={isNonMobile}
+          isNonMobile={isDesktop}
           drawerWidth={drawerWidth}
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}

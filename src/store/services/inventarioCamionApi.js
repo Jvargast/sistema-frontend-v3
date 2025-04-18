@@ -40,7 +40,7 @@ export const inventarioCamionApi = createApi({
         url: `/inventario-camion/estado/${id_camion}`,
       }),
       providesTags: (result, error, id_camion) => [
-        { type: "Inventario", id: id_camion },
+        { type: "Camion", id: id_camion },
       ],
     }),
 

@@ -9,11 +9,16 @@ import {
   useTheme,
 } from "@mui/material";
 import { DirectionsBus, History } from "@mui/icons-material";
-import { useGetAgendaViajeChoferQuery } from "../../store/services/agendaViajesApi";
+import {
+  agendaViajesApi,
+  useGetAgendaViajeChoferQuery,
+} from "../../store/services/agendaViajesApi";
 import ViajeChofer from "./ViajeChofer";
 import HistorialViajes from "../../components/viaje/HistorialViajes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { socket } from "../../socket";
+import { useDispatch } from "react-redux";
 
 const PanelViajeChofer = () => {
   const usuario = useSelector((state) => state.auth.user);
@@ -26,7 +31,30 @@ const PanelViajeChofer = () => {
     data: viaje,
     isLoading,
     error,
-  } = useGetAgendaViajeChoferQuery({ id_chofer: usuario?.id });
+  } = useGetAgendaViajeChoferQuery(
+    { id_chofer: usuario?.id },
+    {
+      skip: !usuario?.id,
+      refetchOnMountOrArgChange: true,
+      refetchOnReconnect: true,
+      refetchOnFocus: true,
+    }
+  );
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const handleActualizarAgenda = () => {
+      console.log("📡 Invalidando tag AgendaViajes desde WebSocket");
+      dispatch(agendaViajesApi.util.invalidateTags(["AgendaViajes"]));
+    };
+
+    socket.on("actualizar_agenda_chofer", handleActualizarAgenda);
+
+    return () => {
+      socket.off("actualizar_agenda_chofer", handleActualizarAgenda);
+    };
+  }, [dispatch]);
 
   if (isLoading) {
     return (

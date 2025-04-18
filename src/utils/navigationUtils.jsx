@@ -3,7 +3,7 @@ export const getInitialRoute = (rol, permissions) => {
       return "/dashboard";
     } else if (rol === "vendedor" && permissions.includes("vistas.puntoventa.ver")) {
       return "/punto-venta";
-    } else if (rol === "chofer" && permissions.includes("vistas.viajes.chofer")) {
+    } else if (rol === "chofer" && permissions.includes("vistas.viajes.ver")) {
       return "/viajes";
     }
   

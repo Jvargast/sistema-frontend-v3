@@ -22,7 +22,7 @@ const estadosCamion = [
   { value: "Mantenimiento", label: "Mantenimiento" },
 ];
 
-const EditarCamionModal = ({ open, onClose, camion }) => {
+const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
   const dispatch= useDispatch();
   const [formData, setFormData] = useState({
     placa: "",
@@ -60,6 +60,9 @@ const EditarCamionModal = ({ open, onClose, camion }) => {
         })
       );
       onClose();
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       console.error("Error al actualizar camión:", error);
       dispatch(
@@ -193,6 +196,7 @@ EditarCamionModal.propTypes = {
     capacidad: PropTypes.number.isRequired,
     estado: PropTypes.string.isRequired,
   }),
+  onSuccess: PropTypes.func,
 };
 
 export default EditarCamionModal;

@@ -69,7 +69,6 @@ const PuntoDeVenta = () => {
   const [createVenta, { isLoading: isCreating }] = useCreateVentaMutation();
 
   const { estado, isLoading, error } = useVerificarCaja(selectedVendedor);
-  const [cajaAbierta, setCajaAbierta] = useState(false);
   const usuario = useSelector((state) => state.auth);
   const [cajaCerrando, setCajaCerrando] = useState(false);
   const [openAlert, setOpenAlert] = useState(false);
@@ -144,6 +143,7 @@ const PuntoDeVenta = () => {
   };
 
   const handleProceedToPayment = () => {
+    setProductosRetornables([]);
     const productosRetornablesEnCarrito = cart.filter(
       (item) => item.es_retornable
     );
@@ -168,7 +168,6 @@ const PuntoDeVenta = () => {
 
     // 💡 Validar si ya se confirmaron los retornables
     const yaConfirmados = productosRetornables.length > 0;
-
     if (productosRetornablesEnCarrito.length > 0 && !yaConfirmados) {
       setProductosRetornables(productosRetornablesEnCarrito);
       setOpenRetornablesModal(true);
@@ -400,10 +399,6 @@ const PuntoDeVenta = () => {
     dispatch(updateItemQuantity({ id_producto, tipo, cantidad }));
   };
 
-  const handleCajaAbierta = () => {
-    setCajaAbierta(true);
-  };
-
   const handleTaxRateChange = (e) => {
     const newTaxRate = parseFloat(e.target.value);
     if (isNaN(newTaxRate) || newTaxRate < 0) return;
@@ -413,10 +408,6 @@ const PuntoDeVenta = () => {
 
   const handlePriceChange = (id_producto, tipo, nuevoPrecio) => {
     dispatch(updateItemPrice({ id_producto, tipo, nuevoPrecio }));
-  };
-
-  const handleClose = () => {
-    setCajaAbierta(false);
   };
 
   const confirmAlert = () => {
@@ -448,7 +439,6 @@ const PuntoDeVenta = () => {
     try {
       await closeCaja({ idCaja: cajaId });
       setCajaCerrando(false);
-      setCajaAbierta(false);
       dispatch(
         showNotification({
           message: "Caja cerrada exitosamente",
@@ -467,12 +457,12 @@ const PuntoDeVenta = () => {
     }
   };
 
-  if (usuario?.rol === "vendedor" && !cajaAbierta) {
+  if (usuario?.rol === "vendedor" && !estado?.cajaAbierta) {
     return (
       <AperturaCajaModal
         caja={estado.asignada}
-        onCajaAbierta={handleCajaAbierta}
-        onClose={handleClose}
+        onCajaAbierta={() => {}}
+        onClose={() => {}}
       />
     );
   }
@@ -522,8 +512,8 @@ const PuntoDeVenta = () => {
     return (
       <AperturaCajaModal
         caja={estado.asignada}
-        onCajaAbierta={handleCajaAbierta}
-        onClose={handleClose}
+        onCajaAbierta={() => {}}
+        onClose={() => {}}
       />
     );
   }
@@ -537,30 +527,6 @@ const PuntoDeVenta = () => {
   ) {
     return <LoaderComponent />;
   }
-
-  /*   if (error) {
-    if (
-      error.status === 403 &&
-      error.data?.error?.includes("ventas.caja.asignada")
-    ) {
-      return <PermissionMessage requiredPermission="ventas.caja.asignada" />;
-    }
-    // 2) Cualquier otro error
-    return (
-      <Typography>{error.data?.error || "Error al cargar datos."}</Typography>
-    );
-  }
-
-  if (errorProductos) {
-    if (errorProductos.status === 403) {
-      return <PermissionMessage requiredPermission="ventas.caja.asignada" />;
-    }
-    return (
-      <Typography>
-        {errorProductos.data?.error || "Error al cargar productos."}
-      </Typography>
-    );
-  } */
 
   if (relevantError.type === "permission") {
     return <PermissionMessage requiredPermission={relevantError.permission} />;

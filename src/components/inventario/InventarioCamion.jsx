@@ -15,10 +15,10 @@ const MotionBox = motion(Box);
 
 const InventarioCamion = ({
   idCamion,
-  modo,
-  productos,
-  productosReservados,
-  onValidezCambio,
+  modo = "visual",
+  productos = [],
+  productosReservados = [],
+  onValidezCambio = null,
 }) => {
   const { data, isLoading, error } =
     useGetEstadoInventarioCamionQuery(idCamion);
@@ -53,19 +53,30 @@ const InventarioCamion = ({
 
   const columnas = isTablet ? 6 : 10;
 
-  const espaciosReservadosProyectados = modo === "simulación" ? productosReservados.reduce(
-    (total, prod) => total + prod.cantidad,
-    0
-  ): 0;
+  console.log(productosReservados)
 
-  const arrayReservadosCarga = modo === "simulacion"
-  ? Array(espaciosReservadosProyectados).fill({ tipo: "ReservadoParaCarga" })
-  : [];
+  const espaciosReservadosProyectados =
+    modo === "simulacion"
+      ? productosReservados.reduce((total, prod) => total + prod.cantidad, 0)
+      : 0;
+  const retornablesACargarAhora =
+    modo === "simulacion"
+      ? productos
+          .filter((p) => p.es_retornable)
+          .reduce((acc, p) => acc + p.cantidad, 0)
+      : 0;
 
+  const arrayReservadosCarga =
+    modo === "simulacion"
+      ? Array(espaciosReservadosProyectados).fill({
+          tipo: "ReservadoParaCarga",
+        })
+      : [];
 
   const espaciosCamion = [
     ...Array(reservados_retornables).fill({ tipo: "ReservadoRetornable" }),
     ...Array(reservados_no_retornables).fill({ tipo: "ReservadoNoRetornable" }),
+    ...Array(retornablesACargarAhora).fill({ tipo: "ACargarAhora" }),
     ...Array(disponibles).fill({ tipo: "Disponible" }),
     ...Array(retorno).fill({ tipo: "Retorno" }),
     ...arrayReservadosCarga,
@@ -88,6 +99,8 @@ const InventarioCamion = ({
         return "#e57373";
       case "Vacío":
         return "lightgray";
+      case "ACargarAhora":
+        return "#0097a7";
       default:
         return "gray";
     }
@@ -128,17 +141,17 @@ const InventarioCamion = ({
             fontSize="12px"
             fontWeight="bold"
             animate={
-              item.tipo === "ReservadoParaCarga"
+              item.tipo === "ReservadoParaCarga" || item.tipo === "ACargarAhora"
                 ? { scale: [0.9, 1.1, 0.9], opacity: [0.8, 1, 0.8] }
                 : {}
             }
             transition={
-              item.tipo === "ReservadoParaCarga"
+              item.tipo === "ReservadoParaCarga" || item.tipo === "ACargarAhora"
                 ? { repeat: Infinity, duration: 2 }
                 : {}
             }
           >
-            {item.tipo.charAt(0)}
+            {item.tipo === "ACargarAhora" ? "D" : item.tipo.charAt(0)}
           </MotionBox>
         ))}
       </Box>
@@ -176,6 +189,11 @@ const InventarioCamion = ({
         <Typography variant="body2">
           <strong style={{ color: "lightgray" }}>■ Vacío: {vacios}</strong>
         </Typography>
+        <Typography variant="body2">
+          <strong style={{ color: "#0097a7" }}>
+            ■ Retornables a Cargar Ahora: {retornablesACargarAhora}
+          </strong>
+        </Typography>
       </Box>
 
       {modo === "simulacion" && (
@@ -208,12 +226,5 @@ InventarioCamion.propTypes = {
   ),
   onValidezCambio: PropTypes.func,
 };
-InventarioCamion.defaultProps = {
-  modo: "visual",
-  productos: [],
-  productosReservados: [],
-  onValidezCambio: null,
-};
-
 
 export default InventarioCamion;

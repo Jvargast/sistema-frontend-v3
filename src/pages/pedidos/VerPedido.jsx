@@ -7,12 +7,20 @@ import DetallesPedido from "../../components/pedido/DetallesPedido";
 import InfoPedido from "../../components/pedido/PedidoInfo";
 import { useState } from "react";
 import ModalPagoPedido from "../../components/pedido/ModalPago";
+import { useGetVentaByIdQuery } from "../../store/services/ventasApi";
 
 const VerPedido = () => {
   const { id } = useParams();
   const { data, error, isLoading } = useGetPedidoByIdQuery(id);
+  const { data: ventaData } = useGetVentaByIdQuery(data?.id_venta, {
+    skip: !data?.id_venta,
+  });
   const [openPago, setOpenPago] = useState(false);
-  const mostrarBotonPago = data?.pagado !== true;
+  const tipoDocumento = ventaData?.documentos[0]?.tipo_documento || "boleta"
+
+
+  const mostrarBotonPago =
+  data?.pagado !== true && tipoDocumento !== "factura";
 
   if (isLoading) return <LoaderComponent />;
 

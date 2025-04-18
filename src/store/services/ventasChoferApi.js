@@ -16,13 +16,27 @@ export const ventasChoferApi = createApi({
     }),
 
     getVentasChofer: builder.query({
-      query: () => ({
+      query: (params) => ({
         url: "/ventas-chofer/",
+        params,
       }),
       providesTags: ["VentasChofer"],
+    }),
+
+    getMisVentasChofer: builder.query({
+      query: (params) => ({
+        url: "/ventas-chofer/misventas",
+        params,
+      }),
+      providesTags: ["VentasChofer"],
+    }),
+
+    getVentaChoferById: builder.query({
+      query: (id) => `/ventas-chofer/venta/${id}`,
+      providesTags: (result, error, id) => [{ type: "VentasChofer", id }],
     }),
   }),
 });
 
-export const { useRealizarVentaRapidaMutation, useGetVentasChoferQuery } =
+export const { useRealizarVentaRapidaMutation, useGetVentasChoferQuery, useGetMisVentasChoferQuery, useGetVentaChoferByIdQuery } =
   ventasChoferApi;

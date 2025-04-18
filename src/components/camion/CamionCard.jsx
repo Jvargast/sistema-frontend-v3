@@ -10,10 +10,16 @@ import {
   IconButton,
   Tooltip,
 } from "@mui/material";
-import { Edit, Delete, LocalShipping, PersonAdd, Visibility } from "@mui/icons-material";
+import {
+  Edit,
+  Delete,
+  LocalShipping,
+  PersonAdd,
+  Visibility,
+} from "@mui/icons-material";
 import PropTypes from "prop-types";
 import InventarioCamion from "./InventarioCamion";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import AsignarChoferModal from "./AsignarChoferModal";
 import EditarCamionModal from "./EditarCamionModal";
 import RemoveCircleOutlineOutlinedIcon from "@mui/icons-material/RemoveCircleOutlineOutlined";
@@ -23,11 +29,12 @@ import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useDesasignarChoferMutation } from "../../store/services/camionesApi";
 import ModalInventarioCamion from "../inventario/ModalInventarioCamion";
 
-const CamionCard = ({ camion, onDelete, isDeleting }) => {
+const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
   const [openModal, setOpenModal] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [open, setOpen] = useState(false);
   const [openInventarioVisual, setOpenInventarioVisual] = useState(false);
+  const inventarioRef = useRef(null);
   const dispatch = useDispatch();
 
   const [desasignarChofer] = useDesasignarChoferMutation();
@@ -58,8 +65,6 @@ const CamionCard = ({ camion, onDelete, isDeleting }) => {
   return (
     <Card
       sx={{
-        width: "100%",
-        maxWidth: "100%",
         boxShadow: 3,
         borderRadius: 3,
         transition: "0.3s",
@@ -71,20 +76,23 @@ const CamionCard = ({ camion, onDelete, isDeleting }) => {
         justifyContent: "space-between",
       }}
     >
-      <CardContent sx={{ p: 2, flexGrow: 1 }}>
+      <CardContent sx={{ flexGrow: 1 }}>
         <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mb={1}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            mb: 1,
+            gap: 1,
+          }}
         >
-          <Box display="flex" alignItems="center" mb={1}>
+          <Box display="flex" alignItems="center">
             <LocalShipping sx={{ mr: 1, color: "#1565C0" }} />
             <Typography
               variant="subtitle2"
               sx={{
                 fontSize: { xs: "0.9rem", sm: "1rem" },
-                p: { xs: 1, sm: 2 },
               }}
             >
               ID: {camion.id_camion}
@@ -170,7 +178,7 @@ const CamionCard = ({ camion, onDelete, isDeleting }) => {
         </Typography>
 
         <Box sx={{ mt: { xs: 1, sm: 2 } }}>
-          <InventarioCamion id_camion={camion.id_camion} />
+          <InventarioCamion ref={inventarioRef} id_camion={camion.id_camion} />
         </Box>
 
         <Box display="flex" justifyContent="center" mt={2}>
@@ -284,6 +292,11 @@ const CamionCard = ({ camion, onDelete, isDeleting }) => {
         open={openEdit}
         onClose={() => setOpenEdit(false)}
         camion={camion}
+        onSuccess={() => {
+          setOpenEdit(false);
+          inventarioRef.current?.refetchInventario();
+          onCamionUpdated?.();
+        }}
       />
       <AlertDialog
         openAlert={open}
@@ -301,6 +314,7 @@ const CamionCard = ({ camion, onDelete, isDeleting }) => {
   );
 };
 
+
 CamionCard.propTypes = {
   camion: PropTypes.shape({
     id_camion: PropTypes.number.isRequired,
@@ -314,6 +328,7 @@ CamionCard.propTypes = {
   }).isRequired,
   onDelete: PropTypes.func.isRequired,
   isDeleting: PropTypes.bool.isRequired,
+  onCamionUpdated: PropTypes.func,
 };
 
 export default CamionCard;

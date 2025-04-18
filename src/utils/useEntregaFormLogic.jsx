@@ -38,7 +38,11 @@ function useEntregaFormLogic({
   useEffect(() => {
     if (open) {
       reset();
-      setPaso(detallePedido?.pagado ? 2 : 1);
+      if (destino?.tipo_documento === "factura") {
+        setPaso(2);
+      } else {
+        setPaso(detallePedido?.pagado ? 2 : 1);
+      }
       setClienteTrae(true);
       setProductosSeleccionados([]);
     }
@@ -67,6 +71,9 @@ function useEntregaFormLogic({
               }
             : { pasados: false, items: [] };
 
+        const isFactura = destino?.tipo_documento === "factura";
+        const isEfectivo = parseInt(formData.id_metodo_pago) === 1;
+        
         const payload = {
           id_agenda_viaje,
           id_pedido: destino.id_pedido,
@@ -74,17 +81,24 @@ function useEntregaFormLogic({
           insumo_entregados: [],
           botellones_retorno: botellonesRetorno,
           monto_total: detallePedido?.monto_total || 0,
-          id_metodo_pago: formData.id_metodo_pago || null,
-          referencia: formData.payment_reference || null,
-          tipo_documento: formData.tipo_documento || null,
+          id_metodo_pago:
+            destino?.tipo_documento === "factura"
+              ? null
+              : formData.id_metodo_pago || null,
+          referencia:
+            destino?.tipo_documento === "factura"
+              ? null
+              : formData.payment_reference || null,
+          tipo_documento: destino?.tipo_documento || "boleta",
           notas: formData.notas || "",
           impuesto: 0,
           descuento_total_porcentaje: 0,
           id_chofer: usuario?.id,
-          pago_recibido:
-            parseInt(formData.id_metodo_pago) === 1
-              ? detallePedido?.monto_total || 0
-              : null,
+          pago_recibido: isFactura
+            ? null
+            : isEfectivo
+            ? detallePedido?.monto_total || 0
+            : null,
         };
 
         const response = await createEntrega(payload).unwrap();

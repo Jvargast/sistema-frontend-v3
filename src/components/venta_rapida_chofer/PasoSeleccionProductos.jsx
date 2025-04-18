@@ -1,13 +1,10 @@
 import {
   Box,
   Typography,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
+  Stack,
   IconButton,
   TextField,
-  Stack,
+  Paper,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -68,19 +65,13 @@ const PasoSeleccionProductos = ({
     setProductosSeleccionados(nuevos);
   };
 
-  const getCantidadSeleccionada = (id_producto) => {
-    return (
-      productosSeleccionados.find((p) => p.id_producto === id_producto)
-        ?.cantidad || 0
-    );
-  };
+  const getCantidadSeleccionada = (id_producto) =>
+    productosSeleccionados.find((p) => p.id_producto === id_producto)
+      ?.cantidad || 0;
 
-  const getPrecioUnitario = (producto) => {
-    return (
-      productosSeleccionados.find((p) => p.id_producto === producto.id_producto)
-        ?.precioUnitario ?? producto.precio
-    );
-  };
+  const getPrecioUnitario = (producto) =>
+    productosSeleccionados.find((p) => p.id_producto === producto.id_producto)
+      ?.precioUnitario ?? producto.precio;
 
   const getSubtotal = (producto) => {
     const cantidad = getCantidadSeleccionada(producto.id_producto);
@@ -90,7 +81,7 @@ const PasoSeleccionProductos = ({
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom fontWeight="bold">
+      <Typography variant="h6" gutterBottom fontWeight={600}>
         Selección de Productos
       </Typography>
 
@@ -99,7 +90,7 @@ const PasoSeleccionProductos = ({
       ) : inventario.length === 0 ? (
         <Typography>No hay productos disponibles en el camión.</Typography>
       ) : (
-        <List>
+        <Stack spacing={2}>
           {inventario.map((producto) => {
             const cantidad = getCantidadSeleccionada(producto.id_producto);
             const precioActual = getPrecioUnitario(producto);
@@ -107,68 +98,79 @@ const PasoSeleccionProductos = ({
             const precioModificado = precioActual !== precioOriginal;
 
             return (
-              <ListItem
-                key={producto.id_producto}
-                alignItems="flex-start"
-                divider
-              >
-                <ListItemText
-                  primary={`${producto.nombre_producto} (${producto.cantidad} disponibles)`}
-                  secondary={
-                    <>
-                      <Typography variant="body2">
-                        Subtotal: $
-                        {getSubtotal(producto).toLocaleString("es-CL")}
+              <Paper key={producto.id_producto} elevation={2} sx={{ p: 2 }}>
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={2}
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      {producto.nombre_producto} ({producto.cantidad}{" "}
+                      disponibles)
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Subtotal: ${getSubtotal(producto).toLocaleString("es-CL")}
+                    </Typography>
+                    {precioModificado && (
+                      <Typography
+                        variant="caption"
+                        color="warning.main"
+                        sx={{ mt: 0.5 }}
+                      >
+                        ⚠️ Precio modificado (original: $
+                        {Math.round(precioOriginal).toLocaleString("es-CL")})
                       </Typography>
-                      {precioModificado && (
-                        <Typography variant="caption" color="warning.main">
-                          ⚠️ Precio modificado (original: $
-                          {precioOriginal.toLocaleString("es-CL")})
-                        </Typography>
-                      )}
-                    </>
-                  }
-                />
-                <ListItemSecondaryAction>
-                  <Stack spacing={1} alignItems="center">
-                    <Stack direction="row" alignItems="center">
-                      <IconButton
-                        onClick={() => actualizarCantidad(producto, -1)}
-                      >
-                        <RemoveIcon />
-                      </IconButton>
-                      <TextField
-                        size="small"
-                        value={cantidad}
-                        inputProps={{
-                          readOnly: true,
-                          style: { width: 30, textAlign: "center" },
-                        }}
-                      />
-                      <IconButton
-                        onClick={() => actualizarCantidad(producto, 1)}
-                      >
-                        <AddIcon />
-                      </IconButton>
-                    </Stack>
+                    )}
+                  </Box>
 
-                    <TextField
-                      label="Precio unitario"
-                      type="number"
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <IconButton
                       size="small"
-                      value={precioActual}
-                      onChange={(e) =>
-                        actualizarPrecio(producto, Number(e.target.value))
-                      }
-                      inputProps={{ min: 0 }}
-                      sx={{ width: 120 }}
+                      onClick={() => actualizarCantidad(producto, -1)}
+                    >
+                      <RemoveIcon />
+                    </IconButton>
+                    <TextField
+                      size="small"
+                      value={cantidad}
+                      inputProps={{
+                        readOnly: true,
+                        style: { width: 30, textAlign: "center" },
+                      }}
+                      variant="outlined"
                     />
+                    <IconButton
+                      size="small"
+                      onClick={() => actualizarCantidad(producto, 1)}
+                    >
+                      <AddIcon />
+                    </IconButton>
                   </Stack>
-                </ListItemSecondaryAction>
-              </ListItem>
+
+                  <TextField
+                    label="Precio unitario"
+                    type="text"
+                    size="small"
+                    value={`$${Number(precioActual).toLocaleString("es-CL")}`}
+                    onChange={(e) => {
+                      const soloNumeros = e.target.value.replace(/\D/g, "");
+                      actualizarPrecio(producto, Number(soloNumeros));
+                    }}
+                    inputProps={{
+                      inputMode: "numeric",
+                      pattern: "[0-9]*",
+                    }}
+                    sx={{ width: 130 }}
+                    variant="outlined"
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Stack>
+              </Paper>
             );
           })}
-        </List>
+        </Stack>
       )}
     </Box>
   );
