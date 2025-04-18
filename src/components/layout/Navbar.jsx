@@ -47,7 +47,9 @@ const Navbar = ({ user, rol, isSidebarOpen, setIsSidebarOpen }) => {
   /* const isNonMobile = useMediaQuery("(min-width: 600px)"); */
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   //const isTablet = useMediaQuery("(min-width: 600px) and (max-width: 1023px)");
-  const isMobile = useMediaQuery("(max-width: 599px)");
+  //const isMobile = useMediaQuery("(max-width: 599px)");
+  const isTabletOrMobile = useMediaQuery("(max-width:1023px)");
+
   const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -124,7 +126,7 @@ const Navbar = ({ user, rol, isSidebarOpen, setIsSidebarOpen }) => {
       <Toolbar sx={{ justifyContent: "space-between", background: "#E4DFDF" }}>
         {/* LADO IZQUIERDO */}
         {/* Botón para abrir/cerrar Sidebar */}
-        {isMobile ? (
+        {isTabletOrMobile ? (
           <FlexBetween>
             <IconButton
               onClick={() => setMobileMenuOpen(true)}
@@ -151,7 +153,13 @@ const Navbar = ({ user, rol, isSidebarOpen, setIsSidebarOpen }) => {
         ) : (
           <FlexBetween>
             <IconButton
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              onClick={() => {
+                if (isDesktop) {
+                  setIsSidebarOpen((prev) => !prev);
+                } else {
+                  setMobileMenuOpen(true);
+                }
+              }}
               sx={{
                 display: isDesktop ? "block" : "none",
                 color: theme.palette.mode === "light" ? "#000000" : "#ffffff",
@@ -193,7 +201,7 @@ const Navbar = ({ user, rol, isSidebarOpen, setIsSidebarOpen }) => {
         )}
 
         {/* LADO DERECHO */}
-        {!isMobile && (
+        {!isTabletOrMobile && (
           <FlexBetween gap="1.5rem">
             <IconButton
               aria-label="Ver notificaciones"

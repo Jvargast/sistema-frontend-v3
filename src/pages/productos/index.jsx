@@ -40,9 +40,9 @@ const Productos = () => {
     limit: pageSize,
   });
 
-  const canCreateProducto = useHasPermission("crear_producto");
-  const canDeleteProducto = useHasPermission("borrar_productos");
-  const canEditProducto = useHasPermission("editar_producto");
+  const canCreateProducto = useHasPermission("inventario.producto.crear");
+  const canDeleteProducto = useHasPermission("inventario.producto.eliminar");
+  const canEditProducto = useHasPermission("inventario.producto.editar");
 
   const paginacion = useMemo(() => data?.paginacion || {}, [data?.paginacion]);
 

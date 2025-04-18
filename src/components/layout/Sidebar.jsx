@@ -32,6 +32,7 @@ import logoImage from "../../assets/images/logo_aguas_valentino2.png";
 import { modulesData } from "../../utils/modulesData";
 import { resetCacheAndLogout } from "../../store/reducers/authSlice";
 import { useLogoutMutation } from "../../store/services/authApi";
+import { getInitialRoute } from "../../utils/navigationUtils";
 
 const Sidebar = ({
   user,
@@ -225,12 +226,14 @@ const Sidebar = ({
           onChange={(event, newValue) => {
             if (newValue === "logout") {
               handleLogout();
+            } else if (newValue === "home") {
+              const initial = getInitialRoute(rol, permisos);
+              console.log(initial);
+              navigate(initial);
             } else {
               setActive(newValue);
               navigate(`/${newValue}`);
             }
-            
-            /* navigate(`/${newValue}`); */
           }}
           sx={{
             position: "fixed",
@@ -243,14 +246,22 @@ const Sidebar = ({
         >
           <BottomNavigationAction
             label="Home"
-            value="dashboard"
+            value="home"
             icon={<HomeOutlined />}
           />
-          <BottomNavigationAction
-            label="Orders"
-            value="pedidos"
-            icon={<ShoppingCartOutlined />}
-          />
+          {rol === "chofer" ? (
+            <BottomNavigationAction
+              label="Mis Ventas"
+              value="misventas"
+              icon={<ShoppingCartOutlined />}
+            />
+          ) : (
+            <BottomNavigationAction
+              label="Pedidos"
+              value="pedidos"
+              icon={<ShoppingCartOutlined />}
+            />
+          )}
           <BottomNavigationAction
             label="Perfil"
             value="miperfil"

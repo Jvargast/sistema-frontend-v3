@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Box, Typography, Button, Grid, Paper } from "@mui/material";
+import { Box, Typography, Button, Paper } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -22,7 +22,6 @@ const CamionesManagement = () => {
   const [open, setOpen] = useState(false);
   const [openAlert, setOpenAlert] = useState(false);
   const [selectedCamionId, setSelectedCamionId] = useState(null);
-
 
   const {
     data: camiones,
@@ -133,6 +132,8 @@ const CamionesManagement = () => {
         p: { xs: 2, sm: 4 },
         backgroundColor: "#f4f6f8",
         minHeight: "100vh",
+        width: "100%",
+        overflowX: "hidden",
       }}
     >
       <Paper
@@ -141,6 +142,8 @@ const CamionesManagement = () => {
           p: { xs: 2, sm: 4 },
           borderRadius: 3,
           backgroundColor: "#ffffff",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         <Box
@@ -197,22 +200,33 @@ const CamionesManagement = () => {
             </Typography>
           </Box>
         ) : (
-          <Grid
-            container
-            spacing={{ xs: 2, sm: 3 }}
-            columns={{ xs: 4, sm: 8, md: 12 }}
-            alignItems="stretch"
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center", 
+              gap: 2, 
+              mt: 2,
+            }}
           >
             {camiones?.map((camion) => (
-              <Grid key={camion.id_camion} item xs={4} sm={4} md={4} lg={3}>
+              <Box
+                key={camion.id_camion}
+                sx={{
+                  flex: "1 1 320px",
+                  maxWidth: "450px", 
+                  width: "100%", 
+                }}
+              >
                 <CamionCard
                   camion={camion}
                   onDelete={confirmDeleteCamion}
                   isDeleting={isDeleting}
+                  onCamionUpdated={refetch} 
                 />
-              </Grid>
+              </Box>
             ))}
-          </Grid>
+          </Box>
         )}
       </Paper>
 

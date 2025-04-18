@@ -18,26 +18,20 @@ const useVerificarCaja = (selectedVendedor = null) => {
     isLoading: loadingAsignada,
     error: errorCaja,
     refetch: refetchCaja,
-  } = useGetCajaAsignadaQuery(
-    rutUsuario ? { rutUsuario } : undefined,
-    {
-      skip: !rutUsuario,
-      refetchOnMountOrArgChange: true,
-    }
-  );
+  } = useGetCajaAsignadaQuery(rutUsuario ? { rutUsuario } : undefined, {
+    skip: !rutUsuario,
+    refetchOnMountOrArgChange: true,
+  });
 
   const {
     data: estadoCaja,
     isLoading: loadingEstado,
     error: errorEstado,
     refetch: refetchEstado,
-  } = useGetEstadoCajaQuery(
-    rutUsuario ? { rutUsuario } : undefined,
-    {
-      skip: !rutUsuario,
-      refetchOnMountOrArgChange: true,
-    }
-  );
+  } = useGetEstadoCajaQuery(rutUsuario ? { rutUsuario } : undefined, {
+    skip: !rutUsuario,
+    refetchOnMountOrArgChange: true,
+  });
 
   const [estado, setEstado] = useState({
     cajaAbierta: false,
@@ -69,10 +63,13 @@ const useVerificarCaja = (selectedVendedor = null) => {
 
   useEffect(() => {
     if (estadoCaja) {
+      const cajaAbierta = estadoCaja?.cajaAbierta || false;
+      const caja = estadoCaja?.caja || null;
       setEstado((prev) => ({
         ...prev,
         cajaAbierta: estadoCaja?.cajaAbierta || false,
         caja: estadoCaja?.caja || prev.caja,
+        cajaListaParaAbrir: !cajaAbierta && caja?.estado === "cerrada",
       }));
     }
   }, [estadoCaja]);

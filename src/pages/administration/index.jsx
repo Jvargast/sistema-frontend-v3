@@ -17,6 +17,7 @@ import Header from "../../components/common/Header";
 import AirportShuttleOutlinedIcon from '@mui/icons-material/AirportShuttleOutlined';
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
 
 const navItems = [
   {
@@ -39,9 +40,16 @@ const navItems = [
   },
   {
     text: "Cotizaciones",
-    icon: <ArticleOutlinedIcon className="text-text-indigo-500" />,
+    icon: <ArticleOutlinedIcon className="text-indigo-500" />,
     description: "Gestión de cotizaciones",
     path: "/cotizaciones",
+  },
+  {
+
+    text: "Ventas Chofer",
+    icon: <MonetizationOnOutlinedIcon className="text-zinc-700" />,
+    description: "Gestión de ventas chofer",
+    path: "/ventas-chofer",
   },
   {
     text: "Almacén",

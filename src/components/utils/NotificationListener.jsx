@@ -3,7 +3,11 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { socket } from "../../socket";
 import { addNotificacion } from "../../store/reducers/notificacionesSlice";
-import { emitRefetchMisPedidos, emitRefetchAgendaViajes } from "../../utils/eventBus";
+import {
+  emitRefetchMisPedidos,
+  emitRefetchAgendaViajes,
+} from "../../utils/eventBus";
+import { agendaViajesApi } from "../../store/services/agendaViajesApi";
 
 function NotificationListener() {
   const dispatch = useDispatch();
@@ -27,12 +31,13 @@ function NotificationListener() {
 
     socket.on("actualizar_mis_pedidos", () => {
       console.log("📡 WS: Recibido evento 'actualizar_mis_pedidos'");
-      emitRefetchMisPedidos(); 
+      emitRefetchMisPedidos();
     });
 
     socket.on("actualizar_agenda_chofer", () => {
       console.log("📡 WS: Recibido evento 'actualizar_agenda_chofer'");
       emitRefetchAgendaViajes();
+      dispatch(agendaViajesApi.util.invalidateTags(["AgendaViajes"]));
     });
 
     return () => {

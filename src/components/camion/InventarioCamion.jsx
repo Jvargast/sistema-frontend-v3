@@ -10,11 +10,17 @@ import {
 import PropTypes from "prop-types";
 import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
 import { LinearProgress } from "@mui/material";
-import { useMemo } from "react";
+import { useImperativeHandle, useMemo, forwardRef } from "react";
 
-const InventarioCamion = ({ id_camion }) => {
-  const { data, isLoading, error } =
+const InventarioCamion = forwardRef(({ id_camion }, ref) => {
+  const { data, isLoading, error, refetch } =
     useGetEstadoInventarioCamionQuery(id_camion);
+
+  useImperativeHandle(ref, () => ({
+    refetchInventario: () => {
+      refetch();
+    },
+  }));
 
   const {
     capacidad_total = 0,
@@ -166,7 +172,9 @@ const InventarioCamion = ({ id_camion }) => {
       </Typography>
     </Card>
   );
-};
+});
+
+InventarioCamion.displayName = "InventarioCamion";
 
 InventarioCamion.propTypes = {
   id_camion: PropTypes.number.isRequired,

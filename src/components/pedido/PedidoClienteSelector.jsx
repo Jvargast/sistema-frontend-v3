@@ -15,7 +15,7 @@ const PedidoClienteSelector = ({ open, onClose, selectedCliente, onSelect }) => 
   const [clientes, setClientes] = useState([]); 
   const [page, setPage] = useState(1); 
   const [hasMore, setHasMore] = useState(true); 
-  const [preSelectedCliente, setPreSelectedCliente] = useState(selectedCliente);
+  const [preSelectedCliente, setPreSelectedCliente] = useState(null);
 
   const { data, isLoading, isFetching, refetch } = useGetAllClientesQuery({
     page,
@@ -36,12 +36,24 @@ const PedidoClienteSelector = ({ open, onClose, selectedCliente, onSelect }) => 
     if (node) observer.current.observe(node);
   }, [isFetching, hasMore]);
 
+
+  
+
   useEffect(() => {
     if (data?.clientes) {
       setClientes((prev) => (page === 1 ? data.clientes : [...prev, ...data.clientes]));
       setHasMore(data?.paginacion?.totalPages > page);
     }
   }, [data, page]);
+
+  useEffect(() => {
+    if (!open) return;
+  
+    // Reinicia selección al abrir el modal
+    setPreSelectedCliente(selectedCliente || null);
+    setPage(1); // Reinicia la paginación también
+    setSearchTerm(""); // Opcional: limpiar búsqueda al abrir
+  }, [open, selectedCliente]);
 
   useEffect(() => {
     setPage(1);

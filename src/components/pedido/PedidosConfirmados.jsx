@@ -21,7 +21,7 @@ const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
     isLoading,
     isError,
   } = useGetPedidosConfirmadosQuery(idChofer, {
-    skip: !idChofer, // No ejecutar si no hay un chofer seleccionado
+    skip: !idChofer, 
   });
 
   const [pedidosConfirmados, setPedidosConfirmados] = useState([]);
@@ -129,7 +129,8 @@ const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
                   variant="contained"
                   color="success"
                   startIcon={<CheckCircle />}
-                  sx={{ textTransform: "none", width: "90%" }}
+                  sx={{ textTransform: "none", width: "90%", cursor: "default" }}
+                  
                 >
                   Confirmado
                 </Button>

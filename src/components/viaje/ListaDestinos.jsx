@@ -11,7 +11,6 @@ import {
   Stack,
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-//import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PropTypes from "prop-types";
 

@@ -1,5 +1,5 @@
 // CreateAgendaCargaForm.js
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Paper,
@@ -27,6 +27,9 @@ import { useDispatch } from "react-redux";
 import PedidosConfirmadosList from "../../components/pedido/PedidosConfirmados";
 import { useSelector } from "react-redux";
 import ConfirmarCargaModal from "../../components/agenda_carga/ConfirmarCargaModal";
+import { useGetCajaAsignadaQuery } from "../../store/services/cajaApi";
+import NoCajaAsignadaDialog from "../../components/chofer/NoCajaAsignadaMessage";
+import NoUsuarioCamionDialog from "../../components/chofer/NoUsuarioCamionDialog";
 
 const CreateAgendaCargaForm = () => {
   const {
@@ -64,10 +67,52 @@ const CreateAgendaCargaForm = () => {
   const [prioridad, setPrioridad] = useState("Media");
   const [notas, setNotas] = useState("");
   const [descargarRetornables, setDescargarRetornables] = useState(false);
-  const [productos, setProductos] = useState([]); 
+  const [productos, setProductos] = useState([]);
   const [productosReservados, setProductosReservados] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [puedeCrearAgenda, setPuedeCrearAgenda] = useState(true);
+
+  const [openNoCajaModal, setOpenNoCajaModal] = useState(false);
+  const [openNoUsuarioCamionModal, setOpenNoUsuarioCamionModal] =
+    useState(false);
+
+  const choferSeleccionado = useMemo(() => {
+    if (!choferes) return null;
+    return choferes.find((c) => c.rut === idChofer) || null;
+  }, [choferes, idChofer]);
+
+  const camionSeleccionado = useMemo(() => {
+    if (!camiones) return null;
+    return camiones.find((cam) => cam.id_camion === Number(idCamion)) || null;
+  }, [camiones, idCamion]);
+
+  const { data: cajaAsignada, isLoading: loadingCaja } =
+    useGetCajaAsignadaQuery(
+      { rutUsuario: idChofer },
+      {
+        skip: !idChofer,
+      }
+    );
+
+  useEffect(() => {
+    if (idChofer && !loadingCaja && cajaAsignada?.asignada === false) {
+      setOpenNoCajaModal(true);
+    } else {
+      setOpenNoCajaModal(false);
+    }
+  }, [idChofer, loadingCaja, cajaAsignada]);
+
+  useEffect(() => {
+    if (
+      idCamion &&
+      camionSeleccionado &&
+      !camionSeleccionado.id_chofer_asignado
+    ) {
+      setOpenNoUsuarioCamionModal(true);
+    } else {
+      setOpenNoUsuarioCamionModal(false);
+    }
+  }, [idCamion, camionSeleccionado]);
 
   const handleAddProductRow = () => {
     setProductos((prev) => [
@@ -88,7 +133,7 @@ const CreateAgendaCargaForm = () => {
               id_producto: Number(newProductId),
               es_retornable: selectedProduct
                 ? selectedProduct.es_retornable
-                : false, 
+                : false,
             }
           : prod
       )
@@ -115,6 +160,27 @@ const CreateAgendaCargaForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!loadingCaja && cajaAsignada?.asignada === false) {
+      dispatch(
+        showNotification({
+          message: "El chofer seleccionado no tiene caja asignada.",
+          severity: "warning",
+        })
+      );
+      return;
+    }
+
+    if (camionSeleccionado && !camionSeleccionado.id_chofer_asignado) {
+      dispatch(
+        showNotification({
+          message: "El camión seleccionado no tiene un usuario asignado.",
+          severity: "warning",
+        })
+      );
+      return;
+    }
+
     const payload = {
       id_usuario_chofer: idChofer,
       id_camion: Number(idCamion),
@@ -250,7 +316,7 @@ const CreateAgendaCargaForm = () => {
             <Box mt={3}>
               <InventarioCamion
                 idCamion={Number(idCamion)}
-                modo="simulación"
+                modo="simulacion"
                 productos={productos}
                 productosReservados={productosReservados}
                 onValidezCambio={setPuedeCrearAgenda}
@@ -290,6 +356,20 @@ const CreateAgendaCargaForm = () => {
         open={openModal}
         handleClose={() => setOpenModal(false)}
         agendaCarga={agendaCarga}
+      />
+      <NoCajaAsignadaDialog
+        open={openNoCajaModal}
+        handleClose={() => setOpenNoCajaModal(false)}
+        choferName={choferSeleccionado?.nombre}
+      />
+      <NoUsuarioCamionDialog
+        open={openNoUsuarioCamionModal}
+        handleClose={() => setOpenNoUsuarioCamionModal(false)}
+        camionLabel={
+          camionSeleccionado
+            ? `${camionSeleccionado.id_camion} - ${camionSeleccionado.placa}`
+            : undefined
+        }
       />
     </Box>
   );

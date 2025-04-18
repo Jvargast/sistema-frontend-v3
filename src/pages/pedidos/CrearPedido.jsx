@@ -10,33 +10,44 @@ import PedidoResumen from "../../components/pedido/PedidoResumen";
 import PedidoProductos from "../../components/pedido/PedidoProductos";
 import PedidoCategorias from "../../components/pedido/PedidoCategorias";
 import PedidoCarrito from "../../components/pedido/PedidoCarrito";
+import { useGetCajaAsignadaQuery } from "../../store/services/cajaApi";
+import NoCajaAsignadaDialog from "../../components/chofer/NoCajaAsignadaMessage";
 
 const CrearPedido = () => {
-  // Estados para los datos del pedido
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [direccionEntrega, setDireccionEntrega] = useState("");
+  const [tipoDocumento, setTipoDocumento] = useState("boleta");
+  const [openNoCajaModal, setOpenNoCajaModal] = useState(false);
+
   const [metodoPago, setMetodoPago] = useState(null);
   const [notas, setNotas] = useState("");
 
-  // Redux
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart.items);
   const total = useSelector((state) => state.cart.total);
+  const auth = useSelector((state) => state.auth.user);
 
-  // RTK Query para crear el pedido
+  const { data: cajaAsignada, isLoading: loadingCaja } =
+    useGetCajaAsignadaQuery({ rutUsuario: auth.id }, { skip: !auth.id });
+
   const [createPedido, { isLoading, error }] = useCreatePedidoMutation();
 
-  // Categoría seleccionada (para filtrar productos)
   const [category, setCategory] = useState("all");
 
-  // Si el cliente tiene dirección, se usa por defecto
+  useEffect(() => {
+    if (!loadingCaja && cajaAsignada?.asignada === false) {
+      setOpenNoCajaModal(true);
+    } else {
+      setOpenNoCajaModal(false);
+    }
+  }, [loadingCaja, cajaAsignada]);
+
   useEffect(() => {
     if (selectedCliente && selectedCliente.direccion) {
       setDireccionEntrega(selectedCliente.direccion);
     }
   }, [selectedCliente]);
 
-  // Función para agregar producto al carrito (incluyendo el campo "tipo")
   const handleAddToCart = (product) => {
     dispatch(
       addItem({
@@ -49,7 +60,6 @@ const CrearPedido = () => {
     );
   };
 
-  // Función para crear el pedido
   const handleCreatePedido = async () => {
     if (!selectedCliente) {
       dispatch(
@@ -61,6 +71,19 @@ const CrearPedido = () => {
       return;
     }
 
+    if (tipoDocumento === "factura") {
+      if (!selectedCliente?.razon_social || !selectedCliente?.rut) {
+        dispatch(
+          showNotification({
+            message:
+              "El cliente no tiene RUT o razón social. No se puede emitir factura.",
+            severity: "error",
+          })
+        );
+        return;
+      }
+    }
+
     const pedidoData = {
       id_cliente: selectedCliente.id_cliente,
       direccion_entrega: direccionEntrega,
@@ -69,8 +92,10 @@ const CrearPedido = () => {
         id_producto: item.id_producto,
         cantidad: item.cantidad,
         tipo: item.tipo,
+        precio_unitario: item.precio_unitario,
       })),
       notas,
+      tipo_documento: tipoDocumento,
     };
 
     try {
@@ -113,7 +138,6 @@ const CrearPedido = () => {
         minHeight: "80vh",
       }}
     >
-      {/* Fila 1: Formulario completo */}
       <Box>
         <Typography variant="h4" fontWeight={700} textAlign="center" mb={3}>
           Crear Pedido
@@ -127,6 +151,9 @@ const CrearPedido = () => {
           setMetodoPago={setMetodoPago}
           notas={notas}
           setNotas={setNotas}
+          mostrarMetodoPago={tipoDocumento !== "factura"}
+          tipoDocumento={tipoDocumento}
+          setTipoDocumento={setTipoDocumento}
         />
       </Box>
 
@@ -159,6 +186,11 @@ const CrearPedido = () => {
           />
         </Box>
       </Box>
+      <NoCajaAsignadaDialog
+        open={openNoCajaModal}
+        handleClose={() => setOpenNoCajaModal(false)}
+        choferName={auth.nombre}
+      />
     </Box>
   );
 };

@@ -1,6 +1,13 @@
 import { Box, Typography, TextField, Button } from "@mui/material";
 import PropTypes from "prop-types";
 
+const formatCLP = (value) =>
+  new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: "CLP",
+    maximumFractionDigits: 0,
+  }).format(value);
+
 const TotalsDisplay = ({
   subtotal,
   descuento,
@@ -13,12 +20,15 @@ const TotalsDisplay = ({
   onTaxRateChange,
   productosRetornables,
 }) => {
+
+  
   return (
     <Box>
       {/* Totales */}
       <Box display="flex" justifyContent="space-between" mb={2}>
         <Typography variant="h4">Subtotal:</Typography>
-        <Typography variant="h4">${subtotal.toFixed(2)}</Typography>
+        <Typography variant="h4">{formatCLP(subtotal)}
+      </Typography>
       </Box>
       <Box
         display="flex"
@@ -35,7 +45,7 @@ const TotalsDisplay = ({
           sx={{ width: "100px", fontSize: "1rem" }}
         />
         <Typography variant="h4" color="error">
-          -${descuento.toFixed(2)}
+          -{formatCLP(descuento)}
         </Typography>
       </Box>
       <Box
@@ -51,11 +61,11 @@ const TotalsDisplay = ({
           onChange={(e) => onTaxRateChange(e)}
           sx={{ width: "100px" }}
         />
-        <Typography variant="h4">${impuestos.toFixed(2)}</Typography>
+        <Typography variant="h4">{formatCLP(impuestos)}</Typography>
       </Box>
       <Box display="flex" justifyContent="space-between" mb={2}>
         <Typography variant="h4">Total:</Typography>
-        <Typography variant="h4">${total.toFixed(2)}</Typography>
+        <Typography variant="h4">{formatCLP(total)}</Typography>
       </Box>
 
       {productosRetornables && productosRetornables.length > 0 && (

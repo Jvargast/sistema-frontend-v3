@@ -13,12 +13,9 @@ import OrdersPieChart from "../../components/dashboard/paneles/OrdersPieChart";
 import RevenueTrendChart from "../../components/dashboard/paneles/RevenueTrendChart";
 import BestSellingProductsChart from "../../components/dashboard/paneles/BestSellingProductsChart";
 import { useGetKpiVentasPorFechaQuery } from "../../store/services/ventasEstadisticasApi";
-import dayjs from "dayjs";
 import Boxkpi from "../../components/dashboard/paneles/Boxkpi";
+import { getKpiConfig } from "../../utils/kpiUtils";
 
-// 📌 Definición de KPIs
-
-// 📊 Definición de gráficos
 const chartsData = [
   { id: "chart1", component: <SalesChart /> },
   { id: "chart2", component: <OrdersPieChart /> },
@@ -33,64 +30,87 @@ const chartsData = [
 ];
 
 const DashboardCentral = () => {
-  const hoy = dayjs().format("YYYY-MM-DD");
-  const { data } = useGetKpiVentasPorFechaQuery(hoy);
-  // 🔢 KPIs base
-  const kpiData = [
-    {
-      id: "kpi1",
-      title: "Ingresos Totales",
-      value: data
-        ? `$${parseFloat(data.total_ventas).toLocaleString()}`
-        : "Cargando...",
-    },
-  ];
+  /* const hoy = dayjs().format("YYYY-MM-DD"); */
+  const { data: ventas } = useGetKpiVentasPorFechaQuery();
 
-  // 🔁 Agregar KPIs dinámicos por tipo_entrega si existen
-  if (data?.detalles) {
-    Object.entries(data.detalles).forEach(([tipo, valores], index) => {
-      let label = tipo
-        .replace(/_/g, " ") // reemplaza guiones bajos por espacios
-        .replace(/\b\w/g, (l) => l.toUpperCase()); // capitaliza cada palabra
+  let kpiData = [];
 
+  if (ventas) {
+    if (typeof ventas.total_ventas !== "undefined") {
+      const { label, icon, color } = getKpiConfig("ingresos");
       kpiData.push({
-        id: `kpi${index + 2}`,
-        title: `Ventas: ${label}`,
-        value: `${
-          valores.cantidad
-        } pedidos / $${valores.total.toLocaleString()}`,
+        id: "kpi1",
+        title: label,
+        value: `$${parseFloat(ventas.total_ventas).toLocaleString()}`,
+        icon,
+        color,
       });
-    });
+    }
+
+    if (ventas.detalles) {
+      Object.entries(ventas.detalles).forEach(([tipo, valores], index) => {
+        const { label, icon, color } = getKpiConfig(tipo);
+
+        kpiData.push({
+          id: `kpi${index + 2}`,
+          title: label,
+          value: `${
+            valores.cantidad
+          } pedidos / $${valores.total.toLocaleString()}`,
+          icon,
+          color,
+        });
+      });
+    }
   }
 
   const containerRef = useRef(null);
   const swapyRef = useRef(null);
 
-  // 📌 Inicializar Swapy correctamente
+  const originalOrderRef = useRef([]);
+
   useEffect(() => {
     if (containerRef.current) {
+      const items = containerRef.current.querySelectorAll("[data-swapy-item]");
+      originalOrderRef.current = Array.from(items).map((item) =>
+        item.getAttribute("data-swapy-item")
+      );
+
       swapyRef.current = createSwapy(containerRef.current);
 
-      // Listener para el evento de intercambio
       swapyRef.current.onSwap((event) => {
         console.log("Intercambio realizado:", event);
       });
     }
 
     return () => {
-      // 🔄 Destruir la instancia de Swapy al desmontar el componente
       swapyRef.current?.destroy();
     };
   }, []);
 
   // 🔄 Restablecer el orden original
   const resetLayout = () => {
-    setTimeout(() => {
-      if (swapyRef.current) {
-        swapyRef.current.destroy();
-        swapyRef.current = createSwapy(containerRef.current);
+    if (!originalOrderRef.current.length || !containerRef.current) return;
+
+    const slots = containerRef.current.querySelectorAll("[data-swapy-slot]");
+    const items = Array.from(
+      containerRef.current.querySelectorAll("[data-swapy-item]")
+    );
+
+    // 🔄 Restaurar el orden visual del DOM
+    originalOrderRef.current.forEach((itemId, index) => {
+      const slot = slots[index];
+      const item = items.find(
+        (el) => el.getAttribute("data-swapy-item") === itemId
+      );
+      if (item && slot) {
+        slot.appendChild(item);
       }
-    }, 100);
+    });
+
+    // 🧼 Resetear Swapy
+    swapyRef.current?.destroy();
+    swapyRef.current = createSwapy(containerRef.current);
   };
 
   return (
@@ -122,18 +142,12 @@ const DashboardCentral = () => {
               data-swapy-slot={`slotKPI${index}`}
             >
               <div data-swapy-item={`itemKPI${index}`} className="swapy-handle">
-                <Card
-                  sx={{
-                    borderRadius: 3,
-                    boxShadow: 2,
-                    backgroundColor: "#F4F6F8",
-                    textAlign: "center",
-                  }}
-                >
-                  <CardContent>
-                    <Boxkpi title={kpi.title} value={kpi.value} />
-                  </CardContent>
-                </Card>
+                <Boxkpi
+                  title={kpi.title}
+                  value={kpi.value}
+                  icon={kpi.icon}
+                  color={kpi.color}
+                />
               </div>
             </Grid>
           ))}
@@ -154,9 +168,7 @@ const DashboardCentral = () => {
                 <Card
                   sx={{ borderRadius: 3, boxShadow: 2, minHeight: "280px" }}
                 >
-                  <CardContent>
-                    {chart.component}
-                  </CardContent>
+                  <CardContent>{chart.component}</CardContent>
                 </Card>
               </div>
             </Grid>

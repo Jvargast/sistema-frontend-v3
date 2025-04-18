@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import PropTypes from "prop-types";
 import BackButton from "./BackButton";
+import { useSelector } from "react-redux";
 
 const formatoCLP = (valor) =>
   new Intl.NumberFormat("es-CL", {
@@ -38,6 +39,7 @@ const DataTable = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const rol = useSelector((state) => state?.auth?.rol);
 
   if (loading) {
     return (
@@ -62,7 +64,7 @@ const DataTable = ({
 
   return (
     <Box sx={{ p: 2, maxWidth: "100%", mx: "auto" }}>
-      <BackButton to="/admin" label="Volver" />
+      <BackButton to={rol === "chofer" ? "/viajes" : "/admin"} label="Volver" />
       <Typography
         variant="h5"
         fontWeight="bold"

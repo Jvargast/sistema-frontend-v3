@@ -9,12 +9,13 @@ import { useTheme } from "@mui/material/styles";
 import { useGetAllVentasQuery } from "../../store/services/ventasApi";
 import HistorialVentas from "./HistorialVentas";
 import EmptyState from "../../components/common/EmptyState";
-import { Navigate } from "react-router";
+import { useNavigate } from "react-router";
 
 const ListaVentas = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(isSmallScreen ? 5 : 10);
 
@@ -29,7 +30,7 @@ const ListaVentas = () => {
 
   useEffect(() => {
     setRowsPerPage(isSmallScreen ? 5 : 10);
-    setPage(0); // reiniciar paginación
+    setPage(0); 
   }, [isSmallScreen]);
 
   const ventas = useMemo(() => data?.ventas || [], [data]);
@@ -60,7 +61,7 @@ const ListaVentas = () => {
         title="Aún no tienes ventas"
         subtitle="Puedes comenzar creando una venta para tus clientes."
         buttonText="Crear Ventas"
-        onAction={() => Navigate("/punto-venta")}
+        onAction={() => navigate("/punto-venta")}
       />
     );
   }

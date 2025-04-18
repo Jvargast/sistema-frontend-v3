@@ -10,6 +10,13 @@ import {
 import PedidoListaProductos from "./PedidoListaProductos";
 import PropTypes from "prop-types";
 
+const formatCLP = (value) =>
+  new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: "CLP",
+    maximumFractionDigits: 0,
+  }).format(value);
+
 const PedidoCard = ({
   pedido,
   confirmado = false,
@@ -50,7 +57,7 @@ const PedidoCard = ({
         <Divider sx={{ my: 2 }} />
 
         <Typography variant="body1" fontWeight="bold" color="primary">
-          Total: ${pedido.total}
+          Total: {formatCLP(pedido.total)}
         </Typography>
         <Typography variant="body2" color={pedido.pagado ? "green" : "red"}>
           Pago: {pedido.estado_pago}
@@ -68,7 +75,13 @@ const PedidoCard = ({
 
         {/* Botón de confirmación */}
         {confirmado ? (
-          <Typography mt={2} color="green" fontWeight="bold">
+          <Typography
+            mt={2}
+            color="green"
+            fontWeight="bold"
+            disabled
+            sx={{ cursor: "default" }}
+          >
             ✅ Pedido Confirmado
           </Typography>
         ) : (

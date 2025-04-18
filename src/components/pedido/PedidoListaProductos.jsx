@@ -1,6 +1,14 @@
 import { List, ListItem, ListItemText, Typography, Paper } from "@mui/material";
 import PropTypes from "prop-types";
 
+const formatCLP = (value) =>
+  new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: "CLP",
+    maximumFractionDigits: 0,
+  }).format(value);
+
+
 const PedidoListaProductos = ({ productos }) => {
   return (
     <Paper
@@ -39,7 +47,8 @@ const PedidoListaProductos = ({ productos }) => {
               }
               secondary={
                 <Typography variant="caption" color="textSecondary">
-                  Subtotal: <strong>${Number(detalle.subtotal)}</strong>{" "}
+                  Subtotal: <strong>{formatCLP(detalle.subtotal)}</strong>
+
                   {/* 🔹 Convertimos a número */}
                 </Typography>
               }

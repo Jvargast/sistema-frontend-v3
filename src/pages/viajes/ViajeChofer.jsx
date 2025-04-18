@@ -1,9 +1,19 @@
 import PropTypes from "prop-types";
-import { useEffect, useRef, useState } from "react";
-import { useTheme, useMediaQuery, Typography } from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  useTheme,
+  useMediaQuery,
+  Typography,
+  Slide,
+  Box,
+  IconButton,
+  Dialog,
+} from "@mui/material";
 import { useDispatch } from "react-redux";
-import { Container, Fab } from "@mui/material";
+import { Container } from "@mui/material";
 import { showNotification } from "../../store/reducers/notificacionSlice";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import CloseIcon from "@mui/icons-material/Close";
 
 import InventarioCargado from "../../components/viaje/InventarioCargado";
 import ListaDestinos from "../../components/viaje/ListaDestinos";
@@ -15,7 +25,9 @@ import DetallePedidoModal from "../../components/entregas/DetallePedidoModal";
 
 import DoneIcon from "@mui/icons-material/Done";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
-import { useLayout } from "../../context/LayoutContext";
+import SpeedDial from "@mui/material/SpeedDial";
+import SpeedDialAction from "@mui/material/SpeedDialAction";
+import SpeedDialIcon from "@mui/material/SpeedDialIcon";
 import { onRefetchAgendaViajes } from "../../utils/eventBus";
 import { useGetPedidoByIdQuery } from "../../store/services/pedidosApi";
 import { useGetEntregasByAgendaIdQuery } from "../../store/services/entregasApi";
@@ -23,26 +35,39 @@ import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventar
 import { useFinalizarViajeMutation } from "../../store/services/agendaViajesApi";
 import { useErrorChecker } from "../../utils/useErrorChecker";
 import PermissionMessage from "../../components/common/PermissionMessage";
+import InventarioCamion from "../../components/inventario/InventarioCamion";
 
 const ViajeChofer = ({ viaje }) => {
   const dispatch = useDispatch();
-  const { drawerWidth } = useLayout();
+  const [fabOpen, setFabOpen] = useState(false);
   const theme = useTheme();
   const isTabletOrMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [openInventarioModal, setOpenInventarioModal] = useState(false);
+
+  const SlideTransition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+  });
+
+  const toggleFab = () => {
+    setFabOpen((prev) => !prev);
+  };
 
   const {
     data: entregasData,
     refetch: refetchEntregas,
     error: errorEntregas,
-  } = useGetEntregasByAgendaIdQuery({
-    id_agenda_viaje: viaje?.id_agenda_viaje,
-  });
+  } = useGetEntregasByAgendaIdQuery(
+    {
+      id_agenda_viaje: viaje?.id_agenda_viaje,
+    },
+    { skip: !viaje?.id_agenda_viaje }
+  );
 
   const {
     data: inventarioCamion,
     isLoading: cargandoInventario,
     refetch: refetchInventario,
-    error: errorInventario
+    error: errorInventario,
   } = useGetEstadoInventarioCamionQuery(viaje?.id_camion, {
     skip: !viaje?.id_camion,
   });
@@ -211,6 +236,36 @@ const ViajeChofer = ({ viaje }) => {
         totalDestinos={viaje.destinos.length}
         entregasCompletadas={entregasCompletadas}
       />
+      <Dialog
+        fullScreen={isTabletOrMobile}
+        open={openInventarioModal}
+        onClose={() => setOpenInventarioModal(false)}
+        TransitionComponent={SlideTransition}
+      >
+        <Box
+          sx={{
+            p: 2,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            bgcolor: "primary.main",
+            color: "#fff",
+          }}
+        >
+          <Typography variant="h6">🛻 Inventario del Camión</Typography>
+          <IconButton
+            edge="end"
+            color="inherit"
+            onClick={() => setOpenInventarioModal(false)}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+
+        <Box sx={{ p: 2 }}>
+          <InventarioCamion idCamion={viaje.id_camion} modo="visual" />
+        </Box>
+      </Dialog>
 
       <ListaDestinos
         destinos={viaje.destinos}
@@ -222,21 +277,6 @@ const ViajeChofer = ({ viaje }) => {
         inventario={inventarioCamion?.data}
         isLoading={cargandoInventario}
       />
-
-      {todasEntregasCompletadas && (
-        <Fab
-          color="success"
-          sx={{
-            position: "fixed",
-            bottom: isTabletOrMobile ? 80 : 24,
-            right: isTabletOrMobile ? 16 : 24,
-            zIndex: 1000,
-          }}
-          onClick={handleFinalizarViaje}
-        >
-          <DoneIcon />
-        </Fab>
-      )}
       {modalOpen && destinoSeleccionado && (
         <FormularioEntregaModal
           open={modalOpen}
@@ -259,20 +299,42 @@ const ViajeChofer = ({ viaje }) => {
         />
       )}
 
-      {viaje?.estado === "En Tránsito" && (
-        <Fab
-          color="primary"
-          sx={{
-            position: "fixed",
-            bottom: 16,
-            left: isTabletOrMobile ? 16 : `${drawerWidth + 20}px`,
-            zIndex: 1000,
-          }}
-          onClick={() => setModalVentaRapidaOpen(true)}
-        >
-          <PointOfSaleIcon />
-        </Fab>
-      )}
+      <SpeedDial
+        ariaLabel="Acciones del viaje"
+        sx={{
+          position: "fixed",
+          bottom: 60,
+          right: 24,
+          zIndex: 1200,
+        }}
+        icon={<SpeedDialIcon onClick={toggleFab} />}
+        direction="up"
+        open={fabOpen}
+        onClose={() => setFabOpen(false)}
+        onOpen={() => setFabOpen(true)}
+      >
+        <SpeedDialAction
+          icon={<Inventory2Icon />}
+          tooltipTitle="Ver Inventario"
+          onClick={() => setOpenInventarioModal(true)}
+        />
+
+        {viaje?.estado === "En Tránsito" && (
+          <SpeedDialAction
+            icon={<PointOfSaleIcon />}
+            tooltipTitle="Venta Rápida"
+            onClick={() => setModalVentaRapidaOpen(true)}
+          />
+        )}
+
+        {todasEntregasCompletadas && (
+          <SpeedDialAction
+            icon={<DoneIcon />}
+            tooltipTitle="Finalizar Viaje"
+            onClick={handleFinalizarViaje}
+          />
+        )}
+      </SpeedDial>
 
       {modalVentaRapidaOpen && (
         <ModalVentaRapida

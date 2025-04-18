@@ -19,10 +19,16 @@ export const pedidosEstadisticasApi = createApi({
       query: ({ mes, anio }) => `/analisis/pedidos?mes=${mes}&anio=${anio}`,
       providesTags: ["PedidosEstadisticas"],
     }),
+
+    getKpiPedidosPorFecha: builder.query({
+      query: () => "/analisis/pedidos/kpi-hoy",
+      providesTags: ["PedidosEstadisticas"],
+    }),
   }),
 });
 
 export const {
   useGenerarPedidosEstadisticasMutation,
   useGetPedidosEstadisticasPorMesQuery,
+  useGetKpiPedidosPorFechaQuery,
 } = pedidosEstadisticasApi;

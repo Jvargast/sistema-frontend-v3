@@ -24,12 +24,13 @@ const PedidoForm = ({
   mostrarMetodoPago = true,
   notas,
   setNotas,
+  tipoDocumento,
+  setTipoDocumento,
   extraFields,
 }) => {
   const [openClienteModal, setOpenClienteModal] = useState(false);
   const [useClientAddress, setUseClientAddress] = useState(true);
 
-  // Cuando se deselecciona el cliente, se limpia la dirección.
   useEffect(() => {
     if (!selectedCliente) {
       setDireccionEntrega("");
@@ -38,6 +39,7 @@ const PedidoForm = ({
       setDireccionEntrega(selectedCliente.direccion || "");
     }
   }, [selectedCliente, useClientAddress, setDireccionEntrega]);
+
 
   return (
     <Paper
@@ -84,7 +86,10 @@ const PedidoForm = ({
       <PedidoClienteSelector
         open={openClienteModal}
         onClose={() => setOpenClienteModal(false)}
-        onSelect={setSelectedCliente}
+        onSelect={(cliente) => {
+          console.log("Cliente seleccionado:", cliente); 
+          setSelectedCliente(cliente);
+        }}
       />
 
       {/* Checkbox para usar la dirección del cliente */}
@@ -115,8 +120,24 @@ const PedidoForm = ({
         }}
       />
 
+      {/* Tipo de documento */}
+      <TextField
+        select
+        fullWidth
+        label="Tipo de Documento"
+        value={tipoDocumento}
+        onChange={(e) => setTipoDocumento(e.target.value)}
+        variant="outlined"
+        sx={{ mb: 3, backgroundColor: "#fff", borderRadius: 1 }}
+      >
+        <MenuItem value="boleta">Boleta</MenuItem>
+        {selectedCliente?.rut && selectedCliente?.razon_social && (
+          <MenuItem value="factura">Factura</MenuItem>
+        )}
+      </TextField>
+
       {/* Método de pago: usar IDs numéricos */}
-      {mostrarMetodoPago && (
+      {(mostrarMetodoPago || tipoDocumento !== "factura") && (
         <TextField
           select
           fullWidth
@@ -167,6 +188,8 @@ PedidoForm.propTypes = {
   setMetodoPago: PropTypes.func.isRequired,
   notas: PropTypes.string,
   setNotas: PropTypes.func.isRequired,
+  tipoDocumento: PropTypes.string,
+  setTipoDocumento: PropTypes.func,
   extraFields: PropTypes.node,
 };
 

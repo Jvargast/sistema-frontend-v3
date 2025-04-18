@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -33,6 +33,16 @@ const ProcesarPagoModal = ({
   const [metodoPago, setMetodoPago] = useState(metodosPago[0]?.id || "");
   const [notas, setNotas] = useState("");
   const [referencia, setReferencia] = useState("");
+
+  useEffect(() => {
+    if (!open) {
+      setMontoPago(total);
+      setMetodoPago(metodosPago[0]?.id || "");
+      setNotas("");
+      setReferencia("");
+    }
+  }, [open, total, metodosPago]);
+
   const dispatch = useDispatch();
 
   const handleConfirm = () => {
