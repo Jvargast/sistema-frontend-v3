@@ -26,6 +26,17 @@ export const ventasEstadisticasApi = createApi({
     getVentasResumenSemanal: builder.query({
       query: () => "/analisis/ventas/resumen-semanal",
     }),
+
+    getVentasTendenciaMensual: builder.query({
+      query: ({ anio }) => `/analisis/ventas/tendencia-mensual?anio=${anio}`,
+      providesTags: ["VentasEstadisticas"],
+    }),
+
+    getResumenVentasPorTipoEntrega: builder.query({
+      query: (fecha) => `/analisis/ventas/resumen-por-tipo-entrega?fecha=${fecha}`,
+      providesTags: ["VentasEstadisticas"],
+    }),
+    
   }),
 });
 
@@ -33,5 +44,7 @@ export const {
   useGenerarVentasEstadisticasMutation,
   useGetVentasEstadisticasPorMesQuery,
   useGetKpiVentasPorFechaQuery,
-  useGetVentasResumenSemanalQuery
+  useGetVentasResumenSemanalQuery,
+  useGetVentasTendenciaMensualQuery,
+  useGetResumenVentasPorTipoEntregaQuery
 } = ventasEstadisticasApi;

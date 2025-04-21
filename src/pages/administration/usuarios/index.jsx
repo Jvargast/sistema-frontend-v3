@@ -71,10 +71,8 @@ const UserManagement = () => {
     { field: "sequentialId", headerName: "ID", flex: 0.15 },
     { field: "nombre", headerName: "Nombre", flex: 0.3 },
     { field: "apellido", headerName: "Apellido", flex: 0.3 },
-    { field: "email", headerName: "Email", flex: 0.4 },
+    { field: "rut", headerName: "Rut", flex: 0.3 },
     { field: "rol", headerName: "Rol", flex: 0.3 },
-    { field: "Empresa", headerName: "Empresa", flex: 0.4 },
-    { field: "Sucursal", headerName: "Sucursal", flex: 0.4 },
     {
       field: "ultimo_login",
       headerName: "Último Login",
@@ -83,7 +81,7 @@ const UserManagement = () => {
     {
       field: "acciones",
       headerName: "Acciones",
-      flex: 0.3,
+      flex: 0.2,
       sortable: false,
       renderCell: (params) => (
         <IconButton color="primary" onClick={() => handleEdit(params.row)}>

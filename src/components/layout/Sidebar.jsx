@@ -249,13 +249,15 @@ const Sidebar = ({
             value="home"
             icon={<HomeOutlined />}
           />
-          {rol === "chofer" ? (
+          {rol === "chofer" && (
             <BottomNavigationAction
               label="Mis Ventas"
               value="misventas"
               icon={<ShoppingCartOutlined />}
             />
-          ) : (
+          )}
+
+          {rol !== "chofer" && rol !== "vendedor" && (
             <BottomNavigationAction
               label="Pedidos"
               value="pedidos"

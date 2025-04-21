@@ -63,7 +63,7 @@ const DataTable = ({
   }
 
   return (
-    <Box sx={{ p: 2, maxWidth: "100%", mx: "auto" }}>
+    <Box sx={{ p: 2, maxWidth: "100%", mx: "auto", mb: 3 }}>
       <BackButton to={rol === "chofer" ? "/viajes" : "/admin"} label="Volver" />
       <Typography
         variant="h5"

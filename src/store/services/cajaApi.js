@@ -88,7 +88,7 @@ export const cajaApi = createApi({
     // Eliminar una caja
     deleteCaja: builder.mutation({
       query: (id) => ({
-        url: `/caja/${id}`,
+        url: `/cajas/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Caja"],

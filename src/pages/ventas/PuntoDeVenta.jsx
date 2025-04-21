@@ -166,15 +166,14 @@ const PuntoDeVenta = () => {
       }
     }
 
-    // 💡 Validar si ya se confirmaron los retornables
     const yaConfirmados = productosRetornables.length > 0;
     if (productosRetornablesEnCarrito.length > 0 && !yaConfirmados) {
       setProductosRetornables(productosRetornablesEnCarrito);
       setOpenRetornablesModal(true);
-      return; // ⚠️ Detener aquí hasta que se confirme el modal
+      return;
     }
 
-    const venta = armarVentaData(productosRetornables); // Usa lo ya confirmado
+    const venta = armarVentaData(productosRetornables); 
     setVentaData(venta);
 
     if (isFactura) {
@@ -535,7 +534,7 @@ const PuntoDeVenta = () => {
   }
 
   return (
-    <Box p={3}>
+    <Box p={3} mb={3}>
       <Typography variant="h2" mb={2} fontWeight={"600"}>
         Punto de Venta
       </Typography>
