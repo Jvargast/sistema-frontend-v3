@@ -19,10 +19,20 @@ export const productosEstadisticasApi = createApi({
       query: ({ mes, anio }) => `/analisis/productos?mes=${mes}&anio=${anio}`,
       providesTags: ["ProductoEstadisticas"],
     }),
+    getKpiProductoPorFecha: builder.query({
+      query: () => "/analisis/productos/kpi-hoy",
+      providesTags: ["ProductoEstadisticas"],
+    }),
+    getResumenProductosPorFecha: builder.query({
+      query: (fecha) => `/analisis/productos/resumen-por-fecha?fecha=${fecha}`,
+      providesTags: ["ProductoEstadisticas"],
+    }),
   }),
 });
 
 export const {
   useGenerarProductoEstadisticasMutation,
   useGetProductoEstadisticasPorMesQuery,
+  useGetKpiProductoPorFechaQuery,
+  useGetResumenProductosPorFechaQuery,
 } = productosEstadisticasApi;

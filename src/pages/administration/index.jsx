@@ -125,6 +125,7 @@ const Administration = () => {
         flexDirection: "column",
         backgroundColor: "gray.50",
         p:1,
+        mb: 4
       }}
     >
       <Header title="Menú Administrador" subtitle=""/>

@@ -13,6 +13,7 @@ import {
   Stack,
 } from "@mui/material";
 import PropTypes from "prop-types";
+import { formatCLP } from "../../utils/formatUtils";
 
 const DetallePedidoModal = ({ open, onClose, pedido, loading }) => {
   const isMobile = useMediaQuery("(max-width:600px)");
@@ -84,7 +85,7 @@ const DetallePedidoModal = ({ open, onClose, pedido, loading }) => {
                         Cantidad: {detalle.cantidad}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Precio Unitario: ${detalle.precio_unitario}
+                        Precio Unitario: {formatCLP(detalle.precio_unitario)}
                       </Typography>
                     </Box>
                   </ListItem>

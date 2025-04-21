@@ -41,6 +41,16 @@ import { modulesData } from "../../utils/modulesData";
 import { markAllAsRead } from "../../store/reducers/notificacionesSlice";
 import NotificationsMenu from "./NotificationMenu";
 
+const rolColors = {
+  chofer: "#FFD54F",       // amarillo
+  administrador: "#90CAF9", // azul claro
+  vendedor: "#A5D6A7",      // verde claro
+  default: "#E4DFDF",       // color por defecto
+};
+
+
+
+
 const Navbar = ({ user, rol, isSidebarOpen, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -49,6 +59,8 @@ const Navbar = ({ user, rol, isSidebarOpen, setIsSidebarOpen }) => {
   //const isTablet = useMediaQuery("(min-width: 600px) and (max-width: 1023px)");
   //const isMobile = useMediaQuery("(max-width: 599px)");
   const isTabletOrMobile = useMediaQuery("(max-width:1023px)");
+
+  const navbarColor = rolColors[rol?.toLowerCase()] || rolColors.default;
 
   const navigate = useNavigate();
 
@@ -123,7 +135,7 @@ const Navbar = ({ user, rol, isSidebarOpen, setIsSidebarOpen }) => {
         boxShadow: "none",
       }}
     >
-      <Toolbar sx={{ justifyContent: "space-between", background: "#E4DFDF" }}>
+      <Toolbar sx={{ justifyContent: "space-between", background: navbarColor }}>
         {/* LADO IZQUIERDO */}
         {/* Botón para abrir/cerrar Sidebar */}
         {isTabletOrMobile ? (

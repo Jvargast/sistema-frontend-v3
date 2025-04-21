@@ -60,7 +60,7 @@ const SalesChart = () => {
   }
 
   return (
-    <Box sx={{ p: 1, height: 300 }}>
+    <Box sx={{ p: 1, height: 320 }}>
       <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
         📅 Ventas Semanales (CLP)
       </Typography>

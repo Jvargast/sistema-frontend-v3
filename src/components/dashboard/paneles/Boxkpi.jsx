@@ -7,6 +7,7 @@ const Boxkpi = ({
   value,
   icon: Icon = TrendingUpIcon,
   color = "primary",
+  subtitle,
 }) => {
   const theme = useTheme();
 
@@ -58,6 +59,14 @@ const Boxkpi = ({
         >
           {value}
         </Typography>
+        {subtitle && (
+          <Typography
+            variant="body2"
+            sx={{ color: theme.palette.text.secondary, mt: 0.5 }}
+          >
+            {subtitle}
+          </Typography>
+        )}
       </Box>
     </Box>
   );
@@ -75,6 +84,7 @@ Boxkpi.propTypes = {
     "error",
     "info",
   ]),
+  subtitle: PropTypes.string,
 };
 
 export default Boxkpi;

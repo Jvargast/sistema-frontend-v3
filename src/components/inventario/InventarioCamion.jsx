@@ -53,7 +53,6 @@ const InventarioCamion = ({
 
   const columnas = isTablet ? 6 : 10;
 
-  console.log(productosReservados)
 
   const espaciosReservadosProyectados =
     modo === "simulacion"
@@ -73,7 +72,7 @@ const InventarioCamion = ({
         })
       : [];
 
-  const espaciosCamion = [
+  /* const espaciosCamion = [
     ...Array(reservados_retornables).fill({ tipo: "ReservadoRetornable" }),
     ...Array(reservados_no_retornables).fill({ tipo: "ReservadoNoRetornable" }),
     ...Array(retornablesACargarAhora).fill({ tipo: "ACargarAhora" }),
@@ -83,7 +82,27 @@ const InventarioCamion = ({
     ...Array(Math.max(0, vacios - espaciosReservadosProyectados)).fill({
       tipo: "Vacío",
     }),
+  ]; */
+  const bloques = [
+    ...Array(reservados_retornables).fill({ tipo: "ReservadoRetornable" }),
+    ...Array(reservados_no_retornables).fill({ tipo: "ReservadoNoRetornable" }),
+    ...Array(retornablesACargarAhora).fill({ tipo: "ACargarAhora" }),
+    ...Array(disponibles).fill({ tipo: "Disponible" }),
+    ...Array(retorno).fill({ tipo: "Retorno" }),
+    ...arrayReservadosCarga,
   ];
+
+  // Si se pasa de la capacidad, recorta
+  let espaciosCamion = bloques.slice(0, capacidad_total);
+
+  // Si queda espacio, agrega vacíos
+  const faltantes = capacidad_total - espaciosCamion.length;
+  if (faltantes > 0) {
+    espaciosCamion = [
+      ...espaciosCamion,
+      ...Array(faltantes).fill({ tipo: "Vacío" }),
+    ];
+  }
 
   const getColor = (tipo) => {
     switch (tipo) {

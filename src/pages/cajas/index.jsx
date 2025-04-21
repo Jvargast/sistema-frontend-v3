@@ -42,7 +42,6 @@ const ListarCajas = () => {
   if (isLoading) return <LoaderComponent />;
   if (error) return <Typography>Error al cargar las cajas.</Typography>;
 
-  console.log(filteredCajas);
 
   return (
     <Box p={3}>
