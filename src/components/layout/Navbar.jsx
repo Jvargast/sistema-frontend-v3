@@ -51,7 +51,7 @@ const rolColors = {
 
 
 
-const Navbar = ({ user, rol, isSidebarOpen, setIsSidebarOpen }) => {
+const Navbar = ({ user, rol, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
   /* const isNonMobile = useMediaQuery("(min-width: 600px)"); */

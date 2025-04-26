@@ -133,64 +133,70 @@ const PedidosBoard = () => {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex flex-col items-start justify-between mb-4 px-4">
-        <Typography variant="h4" className="font-semibold text-gray-700">
-          Administración de Pedidos
-        </Typography>
-        <Typography variant="subtitle1" className="text-gray-500">
-          Gestiona claramente la asignación de pedidos a cada chofer.
-        </Typography>
-      </div>
-      <div
-        className="
-          grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4
-          gap-4 
-          p-4 
-          bg-gray-50
-          min-h-screen
-        "
-      >
-        <Column
-          droppableId="sinAsignar"
-          title={
-            <>
-              <span className="font-semibold text-black">Chofer</span>
-              <br />
-              <span className="text-sm font-normal text-gray-500">
-                Sin Asignar
-              </span>
-            </>
-          }
-          pedidos={columnsState.sinAsignar || []}
-        />
-
-        {(allPedidosLoading || choferesLoading) && (
-          <div className="flex items-center justify-center text-gray-600">
-            Cargando datos...
-          </div>
-        )}
-        {!choferesLoading &&
-          choferesData?.map((chofer) => (
+      <div className="pb-4">
+        <div className="flex flex-col items-start justify-between mb-4 px-4">
+          <Typography variant="h4" className="font-semibold text-gray-700">
+            Administración de Pedidos
+          </Typography>
+          <Typography variant="subtitle1" className="text-gray-500">
+            Gestiona claramente la asignación de pedidos a cada chofer.
+          </Typography>
+        </div>
+        <div className="overflow-x-auto">
+          <div
+            className="
+     flex flex-wrap gap-6
+      justify-center
+      bg-gray-50
+      min-h-screen
+      px-6
+      max-w-screen-2xl
+      mx-auto
+    "
+          >
             <Column
-              key={chofer.rut}
-              droppableId={chofer.rut}
+              droppableId="sinAsignar"
               title={
                 <>
-                  <span>Chofer: {chofer.nombre}</span>
+                  <span className="font-semibold text-black">Chofer</span>
                   <br />
                   <span className="text-sm font-normal text-gray-500">
-                    RUT: {chofer.rut}
+                    Sin Asignar
                   </span>
                 </>
               }
-              pedidos={columnsState[chofer.rut] || []}
+              pedidos={columnsState.sinAsignar || []}
             />
-          ))}
-        {/* Columnas adicionales vacías para completar */}
-        {!choferesLoading &&
-          Array.from({ length: Math.max(0, 3 - choferesData.length) }).map(
-            (_, idx) => <EmptyColumn key={`empty-column-${idx}`} />
-          )}
+
+            {(allPedidosLoading || choferesLoading) && (
+              <div className="flex items-center justify-center text-gray-600">
+                Cargando datos...
+              </div>
+            )}
+            {!choferesLoading &&
+              choferesData?.map((chofer) => (
+                <Column
+                  key={chofer.rut}
+                  droppableId={chofer.rut}
+                  title={
+                    <>
+                      <span>Chofer: {chofer.nombre}</span>
+                      <br />
+                      <span className="text-sm font-normal text-gray-500">
+                        RUT: {chofer.rut}
+                      </span>
+                    </>
+                  }
+                  pedidos={columnsState[chofer.rut] || []}
+                />
+              ))}
+            {/* Columnas adicionales vacías para completar */}
+            {!choferesLoading &&
+              Array.from({ length: Math.max(0, 3 - choferesData.length) }).map(
+                (_, idx) => <EmptyColumn key={`empty-column-${idx}`} />
+              )}
+          </div>
+        </div>
       </div>
     </DragDropContext>
   );

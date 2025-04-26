@@ -108,6 +108,7 @@ const ShoppingCartItem = ({
         <Typography
           variant="body2"
           color="text.secondary"
+          component="div"
           sx={{ display: "flex", alignItems: "center", gap: 1 }}
         >
           Precio unitario
@@ -149,7 +150,8 @@ const ShoppingCartItem = ({
 
 ShoppingCartItem.propTypes = {
   item: PropTypes.shape({
-    id_producto: PropTypes.number.isRequired,
+    id_producto: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+      .isRequired,
     nombre: PropTypes.string.isRequired,
     cantidad: PropTypes.number.isRequired,
     precio_unitario: PropTypes.number.isRequired,

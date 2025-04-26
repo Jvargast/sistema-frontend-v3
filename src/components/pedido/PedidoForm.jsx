@@ -22,6 +22,7 @@ const PedidoForm = ({
   metodoPago,
   setMetodoPago,
   mostrarMetodoPago = true,
+  mostrarTipoDocumento = true,
   notas,
   setNotas,
   tipoDocumento,
@@ -39,7 +40,6 @@ const PedidoForm = ({
       setDireccionEntrega(selectedCliente.direccion || "");
     }
   }, [selectedCliente, useClientAddress, setDireccionEntrega]);
-
 
   return (
     <Paper
@@ -87,7 +87,6 @@ const PedidoForm = ({
         open={openClienteModal}
         onClose={() => setOpenClienteModal(false)}
         onSelect={(cliente) => {
-          console.log("Cliente seleccionado:", cliente); 
           setSelectedCliente(cliente);
         }}
       />
@@ -121,23 +120,26 @@ const PedidoForm = ({
       />
 
       {/* Tipo de documento */}
-      <TextField
-        select
-        fullWidth
-        label="Tipo de Documento"
-        value={tipoDocumento}
-        onChange={(e) => setTipoDocumento(e.target.value)}
-        variant="outlined"
-        sx={{ mb: 3, backgroundColor: "#fff", borderRadius: 1 }}
-      >
-        <MenuItem value="boleta">Boleta</MenuItem>
-        {selectedCliente?.rut && selectedCliente?.razon_social && (
-          <MenuItem value="factura">Factura</MenuItem>
-        )}
-      </TextField>
+      {mostrarTipoDocumento && (
+        <TextField
+          select
+          fullWidth
+          label="Tipo de Documento"
+          value={tipoDocumento || ""}
+          onChange={(e) => setTipoDocumento?.(e.target.value)}
+          variant="outlined"
+          sx={{ mb: 3, backgroundColor: "#fff", borderRadius: 1 }}
+        >
+          <MenuItem value="boleta">Boleta</MenuItem>
+          {selectedCliente?.rut && selectedCliente?.razon_social && (
+            <MenuItem value="factura">Factura</MenuItem>
+          )}
+        </TextField>
+      )}
 
       {/* Método de pago: usar IDs numéricos */}
-      {(mostrarMetodoPago || tipoDocumento !== "factura") && (
+      {(mostrarMetodoPago ||
+        (mostrarTipoDocumento && tipoDocumento !== "factura")) && (
         <TextField
           select
           fullWidth
@@ -189,6 +191,7 @@ PedidoForm.propTypes = {
   notas: PropTypes.string,
   setNotas: PropTypes.func.isRequired,
   tipoDocumento: PropTypes.string,
+  mostrarTipoDocumento: PropTypes.bool,
   setTipoDocumento: PropTypes.func,
   extraFields: PropTypes.node,
 };

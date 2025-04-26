@@ -8,7 +8,6 @@ const formatCLP = (value) =>
     maximumFractionDigits: 0,
   }).format(value);
 
-
 const PedidoListaProductos = ({ productos }) => {
   return (
     <Paper
@@ -26,35 +25,40 @@ const PedidoListaProductos = ({ productos }) => {
       </Typography>
 
       <List dense disablePadding>
-        {productos.map((detalle) => (
-          <ListItem
-            key={detalle.id_detalle_pedido}
-            sx={{
-              px: 1,
-              py: 0.5,
-              borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
-              "&:hover": { bgcolor: "action.hover" },
-            }}
-          >
-            <ListItemText
-              primary={
-                <Typography variant="body2" fontWeight="bold">
-                  {detalle.Producto.nombre_producto}{" "}
-                  <span style={{ color: "#1976d2" }}>
-                    (x{detalle.cantidad})
-                  </span>
-                </Typography>
-              }
-              secondary={
-                <Typography variant="caption" color="textSecondary">
-                  Subtotal: <strong>{formatCLP(detalle.subtotal)}</strong>
+        {productos.map((detalle) => {
+          const nombre =
+            detalle?.Producto?.nombre_producto ??
+            detalle?.Insumo?.nombre_insumo ??
+            "Producto desconocido";
 
-                  {/* 🔹 Convertimos a número */}
-                </Typography>
-              }
-            />
-          </ListItem>
-        ))}
+          return (
+            <ListItem
+              key={detalle.id_detalle_pedido}
+              sx={{
+                px: 1,
+                py: 0.5,
+                borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
+                "&:hover": { bgcolor: "action.hover" },
+              }}
+            >
+              <ListItemText
+                primary={
+                  <Typography variant="body2" fontWeight="bold">
+                    {nombre}{" "}
+                    <span style={{ color: "#1976d2" }}>
+                      (x{detalle.cantidad})
+                    </span>
+                  </Typography>
+                }
+                secondary={
+                  <Typography variant="caption" color="textSecondary">
+                    Subtotal: <strong>{formatCLP(detalle.subtotal)}</strong>
+                  </Typography>
+                }
+              />
+            </ListItem>
+          );
+        })}
       </List>
     </Paper>
   );
@@ -64,11 +68,14 @@ PedidoListaProductos.propTypes = {
   productos: PropTypes.arrayOf(
     PropTypes.shape({
       id_detalle_pedido: PropTypes.number.isRequired,
-      Producto: PropTypes.shape({
-        nombre_producto: PropTypes.string.isRequired,
-      }).isRequired,
       cantidad: PropTypes.number.isRequired,
       subtotal: PropTypes.number.isRequired,
+      Producto: PropTypes.shape({
+        nombre_producto: PropTypes.string,
+      }),
+      Insumo: PropTypes.shape({
+        nombre_insumo: PropTypes.string,
+      }),
     })
   ).isRequired,
 };

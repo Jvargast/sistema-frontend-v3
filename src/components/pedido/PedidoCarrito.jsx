@@ -139,7 +139,7 @@ const PedidoCarrito = () => {
             justifyContent: "center",
           }}
         >
-          <Typography variant="body1" color="textSecondary" textAlign="center">
+          <Typography variant="body1" color="textSecondary" textAlign="center" component="div" >
             No hay productos en el carrito.
           </Typography>
         </Box>

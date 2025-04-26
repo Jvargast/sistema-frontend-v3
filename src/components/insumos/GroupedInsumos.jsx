@@ -23,7 +23,7 @@ const GroupedInsumos = ({
   const theme = useTheme();
   const [pagination, setPagination] = useState({ page: 0, pageSize: 10 });
 
-  const canEditInsumo = useHasPermission("editar_insumo");
+  const canEditInsumo = useHasPermission("inventario.insumo.editar");
 
   const { data, isLoading, isError } = useGetAllInsumosQuery({
     tipo,
@@ -46,6 +46,7 @@ const GroupedInsumos = ({
       );
     }
   }, [isError, dispatch]);
+
   // Preprocesar filas con useMemo
   const rows = useMemo(() => {
     return data?.data?.items
@@ -114,7 +115,7 @@ const GroupedInsumos = ({
               width: 100,
               renderCell: (params) => (
                 <img
-                  src={params.value || "https://via.placeholder.com/50"}
+                  src={params.value || "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg"}
                   alt="Insumo"
                   style={{ width: "50px", height: "50px", borderRadius: "8px" }}
                 />
@@ -123,20 +124,6 @@ const GroupedInsumos = ({
             {
               field: "nombre_insumo",
               headerName: "Nombre",
-              flex: 0.5,
-              sortable: false,
-              resizable: false,
-            },
-            {
-              field: "descripcion",
-              headerName: "Descripción",
-              flex: 0.5,
-              sortable: false,
-              resizable: false,
-            },
-            {
-              field: "codigo_barra",
-              headerName: "Código de Barra",
               flex: 0.5,
               sortable: false,
               resizable: false,
@@ -153,7 +140,7 @@ const GroupedInsumos = ({
                   {
                     field: "acciones",
                     headerName: "Acciones",
-                    flex: 0.5,
+                    flex: 0.3,
                     sortable: false,
                     renderCell: (params) => (
                       <Box sx={{ display: "flex", gap: 1 }}>

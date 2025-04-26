@@ -10,6 +10,24 @@ import PedidoProductos from "../../components/pedido/PedidoProductos";
 import PedidoCarrito from "../../components/pedido/PedidoCarrito";
 import PedidoResumen from "../../components/pedido/PedidoResumen";
 import { useNavigate } from "react-router";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const ZONA_HORARIA = "America/Santiago";
+
+const calcularFechaVencimiento = (dias) => {
+  return dayjs()
+    .tz(ZONA_HORARIA)
+    .add(dias, "day")
+    .hour(12)
+    .minute(0)
+    .second(0)
+    .format(); // ISO completo
+};
 
 const CrearCotizacion = () => {
   const dispatch = useDispatch();
@@ -29,11 +47,11 @@ const CrearCotizacion = () => {
   const [createCotizacion, { isLoading, error }] =
     useCreateCotizacionMutation();
 
-  const calcularFechaVencimiento = (dias) => {
+  /*   const calcularFechaVencimiento = (dias) => {
     const hoy = new Date();
     hoy.setDate(hoy.getDate() + dias);
     return hoy.toISOString().split("T")[0];
-  };
+  }; */
 
   useEffect(() => {
     if (selectedCliente && selectedCliente.direccion) {
@@ -68,13 +86,32 @@ const CrearCotizacion = () => {
     const cotizacionData = {
       id_cliente: selectedCliente.id_cliente,
       id_sucursal: user?.id_sucursal,
-      fecha_vencimiento: fechaVencimiento,
-      productos: cart.map((item) => ({
-        id_producto: item.id_producto,
-        cantidad: item.cantidad,
-        precio_unitario: item.precio_unitario,
-        descuento_porcentaje: 0,
-      })),
+      fecha_vencimiento: dayjs(fechaVencimiento)
+        .tz(ZONA_HORARIA)
+        .hour(12)
+        .minute(0)
+        .second(0)
+        .format(),
+      productos: cart.map((item) => {
+        if (
+          typeof item.id_producto === "string" &&
+          item.id_producto.startsWith("insumo_")
+        ) {
+          return {
+            id_insumo: parseInt(item.id_producto.replace("insumo_", "")),
+            cantidad: item.cantidad,
+            precio_unitario: item.precio_unitario,
+            descuento_porcentaje: 0,
+          };
+        }
+        return {
+          id_producto: item.id_producto,
+          cantidad: item.cantidad,
+          precio_unitario: item.precio_unitario,
+          descuento_porcentaje: 0,
+        };
+      }),
+
       notas,
       impuesto,
       descuento_total_porcentaje: descuentoPorcentaje,
@@ -124,6 +161,7 @@ const CrearCotizacion = () => {
           setMetodoPago={() => {}}
           notas={notas}
           mostrarMetodoPago={false}
+          mostrarTipoDocumento={false}
           setNotas={setNotas}
           extraFields={
             <>
@@ -146,17 +184,35 @@ const CrearCotizacion = () => {
               <TextField
                 type="date"
                 label="Fecha de vencimiento"
-                value={fechaVencimiento || ""}
-                onChange={(e) => setFechaVencimiento(e.target.value)}
+                value={
+                  fechaVencimiento
+                    ? dayjs(fechaVencimiento)
+                        .tz(ZONA_HORARIA)
+                        .format("YYYY-MM-DD")
+                    : ""
+                }
+                onChange={(e) => {
+                  const fecha = dayjs(e.target.value)
+                    .tz(ZONA_HORARIA)
+                    .hour(12)
+                    .minute(0)
+                    .second(0)
+                    .format();
+                  setFechaVencimiento(fecha);
+                }}
                 InputLabelProps={{ shrink: true }}
                 fullWidth
                 sx={{ mb: 3 }}
               />
+
               <TextField
                 label="Impuesto (%)"
                 type="number"
-                value={impuesto * 100}
-                onChange={(e) => setImpuesto(parseFloat(e.target.value) / 100)}
+                value={isNaN(impuesto) ? "" : impuesto * 100}
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value);
+                  setImpuesto(isNaN(value) ? 0 : value / 100);
+                }}
                 fullWidth
                 sx={{ mb: 3 }}
               />
@@ -164,10 +220,11 @@ const CrearCotizacion = () => {
               <TextField
                 label="Descuento total (%)"
                 type="number"
-                value={descuentoPorcentaje}
-                onChange={(e) =>
-                  setDescuentoPorcentaje(parseFloat(e.target.value))
-                }
+                value={isNaN(descuentoPorcentaje) ? "" : descuentoPorcentaje}
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value);
+                  setDescuentoPorcentaje(isNaN(value) ? 0 : value);
+                }}
                 fullWidth
                 sx={{ mb: 3 }}
               />

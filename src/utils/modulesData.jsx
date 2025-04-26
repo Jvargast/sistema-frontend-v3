@@ -1,4 +1,4 @@
-import { AdminPanelSettingsOutlined, CategoryOutlined, ChecklistOutlined, Groups2Outlined, HomeOutlined, MapOutlined, PieChartOutlined, PointOfSaleOutlined, ReceiptLongOutlined, ShoppingCartOutlined, TrendingUpOutlined, WarehouseOutlined } from "@mui/icons-material";
+import { AdminPanelSettingsOutlined, CategoryOutlined, ChecklistOutlined, Groups2Outlined, HomeOutlined, MapOutlined, /* PieChartOutlined, */ PointOfSaleOutlined, ReceiptLongOutlined, ShoppingCartOutlined, /* TrendingUpOutlined, */ WarehouseOutlined } from "@mui/icons-material";
 import EventIcon from "@mui/icons-material/Event";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
@@ -137,7 +137,7 @@ export const modulesData = [
       },
     ],
   },
-  {
+  /* {
     name: "Modulo Analytics",
     permission: "vistas.analisis.ver",
     children: [
@@ -148,7 +148,7 @@ export const modulesData = [
         permission: "vistas.analisis.ver",
       },
     ],
-  },
+  }, */
   {
     name: "Gestion",
     permission: "vistas.admin.ver",
@@ -159,12 +159,12 @@ export const modulesData = [
         path: "admin",
         permission: "vistas.admin.ver",
       },
-      {
+      /* {
         text: "Rendimiento",
         icon: <TrendingUpOutlined />,
         path: "rendimiento",
         permission: "vistas.admin.ver",
-      },
+      }, */
     ],
   },
 ];

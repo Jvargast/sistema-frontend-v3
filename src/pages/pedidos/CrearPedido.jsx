@@ -49,6 +49,14 @@ const CrearPedido = () => {
   }, [selectedCliente]);
 
   const handleAddToCart = (product) => {
+    const isInsumo = product.tipo === "insumo";
+    const idInsumo = isInsumo
+      ? parseInt(
+          typeof product.id_producto === "string"
+            ? product.id_producto.replace("insumo_", "")
+            : product.id_producto
+        )
+      : undefined;
     dispatch(
       addItem({
         id_producto: product.id_producto,
@@ -56,6 +64,7 @@ const CrearPedido = () => {
         precio_unitario: parseFloat(product.precio),
         cantidad: 1,
         tipo: product.tipo || "producto",
+        ...(isInsumo && { id_insumo: idInsumo }),
       })
     );
   };
@@ -89,10 +98,12 @@ const CrearPedido = () => {
       direccion_entrega: direccionEntrega,
       metodo_pago: metodoPago,
       productos: cart.map((item) => ({
-        id_producto: item.id_producto,
         cantidad: item.cantidad,
         tipo: item.tipo,
         precio_unitario: item.precio_unitario,
+        ...(item.tipo === "insumo"
+          ? { id_insumo: item.id_insumo }
+          : { id_producto: item.id_producto }),
       })),
       notas,
       tipo_documento: tipoDocumento,

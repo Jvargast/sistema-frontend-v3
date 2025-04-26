@@ -33,7 +33,6 @@ const ListarVentasChofer = () => {
     page: page + 1,
     limit: rowsPerPage,
   });
-  console.log(data);
 
   useEffect(() => {
     refetch();

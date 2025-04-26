@@ -47,88 +47,33 @@ const DashboardCentral = () => {
       id: "ingresos",
       title: getKpiConfig("ingresos").label,
       value: `${formatCLP(ventas.total_ventas)}`,
+      subtitle: `Ventas totales del día`,
       icon: getKpiConfig("ingresos").icon,
       color: getKpiConfig("ingresos").color,
     },
     pedidos?.total_pedidos !== undefined && {
       id: "pedidos",
       title: getKpiConfig("pedidos").label,
-      value: `${pedidos.total_pedidos} pedidos / ${formatCLP(
+      value: `${pedidos.total_pedidos} pedidos`,
+      subtitle: `Monto total: ${formatCLP(
         pedidos.detalles.reduce((acc, p) => acc + p.monto_total, 0)
       )}`,
       icon: getKpiConfig("pedidos").icon,
       color: getKpiConfig("pedidos").color,
     },
-    producto?.producto_destacado && {
-      id: "producto",
-      title: "Producto Más Vendido",
-      value: producto.producto_destacado.nombre,
-      subtitle: `${producto.producto_destacado.cantidad} unidades · ${formatCLP(
-        producto.producto_destacado.monto_total
-      )}`,
-      icon: getKpiConfig("producto_destacado").icon,
-      color: getKpiConfig("producto_destacado").color,
-    },
+    producto?.producto_destacado &&
+      (producto.producto_destacado.id_producto ||
+        producto.producto_destacado.id_insumo) && {
+        id: "producto",
+        title: "Producto/Insumo Más Vendido",
+        value: producto.producto_destacado.nombre,
+        subtitle: `${
+          producto.producto_destacado.cantidad
+        } unidades · ${formatCLP(producto.producto_destacado.monto_total)}`,
+        icon: getKpiConfig("producto_destacado").icon,
+        color: getKpiConfig("producto_destacado").color,
+      },
   ].filter(Boolean);
-
-  /* if (ventas) {
-    if (typeof ventas.total_ventas !== "undefined") {
-      const { label, icon, color } = getKpiConfig("ingresos");
-      kpiData.push({
-        id: "kpi1",
-        title: label,
-        value: `$${parseFloat(ventas.total_ventas).toLocaleString()}`,
-        icon,
-        color,
-      });
-    }
-
-    if (ventas.detalles) {
-      Object.entries(ventas.detalles).forEach(([tipo, valores], index) => {
-        const { label, icon, color } = getKpiConfig(tipo);
-
-        kpiData.push({
-          id: `kpi${index + 2}`,
-          title: label,
-          value: `${
-            valores.cantidad
-          } pedidos / $${valores.total.toLocaleString()}`,
-          icon,
-          color,
-        });
-      });
-    }
-  }
-  if (pedidos && typeof pedidos.total_pedidos !== "undefined") {
-    const { label, icon, color } = getKpiConfig("pedidos");
-
-    const montoTotal = pedidos?.detalles?.reduce(
-      (acc, item) => acc + (parseFloat(item.monto_total) || 0),
-      0
-    );
-
-    kpiData.push({
-      id: "kpi-p-1",
-      title: label || "Pedidos del día",
-      value: `${pedidos.total_pedidos} pedidos / ${formatCLP(montoTotal)}`,
-      icon,
-      color,
-    });
-  }
-  if (producto?.producto_destacado) {
-    const { icon, color } = getKpiConfig("producto_destacado");
-
-    const { nombre, cantidad, monto_total } = producto.producto_destacado;
-
-    kpiData.push({
-      id: "kpi-prod-1",
-      title: "Producto Más Vendido",
-      value: nombre,
-      subtitle: `${cantidad} unidades · ${formatCLP(monto_total)}`,
-      icon,
-      color,
-    });
-  } */
 
   useEffect(() => {
     if (containerRef.current) {
@@ -202,6 +147,7 @@ const DashboardCentral = () => {
                 <Boxkpi
                   title={kpi.title}
                   value={kpi.value}
+                  subtitle={kpi.subtitle}
                   icon={kpi.icon}
                   color={kpi.color}
                 />

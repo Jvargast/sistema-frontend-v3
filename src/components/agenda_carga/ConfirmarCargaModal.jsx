@@ -7,6 +7,7 @@ import {
   TextField,
   CircularProgress,
   Grid,
+  Chip,
   Box,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
@@ -22,32 +23,48 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
 
   const productosAgrupados = useMemo(() => {
     if (!agendaCarga) return [];
+
     const agrupados = {};
 
     agendaCarga.data.detallesCarga.forEach((detalle) => {
-      const id = detalle.producto?.id_producto;
-      const nombre = detalle.producto?.nombre_producto;
-      const cantidad = detalle.cantidad;
+      const isProducto = detalle.producto?.id_producto !== undefined;
+      const id = isProducto
+        ? detalle.producto.id_producto
+        : detalle.insumo.id_insumo;
+      const nombre = isProducto
+        ? detalle.producto.nombre_producto
+        : detalle.insumo.nombre_insumo;
+      const inventarios = isProducto
+        ? detalle.producto.inventariosProducto || []
+        : detalle.insumo.inventariosInsumo || [];
 
-      if (!agrupados[id]) {
-        const inventarios = detalle.producto?.inventariosProducto || [];
+      const key = isProducto ? `producto_${id}` : `insumo_${id}`;
+
+      if (!agrupados[key]) {
         const reservados = inventarios
-          .filter((inv) => inv.estado === "En Camión - Reservado")
+          .filter(
+            (inv) =>
+              inv.estado === "En Camión - Reservado" ||
+              inv.estado === "En Camión - Reservado - Entrega"
+          )
           .reduce((sum, inv) => sum + inv.cantidad, 0);
+
         const disponibles = inventarios
           .filter((inv) => inv.estado === "En Camión - Disponible")
           .reduce((sum, inv) => sum + inv.cantidad, 0);
 
-        agrupados[id] = {
-          id_producto: id,
-          nombre_producto: nombre,
+        agrupados[key] = {
+          id_producto: isProducto ? id : null,
+          id_insumo: !isProducto ? id : null,
+          nombre_producto: isProducto ? nombre : null,
+          nombre_insumo: !isProducto ? nombre : null,
           cantidadTotal: 0,
           cantidadReservada: reservados,
           cantidadDisponible: disponibles,
         };
       }
 
-      agrupados[id].cantidadTotal += cantidad;
+      agrupados[key].cantidadTotal += detalle.cantidad;
     });
 
     return Object.values(agrupados);
@@ -56,7 +73,10 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
   const productosCargadosInicial = useMemo(() => {
     const inicial = {};
     productosAgrupados.forEach((prod) => {
-      inicial[prod.id_producto] = prod.cantidadTotal; // Usar la cantidad planificada en la agenda
+      const key = prod.id_producto
+        ? `producto_${prod.id_producto}`
+        : `insumo_${prod.id_insumo}`;
+      inicial[key] = prod.cantidadTotal;
     });
     return inicial;
   }, [productosAgrupados]);
@@ -65,10 +85,10 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
     setProductosCargados(productosCargadosInicial);
   }, [productosCargadosInicial]);
 
-  const handleChangeCantidad = (idProducto, cantidad) => {
+  const handleChangeCantidad = (key, cantidad) => {
     setProductosCargados((prev) => ({
       ...prev,
-      [idProducto]: cantidad,
+      [key]: cantidad,
     }));
   };
 
@@ -77,10 +97,18 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
       const payload = {
         id_agenda_carga: agendaCarga.data.id_agenda_carga,
         productosCargados: Object.entries(productosCargados).map(
-          ([id, cantidad]) => ({
-            id_producto: Number(id),
-            cantidad: Number(cantidad),
-          })
+          ([key, cantidad]) => {
+            const item = productosAgrupados.find(
+              (p) =>
+                `producto_${p.id_producto}` === key ||
+                `insumo_${p.id_insumo}` === key
+            );
+            return {
+              id_producto: item?.id_producto || null,
+              id_insumo: item?.id_insumo || null,
+              cantidad: Number(cantidad),
+            };
+          }
         ),
         notasChofer,
       };
@@ -142,7 +170,11 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
 
             return (
               <Paper
-                key={producto.id_producto}
+                key={
+                  producto.id_producto
+                    ? `producto_${producto.id_producto}`
+                    : `insumo_${producto.id_insumo}`
+                }
                 sx={{
                   p: 2,
                   mb: 3,
@@ -151,9 +183,27 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
                   backgroundColor: "#ffffff",
                 }}
               >
-                <Typography variant="h6" fontWeight="bold">
-                  {producto.nombre_producto.toUpperCase()}
-                </Typography>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  mb={1}
+                >
+                  <Typography variant="h6" fontWeight="bold">
+                    {(
+                      producto.nombre_producto ||
+                      producto.nombre_insumo ||
+                      "Sin nombre"
+                    ).toUpperCase()}
+                    <Chip
+                      label={producto.id_producto ? "Producto" : "Insumo"}
+                      color={producto.id_producto ? "primary" : "secondary"}
+                      size="small"
+                      sx={{ fontWeight: "bold" }}
+                    />
+                  </Typography>
+                </Box>
+
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={6} md={4}>
                     <Typography variant="body1">
@@ -187,7 +237,12 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
                     max: restante,
                   }}
                   onChange={(e) =>
-                    handleChangeCantidad(producto.id_producto, e.target.value)
+                    handleChangeCantidad(
+                      producto.id_producto
+                        ? `producto_${producto.id_producto}`
+                        : `insumo_${producto.id_insumo}`,
+                      e.target.value
+                    )
                   }
                 />
                 <Typography

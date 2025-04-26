@@ -21,7 +21,7 @@ const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
     isLoading,
     isError,
   } = useGetPedidosConfirmadosQuery(idChofer, {
-    skip: !idChofer, 
+    skip: !idChofer,
   });
 
   const [pedidosConfirmados, setPedidosConfirmados] = useState([]);
@@ -37,18 +37,15 @@ const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
             id_producto: prod.id_producto,
             nombre_producto: prod.nombre_producto,
             cantidad: prod.cantidad,
-            es_retornable: prod.es_retornable
+            es_retornable: prod.es_retornable,
           }))
       );
 
-      console.log(productosReservadosDetalle)
       setProductosReservados(productosReservadosDetalle);
     }
   }, [pedidos, setProductosReservados]);
 
   if (!idChofer) return null;
-
-  
 
   return (
     <Box mt={3}>
@@ -102,19 +99,25 @@ const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
                 <Typography variant="body1" fontWeight="bold" color="primary">
                   🛒 Productos:
                 </Typography>
-                {pedido.productos.map((prod, index) => (
-                  <Typography
-                    variant="body2"
-                    key={index}
-                    sx={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    - {prod.nombre_producto} (x{prod.cantidad})
-                  </Typography>
-                ))}
+                {pedido.productos.map((prod, index) => {
+                  const nombre =
+                    prod.nombre_producto ||
+                    prod.nombre_insumo ||
+                    "Ítem desconocido";
+                  return (
+                    <Typography
+                      variant="body2"
+                      key={index}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      - {nombre} (x{prod.cantidad})
+                    </Typography>
+                  );
+                })}
 
                 <Divider sx={{ my: 1 }} />
 
@@ -129,8 +132,11 @@ const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
                   variant="contained"
                   color="success"
                   startIcon={<CheckCircle />}
-                  sx={{ textTransform: "none", width: "90%", cursor: "default" }}
-                  
+                  sx={{
+                    textTransform: "none",
+                    width: "90%",
+                    cursor: "default",
+                  }}
                 >
                   Confirmado
                 </Button>

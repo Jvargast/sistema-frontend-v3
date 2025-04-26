@@ -9,8 +9,18 @@ import {
 } from "@mui/material";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router";
+import { useSelector } from "react-redux";
 
 const NoCajaAsignadaDialog = ({ open, handleClose, choferName }) => {
+  const navigate = useNavigate();
+
+  const rol = useSelector((state) => state?.auth?.rol);
+
+  const handleIrACajas = () => {
+    handleClose(); // Cierra el diálogo antes de redirigir
+    navigate("/cajas");
+  };
   return (
     <Dialog
       open={open}
@@ -51,15 +61,25 @@ const NoCajaAsignadaDialog = ({ open, handleClose, choferName }) => {
         </Typography>
       </DialogContent>
 
-      <DialogActions sx={{ py: 1.5, px: 2.5 }}>
+      <DialogActions sx={{ py: 1.5, px: 2.5, gap: 1 }}>
         <Button
           onClick={handleClose}
-          variant="contained"
+          variant="outlined"
           color="primary"
           sx={{ textTransform: "none" }}
         >
           Cerrar
         </Button>
+        {rol === "administrador" && (
+          <Button
+            onClick={handleIrACajas}
+            variant="contained"
+            color="primary"
+            sx={{ textTransform: "none" }}
+          >
+            Ir a Cajas
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

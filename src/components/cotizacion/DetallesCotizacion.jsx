@@ -57,7 +57,11 @@ const DetallesCotizacion = ({ detalles, modoEdicion, onDetalleChange }) => {
             py={1}
             sx={{ borderBottom: "1px solid #eee" }}
           >
-            <Typography flex={3}>{item.producto.nombre_producto}</Typography>
+            <Typography flex={3}>
+              {item.producto?.nombre_producto ||
+                item.insumo?.nombre_insumo ||
+                "—"}
+            </Typography>
 
             <Box flex={1} textAlign="center">
               {modoEdicion ? (
@@ -163,8 +167,11 @@ DetallesCotizacion.propTypes = {
   detalles: PropTypes.arrayOf(
     PropTypes.shape({
       producto: PropTypes.shape({
-        nombre_producto: PropTypes.string.isRequired,
-      }).isRequired,
+        nombre_producto: PropTypes.string,
+      }),
+      insumo: PropTypes.shape({
+        nombre_insumo: PropTypes.string,
+      }),
       cantidad: PropTypes.number.isRequired,
       precio_unitario: PropTypes.number.isRequired,
     })

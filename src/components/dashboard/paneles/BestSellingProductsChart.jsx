@@ -13,7 +13,15 @@ import { useGetResumenProductosPorFechaQuery } from "../../../store/services/pro
 import dayjs from "dayjs";
 
 // 🎨 Paleta de colores pastel profesional
-const colors = ["#A3C4F3", "#BFD8AF", "#FCD5CE", "#FFE5B4", "#D5AAFF"];
+const colors = [
+  "#A3C4F3",
+  "#BFD8AF",
+  "#FCD5CE",
+  "#FFE5B4",
+  "#D5AAFF",
+  "#B5EAEA",
+  "#FFB5E8",
+];
 
 const BestSellingProductsChart = () => {
   const theme = useTheme();
@@ -24,8 +32,9 @@ const BestSellingProductsChart = () => {
     ? data
         .filter((item) => item.value > 0)
         .map((item) => ({
-          product: item.name,
-          sales: item.value,
+          nombre:
+            item.name.length > 30 ? `${item.name.slice(0, 30)}...` : item.name,
+          cantidad: item.value,
         }))
     : [];
 
@@ -43,7 +52,7 @@ const BestSellingProductsChart = () => {
       }}
     >
       <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-        🏆 Productos Más Vendidos
+        🏆 Productos e Insumos Más Vendidos
       </Typography>
 
       {isLoading || isError || chartData.length === 0 ? (
@@ -72,7 +81,12 @@ const BestSellingProductsChart = () => {
           <BarChart data={chartData} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis type="number" />
-            <YAxis dataKey="product" type="category" width={140} />
+            <YAxis
+              dataKey="nombre"
+              type="category"
+              width={150}
+              tick={{ fontSize: 12 }}
+            />
             <Tooltip
               formatter={(value) =>
                 new Intl.NumberFormat("es-CL", {
@@ -80,8 +94,9 @@ const BestSellingProductsChart = () => {
                   maximumFractionDigits: 0,
                 }).format(value)
               }
+              labelFormatter={(label) => `Producto/Insumo: ${label}`}
             />
-            <Bar dataKey="sales" barSize={30}>
+            <Bar dataKey="cantidad" barSize={30}>
               {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}

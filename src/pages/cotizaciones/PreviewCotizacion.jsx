@@ -58,7 +58,14 @@ const PreviewCotizacion = () => {
       setImpuesto(cotizacion.impuesto || 0.19);
       setDescuento(
         cotizacion.total
-          ? 1 - (cotizacion.total - cotizacion.impuestos_totales) / totalNeto
+          ? parseFloat(
+              (
+                (1 -
+                  (cotizacion.total - cotizacion.impuestos_totales) /
+                    totalNeto) *
+                100
+              ).toFixed(2)
+            ) / 100
           : 0
       );
       setDetallesEditables(
@@ -66,6 +73,7 @@ const PreviewCotizacion = () => {
           ...d,
           cantidad: Number(d.cantidad),
           precio_unitario: Number(d.precio_unitario),
+          tipo: d.id_insumo ? "insumo" : "producto",
         }))
       );
       setFechaVencimiento(cotizacion.fecha_vencimiento || "");
@@ -120,6 +128,7 @@ const PreviewCotizacion = () => {
             id_detalle: d.id_detalle,
             cantidad: d.cantidad,
             precio_unitario: d.precio_unitario,
+            tipo: d.tipo,
           })),
         },
       });
@@ -143,7 +152,7 @@ const PreviewCotizacion = () => {
 
   return (
     <Box maxWidth="lg" mx="auto" py={6}>
-      <BackButton to="/cotizaciones" label="Volver a Cotizaciones"/>
+      <BackButton to="/cotizaciones" label="Volver a Cotizaciones" />
       <Card elevation={3} sx={{ borderRadius: 3 }}>
         <CardContent sx={{ p: 5 }}>
           <EncabezadoCotizacion id={cotizacion.id_cotizacion} />
