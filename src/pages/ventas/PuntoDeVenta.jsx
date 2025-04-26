@@ -339,10 +339,10 @@ const PuntoDeVenta = () => {
     const cajaSeleccionada = vendedores?.find((v) => v.rut === rut)
       ?.cajasAsignadas[0];
 
-    if (cajaSeleccionada && !isCajaDeHoy(cajaSeleccionada.fecha_apertura)) {
+    /* if (cajaSeleccionada && !isCajaDeHoy(cajaSeleccionada.fecha_apertura)) {
       alert("⚠️ La caja seleccionada no es del día de hoy. Elige otra.");
       return;
-    }
+    } */
 
     setSelectedVendedor(rut);
     setTimeout(() => setOpenModal(false), 200);

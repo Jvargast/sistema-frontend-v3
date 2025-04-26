@@ -30,6 +30,8 @@ import ConfirmarCargaModal from "../../components/agenda_carga/ConfirmarCargaMod
 import { useGetCajaAsignadaQuery } from "../../store/services/cajaApi";
 import NoCajaAsignadaDialog from "../../components/chofer/NoCajaAsignadaMessage";
 import NoUsuarioCamionDialog from "../../components/chofer/NoUsuarioCamionDialog";
+import { emitRefetchAgendaViajes } from "../../utils/eventBus";
+import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
 
 const CreateAgendaCargaForm = () => {
   const {
@@ -93,6 +95,11 @@ const CreateAgendaCargaForm = () => {
         skip: !idChofer,
       }
     );
+
+  const { refetch: refetchInventarioCamion } =
+    useGetEstadoInventarioCamionQuery(Number(idCamion), {
+      skip: !idCamion,
+    });
 
   useEffect(() => {
     if (idChofer && !loadingCaja && cajaAsignada?.asignada === false) {
@@ -204,6 +211,10 @@ const CreateAgendaCargaForm = () => {
           severity: "success",
         })
       );
+      if (refetchInventarioCamion && idCamion) {
+        await refetchInventarioCamion();
+      }
+      emitRefetchAgendaViajes();
       setIdChofer("");
       setIdCamion("");
       setPrioridad("Media");
@@ -249,7 +260,8 @@ const CreateAgendaCargaForm = () => {
     );
   }
 
-  const { productos: listaProductos = [] } = productosDisponibles || {};
+  const { productos: listaProductosOriginal = [] } = productosDisponibles || {};
+  const listaProductos = listaProductosOriginal.filter((p) => p.es_retornable);
 
   return (
     <Box display="flex" justifyContent="center" alignItems="flex-start" p={4}>

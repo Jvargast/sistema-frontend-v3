@@ -43,13 +43,13 @@ const EditarProducto = () => {
     id_categoria: "",
     id_estado_producto: "",
     stock: 0,
-    image_url: "https://via.placeholder.com/150",
+    image_url: "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg",
     es_para_venta: true, 
     activo: true, 
     es_retornable: false, 
   });
   const [imagePreview, setImagePreview] = useState(
-    "https://via.placeholder.com/150"
+    "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg"
   );
 
   const categoriaOptions = categorias
@@ -70,12 +70,12 @@ const EditarProducto = () => {
         id_categoria: data.id_categoria,
         id_estado_producto: data.id_estado_producto,
         stock: data.inventario?.cantidad || 0,
-        image_url: data.image_url || "https://via.placeholder.com/150",
+        image_url: data.image_url || "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg",
         es_para_venta: data.es_para_venta || false,
         activo: data.activo || false,
         es_retornable: data.es_retornable || false,
       });
-      setImagePreview(data.image_url || "https://via.placeholder.com/150");
+      setImagePreview(data.image_url || "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg");
     }
   }, [data]);
 
@@ -92,7 +92,7 @@ const EditarProducto = () => {
     const { name, value, type, checked } = e.target;
     setFormData((prevData) => ({ ...prevData,  [name]: type === "checkbox" ? checked : value,  }));
     if (name === "image_url") {
-      setImagePreview(value || "https://via.placeholder.com/150");
+      setImagePreview(value || "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg");
     }
   };
 

@@ -16,10 +16,13 @@ const Column = ({ droppableId, title, pedidos }) => {
           ref={provided.innerRef}
           {...provided.droppableProps}
           className={
-            "w-72 max-h-[80vh] overflow-y-auto rounded-lg " +
-            "p-4 shadow-sm flex flex-col " +
+            "min-w-[280px] max-w-[320px] w-full sm:w-72 " +
+            "max-h-[80vh] overflow-y-auto rounded-lg " +
+            "p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col " +
+            "border border-gray-400 hover:border-rose-400 transition-colors duration-300 " +
             (snapshot.isDraggingOver ? "bg-pink-50" : "bg-white")
           }
+          
         >
           {/* Título */}
           <div className="text-center mb-4">

@@ -11,6 +11,7 @@ import {
   Box,
   useMediaQuery,
   Stack,
+  Chip,
 } from "@mui/material";
 import PropTypes from "prop-types";
 import { formatCLP } from "../../utils/formatUtils";
@@ -30,9 +31,13 @@ const DetallePedidoModal = ({ open, onClose, pedido, loading }) => {
       scroll={isMobile ? "paper" : "body"}
     >
       <DialogTitle
-        sx={{ fontSize: isMobile ? "1.1rem" : "1.5rem", fontWeight: 600 }}
+        sx={{
+          fontSize: isMobile ? "1.1rem" : "1.5rem",
+          fontWeight: 700,
+          color: "primary.main",
+        }}
       >
-        Detalles del Pedido #{pedido.id_pedido}
+        🧾 Detalles del Pedido #{pedido.id_pedido}
       </DialogTitle>
 
       <DialogContent dividers>
@@ -54,40 +59,62 @@ const DetallePedidoModal = ({ open, onClose, pedido, loading }) => {
           <Divider sx={{ my: 2 }} />
 
           <Typography variant="subtitle1" fontWeight={600}>
-            Productos:
+            Ítems del pedido:
           </Typography>
 
           {detalles.length === 0 ? (
             <Typography color="text.secondary">
-              Sin productos registrados.
+              Sin productos ni insumos registrados.
             </Typography>
           ) : (
-            <List dense>
+            <List dense disablePadding>
               {detalles.map((detalle) => {
-                const producto = detalle.Producto;
+                const { Producto: producto, Insumo: insumo } = detalle;
+                const nombre =
+                  producto?.nombre_producto ||
+                  insumo?.nombre_insumo ||
+                  "Sin nombre";
+                const tipo = producto ? "Producto" : "Insumo";
+
                 return (
                   <ListItem
                     key={detalle.id_detalle_pedido}
                     disableGutters
                     sx={{
-                      display: "flex",
-                      flexDirection: isMobile ? "column" : "row",
-                      alignItems: isMobile ? "flex-start" : "center",
-                      gap: 1,
-                      py: 1,
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      mb: 2,
+                      px: 0,
                     }}
                   >
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Typography variant="body1" fontWeight={500}>
-                        {producto?.nombre_producto || "Producto sin nombre"}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "100%",
+                      }}
+                    >
+                      <Typography variant="body1" fontWeight={600}>
+                        {nombre}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Cantidad: {detalle.cantidad}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Precio Unitario: {formatCLP(detalle.precio_unitario)}
-                      </Typography>
+                      <Chip
+                        label={tipo}
+                        size="small"
+                        color={tipo === "Producto" ? "primary" : "secondary"}
+                        sx={{ fontWeight: 500 }}
+                      />
                     </Box>
+
+                    <Typography variant="body2" color="text.secondary">
+                      Cantidad: {detalle.cantidad}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Precio Unitario: {formatCLP(detalle.precio_unitario)}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Subtotal: {formatCLP(detalle.subtotal)}
+                    </Typography>
                   </ListItem>
                 );
               })}
@@ -97,7 +124,12 @@ const DetallePedidoModal = ({ open, onClose, pedido, loading }) => {
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose} variant="contained" fullWidth={isMobile}>
+        <Button
+          onClick={onClose}
+          variant="contained"
+          fullWidth={isMobile}
+          sx={{ fontWeight: 600, textTransform: "none" }}
+        >
           Cerrar
         </Button>
       </DialogActions>
@@ -122,9 +154,9 @@ DetallePedidoModal.propTypes = {
         id_detalle_pedido: PropTypes.number,
         cantidad: PropTypes.number,
         precio_unitario: PropTypes.string,
-        Producto: PropTypes.shape({
-          nombre_producto: PropTypes.string,
-        }),
+        subtotal: PropTypes.string,
+        Producto: PropTypes.object,
+        Insumo: PropTypes.object,
       })
     ),
   }),

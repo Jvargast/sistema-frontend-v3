@@ -40,8 +40,8 @@ const Insumos = () => {
   const [createInsumo, { isLoading: isCreating }] = useCreateInsumoMutation();
   const [deleteInsumos, { isLoading: isDeleting }] = useDeleteInsumosMutation();
 
-  const canCreateInsumo = useHasPermission("crear_insumo");
-  const canDeleteInsumo = useHasPermission("borrar_insumos");
+  const canCreateInsumo = useHasPermission("inventario.insumo.crear");
+  const canDeleteInsumo = useHasPermission("inventario.insumo.eliminar");
 
 
   const handleSearchInputChange = (tipo, value) => {
@@ -70,8 +70,6 @@ const Insumos = () => {
   const fields = useMemo(
     () => [
       { name: "nombre_insumo", label: "Nombre del Insumo", type: "text" },
-      { name: "descripcion", label: "Descripción", type: "text" },
-      { name: "codigo_barra", label: "Código de Barra", type: "text" },
       { name: "unidad_de_medida", label: "Unidad de Medida", type: "text" },
       { name: "cantidad_inicial", label: "Cantidad Inicial", type: "number" },
       { name: "es_para_venta", label: "¿Para Venta?", type: "checkbox" },

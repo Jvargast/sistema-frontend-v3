@@ -70,17 +70,32 @@ const OrdersPieChart = () => {
           <CircularProgress size={28} />
         </Box>
       ) : isError ? (
-        <Typography variant="body2" color="error">
-          Error al cargar datos.
-        </Typography>
-      ) : chartData.length === 0 ? (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ textAlign: "center", mt: 2 }}
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
-          No hay datos disponibles para hoy.
-        </Typography>
+          <Typography variant="body2" color="error">
+            Error al cargar datos.
+          </Typography>
+        </Box>
+      ) : chartData.length === 0 ? (
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            💤 No hay datos disponibles para hoy.
+          </Typography>
+        </Box>
       ) : (
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -118,8 +133,7 @@ const OrdersPieChart = () => {
                   0
                 );
                 if (chartData.length === 1) return `100%`;
-                const mayor = Math.max(...chartData.map((i) => i.value));
-                return `${Math.round((mayor / total) * 100)}%`;
+                return `${total} pedidos`;
               })()}
             </text>
 

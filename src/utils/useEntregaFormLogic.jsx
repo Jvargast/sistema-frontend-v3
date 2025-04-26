@@ -51,12 +51,23 @@ function useEntregaFormLogic({
   const enviarEntrega = useCallback(
     async (formData, retornables) => {
       try {
-        const productos_entregados =
-          detallePedido?.detalle.map((item) => ({
-            id_producto: item.id_producto,
-            cantidad: item.cantidad,
-            es_retornable: item.es_retornable || false,
-          })) || [];
+        const productos_entregados = [];
+        const insumo_entregados = [];
+
+        detallePedido?.detalle.forEach((item) => {
+          if (item.id_producto) {
+            productos_entregados.push({
+              id_producto: item.id_producto,
+              cantidad: item.cantidad,
+              es_retornable: item.es_retornable || false,
+            });
+          } else if (item.id_insumo) {
+            insumo_entregados.push({
+              id_insumo: item.id_insumo,
+              cantidad: item.cantidad,
+            });
+          }
+        });
 
         const botellonesRetorno =
           retornables.length > 0
@@ -73,12 +84,12 @@ function useEntregaFormLogic({
 
         const isFactura = destino?.tipo_documento === "factura";
         const isEfectivo = parseInt(formData.id_metodo_pago) === 1;
-        
+
         const payload = {
           id_agenda_viaje,
           id_pedido: destino.id_pedido,
           productos_entregados,
-          insumo_entregados: [],
+          insumo_entregados,
           botellones_retorno: botellonesRetorno,
           monto_total: detallePedido?.monto_total || 0,
           id_metodo_pago:

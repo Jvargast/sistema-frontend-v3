@@ -4,8 +4,11 @@ const EmptyColumn = () => (
   <Paper
     elevation={1}
     className="
-      w-72 max-h-[80vh] overflow-y-auto rounded-lg p-4 shadow-sm flex flex-col 
-      bg-gray-100 opacity-60
+      min-w-[280px] max-w-[320px] w-full sm:w-72
+      max-h-[80vh] overflow-y-auto rounded-lg
+      p-3 sm:p-4 flex flex-col shadow-sm hover:shadow-md
+      bg-gray-50 border border-gray-400 hover:border-rose-400
+      transition-all duration-300 opacity-90
     "
   >
     {/* Encabezado estilo Column */}

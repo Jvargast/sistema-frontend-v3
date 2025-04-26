@@ -1,4 +1,3 @@
-// PedidoTooltip.jsx
 import {
   Paper,
   Typography,
@@ -76,12 +75,34 @@ const PedidoTooltip = ({ idPedido }) => {
         Productos:
       </Typography>
 
-      {pedido.DetallesPedido?.map((item, idx) => (
-        <Typography key={idx} variant="body2">
-          - {item.Producto.nombre_producto} ({item.cantidad} x $
-          {item.precio_unitario}) = ${item.subtotal}
-        </Typography>
-      ))}
+      {pedido.DetallesPedido?.map((item) => {
+        const isProducto = !!item.Producto;
+        const nombre = isProducto
+          ? item.Producto.nombre_producto
+          : item.Insumo?.nombre_insumo ?? "Desconocido";
+
+        const tipoLabel = isProducto ? "Producto" : "Insumo";
+        const tipoColor = isProducto ? "primary" : "default";
+
+        return (
+          <div
+            key={item.id_detalle_pedido}
+            className="flex items-start gap-2 mb-1"
+          >
+            <Chip
+              label={tipoLabel}
+              size="small"
+              color={tipoColor}
+              sx={{ fontSize: "0.75rem", height: "20px" }}
+            />
+            <Typography variant="body2">
+              {nombre} ({item.cantidad} x $
+              {Number(item.precio_unitario).toFixed(0)}) = $
+              {Number(item.subtotal).toFixed(0)}
+            </Typography>
+          </div>
+        );
+      })}
 
       <Divider className="my-2" />
 
@@ -105,7 +126,7 @@ const PedidoTooltip = ({ idPedido }) => {
 };
 
 PedidoTooltip.propTypes = {
-  idPedido: PropTypes.number.isRequired
+  idPedido: PropTypes.number.isRequired,
 };
 
 export default PedidoTooltip;

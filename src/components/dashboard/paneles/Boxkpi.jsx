@@ -1,30 +1,38 @@
 import { Box, Typography, Avatar, useTheme } from "@mui/material";
+import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+
+const MotionBox = motion(Box);
 
 const Boxkpi = ({
   title,
   value,
   icon: Icon = TrendingUpIcon,
   color = "primary",
-  subtitle,
+  subtitle = "",
 }) => {
   const theme = useTheme();
 
   return (
-    <Box
+    <MotionBox
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
       sx={{
         display: "flex",
         alignItems: "center",
         gap: 2,
-        p: 2,
-        borderRadius: 2,
+        p: 3,
+        borderRadius: 3,
         border: `1px solid ${theme.palette.divider}`,
-        backgroundColor: theme.palette.background.default,
-        transition: "all 0.2s ease-in-out",
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: 1,
+        transition: "all 0.3s ease",
         "&:hover": {
           backgroundColor: theme.palette.action.hover,
-          transform: "translateY(-2px)",
+          transform: "translateY(-3px)",
+          boxShadow: 4,
         },
       }}
     >
@@ -32,43 +40,55 @@ const Boxkpi = ({
         variant="rounded"
         sx={{
           bgcolor: theme.palette[color].light,
-          color: theme.palette[color].dark,
-          width: 44,
-          height: 44,
-          fontSize: 24,
+          color: theme.palette[color].contrastText,
+          width: 50,
+          height: 50,
+          fontSize: 26,
         }}
       >
-        <Icon />
+        <Icon fontSize="inherit" />
       </Avatar>
 
       <Box>
         <Typography
-          variant="body2"
-          sx={{ color: theme.palette.text.secondary, fontWeight: 500 }}
+          variant="subtitle2"
+          sx={{
+            color: theme.palette.text.secondary,
+            fontWeight: 600,
+            textTransform: "uppercase",
+            fontSize: "0.75rem",
+            letterSpacing: 1,
+          }}
         >
           {title}
         </Typography>
+
         <Typography
-          variant="h6"
+          variant="h5"
           sx={{
-            fontWeight: 600,
+            fontWeight: 700,
             color: theme.palette.text.primary,
-            fontSize: "1.25rem",
+            fontSize: "1.5rem",
             mt: 0.5,
           }}
         >
           {value}
         </Typography>
+
         {subtitle && (
           <Typography
             variant="body2"
-            sx={{ color: theme.palette.text.secondary, mt: 0.5 }}
+            sx={{
+              color: theme.palette.text.secondary,
+              mt: 0.5,
+              fontSize: "0.85rem",
+            }}
           >
             {subtitle}
           </Typography>
         )}
       </Box>
-    </Box>
+    </MotionBox>
   );
 };
 

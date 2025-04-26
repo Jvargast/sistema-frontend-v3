@@ -26,7 +26,7 @@ const AsignarChoferModal = ({ open, onClose, camionId }) => {
     isLoading: loadingChoferes,
     isError,
   } = useGetAllChoferesQuery();
-  const [choferSeleccionado, setChoferSeleccionado] = useState("");
+  const [choferSeleccionado, setChoferSeleccionado] = useState(null);
 
   const [asignarChofer, { isLoading }] = useAsignarChoferMutation();
 

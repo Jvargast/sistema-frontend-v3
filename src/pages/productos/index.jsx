@@ -75,22 +75,20 @@ const Productos = () => {
   }, [location.state, refetch, navigate]);
 
   const columns = [
+    { field: "id", headerName: "ID", flex: 0.25 },
     {
       field: "image_url",
       headerName: "Imagen",
       width: 100,
       renderCell: (params) => (
         <img
-          src={params.value || "https://via.placeholder.com/50"}
+          src={params.value || "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg"}
           alt="Producto"
           style={{ width: "50px", height: "50px", borderRadius: "8px" }}
         />
       ),
     },
-    { field: "id", headerName: "ID", flex: 0.25 },
     { field: "nombre", headerName: "Nombre", flex: 0.5 },
-    { field: "codigo_barra", headerName: "Código de Barra", flex: 0.5 },
-    { field: "marca", headerName: "Marca", flex: 0.3 },
     { field: "categoria", headerName: "Categoría", flex: 0.4 },
     { field: "stock", headerName: "Stock", flex: 0.3 },
     ...(canEditProducto

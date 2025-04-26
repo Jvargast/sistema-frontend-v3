@@ -17,7 +17,7 @@ const EditarInsumo = () => {
   const dispatch = useDispatch();
 
   // Obtener datos del insumo
-  const { data, isLoading, isError, refetch } = useGetInsumoByIdQuery(id);
+  const { data, isLoading, isError } = useGetInsumoByIdQuery(id);
 
   // Obtener tipos de insumo
   const { data: tipos, isLoading: isLoadingTipos } = useGetAllTiposQuery();
@@ -28,7 +28,7 @@ const EditarInsumo = () => {
 
   const [formData, setFormData] = useState({});
   const [imagePreview, setImagePreview] = useState(
-    "https://via.placeholder.com/150"
+    "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg"
   );
 
   useEffect(() => {
@@ -42,9 +42,9 @@ const EditarInsumo = () => {
         precio: data.precio || 0,
         unidad_de_medida: data.unidad_de_medida || "",
         stock: data.inventario?.cantidad || 0,
-        image_url: data.image_url || "https://via.placeholder.com/150",
+        image_url: data.image_url || "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg",
       });
-      setImagePreview(data.image_url || "https://via.placeholder.com/150");
+      setImagePreview(data.image_url || "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg");
     }
   }, [data]);
 
@@ -53,7 +53,7 @@ const EditarInsumo = () => {
     setFormData({ ...formData, [name]: value });
 
     if (name === "image_url") {
-      setImagePreview(value || "https://via.placeholder.com/150");
+      setImagePreview(value || "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg");
     }
   };
 
@@ -69,7 +69,6 @@ const EditarInsumo = () => {
         precio: Number(formData.precio),
         stock: Number(formData.stock),
       };
-      console.log(payload)
 
       await updateInsumo({ id, ...payload }).unwrap();
       dispatch(

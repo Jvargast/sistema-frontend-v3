@@ -327,7 +327,7 @@ const ViajeChofer = ({ viaje }) => {
           />
         )}
 
-        {todasEntregasCompletadas && (
+        {(viaje?.destinos?.length === 0 || todasEntregasCompletadas)&& (
           <SpeedDialAction
             icon={<DoneIcon />}
             tooltipTitle="Finalizar Viaje"
