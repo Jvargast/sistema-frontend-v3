@@ -6,14 +6,21 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { useGetAllVentasQuery } from "../../store/services/ventasApi";
+import {
+  useDeleteVentaMutation,
+  useGetAllVentasQuery,
+  useRejectVentaMutation,
+} from "../../store/services/ventasApi";
 import HistorialVentas from "./HistorialVentas";
 import EmptyState from "../../components/common/EmptyState";
 import { useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
+import { showNotification } from "../../store/reducers/notificacionSlice";
 
 const ListaVentas = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
@@ -24,13 +31,52 @@ const ListaVentas = () => {
     limit: rowsPerPage,
   });
 
+  const [deleteVenta] = useDeleteVentaMutation();
+  const [rejectVenta] = useRejectVentaMutation();
+
+  const handleDeleteVenta = async (venta) => {
+    try {
+      await deleteVenta(venta.id_venta).unwrap();
+      refetch();
+    } catch (error) {
+      console.error("Error al eliminar venta:", error);
+      dispatch(
+        showNotification({
+          message: `Error al eliminar: ${error?.data?.error}`,
+          severity: "error",
+        })
+      );
+    }
+  };
+
+  const handleRejectVenta = async (venta) => {
+    try {
+      await rejectVenta(venta.id_venta).unwrap();
+      refetch();
+      dispatch(
+        showNotification({
+          message: "Venta rechazada correctamente.",
+          severity: "success",
+        })
+      );
+    } catch (error) {
+      console.error("Error al rechazar venta:", error);
+      dispatch(
+        showNotification({
+          message: `Error al rechazar: ${error?.data?.error}`,
+          severity: "error",
+        })
+      );
+    }
+  };
+
   useEffect(() => {
     refetch();
   }, [page, rowsPerPage, refetch]);
 
   useEffect(() => {
     setRowsPerPage(isSmallScreen ? 5 : 10);
-    setPage(0); 
+    setPage(0);
   }, [isSmallScreen]);
 
   const ventas = useMemo(() => data?.ventas || [], [data]);
@@ -83,6 +129,8 @@ const ListaVentas = () => {
       page={page}
       handleChangePage={handleChangePage}
       handleChangeRowsPerPage={handleChangeRowsPerPage}
+      onDeleteVenta={handleDeleteVenta}
+      onRejectVenta={handleRejectVenta}
     />
   );
 };

@@ -61,18 +61,19 @@ const DashboardCentral = () => {
       icon: getKpiConfig("pedidos").icon,
       color: getKpiConfig("pedidos").color,
     },
-    producto?.producto_destacado &&
-      (producto.producto_destacado.id_producto ||
-        producto.producto_destacado.id_insumo) && {
-        id: "producto",
-        title: "Producto/Insumo Más Vendido",
-        value: producto.producto_destacado.nombre,
-        subtitle: `${
-          producto.producto_destacado.cantidad
-        } unidades · ${formatCLP(producto.producto_destacado.monto_total)}`,
-        icon: getKpiConfig("producto_destacado").icon,
-        color: getKpiConfig("producto_destacado").color,
-      },
+    {
+      id: "producto",
+      title: "Producto/Insumo Más Vendido",
+      value: producto?.producto_destacado?.nombre || "Sin ventas registradas",
+      subtitle:
+        producto?.producto_destacado?.cantidad !== undefined
+          ? `${producto.producto_destacado.cantidad} unidades · ${formatCLP(
+              producto.producto_destacado.monto_total
+            )}`
+          : "No hay ventas de productos o insumos",
+      icon: getKpiConfig("producto_destacado").icon,
+      color: getKpiConfig("producto_destacado").color,
+    },
   ].filter(Boolean);
 
   useEffect(() => {
