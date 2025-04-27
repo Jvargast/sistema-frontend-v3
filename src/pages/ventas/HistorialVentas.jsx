@@ -12,11 +12,14 @@ import {
   IconButton,
   Chip,
   useMediaQuery,
+  Tooltip,
 } from "@mui/material";
-import { Visibility, Edit } from "@mui/icons-material";
+import { Visibility, Cancel, Delete } from "@mui/icons-material"; // <-- Importamos Delete
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../../components/common/BackButton";
+import { useState } from "react";
+import AlertDialog from "../../components/common/AlertDialog";
 
 const HistorialVentas = ({
   ventas,
@@ -25,6 +28,8 @@ const HistorialVentas = ({
   page,
   handleChangePage,
   handleChangeRowsPerPage,
+  onDeleteVenta,
+  onRejectVenta,
 }) => {
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:600px)");
@@ -38,6 +43,25 @@ const HistorialVentas = ({
     "Estado",
     "Acciones",
   ];
+
+  const [openAlert, setOpenAlert] = useState(false);
+  const [ventaSeleccionada, setVentaSeleccionada] = useState(null);
+
+  const handleConfirmDelete = (venta) => {
+    setVentaSeleccionada(venta);
+    setOpenAlert(true);
+  };
+
+  const handleCloseAlert = () => {
+    setOpenAlert(false);
+    setVentaSeleccionada(null);
+  };
+
+  const handleDeleteVentaConfirmada = () => {
+    if (ventaSeleccionada) {
+      onDeleteVenta(ventaSeleccionada);
+    }
+  };
 
   return (
     <Box
@@ -120,24 +144,52 @@ const HistorialVentas = ({
                   <strong>Estado:</strong>
                   <Chip
                     label={venta.estadoVenta?.nombre_estado || "Desconocido"}
-                    color={
-                      venta.estadoVenta?.nombre_estado === "Pagada"
-                        ? "success"
-                        : "warning"
-                    }
-                    sx={{ fontWeight: "bold" }}
+                    sx={{
+                      fontWeight: "bold",
+                      backgroundColor:
+                        venta.estadoVenta?.nombre_estado === "Pagada"
+                          ? "#4CAF50" // Verde fuerte para Pagada
+                          : venta.estadoVenta?.nombre_estado === "Rechazada"
+                          ? "#E53935" // Rojo más oscuro para Rechazada
+                          : venta.estadoVenta?.nombre_estado === "Cancelada"
+                          ? "#FB8C00" // Naranja fuerte para Cancelada
+                          : venta.estadoVenta?.nombre_estado ===
+                            "Pendiente de Pago"
+                          ? "#FFCA28" // Amarillo fuerte para Pendiente de Pago
+                          : "#BDBDBD", // Gris claro para desconocido
+                      color: "#fff", // Texto siempre blanco
+                      borderRadius: "8px",
+                      px: 1.5,
+                      py: 0.5,
+                    }}
                   />
                 </Box>
-                <Box>
-                  <IconButton
-                    color="primary"
-                    onClick={() => navigate(`/ventas/ver/${venta.id_venta}`)}
-                  >
-                    <Visibility />
-                  </IconButton>
-                  <IconButton color="secondary">
-                    <Edit />
-                  </IconButton>
+                <Box display="flex" justifyContent="center" gap={1}>
+                  <Tooltip title="Ver Detalle">
+                    <IconButton
+                      color="primary"
+                      onClick={() => navigate(`/ventas/ver/${venta.id_venta}`)}
+                    >
+                      <Visibility />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Rechazar Venta">
+                    <IconButton
+                      color="warning"
+                      onClick={() => onRejectVenta(venta)}
+                    >
+                      <Cancel />
+                    </IconButton>
+                  </Tooltip>
+
+                  <Tooltip title="Eliminar Venta">
+                    <IconButton
+                      color="error"
+                      onClick={() => handleConfirmDelete(venta)}
+                    >
+                      <Delete />
+                    </IconButton>
+                  </Tooltip>
                 </Box>
               </Box>
             ))}
@@ -163,56 +215,81 @@ const HistorialVentas = ({
               </TableHead>
               <TableBody>
                 {ventas.length > 0 ? (
-                  ventas.map(
-                    ({
-                      id_venta,
-                      vendedor,
-                      cliente,
-                      total,
-                      fecha,
-                      estadoVenta,
-                    }) => (
-                      <TableRow key={id_venta} hover>
-                        <TableCell align="center">{id_venta}</TableCell>
-                        <TableCell align="center">
-                          {vendedor?.nombre || "Desconocido"}
-                        </TableCell>
-                        <TableCell align="center">
-                          {cliente?.nombre || "N/A"}
-                        </TableCell>
-                        <TableCell align="center">
-                          <Typography fontWeight="bold" color="primary">
-                            ${parseFloat(total).toLocaleString()}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          {new Date(fecha).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell align="center">
-                          <Chip
-                            label={estadoVenta?.nombre_estado || "Desconocido"}
-                            color={
-                              estadoVenta?.nombre_estado === "Pagada"
-                                ? "success"
-                                : "warning"
-                            }
-                            sx={{ fontWeight: "bold" }}
-                          />
-                        </TableCell>
-                        <TableCell align="center">
+                  ventas.map((venta) => (
+                    <TableRow key={venta.id_venta} hover>
+                      <TableCell align="center">{venta.id_venta}</TableCell>
+                      <TableCell align="center">
+                        {venta.vendedor?.nombre || "Desconocido"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {venta.cliente?.nombre || "N/A"}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography fontWeight="bold" color="primary">
+                          ${parseFloat(venta.total).toLocaleString()}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        {new Date(venta.fecha).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Chip
+                          label={
+                            venta.estadoVenta?.nombre_estado || "Desconocido"
+                          }
+                          sx={{
+                            fontWeight: "bold",
+                            backgroundColor:
+                              venta.estadoVenta?.nombre_estado === "Pagada"
+                                ? "#4CAF50" // Verde fuerte para Pagada
+                                : venta.estadoVenta?.nombre_estado ===
+                                  "Rechazada"
+                                ? "#E53935" // Rojo más oscuro para Rechazada
+                                : venta.estadoVenta?.nombre_estado ===
+                                  "Cancelada"
+                                ? "#FB8C00" // Naranja fuerte para Cancelada
+                                : venta.estadoVenta?.nombre_estado ===
+                                  "Pendiente de Pago"
+                                ? "#FFCA28" // Amarillo fuerte para Pendiente de Pago
+                                : "#BDBDBD", // Gris claro para desconocido
+                            color: "#fff", // Texto siempre blanco
+                            borderRadius: "8px",
+                            px: 1.5,
+                            py: 0.5,
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <Tooltip title="Ver Detalle">
                           <IconButton
                             color="primary"
-                            onClick={() => navigate(`/ventas/ver/${id_venta}`)}
+                            onClick={() =>
+                              navigate(`/ventas/ver/${venta.id_venta}`)
+                            }
                           >
                             <Visibility />
                           </IconButton>
-                          <IconButton color="secondary">
-                            <Edit />
+                        </Tooltip>
+                        <Tooltip title="Rechazar Venta">
+                          <IconButton
+                            color="warning"
+                            onClick={() => onRejectVenta(venta)}
+                          >
+                            <Cancel />{" "}
                           </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  )
+                        </Tooltip>
+
+                        <Tooltip title="Eliminar Venta">
+                          <IconButton
+                            color="error"
+                            onClick={() => handleConfirmDelete(venta)}
+                          >
+                            <Delete />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 ) : (
                   <TableRow>
                     <TableCell colSpan={7} align="center">
@@ -228,14 +305,9 @@ const HistorialVentas = ({
         )}
       </Paper>
 
-      {/* 🔁 Paginación siempre visible */}
+      {/* 🔁 Paginación */}
       <Box
-        sx={{
-          mt: 2,
-          display: "flex",
-          justifyContent: "center",
-          width: "100%",
-        }}
+        sx={{ mt: 2, display: "flex", justifyContent: "center", width: "100%" }}
       >
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
@@ -252,6 +324,13 @@ const HistorialVentas = ({
           }}
         />
       </Box>
+      <AlertDialog
+        openAlert={openAlert}
+        onCloseAlert={handleCloseAlert}
+        onConfirm={handleDeleteVentaConfirmada}
+        title="Confirmar Eliminación"
+        message="¿Estás seguro que deseas eliminar esta venta? Esta acción no se puede deshacer."
+      />
     </Box>
   );
 };
@@ -263,6 +342,8 @@ HistorialVentas.propTypes = {
   page: PropTypes.number.isRequired,
   handleChangePage: PropTypes.func.isRequired,
   handleChangeRowsPerPage: PropTypes.func.isRequired,
+  onDeleteVenta: PropTypes.func.isRequired,
+  onRejectVenta: PropTypes.func.isRequired,
 };
 
 export default HistorialVentas;

@@ -5,6 +5,7 @@ import { Visibility } from "@mui/icons-material";
 import { useGetVentasChoferQuery } from "../../store/services/ventasChoferApi";
 import EmptyState from "../../components/common/EmptyState";
 import DataTable from "../../components/common/DataTable";
+import { useSelector } from "react-redux";
 
 const estadoColores = {
   pendiente: "warning",
@@ -40,6 +41,7 @@ const ListarVentasChofer = () => {
 
   const ventas = useMemo(() => data?.data || [], [data]);
   const totalItems = useMemo(() => data?.total?.totalItems || 0, [data]);
+  const rol = useSelector((state) => state?.auth?.rol);
 
   const columns = [
     {
@@ -110,7 +112,7 @@ const ListarVentasChofer = () => {
 
   return (
     <DataTable
-      title="🧾 Listado de Mis Ventas"
+      title={rol === "chofer" ? "🧾 Listado de Mis Ventas" : "🧾 Ventas Chofer"}
       columns={columns}
       rows={ventas}
       totalItems={totalItems}

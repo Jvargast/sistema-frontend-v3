@@ -4,15 +4,14 @@ import { baseQueryWithReauthEnhanced } from "./fettchQuery";
 export const ventasApi = createApi({
   reducerPath: "ventasApi",
   baseQuery: baseQueryWithReauthEnhanced,
-  tagTypes: ["Ventas"], // Identificador para invalidar cache
+  tagTypes: ["Ventas"],
   endpoints: (builder) => ({
-    // Obtener todas las ventas
     getAllVentas: builder.query({
       query: (params) => ({ url: `/ventas/`, params }),
-      providesTags: ["Ventas"], // Para invalidar cache
+      providesTags: ["Ventas"],
       transformResponse: (response) => ({
-        ventas: response.data, // Datos de ventas
-        paginacion: response.total, // Datos de paginación
+        ventas: response.data,
+        paginacion: response.total,
       }),
       async onQueryStarted(args, { queryFulfilled }) {
         try {
@@ -23,7 +22,6 @@ export const ventasApi = createApi({
       },
     }),
 
-    // Obtener un venta por ID
     getVentaById: builder.query({
       query: (id) => `/ventas/${id}`,
       providesTags: ["Ventas"],
@@ -31,12 +29,11 @@ export const ventasApi = createApi({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.error("Error al obtener el rol:", error);
+          console.error("Error al obtener la venta:", error); // aquí corregido
         }
       },
     }),
 
-    // Crear un rol
     createVenta: builder.mutation({
       query: (newVenta) => ({
         url: `/ventas/`,
@@ -48,12 +45,11 @@ export const ventasApi = createApi({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.error("Error al crear el venta:", error);
+          console.error("Error al crear la venta:", error); // aquí corregido
         }
       },
     }),
 
-    // Actualizar un rol
     updateVenta: builder.mutation({
       query: ({ id, ...updatedVenta }) => ({
         url: `/ventas/${id}`,
@@ -64,14 +60,28 @@ export const ventasApi = createApi({
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("Rol actualizado correctamente:", data);
+          console.log("Venta actualizada correctamente:", data); // aquí corregido
         } catch (error) {
-          console.error("Error al actualizar el venta:", error);
+          console.error("Error al actualizar la venta:", error); // aquí corregido
         }
       },
     }),
 
-    // Eliminar un rol
+    rejectVenta: builder.mutation({
+      query: (id) => ({
+        url: `/ventas/${id}/rechazar`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Ventas"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Error al rechazar la venta:", error);
+        }
+      },
+    }),
+
     deleteVenta: builder.mutation({
       query: (id) => ({
         url: `/ventas/${id}`,
@@ -82,7 +92,7 @@ export const ventasApi = createApi({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.error("Error al eliminar la venta:", error);
+          console.error("Error al eliminar la venta:", error); // aquí corregido
         }
       },
     }),
@@ -94,6 +104,6 @@ export const {
   useGetVentaByIdQuery,
   useCreateVentaMutation,
   useUpdateVentaMutation,
+  useRejectVentaMutation,
   useDeleteVentaMutation,
 } = ventasApi;
-
