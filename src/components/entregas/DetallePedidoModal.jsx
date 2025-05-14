@@ -46,8 +46,21 @@ const DetallePedidoModal = ({ open, onClose, pedido, loading }) => {
             Cliente: {pedido?.Cliente?.nombre} {pedido?.Cliente?.apellido}
           </Typography>
 
+          <Box display="flex" alignItems="center" gap={1}>
+            <Chip
+              label={
+                pedido?.pagado
+                  ? `Pagado (${pedido?.estado_pago})`
+                  : "Pendiente de Pago"
+              }
+              color={pedido.pagado ? "success" : "warning"}
+              variant="outlined"
+              sx={{ fontWeight: "bold" }}
+            />
+          </Box>
+
           <Typography variant="body2" color="text.secondary">
-            Dirección: {pedido.direccion_entrega}
+            Dirección: {pedido?.direccion_entrega}
           </Typography>
 
           {pedido.notas && (
@@ -146,7 +159,7 @@ DetallePedidoModal.propTypes = {
     Cliente: PropTypes.shape({
       nombre: PropTypes.string,
       apellido: PropTypes.string,
-    }),
+    }).isRequired,
     direccion_entrega: PropTypes.string,
     notas: PropTypes.string,
     DetallesPedido: PropTypes.arrayOf(
@@ -159,6 +172,8 @@ DetallePedidoModal.propTypes = {
         Insumo: PropTypes.object,
       })
     ),
+    pagado: PropTypes.bool,
+    estado_pago: PropTypes.string,
   }),
 };
 

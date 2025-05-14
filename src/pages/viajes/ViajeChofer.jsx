@@ -1,10 +1,9 @@
 import PropTypes from "prop-types";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   useTheme,
   useMediaQuery,
   Typography,
-  Slide,
   Box,
   IconButton,
   Dialog,
@@ -28,7 +27,7 @@ import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import SpeedDial from "@mui/material/SpeedDial";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
 import SpeedDialIcon from "@mui/material/SpeedDialIcon";
-import { onRefetchAgendaViajes } from "../../utils/eventBus";
+import { emitRefetchAgendaViajes, onRefetchAgendaViajes } from "../../utils/eventBus";
 import { useGetPedidoByIdQuery } from "../../store/services/pedidosApi";
 import { useGetEntregasByAgendaIdQuery } from "../../store/services/entregasApi";
 import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
@@ -44,13 +43,41 @@ const ViajeChofer = ({ viaje }) => {
   const isTabletOrMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [openInventarioModal, setOpenInventarioModal] = useState(false);
 
-  const SlideTransition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-  });
-
   const toggleFab = () => {
-    setFabOpen((prev) => !prev);
+    setFabOpen((prev) => {
+      const nextState = !prev;
+      return nextState;
+    });
   };
+
+  const renderSpeedDialAction = (mostrar, icono, titulo, onClick) => {
+    if (!mostrar) return null;
+    return (
+      <SpeedDialAction
+        icon={icono}
+        tooltipTitle={titulo}
+        onClick={onClick}
+        tabIndex={0}
+        aria-hidden={false}
+      />
+    );
+  };
+
+  useEffect(() => {
+    if (!openInventarioModal) {
+      const root = document.getElementById("root");
+      if (root?.getAttribute("aria-hidden") === "true") {
+        root.setAttribute("aria-hidden", "false");
+      }
+    }
+  }, [openInventarioModal]);
+
+  useEffect(() => {
+    if (!openInventarioModal && fabRef.current) {
+      fabRef.current.blur();
+      setTimeout(() => fabRef.current.focus(), 50);
+    }
+  }, [openInventarioModal]);
 
   const {
     data: entregasData,
@@ -78,6 +105,7 @@ const ViajeChofer = ({ viaje }) => {
   const isEntregasReady = useRef(false);
   const refetchInventarioRef = useRef(null);
   const refetchEntregasRef = useRef(null);
+  const fabRef = useRef(null);
 
   // Montaje
   useEffect(() => {
@@ -185,6 +213,7 @@ const ViajeChofer = ({ viaje }) => {
       [idPedido]: { entregado: true, entrega: entregaData },
     }));
     refetchInventario();
+    emitRefetchAgendaViajes();
   };
 
   const handleFinalizarViaje = async () => {
@@ -236,36 +265,6 @@ const ViajeChofer = ({ viaje }) => {
         totalDestinos={viaje.destinos.length}
         entregasCompletadas={entregasCompletadas}
       />
-      <Dialog
-        fullScreen={isTabletOrMobile}
-        open={openInventarioModal}
-        onClose={() => setOpenInventarioModal(false)}
-        TransitionComponent={SlideTransition}
-      >
-        <Box
-          sx={{
-            p: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: "primary.main",
-            color: "#fff",
-          }}
-        >
-          <Typography variant="h6">🛻 Inventario del Camión</Typography>
-          <IconButton
-            edge="end"
-            color="inherit"
-            onClick={() => setOpenInventarioModal(false)}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-
-        <Box sx={{ p: 2 }}>
-          <InventarioCamion idCamion={viaje.id_camion} modo="visual" />
-        </Box>
-      </Dialog>
 
       <ListaDestinos
         destinos={viaje.destinos}
@@ -280,7 +279,10 @@ const ViajeChofer = ({ viaje }) => {
       {modalOpen && destinoSeleccionado && (
         <FormularioEntregaModal
           open={modalOpen}
-          onClose={() => setModalOpen(false)}
+          onClose={() => {
+            setModalOpen(false);
+            refetchEntregas(); 
+          }}
           destino={destinoSeleccionado}
           id_agenda_viaje={viaje.id_agenda_viaje}
           onSuccess={handleEntregaExitosa}
@@ -300,12 +302,16 @@ const ViajeChofer = ({ viaje }) => {
       )}
 
       <SpeedDial
+        ref={fabRef}
         ariaLabel="Acciones del viaje"
         sx={{
           position: "fixed",
           bottom: 60,
           right: 24,
           zIndex: 1200,
+          "& .MuiSpeedDialAction-fab": {
+            transition: "none !important", // ← elimina temporalmente transición
+          },
         }}
         icon={<SpeedDialIcon onClick={toggleFab} />}
         direction="up"
@@ -313,26 +319,26 @@ const ViajeChofer = ({ viaje }) => {
         onClose={() => setFabOpen(false)}
         onOpen={() => setFabOpen(true)}
       >
-        <SpeedDialAction
-          icon={<Inventory2Icon />}
-          tooltipTitle="Ver Inventario"
-          onClick={() => setOpenInventarioModal(true)}
-        />
-
-        {viaje?.estado === "En Tránsito" && (
-          <SpeedDialAction
-            icon={<PointOfSaleIcon />}
-            tooltipTitle="Venta Rápida"
-            onClick={() => setModalVentaRapidaOpen(true)}
-          />
+        {renderSpeedDialAction(
+          fabOpen,
+          <Inventory2Icon />,
+          "Ver Inventario",
+          () => setOpenInventarioModal(true)
         )}
 
-        {(viaje?.destinos?.length === 0 || todasEntregasCompletadas)&& (
-          <SpeedDialAction
-            icon={<DoneIcon />}
-            tooltipTitle="Finalizar Viaje"
-            onClick={handleFinalizarViaje}
-          />
+        {renderSpeedDialAction(
+          fabOpen && viaje?.estado === "En Tránsito",
+          <PointOfSaleIcon />,
+          "Venta Rápida",
+          () => setModalVentaRapidaOpen(true)
+        )}
+
+        {renderSpeedDialAction(
+          fabOpen &&
+            (viaje?.destinos?.length === 0 || todasEntregasCompletadas),
+          <DoneIcon />,
+          "Finalizar Viaje",
+          handleFinalizarViaje
         )}
       </SpeedDial>
 
@@ -352,6 +358,48 @@ const ViajeChofer = ({ viaje }) => {
           }}
         />
       )}
+      <Dialog
+        fullScreen={isTabletOrMobile}
+        hideBackdrop
+        disableEnforceFocus
+        disableRestoreFocus
+        disableAutoFocus
+        open={openInventarioModal}
+        onClose={() => {
+          setOpenInventarioModal(false);
+          setFabOpen(false);
+          document.activeElement.blur();
+        }}
+        keepMounted={false}
+      >
+        <Box
+          sx={{
+            p: 2,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            bgcolor: "primary.main",
+            color: "#fff",
+          }}
+        >
+          <Typography variant="h6">🛻 Inventario del Camión</Typography>
+          <IconButton
+            edge="end"
+            color="inherit"
+            onClick={() => {
+              setOpenInventarioModal(false);
+              setFabOpen(false);
+              document.activeElement.blur();
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+
+        <Box sx={{ p: 2 }}>
+          <InventarioCamion idCamion={viaje.id_camion} modo="visual" />
+        </Box>
+      </Dialog>
     </Container>
   );
 };

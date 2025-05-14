@@ -14,13 +14,11 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import EventNoteIcon from "@mui/icons-material/EventNote";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PropTypes from "prop-types";
 import { fetchCuentaPorCobrarPdf } from "../../utils/pdfHelper";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import DocumentoPopover from "../../components/documento/DocumentoPopover";
 import ModalPagoFactura from "../../components/cuentas_por_cobrar/ModalPagoFactura";
 import {
   useGetCuentaPorCobrarByIdQuery,
@@ -29,6 +27,7 @@ import {
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useDispatch } from "react-redux";
 import BackButton from "../../components/common/BackButton";
+import PagosAsociados from "../../components/cuentas_por_cobrar/PagosAsociados";
 
 const estadoColores = {
   pendiente: "warning",
@@ -46,14 +45,13 @@ const CLP = (valor) =>
 const CuentaPorCobrarDetalle = ({ cuenta }) => {
   const dispatch = useDispatch();
   const [loadingPdf, setLoadingPdf] = useState(false);
-  const [anchorDoc, setAnchorDoc] = useState(null);
 
-  const handleOpenDoc = (event) => setAnchorDoc(event.currentTarget);
-  const handleCloseDoc = () => setAnchorDoc(null);
   const navigate = useNavigate();
   const [openModalPago, setOpenModalPago] = useState(false);
   const { refetch } = useGetCuentaPorCobrarByIdQuery(cuenta.id_cxc);
   const [updateCuenta] = useUpdateCuentaPorCobrarMutation();
+
+  const [refetchPagosKey, setRefetchPagosKey] = useState(0);
 
   const {
     monto_total,
@@ -332,24 +330,7 @@ const CuentaPorCobrarDetalle = ({ cuenta }) => {
                   documento.numero
                 }`}
               </Typography>
-              <Button
-                onClick={handleOpenDoc}
-                size="small"
-                sx={{
-                  minWidth: 0,
-                  ml: 1,
-                  color: "#1e88e5",
-                }}
-              >
-                <InfoOutlinedIcon fontSize="small" />
-              </Button>
             </Box>
-
-            <DocumentoPopover
-              anchorEl={anchorDoc}
-              onClose={handleCloseDoc}
-              idDocumento={documento.id_documento}
-            />
 
             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
               ID de Venta
@@ -471,9 +452,12 @@ const CuentaPorCobrarDetalle = ({ cuenta }) => {
         onClose={() => {
           setOpenModalPago(false);
           refetch();
+          setRefetchPagosKey((prev) => prev + 1);
         }}
         idCxc={cuenta.id_cxc}
+        montoPorDefecto={cuenta.saldo_pendiente}
       />
+      <PagosAsociados idVenta={id_venta} refetchTrigger={refetchPagosKey} />
     </Box>
   );
 };

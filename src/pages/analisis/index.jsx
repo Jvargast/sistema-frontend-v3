@@ -1,6 +1,4 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import BackButton from "../../components/common/BackButton";
@@ -11,10 +9,10 @@ import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import { useGenerarVentasEstadisticasMutation } from "../../store/services/ventasEstadisticasApi";
 import { useGenerarPedidosEstadisticasMutation } from "../../store/services/pedidosEstadisticasApi";
 import { useGenerarProductoEstadisticasMutation } from "../../store/services/productosEstadisticasApi";
+import { convertirChileAUtc, obtenerFechaChile } from "../../utils/fechaUtils";
 
 const Analisis = () => {
-  dayjs.extend(utc);
-  const hoy = dayjs().utc().format("YYYY-MM-DD");
+  const hoy = convertirChileAUtc(obtenerFechaChile().format("YYYY-MM-DD"));
   const dispatch = useDispatch();
 
   const [generarVentas, { isLoading: loadingVentas }] =

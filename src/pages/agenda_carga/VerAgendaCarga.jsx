@@ -173,102 +173,112 @@ const VerAgendaCarga = () => {
         </Alert>
       ) : (
         <Box display="flex" flexWrap="wrap" gap={2}>
-          {detalles.map((item, idx) => (
-            <Card
-              key={idx}
-              variant="outlined"
-              sx={{
-                borderRadius: 3,
-                flex: "1 1 280px",
-                transition: "0.3s",
-                "&:hover": { boxShadow: 4 },
-              }}
-            >
-              <CardContent>
-                <Stack spacing={1}>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <Typography
-                      variant="subtitle2"
-                      fontWeight="bold"
-                      color="text.secondary"
-                      sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                    >
-                      {item.producto ? (
-                        <>
-                          🧴 {item.producto.nombre_producto}
-                          {item.producto.es_retornable && (
-                            <Chip
-                              label="Retornable"
-                              color="success"
-                              size="small"
-                              sx={{ ml: 1, fontSize: "0.7rem", height: 22 }}
-                            />
-                          )}
-                        </>
-                      ) : item.insumo ? (
-                        <>🧰 {item.insumo.nombre_insumo}</>
-                      ) : (
-                        "Ítem desconocido"
-                      )}
+          {detalles.map((item, idx) => {
+            const esDePedido = item.notas?.includes("Pedido ID");
+            return (
+              <Card
+                key={idx}
+                variant="outlined"
+                sx={{
+                  borderRadius: 3,
+                  flex: "1 1 280px",
+                  transition: "0.3s",
+                  borderLeft: `6px solid ${esDePedido ? "#1e88e5" : "#8e24aa"}`,
+                  "&:hover": { boxShadow: 4 },
+                }}
+              >
+                <CardContent>
+                  <Stack spacing={1}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Typography
+                        variant="subtitle2"
+                        fontWeight="bold"
+                        color="text.secondary"
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        {item.producto ? (
+                          <>
+                            🧴 {item.producto.nombre_producto}
+                            {item.producto.es_retornable && (
+                              <Chip
+                                label="Retornable"
+                                color="success"
+                                size="small"
+                                sx={{ ml: 1, fontSize: "0.7rem", height: 22 }}
+                              />
+                            )}
+                          </>
+                        ) : item.insumo ? (
+                          <>🧰 {item.insumo.nombre_insumo}</>
+                        ) : (
+                          "Ítem desconocido"
+                        )}
+                      </Typography>
+                      <Chip
+                        label={esDePedido ? "Pedido" : "Adicional"}
+                        size="small"
+                        color={esDePedido ? "info" : "secondary"}
+                        sx={{ fontWeight: "bold" }}
+                      />
+                    </Stack>
+
+                    <Typography variant="h6" fontWeight="bold" color="primary">
+                      {item.cantidad} unidades
                     </Typography>
+
+                    {item.producto && (
+                      <Stack spacing={0.5}>
+                        {item.producto.marca && (
+                          <Typography variant="body2" color="text.secondary">
+                            Marca: <strong>{item.producto.marca}</strong>
+                          </Typography>
+                        )}
+                        {item.producto.codigo_barra && (
+                          <Typography variant="body2" color="text.secondary">
+                            Código de barra: {item.producto.codigo_barra}
+                          </Typography>
+                        )}
+                        {item.producto.descripcion && (
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontStyle: "italic" }}
+                          >
+                            {item.producto.descripcion}
+                          </Typography>
+                        )}
+                      </Stack>
+                    )}
+
+                    {item.insumo && (
+                      <Stack spacing={0.5}>
+                        {item.insumo.unidad_de_medida && (
+                          <Typography variant="body2" color="text.secondary">
+                            Unidad:{" "}
+                            <strong>{item.insumo.unidad_de_medida}</strong>
+                          </Typography>
+                        )}
+                        {item.insumo.codigo_barra && (
+                          <Typography variant="body2" color="text.secondary">
+                            Código de barra: {item.insumo.codigo_barra}
+                          </Typography>
+                        )}
+                        {item.insumo.descripcion && (
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontStyle: "italic" }}
+                          >
+                            {item.insumo.descripcion}
+                          </Typography>
+                        )}
+                      </Stack>
+                    )}
                   </Stack>
-
-                  <Typography variant="h6" fontWeight="bold" color="primary">
-                    {item.cantidad} unidades
-                  </Typography>
-
-                  {item.producto && (
-                    <Stack spacing={0.5}>
-                      {item.producto.marca && (
-                        <Typography variant="body2" color="text.secondary">
-                          Marca: <strong>{item.producto.marca}</strong>
-                        </Typography>
-                      )}
-                      {item.producto.codigo_barra && (
-                        <Typography variant="body2" color="text.secondary">
-                          Código de barra: {item.producto.codigo_barra}
-                        </Typography>
-                      )}
-                      {item.producto.descripcion && (
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ fontStyle: "italic" }}
-                        >
-                          {item.producto.descripcion}
-                        </Typography>
-                      )}
-                    </Stack>
-                  )}
-
-                  {item.insumo && (
-                    <Stack spacing={0.5}>
-                      {item.insumo.unidad_de_medida && (
-                        <Typography variant="body2" color="text.secondary">
-                          Unidad:{" "}
-                          <strong>{item.insumo.unidad_de_medida}</strong>
-                        </Typography>
-                      )}
-                      {item.insumo.codigo_barra && (
-                        <Typography variant="body2" color="text.secondary">
-                          Código de barra: {item.insumo.codigo_barra}
-                        </Typography>
-                      )}
-                      {item.insumo.descripcion && (
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ fontStyle: "italic" }}
-                        >
-                          {item.insumo.descripcion}
-                        </Typography>
-                      )}
-                    </Stack>
-                  )}
-                </Stack>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </Box>
       )}
     </Box>

@@ -41,6 +41,15 @@ const PedidoForm = ({
     }
   }, [selectedCliente, useClientAddress, setDireccionEntrega]);
 
+  useEffect(() => {
+    if (
+      tipoDocumento === "factura" &&
+      !(selectedCliente?.rut && selectedCliente?.razon_social)
+    ) {
+      setTipoDocumento?.("boleta"); 
+    }
+  }, [selectedCliente, tipoDocumento, setTipoDocumento]);
+
   return (
     <Paper
       elevation={4}

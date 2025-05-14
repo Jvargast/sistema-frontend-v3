@@ -37,8 +37,14 @@ export const cuentasPorCobrarApi = createApi({
       }),
       invalidatesTags: ["CuentaPorCobrar"],
     }),
-    
-    
+    getCuentaPorCobrarByVentaId: builder.query({
+      query: (idVenta) => `/cuentas-por-cobrar/venta/${idVenta}`,
+      providesTags: ["CuentaPorCobrar"],
+    }),
+    getCuentaPorCobrarByDocumentoId: builder.query({
+      query: (idDocumento) => `/cuentas-por-cobrar/documento/${idDocumento}`,
+      providesTags: ["CuentaPorCobrar"],
+    }),
   }),
 });
 
@@ -46,5 +52,7 @@ export const {
   useGetCuentaPorCobrarByIdQuery,
   useGetAllCuentasPorCobrarQuery,
   useRegistrarPagoMutation,
-  useUpdateCuentaPorCobrarMutation
+  useUpdateCuentaPorCobrarMutation,
+  useGetCuentaPorCobrarByVentaIdQuery,
+  useGetCuentaPorCobrarByDocumentoIdQuery
 } = cuentasPorCobrarApi;

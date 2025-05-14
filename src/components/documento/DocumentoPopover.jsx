@@ -12,8 +12,9 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import PaidIcon from "@mui/icons-material/Paid";
 import InfoIcon from "@mui/icons-material/Info";
 import { useGetDocumentoByIdQuery } from "../../store/services/documentoApi";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Fade from "@mui/material/Fade";
+import { useGetCuentaPorCobrarByDocumentoIdQuery } from "../../store/services/cuentasPorCobrarApi";
 
 const DocumentoPopover = ({ anchorEl, onClose, idDocumento }) => {
   const open = Boolean(anchorEl);
@@ -22,6 +23,14 @@ const DocumentoPopover = ({ anchorEl, onClose, idDocumento }) => {
     isLoading,
     isError,
   } = useGetDocumentoByIdQuery(idDocumento, {
+    skip: !open,
+  });
+  const navigate = useNavigate();
+  const {
+    data: factura,
+    isLoading: isLoadingFactura,
+    isError: isErrorFactura,
+  } = useGetCuentaPorCobrarByDocumentoIdQuery(idDocumento, {
     skip: !open,
   });
 
@@ -79,15 +88,17 @@ const DocumentoPopover = ({ anchorEl, onClose, idDocumento }) => {
             {documento.creador?.rut})
           </Typography>
 
-          <Typography variant="body2" mb={1}>
-            <strong>Estado:</strong>{" "}
+          <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <Typography variant="body2">
+              <strong>Estado:</strong>
+            </Typography>
             <Chip
               label={documento.estadoPago?.nombre}
               color={colorChip}
               size="small"
-              sx={{ fontWeight: "bold", ml: 1 }}
+              sx={{ fontWeight: "bold" }}
             />
-          </Typography>
+          </Box>
 
           <Divider sx={{ my: 1 }} />
 
@@ -120,26 +131,40 @@ const DocumentoPopover = ({ anchorEl, onClose, idDocumento }) => {
           <Divider sx={{ my: 2 }} />
 
           <Box display="flex" justifyContent="center">
-            <Button
-              component={Link}
-              to={`/documentos/ver/${documento.id_documento}`}
-              variant="contained"
-              size="small"
-              sx={{
-                textTransform: "none",
-                fontWeight: "bold",
-                borderRadius: 2,
-                px: 2,
-                backgroundColor: "#1e88e5",
-                color: "#fff",
-                "&:hover": {
-                  backgroundColor: "#1565c0",
-                },
-              }}
-              onClick={onClose}
-            >
-              Ver Detalle Completo
-            </Button>
+            {isLoadingFactura ? (
+              <CircularProgress size={18} />
+            ) : isErrorFactura ? (
+              <Typography
+                variant="caption"
+                color="error"
+                textAlign="center"
+                display="block"
+              >
+                ❌ No se pudo obtener la factura asociada.
+              </Typography>
+            ) : factura?.id_cxc ? (
+              <Button
+                variant="contained"
+                size="small"
+                sx={{
+                  textTransform: "none",
+                  fontWeight: "bold",
+                  borderRadius: 2,
+                  px: 2,
+                  backgroundColor: "#1e88e5",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "#1565c0",
+                  },
+                }}
+                onClick={() => {
+                  onClose();
+                  navigate(`/facturas/ver/${factura.id_cxc}`);
+                }}
+              >
+                Ir a Factura
+              </Button>
+            ) : null}
           </Box>
         </Box>
       )}

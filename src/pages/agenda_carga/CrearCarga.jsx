@@ -1,4 +1,3 @@
-// CreateAgendaCargaForm.js
 import { useEffect, useMemo, useState } from "react";
 import {
   Box,
@@ -10,7 +9,7 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
-
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { useGetAllChoferesQuery } from "../../store/services/usuariosApi";
 import { useGetAllCamionesQuery } from "../../store/services/camionesApi";
 import { useGetAvailabreProductosQuery } from "../../store/services/productoApi";
@@ -18,7 +17,6 @@ import {
   useCreateAgendaMutation,
   useGetAgendaCargaDelDiaQuery,
 } from "../../store/services/agendaCargaApi";
-
 import AgendaCargaFormInputs from "../../components/agenda_carga/AgendaCargaInputs";
 import AgendaCargaProductsSection from "../../components/agenda_carga/AgendaCargaProductsSection";
 import InventarioCamion from "../../components/inventario/InventarioCamion";
@@ -32,6 +30,7 @@ import NoCajaAsignadaDialog from "../../components/chofer/NoCajaAsignadaMessage"
 import NoUsuarioCamionDialog from "../../components/chofer/NoUsuarioCamionDialog";
 import { emitRefetchAgendaViajes } from "../../utils/eventBus";
 import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
+import { convertirFechaLocal } from "../../utils/fechaUtils";
 
 const CreateAgendaCargaForm = () => {
   const {
@@ -83,10 +82,20 @@ const CreateAgendaCargaForm = () => {
     return choferes.find((c) => c.rut === idChofer) || null;
   }, [choferes, idChofer]);
 
+  const camionesDisponibles = useMemo(() => {
+    if (!camiones) return [];
+    return camiones.filter(
+      (c) => c.estado !== "En Ruta" && c.estado !== "En Tránsito"
+    );
+  }, [camiones]);
+
   const camionSeleccionado = useMemo(() => {
-    if (!camiones) return null;
-    return camiones.find((cam) => cam.id_camion === Number(idCamion)) || null;
-  }, [camiones, idCamion]);
+    if (!camionesDisponibles) return null;
+    return (
+      camionesDisponibles.find((cam) => cam.id_camion === Number(idCamion)) ||
+      null
+    );
+  }, [camionesDisponibles, idCamion]);
 
   const { data: cajaAsignada, isLoading: loadingCaja } =
     useGetCajaAsignadaQuery(
@@ -148,6 +157,11 @@ const CreateAgendaCargaForm = () => {
   };
 
   const handleChangeCantidad = (index, newCantidad) => {
+    const cantidadNumerica = Number(newCantidad);
+
+    if (isNaN(cantidadNumerica) || cantidadNumerica < 0) {
+      return;
+    }
     setProductos((prev) =>
       prev.map((prod, i) =>
         i === index ? { ...prod, cantidad: Number(newCantidad) } : prod
@@ -275,21 +289,91 @@ const CreateAgendaCargaForm = () => {
           bgcolor: "background.paper",
         }}
       >
-        <Typography variant="h5" mb={2}>
-          Crear Agenda de Carga
-        </Typography>
-
-        {!loadingAgenda && user.rol === "chofer" && !isError && agendaCarga && (
-          <Button
-            variant="contained"
-            color="warning"
-            size="large"
-            sx={{ mb: 2 }}
-            onClick={() => setOpenModal(true)}
+        <Box
+          display="flex"
+          alignItems="center"
+          gap={1}
+          mb={2}
+          pb={1}
+          borderBottom="1px solid #e0e0e0"
+        >
+          <CalendarTodayIcon color="action" fontSize="medium" />
+          <Typography
+            variant="h6"
+            fontWeight={600}
+            letterSpacing={0.5}
+            sx={{
+              color: "grey.900",
+              textTransform: "uppercase",
+            }}
           >
-            📅 Ver mi Agenda de Hoy
-          </Button>
-        )}
+            Crear Agenda de Carga
+          </Typography>
+        </Box>
+
+        {!loadingAgenda &&
+          user.rol === "chofer" &&
+          !isError &&
+          agendaCarga &&
+          agendaCarga?.data?.validada_por_chofer === false && (
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              flexWrap="wrap"
+              gap={2}
+              mb={3}
+              px={1}
+              py={1}
+              sx={{
+                backgroundColor: "transparent",
+                borderBottom: "1px solid",
+                borderColor: "grey.200",
+              }}
+            >
+              <Button
+                onClick={() => setOpenModal(true)}
+                size="medium"
+                variant="outlined"
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 500,
+                  px: 2.5,
+                  py: 1.2,
+                  mb: 1,
+                  borderRadius: 2,
+                  color: "grey.900",
+                  borderColor: "grey.300",
+                  backgroundColor: "white",
+                  "&:hover": {
+                    backgroundColor: "grey.50",
+                    borderColor: "grey.400",
+                  },
+                }}
+              >
+                Ver mi Agenda de Hoy
+              </Button>
+
+              {agendaCarga?.data?.fecha_hora && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "grey.700",
+                    fontStyle: "italic",
+                  }}
+                >
+                  Agenda del día:&nbsp;
+                  <Typography
+                    component="span"
+                    fontWeight="medium"
+                    color="text.primary"
+                  >
+                    {convertirFechaLocal(agendaCarga.data.fecha_hora)}
+                  </Typography>
+                </Typography>
+              )}
+            </Box>
+          )}
 
         {!loadingAgenda && isError && (
           <Alert severity="info" sx={{ mb: 2 }}>
@@ -301,7 +385,7 @@ const CreateAgendaCargaForm = () => {
           <Grid container spacing={2}>
             <AgendaCargaFormInputs
               choferes={choferes}
-              camiones={camiones}
+              camiones={camionesDisponibles}
               idChofer={idChofer}
               setIdChofer={setIdChofer}
               idCamion={idCamion === "" ? "" : Number(idCamion)}
@@ -316,6 +400,12 @@ const CreateAgendaCargaForm = () => {
               setDescargarRetornables={setDescargarRetornables}
             />
           </Grid>
+          {camionSeleccionado?.estado === "En Ruta" && (
+            <Alert severity="warning" sx={{ mt: 2 }}>
+              Este camión está en ruta. No puedes crear una agenda hasta que
+              finalice su viaje.
+            </Alert>
+          )}
           {idChofer && (
             <PedidosConfirmadosList
               idChofer={idChofer}
@@ -356,7 +446,15 @@ const CreateAgendaCargaForm = () => {
               variant="contained"
               color="success"
               size="large"
-              disabled={loadingCreate || !puedeCrearAgenda}
+              disabled={
+                loadingCreate ||
+                !puedeCrearAgenda ||
+                !idChofer ||
+                !idCamion ||
+                productos.length === 0 ||
+                productos.some((p) => !p.id_producto || p.cantidad <= 0) ||
+                camionSeleccionado?.estado === "En Ruta"
+              }
               sx={{ textTransform: "none" }}
             >
               {loadingCreate ? "Creando..." : "Crear Agenda"}

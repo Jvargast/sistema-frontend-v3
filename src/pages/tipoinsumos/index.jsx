@@ -11,7 +11,13 @@ import {
 import { Add, Edit, Delete } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useCreateTipoMutation, useDeleteTipoMutation, useGetAllTiposQuery, useGetTipoByIdQuery, useUpdateTipoMutation } from "../../store/services/tipoInsumoApi";
+import {
+  useCreateTipoMutation,
+  useDeleteTipoMutation,
+  useGetAllTiposQuery,
+  useGetTipoByIdQuery,
+  useUpdateTipoMutation,
+} from "../../store/services/tipoInsumoApi";
 import { useHasPermission } from "../../utils/useHasPermission";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import LoaderComponent from "../../components/common/LoaderComponent";
@@ -20,17 +26,12 @@ import BackButton from "../../components/common/BackButton";
 import ModalForm from "../../components/common/ModalForm";
 import AlertDialog from "../../components/common/AlertDialog";
 
-
-
 const TipoInsumoManagement = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [createTipoInsumo, { isLoading: isCreating }] =
-    useCreateTipoMutation();
-  const [deleteTipoInsumo, { isLoading: isDeleting }] =
-    useDeleteTipoMutation();
-  const [updateTipoInsumo, { isLoading: isUpdating }] =
-    useUpdateTipoMutation();
+  const [createTipoInsumo, { isLoading: isCreating }] = useCreateTipoMutation();
+  const [deleteTipoInsumo, { isLoading: isDeleting }] = useDeleteTipoMutation();
+  const [updateTipoInsumo, { isLoading: isUpdating }] = useUpdateTipoMutation();
 
   const dispatch = useDispatch();
 
@@ -40,13 +41,13 @@ const TipoInsumoManagement = () => {
 
   const { permisos, rol } = useSelector((state) => state.auth);
 
-  const crearTipoInsumo = useHasPermission("crear_insumo");
-  const editarTipoInsumo = useHasPermission("editar_insumo");
-  const borrarTipoInsumo = useHasPermission("borrar_insumo");
+  const crearTipoInsumo = useHasPermission("inventario.tipoinsumo.crear");
+  const editarTipoInsumo = useHasPermission("inventario.tipoinsumo.editar");
+  const borrarTipoInsumo = useHasPermission("inventario.tipoinsumo.eliminar");
 
   const { data: tipoInsumo, isLoading: isLoadingTipoInsumo } =
     useGetTipoByIdQuery(selectedTipoInsumoId, {
-      skip: !selectedTipoInsumoId, // Skip the query if no ID is selected);
+      skip: !selectedTipoInsumoId,
     });
 
   const {
@@ -57,15 +58,14 @@ const TipoInsumoManagement = () => {
   } = useGetAllTiposQuery();
 
   const handleEdit = (id) => {
-    setSelectedTipoInsumoId(id); // Establece el ID de la categoría seleccionada
-    setOpen(true); // Abre el modal
+    setSelectedTipoInsumoId(id);
+    setOpen(true);
   };
 
   const handleSubmit = async (data) => {
     try {
       if (selectedTipoInsumoId) {
         const updatedTipoInsumo = data;
-        // Actualización
         await updateTipoInsumo({
           id: selectedTipoInsumoId,
           updatedTipoInsumo,
@@ -77,7 +77,6 @@ const TipoInsumoManagement = () => {
           })
         );
       } else {
-        // Creación
         await createTipoInsumo({ ...data }).unwrap();
         dispatch(
           showNotification({
@@ -241,9 +240,7 @@ const TipoInsumoManagement = () => {
                   <Button
                     size="small"
                     startIcon={<Delete />}
-                    onClick={() =>
-                      confirmDeleteTipoInsumo(tipo.id_categoria)
-                    }
+                    onClick={() => confirmDeleteTipoInsumo(tipo.id_categoria)}
                     sx={{ color: "#d32f2f", fontWeight: "bold" }}
                   >
                     {isDeleting ? "Eliminando..." : "Eliminar"}
@@ -263,7 +260,9 @@ const TipoInsumoManagement = () => {
         }}
         onSubmit={handleSubmit}
         fields={fields}
-        title={selectedTipoInsumoId ? "Editar Tipo Insumo" : "Crear Tipo Insumo"}
+        title={
+          selectedTipoInsumoId ? "Editar Tipo Insumo" : "Crear Tipo Insumo"
+        }
         initialData={tipoInsumo}
         isLoading={isUpdating || isCreating}
       />

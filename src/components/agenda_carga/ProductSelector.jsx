@@ -24,13 +24,17 @@ const ProductSelectorRow = ({
     <Grid container spacing={2} alignItems="center">
       {/* Seleccionar producto */}
       <Grid item xs={12} sm={4}>
-        <FormControl fullWidth>
+        <FormControl fullWidth size="small">
           <InputLabel id={`producto-label-${index}`}>Producto</InputLabel>
           <Select
             labelId={`producto-label-${index}`}
             value={selectedProduct?.id_producto || ""}
             label="Producto"
             onChange={(e) => onChangeProduct(index, e.target.value)}
+            sx={{
+              borderRadius: 2,
+              backgroundColor: "background.paper",
+            }}
           >
             <MenuItem value="">-- Selecciona producto --</MenuItem>
             {productosDisponibles?.map((prod) => (
@@ -44,40 +48,70 @@ const ProductSelectorRow = ({
 
       {/* Mostrar si el producto es retornable o no */}
       <Grid item xs={12} sm={2}>
-        <Typography variant="body2" sx={{ fontWeight: "bold", textAlign: "center" }}>
-          {selectedProduct?.es_retornable ? "♻️ Retornable" : "❌ No Retornable"}
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 500,
+            textAlign: "center",
+            color: selectedProduct?.es_retornable
+              ? "success.main"
+              : "text.secondary",
+          }}
+        >
+          {selectedProduct?.es_retornable ? "♻️ Retornable" : "No retornable"}
         </Typography>
       </Grid>
 
       {/* Cantidad */}
-      <Grid item xs={12} sm={3}>
+      <Grid item xs={12} sm={2}>
         <TextField
           label="Cantidad"
+          inputProps={{ min: 0 }}
           type="number"
           value={selectedProduct?.cantidad || ""}
           onChange={(e) => onChangeCantidad(index, e.target.value)}
+          size="small"
           fullWidth
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              backgroundColor: "white",
+            },
+          }}
         />
       </Grid>
 
       {/* Notas */}
-      <Grid item xs={12} sm={2}>
+      <Grid item xs={12} sm={3}>
         <TextField
           label="Notas"
           value={selectedProduct?.notas || ""}
           onChange={(e) => onChangeNotas(index, e.target.value)}
+          size="small"
           fullWidth
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              backgroundColor: "white",
+            },
+          }}
         />
       </Grid>
 
       {/* Botón Eliminar */}
-      <Grid item xs={12} sm={1}>
+      <Grid item xs={12} sm={1} textAlign="center">
         <IconButton
-          color="error"
           onClick={() => onRemoveRow(index)}
-          sx={{ marginTop: "4px" }}
+          sx={{
+            borderRadius: "50%",
+            backgroundColor: "grey.100",
+            color: "error.main",
+            "&:hover": {
+              backgroundColor: "grey.200",
+            },
+          }}
         >
-          <DeleteIcon />
+          <DeleteIcon fontSize="small" />
         </IconButton>
       </Grid>
     </Grid>

@@ -27,11 +27,13 @@ const PasoSeleccionCliente = ({
   useEffect(() => {
     if (clientes?.clientes) {
       const texto = search.toLowerCase();
-      const filtrados = clientes.clientes.filter((c) => {
-        const nombre = c.nombre?.toLowerCase() || "";
-        const rut = c.rut?.toLowerCase() || "";
-        return nombre.includes(texto) || rut.includes(texto);
-      });
+      const filtrados = clientes.clientes
+        .filter((c) => c.tipo_cliente !== "empresa")
+        .filter((c) => {
+          const nombre = c.nombre?.toLowerCase() || "";
+          const rut = c.rut?.toLowerCase() || "";
+          return nombre.includes(texto) || rut.includes(texto);
+        });
       setFiltro(filtrados);
     }
   }, [search, clientes]);
@@ -42,7 +44,7 @@ const PasoSeleccionCliente = ({
 
   const handleClienteCreado = (nuevoCliente) => {
     setClienteSeleccionado(nuevoCliente);
-    setSearch(""); // Limpia búsqueda
+    setSearch("");
   };
 
   return (
@@ -78,23 +80,30 @@ const PasoSeleccionCliente = ({
           <CircularProgress size={28} />
         </Box>
       ) : (
-        <List dense>
-          {filtro.map((cliente) => (
-            <ListItem disablePadding key={cliente.id_cliente}>
-              <ListItemButton
-                selected={
-                  clienteSeleccionado?.id_cliente === cliente.id_cliente
-                }
-                onClick={() => handleSeleccion(cliente)}
-              >
-                <ListItemText
-                  primary={cliente.nombre}
-                  secondary={`RUT: ${cliente.rut || "No especificado"}`}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
+        <Box
+          sx={{
+            maxHeight: 260,
+            overflowY: "auto",
+          }}
+        >
+          <List dense disablePadding>
+            {filtro.map((cliente) => (
+              <ListItem disablePadding key={cliente.id_cliente}>
+                <ListItemButton
+                  selected={
+                    clienteSeleccionado?.id_cliente === cliente.id_cliente
+                  }
+                  onClick={() => handleSeleccion(cliente)}
+                >
+                  <ListItemText
+                    primary={cliente.nombre}
+                    secondary={`RUT: ${cliente.rut || "No especificado"}`}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Box>
       )}
 
       {clienteSeleccionado && (
