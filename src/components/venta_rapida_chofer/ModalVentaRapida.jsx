@@ -8,6 +8,9 @@ import {
   Button,
   Box,
   IconButton,
+  useMediaQuery,
+  Typography,
+  useTheme,
 } from "@mui/material";
 import PropTypes from "prop-types";
 import CloseIcon from "@mui/icons-material/Close";
@@ -29,6 +32,9 @@ const pasos = [
 ];
 
 const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
   const {
     activeStep,
     handleNext,
@@ -80,23 +86,61 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
   };
 
   return (
-    <Dialog open={open} onClose={handleCerrar} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ m: 0, p: 2 }}>
+    <Dialog
+      open={open}
+      onClose={handleCerrar}
+      fullWidth
+      maxWidth="sm"
+      fullScreen={fullScreen}
+      PaperProps={{
+        sx: {
+          bgcolor: "#f5f7fa",
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          m: 0,
+          p: 2,
+          bgcolor: "#1976d2",
+          color: "white",
+          fontWeight: "bold",
+        }}
+      >
         Venta Rápida
         <IconButton
           aria-label="close"
           onClick={handleCerrar}
-          sx={{ position: "absolute", right: 8, top: 8 }}
+          sx={{ position: "absolute", right: 8, top: 8, color: "white" }}
         >
           <CloseIcon />
         </IconButton>
       </DialogTitle>
 
-      <DialogContent dividers>
-        <Stepper activeStep={activeStep} alternativeLabel>
+      <DialogContent dividers sx={{ px: { xs: 2, sm: 4 }, pt: 2, pb: 3 }}>
+        <Stepper
+          activeStep={activeStep}
+          alternativeLabel
+          sx={{
+            flexWrap: "wrap",
+            "& .MuiStepIcon-root.Mui-completed": {
+              color: "#1976d2",
+            },
+            "& .MuiStepIcon-root.Mui-active": {
+              color: "#1565c0",
+            },
+          }}
+        >
           {pasos.map((label) => (
             <Step key={label}>
-              <StepLabel>{label}</StepLabel>
+              <StepLabel>
+                <Typography
+                  variant="caption"
+                  sx={{ fontSize: { xs: 11, sm: 13 }, color: "text.secondary" }}
+                >
+                  {label}
+                </Typography>
+              </StepLabel>
             </Step>
           ))}
         </Stepper>
@@ -144,19 +188,45 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
           )}
         </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            mt: 4,
+            gap: 2,
+            flexDirection: { xs: "column-reverse", sm: "row" },
+          }}
+        >
           <Button
+            fullWidth={fullScreen}
             disabled={activeStep === 0}
             onClick={handleBack}
             variant="outlined"
+            sx={{
+              borderColor: "#1976d2",
+              color: "#1976d2",
+              fontWeight: 500,
+              "&:hover": {
+                borderColor: "#1565c0",
+                backgroundColor: "#e3f2fd",
+              },
+            }}
           >
             Atrás
           </Button>
           {activeStep < pasos.length - 1 && (
             <Button
+              fullWidth={fullScreen}
               onClick={handleNext}
               variant="contained"
               disabled={!isStepValid()}
+              sx={{
+                backgroundColor: "#1976d2",
+                fontWeight: 600,
+                "&:hover": {
+                  backgroundColor: "#1565c0",
+                },
+              }}
             >
               Siguiente
             </Button>
@@ -170,7 +240,7 @@ ModalVentaRapida.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSuccess: PropTypes.func.isRequired,
-  viaje: PropTypes.object.isRequired
+  viaje: PropTypes.object.isRequired,
 };
 
 export default ModalVentaRapida;

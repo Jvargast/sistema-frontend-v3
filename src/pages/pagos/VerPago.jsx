@@ -109,6 +109,17 @@ const VerPago = () => {
               }
               sx={{ fontWeight: "bold", fontSize: 15 }}
             />
+            {pago.estadoPago?.nombre === "Pendiente" && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                mt={1}
+                sx={{ display: "block" }}
+              >
+                Este pago es parte de una factura que aún no ha sido saldada por
+                completo.
+              </Typography>
+            )}
           </Grid>
 
           <Grid item xs={12} sm={6}>
@@ -118,11 +129,11 @@ const VerPago = () => {
             {pago.documento ? (
               <Box display="flex" alignItems="center" gap={1}>
                 <ReceiptIcon />
-                <Typography>
+                <Box component="span" sx={{ fontSize: 14, fontWeight: "bold" }}>
                   {`${pago.documento.tipo_documento.toUpperCase()} N° ${
                     pago.documento.numero
                   }`}
-                </Typography>
+                </Box>
                 <IconButton
                   size="small"
                   color="primary"

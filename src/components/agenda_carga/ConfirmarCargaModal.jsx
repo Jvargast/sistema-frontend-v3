@@ -9,7 +9,10 @@ import {
   Grid,
   Chip,
   Box,
+  IconButton,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+
 import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 import { useConfirmarCargaCamionMutation } from "../../store/services/agendaCargaApi";
@@ -146,23 +149,31 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
           mx: "auto",
           mt: { xs: 3, md: 5 },
           borderRadius: 3,
-          bgcolor: "#f9f9f9",
-          boxShadow: 3,
+          bgcolor: "background.paper",
+          boxShadow: 4,
         }}
       >
+        <Box display="flex" justifyContent="flex-end">
+          <IconButton onClick={handleClose} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Box>
         <Typography
           variant="h5"
           fontWeight="bold"
           mb={3}
           textAlign="center"
-          color="primary"
+          color="text.primary"
         >
-          ✅ Confirmar Carga del Camión
+          Confirmar Carga del Camión
         </Typography>
 
         {/* Aquí está el ajuste importante */}
         <Box sx={{ maxHeight: "60vh", overflowY: "auto", px: 1 }}>
           {productosAgrupados.map((producto) => {
+            const key = producto.id_producto
+              ? `producto_${producto.id_producto}`
+              : `insumo_${producto.id_insumo}`; //
             const yaEnCamion =
               producto.cantidadReservada + producto.cantidadDisponible;
             const restante = Math.max(producto.cantidadTotal - yaEnCamion, 0);
@@ -177,49 +188,94 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
                 }
                 sx={{
                   p: 2,
-                  mb: 3,
-                  borderRadius: 3,
-                  border: "1px solid #ccc",
-                  backgroundColor: "#ffffff",
+                  mb: 2.5,
+                  borderRadius: 2,
+                  border: "1px solid",
+                  borderColor: "grey.200",
+                  backgroundColor: "grey.50",
                 }}
               >
                 <Box
                   display="flex"
-                  alignItems="center"
                   justifyContent="space-between"
+                  alignItems="center"
                   mb={1}
                 >
-                  <Typography variant="h6" fontWeight="bold">
-                    {(
-                      producto.nombre_producto ||
-                      producto.nombre_insumo ||
-                      "Sin nombre"
-                    ).toUpperCase()}
-                    <Chip
-                      label={producto.id_producto ? "Producto" : "Insumo"}
-                      color={producto.id_producto ? "primary" : "secondary"}
-                      size="small"
-                      sx={{ fontWeight: "bold" }}
-                    />
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="medium"
+                    color="text.primary"
+                  >
+                    {producto.nombre_producto || producto.nombre_insumo}
                   </Typography>
+
+                  <Chip
+                    label={producto.id_producto ? "Producto" : "Insumo"}
+                    color={producto.id_producto ? "primary" : "secondary"}
+                    size="small"
+                    sx={{ fontWeight: "bold" }}
+                  />
                 </Box>
 
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={6} md={4}>
-                    <Typography variant="body1">
-                      🧾 Planificado: <strong>{producto.cantidadTotal}</strong>
+                <Grid
+                  container
+                  spacing={2}
+                  sx={{
+                    mt: 1.5,
+                    px: 1,
+                    py: 1,
+                    borderRadius: 2,
+                    bgcolor: "grey.100",
+                    border: "1px solid",
+                    borderColor: "grey.200",
+                  }}
+                >
+                  <Grid item xs={12} sm={4}>
+                    <Typography
+                      variant="subtitle2"
+                      color="grey.800"
+                      sx={{ fontWeight: 500 }}
+                    >
+                      Planificado
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      fontWeight="bold"
+                      color="text.primary"
+                    >
+                      {producto.cantidadTotal}
                     </Typography>
                   </Grid>
-                  <Grid item xs={6} md={4}>
-                    <Typography variant="body1">
-                      📦 En camión (Reservado):{" "}
-                      <strong>{producto.cantidadReservada}</strong>
+                  <Grid item xs={12} sm={4}>
+                    <Typography
+                      variant="subtitle2"
+                      color="grey.800"
+                      sx={{ fontWeight: 500 }}
+                    >
+                      En camión (reservado)
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      fontWeight="bold"
+                      color="text.primary"
+                    >
+                      {producto.cantidadReservada}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={4}>
-                    <Typography variant="body1">
-                      ✅ Disponible:{" "}
-                      <strong>{producto.cantidadDisponible}</strong>
+                  <Grid item xs={12} sm={4}>
+                    <Typography
+                      variant="subtitle2"
+                      color="grey.800"
+                      sx={{ fontWeight: 500 }}
+                    >
+                      Disponible
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      fontWeight="bold"
+                      color="text.primary"
+                    >
+                      {producto.cantidadDisponible}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -231,19 +287,16 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
                   fullWidth
                   sx={{ mt: 2 }}
                   disabled={deshabilitado}
-                  value={productosCargados[producto.id_producto] ?? ""}
+                  value={
+                    productosCargados[key] !== undefined
+                      ? productosCargados[key]
+                      : producto.cantidadTotal
+                  }
                   inputProps={{
                     min: 0,
                     max: restante,
                   }}
-                  onChange={(e) =>
-                    handleChangeCantidad(
-                      producto.id_producto
-                        ? `producto_${producto.id_producto}`
-                        : `insumo_${producto.id_insumo}`,
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => handleChangeCantidad(key, e.target.value)}
                 />
                 <Typography
                   variant="caption"
@@ -282,10 +335,12 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
           color="success"
           sx={{
             mt: 3,
-            width: "100%",
             py: 1.5,
-            fontSize: "1rem",
+            width: "100%",
             borderRadius: 2,
+            fontWeight: "bold",
+            fontSize: "0.95rem",
+            textTransform: "none",
           }}
           onClick={handleConfirmar}
           disabled={isLoading}

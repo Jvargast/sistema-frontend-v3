@@ -1,0 +1,14 @@
+{
+  "icon": {
+    "source": "resources/icon.png",
+    "padding": 0,
+    "backgroundColor": "#ffffff"
+  },
+  "splash": {
+    "source": "resources/splash.png",
+    "padding": 0,
+    "resizeMode": "contain",
+    "backgroundColor": "#ffffff"
+  },
+  "platforms": ["android"]
+}

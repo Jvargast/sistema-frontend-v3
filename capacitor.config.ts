@@ -5,8 +5,8 @@ const config: CapacitorConfig = {
   appName: 'AguasValentinoERP',
   webDir: 'dist',
   server: {
-    url: 'http://192.168.1.121:3000', // 👈 Asegúrate que tu frontend esté corriendo ahí
-    cleartext: true, // Necesario si usas HTTP y no HTTPS
+    url: 'https://erp.aguasvalentino.com',
+    cleartext: false, 
   },
 };
 

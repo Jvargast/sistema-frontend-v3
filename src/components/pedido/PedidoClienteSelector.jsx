@@ -1,20 +1,36 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { 
-  Dialog, DialogTitle, DialogContent, DialogActions, 
-  Button, TextField, Box, Typography, CircularProgress, IconButton
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Box,
+  Typography,
+  CircularProgress,
+  IconButton,
 } from "@mui/material";
 import PropTypes from "prop-types";
 import PersonIcon from "@mui/icons-material/Person";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { useNavigate } from "react-router-dom";
 import { useGetAllClientesQuery } from "../../store/services/clientesApi";
 import LoaderComponent from "../common/LoaderComponent";
 
-const PedidoClienteSelector = ({ open, onClose, selectedCliente, onSelect }) => {
-  const [searchTerm, setSearchTerm] = useState(""); 
-  const [clientes, setClientes] = useState([]); 
-  const [page, setPage] = useState(1); 
-  const [hasMore, setHasMore] = useState(true); 
+const PedidoClienteSelector = ({
+  open,
+  onClose,
+  selectedCliente,
+  onSelect,
+}) => {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [clientes, setClientes] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [preSelectedCliente, setPreSelectedCliente] = useState(null);
 
   const { data, isLoading, isFetching, refetch } = useGetAllClientesQuery({
@@ -23,32 +39,34 @@ const PedidoClienteSelector = ({ open, onClose, selectedCliente, onSelect }) => 
   });
 
   const observer = useRef();
-  const lastClienteRef = useCallback((node) => {
-    if (isFetching || !hasMore) return;
-    if (observer.current) observer.current.disconnect();
-    
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        setPage((prev) => prev + 1); 
-      }
-    });
+  const lastClienteRef = useCallback(
+    (node) => {
+      if (isFetching || !hasMore) return;
+      if (observer.current) observer.current.disconnect();
 
-    if (node) observer.current.observe(node);
-  }, [isFetching, hasMore]);
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          setPage((prev) => prev + 1);
+        }
+      });
 
-
-  
+      if (node) observer.current.observe(node);
+    },
+    [isFetching, hasMore]
+  );
 
   useEffect(() => {
     if (data?.clientes) {
-      setClientes((prev) => (page === 1 ? data.clientes : [...prev, ...data.clientes]));
+      setClientes((prev) =>
+        page === 1 ? data.clientes : [...prev, ...data.clientes]
+      );
       setHasMore(data?.paginacion?.totalPages > page);
     }
   }, [data, page]);
 
   useEffect(() => {
     if (!open) return;
-  
+
     // Reinicia selección al abrir el modal
     setPreSelectedCliente(selectedCliente || null);
     setPage(1); // Reinicia la paginación también
@@ -64,15 +82,15 @@ const PedidoClienteSelector = ({ open, onClose, selectedCliente, onSelect }) => 
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle 
-        sx={{ 
-          display: "flex", 
-          alignItems: "center", 
+      <DialogTitle
+        sx={{
+          display: "flex",
+          alignItems: "center",
           justifyContent: "space-between",
           fontWeight: "bold",
           background: "linear-gradient(90deg, #4A90E2 0%, #0052D4 100%)",
           color: "white",
-          padding: "16px 24px"
+          padding: "16px 24px",
         }}
       >
         <Box display="flex" alignItems="center" gap={1}>
@@ -82,7 +100,7 @@ const PedidoClienteSelector = ({ open, onClose, selectedCliente, onSelect }) => 
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      
+
       <DialogContent sx={{ p: 3 }}>
         <Box mb={2} display="flex" alignItems="center">
           <SearchIcon sx={{ color: "#666", mr: 1 }} />
@@ -95,31 +113,68 @@ const PedidoClienteSelector = ({ open, onClose, selectedCliente, onSelect }) => 
             sx={{ "& input": { fontSize: "1rem" } }}
           />
         </Box>
+        <Box display="flex" justifyContent="flex-end" mt={1} mb={2}>
+          <Button
+            variant="outlined"
+            startIcon={<AddCircleOutlineIcon />}
+            onClick={() => {
+              onClose(); // Cierra el modal antes de redirigir
+              navigate("/clientes/crear");
+            }}
+            sx={{
+              borderColor: "#007AFF",
+              color: "#007AFF",
+              fontWeight: "bold",
+              "&:hover": {
+                backgroundColor: "#E3F2FD",
+                borderColor: "#005BB5",
+              },
+            }}
+          >
+            Crear nuevo cliente
+          </Button>
+        </Box>
 
         {preSelectedCliente && (
-          <Box 
-            display="flex" 
-            alignItems="center" 
+          <Box
+            display="flex"
+            alignItems="center"
             justifyContent="space-between"
-            p={2} 
+            p={2}
             mb={2}
             borderRadius="8px"
-            sx={{ 
-              backgroundColor: "#D1E9FF", 
+            sx={{
+              backgroundColor: "#D1E9FF",
               border: "1px solid #4A90E2",
-              boxShadow: "0px 4px 10px rgba(0,0,0,0.1)"
+              boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
             }}
           >
             <Typography fontWeight="bold">
               Cliente Seleccionado: {preSelectedCliente.nombre}
             </Typography>
-            <IconButton onClick={() => setPreSelectedCliente(null)} color="error">
+            <IconButton
+              onClick={() => setPreSelectedCliente(null)}
+              color="error"
+            >
               <CloseIcon />
             </IconButton>
           </Box>
         )}
 
-        <Box sx={{ maxHeight: "300px", overflowY: "auto", p: 1 }}>
+        <Box
+          sx={{
+            maxHeight: "300px",
+            overflowY: "auto",
+            p: 1,
+            "&::-webkit-scrollbar": {
+              width: "6px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#cfd8dc",
+              borderRadius: "4px",
+            },
+          }}
+        >
           {clientes.map((cliente, index) => (
             <Box
               key={cliente.id_cliente}
@@ -130,7 +185,10 @@ const PedidoClienteSelector = ({ open, onClose, selectedCliente, onSelect }) => 
                 mb: 1,
                 cursor: "pointer",
                 borderRadius: "8px",
-                backgroundColor: preSelectedCliente?.id_cliente === cliente.id_cliente ? "#D1E9FF" : "#F9F9F9",
+                backgroundColor:
+                  preSelectedCliente?.id_cliente === cliente.id_cliente
+                    ? "#D1E9FF"
+                    : "#F9F9F9",
                 transition: "background 0.2s",
                 "&:hover": { backgroundColor: "#D1E9FF" },
               }}
@@ -149,11 +207,11 @@ const PedidoClienteSelector = ({ open, onClose, selectedCliente, onSelect }) => 
           )}
         </Box>
       </DialogContent>
-      
+
       <DialogActions sx={{ p: 3 }}>
-        <Button 
-          onClick={onClose} 
-          variant="contained" 
+        <Button
+          onClick={onClose}
+          variant="contained"
           sx={{
             backgroundColor: "#FF5252",
             color: "white",
@@ -163,12 +221,12 @@ const PedidoClienteSelector = ({ open, onClose, selectedCliente, onSelect }) => 
         >
           Cancelar
         </Button>
-        <Button 
+        <Button
           onClick={() => {
             onSelect(preSelectedCliente);
             onClose();
           }}
-          variant="contained" 
+          variant="contained"
           sx={{
             backgroundColor: "#007AFF",
             color: "white",

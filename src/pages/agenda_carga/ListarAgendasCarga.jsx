@@ -5,6 +5,7 @@ import { Visibility } from "@mui/icons-material";
 import EmptyState from "../../components/common/EmptyState";
 import DataTable from "../../components/common/DataTable";
 import { useGetAllAgendasQuery } from "../../store/services/agendaCargaApi";
+import { convertirFechaLocal } from "../../utils/fechaUtils";
 
 const estadoColores = {
   pendiente: "warning",
@@ -40,15 +41,7 @@ const ListarAgendasCarga = () => {
       id: "fecha_hora",
       label: "Fecha de Carga",
       render: (row) =>
-        row.fecha_hora
-          ? new Date(row.fecha_hora).toLocaleString("es-CL", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : "Sin fecha",
+        row.fecha_hora ? convertirFechaLocal(row.fecha_hora) : "Sin fecha",
     },
     {
       id: "chofer",

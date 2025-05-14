@@ -73,7 +73,7 @@ const Sidebar = ({
     try {
       await logout().unwrap();
       dispatch(resetCacheAndLogout());
-      navigate("/login");
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }
@@ -224,15 +224,13 @@ const Sidebar = ({
         <BottomNavigation
           value={active}
           onChange={(event, newValue) => {
-            if (newValue === "logout") {
-              handleLogout();
-            } else if (newValue === "home") {
+            if (newValue === "home") {
               const initial = getInitialRoute(rol, permisos);
-              console.log(initial);
               navigate(initial);
-            } else {
-              setActive(newValue);
+              setActive("home");
+            } else if (newValue !== "logout") {
               navigate(`/${newValue}`);
+              setActive(newValue);
             }
           }}
           sx={{
@@ -273,6 +271,7 @@ const Sidebar = ({
             label="Cerrar Sesión"
             value="logout"
             icon={<LogoutOutlined />}
+            onClick={handleLogout}
           />
         </BottomNavigation>
       )}

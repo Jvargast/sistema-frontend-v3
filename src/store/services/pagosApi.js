@@ -15,7 +15,10 @@ export const pagosApi = createApi({
       query: (id_documento) => `/pagos/documento/${id_documento}`,
       providesTags: ["Pago"],
     }),
-
+    getPagosByVentaId: builder.query({
+      query: (id_venta) => `/pagos/venta/${id_venta}`,
+      providesTags: ["Pago"],
+    }),
     getAllPagos: builder.query({
       query: (params) => ({
         url: `/pagos/`,
@@ -55,6 +58,7 @@ export const pagosApi = createApi({
 export const {
   useGetPagoByIdQuery,
   useGetPagosByDocumentoQuery,
+  useGetPagosByVentaIdQuery,
   useGetAllPagosQuery,
   useCreatePagoMutation,
   useUpdatePagoMutation,

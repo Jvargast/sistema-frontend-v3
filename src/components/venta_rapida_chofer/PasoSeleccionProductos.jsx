@@ -98,7 +98,17 @@ const PasoSeleccionProductos = ({
             const precioModificado = precioActual !== precioOriginal;
 
             return (
-              <Paper key={producto.id_producto} elevation={2} sx={{ p: 2 }}>
+              <Paper
+                key={producto.id_producto}
+                elevation={1}
+                sx={{
+                  p: 2,
+                  border: "1px solid",
+                  borderColor: "grey.200",
+                  borderRadius: 2,
+                  bgcolor: "grey.50",
+                }}
+              >
                 <Stack
                   direction={{ xs: "column", sm: "row" }}
                   spacing={2}
@@ -126,26 +136,63 @@ const PasoSeleccionProductos = ({
                   </Box>
 
                   <Stack direction="row" spacing={1} alignItems="center">
+                    {/* Botón RESTAR con rojo sutil */}
                     <IconButton
                       size="small"
                       onClick={() => actualizarCantidad(producto, -1)}
+                      sx={{
+                        borderRadius: "50%",
+                        backgroundColor: "grey.100",
+                        color: "error.main",
+                        border: "1px solid",
+                        borderColor: "grey.300",
+                        "&:hover": {
+                          backgroundColor: "grey.200",
+                        },
+                      }}
                     >
-                      <RemoveIcon />
+                      <RemoveIcon fontSize="small" />
                     </IconButton>
+
+                    {/* Campo de cantidad */}
                     <TextField
                       size="small"
                       value={cantidad}
                       inputProps={{
                         readOnly: true,
-                        style: { width: 30, textAlign: "center" },
+                        style: {
+                          width: 35,
+                          textAlign: "center",
+                          fontWeight: "bold",
+                        },
                       }}
-                      variant="outlined"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: 2,
+                          px: 1,
+                          py: 0.5,
+                          backgroundColor: "white",
+                          fontSize: "1rem",
+                        },
+                      }}
                     />
+
+                    {/* Botón SUMAR con azul sutil */}
                     <IconButton
                       size="small"
                       onClick={() => actualizarCantidad(producto, 1)}
+                      sx={{
+                        borderRadius: "50%",
+                        backgroundColor: "grey.100",
+                        color: "primary.main",
+                        border: "1px solid",
+                        borderColor: "grey.300",
+                        "&:hover": {
+                          backgroundColor: "grey.200",
+                        },
+                      }}
                     >
-                      <AddIcon />
+                      <AddIcon fontSize="small" />
                     </IconButton>
                   </Stack>
 
@@ -162,7 +209,13 @@ const PasoSeleccionProductos = ({
                       inputMode: "numeric",
                       pattern: "[0-9]*",
                     }}
-                    sx={{ width: 130 }}
+                    sx={{
+                      width: 140,
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 2,
+                        backgroundColor: "white",
+                      },
+                    }}
                     variant="outlined"
                     InputLabelProps={{ shrink: true }}
                   />

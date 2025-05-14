@@ -94,7 +94,7 @@ const ListaDestinos = ({ destinos, entregas, onOpenEntrega, onVerDetallePedido }
                           }
                         }}
                         disabled={entregas[destino.id_pedido]?.entregado}
-                        sx={{ textTransform: "none", fontWeight: 500 }}
+                        sx={{ textTransform: "none", fontWeight: 500, mr: 1}}
                       >
                         {entregas[destino.id_pedido]?.entregado
                           ? "Entregado"

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Typography,
@@ -11,11 +11,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useCreateClienteMutation } from "../../store/services/clientesApi";
-import { Autocomplete, useLoadScript } from "@react-google-maps/api";
 import { showNotification } from "../../store/reducers/notificacionSlice";
-import LoaderComponent from "../../components/common/LoaderComponent";
-
-const libraries = ["places"];
+import GooglePlacesInput from "../../components/google/GooglePlacesInput";
 
 const CrearCliente = () => {
   const navigate = useNavigate();
@@ -31,25 +28,6 @@ const CrearCliente = () => {
     email: "",
     activo: true, // Predeterminado activo
   });
-  const autocompleteRef = useRef(null);
-
-  const apiGoogle = import.meta.env.VITE_API_GOOGLE_MAPS;
-
-  // Cargar el script de Google Maps
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: `${apiGoogle}`, 
-    libraries,
-  });
-
-  const handlePlaceSelect = () => {
-    const place = autocompleteRef.current.getPlace();
-    if (place && place.formatted_address) {
-      setFormData((prev) => ({
-        ...prev,
-        direccion: place.formatted_address,
-      }));
-    }
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -80,16 +58,6 @@ const CrearCliente = () => {
       );
     }
   };
-
-  if (loadError) {
-    return (
-      <Typography color="error">Error al cargar Google Maps API</Typography>
-    );
-  }
-
-  if (!isLoaded) {
-    return <LoaderComponent />;
-  }
 
   return (
     <Box m={3}>
@@ -123,20 +91,11 @@ const CrearCliente = () => {
             variant="outlined"
           />
 
-          <Autocomplete
-            onLoad={(ref) => (autocompleteRef.current = ref)}
-            onPlaceChanged={handlePlaceSelect}
-          >
-            <TextField
-              fullWidth
-              name="direccion"
-              value={formData.direccion}
-              onChange={handleInputChange}
-              placeholder="Ingrese la dirección*"
-              required
-              variant="outlined"
-            />
-          </Autocomplete>
+          <GooglePlacesInput
+            onSelect={(direccion) =>
+              setFormData((prev) => ({ ...prev, direccion }))
+            }
+          />
 
           <TextField
             fullWidth

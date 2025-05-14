@@ -44,9 +44,9 @@ const CategoriaManagement = () => {
 
   const { permisos, rol } = useSelector((state) => state.auth);
 
-  const crearCategoria = useHasPermission("crear_categoria");
-  const editarCategoria = useHasPermission("editar_categoria");
-  const borrarCategoria = useHasPermission("borrar_categoria");
+  const crearCategoria = useHasPermission("inventario.categoriaproducto.crear");
+  const editarCategoria = useHasPermission("inventario.categoriaproducto.editar");
+  const borrarCategoria = useHasPermission("inventario.categoriaproducto.eliminar");
 
   const { data: categoria, isLoading: isLoadingCategoria } =
     useGetCategoriaByIdQuery(selectedCategoriaId, {

@@ -17,10 +17,11 @@ import PaymentIcon from "@mui/icons-material/Payment";
 import NotesIcon from "@mui/icons-material/Notes";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRegistrarPagoMutation } from "../../store/services/cuentasPorCobrarApi";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
+import { formatCLP } from "../../utils/formatUtils";
 
 const metodos = [
   { value: 1, label: "Efectivo" },
@@ -29,13 +30,25 @@ const metodos = [
   { value: 4, label: "Transferencia" },
 ];
 
-const ModalPagoFactura = ({ open, onClose, idCxc }) => {
+const ModalPagoFactura = ({ open, onClose, idCxc, montoPorDefecto }) => {
   const dispatch = useDispatch();
-  const [monto, setMonto] = useState("");
+  const [monto, setMonto] = useState(montoPorDefecto || "");
   const [metodoPago, setMetodoPago] = useState("");
   const [observaciones, setObservaciones] = useState("");
   const [referencia, setReferencia] = useState("");
   const [registrarPago, { isLoading }] = useRegistrarPagoMutation();
+  const saldoPendiente = Number(montoPorDefecto); // viene del padre
+  const montoNumerico = Number(monto);
+  const montoValido =
+    !isNaN(montoNumerico) &&
+    montoNumerico > 0 &&
+    montoNumerico <= saldoPendiente;
+
+  useEffect(() => {
+    if (open && montoPorDefecto) {
+      setMonto(montoPorDefecto.toString());
+    }
+  }, [open, montoPorDefecto]);
 
   const handleSubmit = async () => {
     try {
@@ -76,12 +89,21 @@ const ModalPagoFactura = ({ open, onClose, idCxc }) => {
             <TextField
               label="Monto a Pagar"
               type="text"
-              inputMode="decimal"
-              value={monto}
-              onChange={(e) => setMonto(e.target.value.replace(/[^\d.]/g, ""))}
+              inputMode="numeric"
+              value={formatCLP(monto)}
+              onChange={(e) => {
+                const raw = e.target.value.replace(/\D/g, "");
+                setMonto(raw);
+              }}
               fullWidth
               required
               variant="outlined"
+              error={!montoValido}
+              helperText={
+                !montoValido
+                  ? "El monto debe ser mayor a 0 y no exceder el saldo pendiente"
+                  : ""
+              }
               sx={{
                 "& .MuiInputAdornment-root": {
                   alignSelf: "center",
@@ -168,7 +190,7 @@ const ModalPagoFactura = ({ open, onClose, idCxc }) => {
           onClick={handleSubmit}
           variant="contained"
           color="primary"
-          disabled={isLoading || !monto || !metodoPago}
+          disabled={isLoading || !montoValido || !metodoPago}
           sx={{ fontWeight: "bold", textTransform: "none" }}
         >
           {isLoading ? (
@@ -188,6 +210,7 @@ ModalPagoFactura.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   idCxc: PropTypes.number.isRequired,
+  montoPorDefecto: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 export default ModalPagoFactura;
