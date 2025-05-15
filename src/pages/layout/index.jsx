@@ -6,6 +6,7 @@ import Sidebar from "../../components/layout/Sidebar";
 import { Outlet } from "react-router";
 import Navbar from "../../components/layout/Navbar";
 import { LayoutContext } from "../../context/LayoutContext";
+import Footer from "../../components/common/Footer";
 
 const Layout = () => {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -14,23 +15,17 @@ const Layout = () => {
 
   const { user, rol, isLoading, isError } = useSelector((state) => state.auth);
 
-  // Actualizar estado de la barra lateral según el ancho de pantalla
   useEffect(() => {
     setIsSidebarOpen(isDesktop);
   }, [isDesktop]);
 
-  // Manejo de estados de carga y error
   if (isLoading) return <LoaderComponent />;
   if (isError) return <div>Error al cargar los datos del usuario</div>;
-
-  // Validación para asegurarse de que el usuario está disponible
-  if (!user) {
-    return <LoaderComponent />;
-  }
+  if (!user) return <LoaderComponent />;
 
   return (
     <LayoutContext.Provider value={{ drawerWidth }}>
-      <Box display={isDesktop ? "flex" : "block"} width="100%" height="100%">
+      <Box display="flex" height="100%" width="100%">
         <Sidebar
           user={user}
           rol={rol}
@@ -39,16 +34,22 @@ const Layout = () => {
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
         />
-        <Box flexGrow={1}>
+        <Box
+          display="flex"
+          flexDirection="column"
+          flexGrow={1}
+          minHeight="100vh"
+        >
           <Navbar
             user={user}
             rol={rol}
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}
           />
-          <Box p={2}>
+          <Box flexGrow={1} p={2}>
             <Outlet />
           </Box>
+          <Footer /> {/* 👈 Aquí va el Footer */}
         </Box>
       </Box>
     </LayoutContext.Provider>
