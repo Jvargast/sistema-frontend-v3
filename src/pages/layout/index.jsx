@@ -49,7 +49,7 @@ const Layout = () => {
           <Box flexGrow={1} p={2}>
             <Outlet />
           </Box>
-          <Footer /> {/* 👈 Aquí va el Footer */}
+          <Footer /> 
         </Box>
       </Box>
     </LayoutContext.Provider>

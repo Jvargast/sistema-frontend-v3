@@ -9,8 +9,8 @@ import {
 import { Box, Typography, CircularProgress, useTheme } from "@mui/material";
 import { useGetResumenVentasPorTipoEntregaQuery } from "../../../store/services/ventasEstadisticasApi";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
-// 🎨 Paleta pastel profesional
 const COLORS = ["#A3C4F3", "#BFD8AF", "#FCD5CE", "#FFE5B4", "#D5AAFF"];
 
 const OrdersPieChart = () => {
@@ -18,6 +18,7 @@ const OrdersPieChart = () => {
   const hoy = dayjs().format("YYYY-MM-DD");
   const { data, isLoading, isError } =
     useGetResumenVentasPorTipoEntregaQuery(hoy);
+  const { t } = useTranslation();
 
   const chartData = Array.isArray(data)
     ? data.filter((item) => item.value > 0)
@@ -30,7 +31,7 @@ const OrdersPieChart = () => {
         px: 3,
         py: 3,
         borderRadius: 3,
-        backgroundColor: theme.palette.background.paper,
+        
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
@@ -55,7 +56,7 @@ const OrdersPieChart = () => {
           gap: 1,
         }}
       >
-        🚚 Ventas por Tipo de Entrega
+        🚚 {t("dashboard.sales_by_delivery_type")}
       </Typography>
 
       {isLoading ? (
@@ -79,7 +80,7 @@ const OrdersPieChart = () => {
           }}
         >
           <Typography variant="body2" color="error">
-            Error al cargar datos.
+            {t("dashboard.error_loading_data")}
           </Typography>
         </Box>
       ) : chartData.length === 0 ? (
@@ -93,7 +94,7 @@ const OrdersPieChart = () => {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            💤 No hay datos disponibles para hoy.
+            💤 {t("dashboard.no_data_today")}
           </Typography>
         </Box>
       ) : (
@@ -138,7 +139,10 @@ const OrdersPieChart = () => {
             </text>
 
             <Tooltip
-              formatter={(value, name) => [`${value} pedidos`, name]}
+              formatter={(value, name) => [
+                `${value} ${t("dashboard.orders")}`,
+                name,
+              ]}
               contentStyle={{
                 backgroundColor: "#fff",
                 borderRadius: 8,

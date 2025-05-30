@@ -1,0 +1,80 @@
+{
+  "general": {
+    "welcome": "Welcome",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "profile": "My Profile",
+    "logout": "Log Out",
+    "notifications": "Notifications",
+    "language": "Language",
+    "theme": "Theme",
+    "advanced_settings": "Advanced Settings",
+    "year": "Year"
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "reset_order": "Reset Order"
+  },
+  "menu": {
+    "home": "Home",
+    "orders": "Orders",
+    "sales": "Sales",
+    "clients": "Clients",
+    "products": "Products",
+    "reports": "Reports",
+    "users": "Users"
+  },
+  "messages": {
+    "loading": "Loading...",
+    "error": "An error has occurred",
+    "success": "Operation completed successfully",
+    "no_data": "No data available"
+  },
+  "profile": {
+    "name": "Name",
+    "role": "Role",
+    "email": "Email",
+    "phone": "Phone"
+  },
+  "dashboard": {
+    "top_selling_product": "Top Selling Product/Supply",
+    "no_sales_recorded": "No sales recorded",
+    "units": "units",
+    "no_product_sales": "No product or supply sales",
+    "total_sales_today": "Total sales today",
+    "orders": "orders",
+    "total_amount": "Total amount",
+    "reset_order": "Reset order",
+    "charts": "Charts",
+    "kpis": "KPIs",
+    "view_more": "View more",
+    "revenue": "Revenue",
+    "sales": "Sales",
+    "clients": "Clients",
+    "products": "Products",
+    "monthly_summary": "Monthly summary",
+    "daily_summary": "Daily summary",
+    "average_ticket": "Average ticket",
+    "conversion_rate": "Conversion rate",
+    "income_today": "Income Today",
+    "orders_created_today": "Orders Created Today",
+    "weekly_sales": "Weekly Sales",
+    "loading_sales_chart": "Loading sales chart...",
+    "no_sales_this_week": "No sales recorded this week.",
+    "come_back_later": "Come back later to see the weekly summary.",
+    "sales_by_delivery_type": "Sales by Delivery Type",
+    "error_loading_data": "Error loading data.",
+    "no_data_today": "No data available for today.",
+    "monthly_revenue_trend": "Monthly Revenue Trend",
+    "month": "Month",
+    "best_selling_products": "Best-Selling Products and Supplies",
+    "no_data_available_today": "No data available for today.",
+    "product_or_supply": "Product/Supply"
+  }
+}

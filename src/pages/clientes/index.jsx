@@ -66,18 +66,18 @@ const Clientes = () => {
       renderCell: (params) => (
         <Box
           sx={{
-            overflowX: "auto", // Habilitar solo scroll horizontal
-            overflowY: "hidden", // Deshabilitar scroll vertical
-            whiteSpace: "nowrap", // Prevenir que el texto se quiebre
+            overflowX: "auto",
+            overflowY: "hidden",
+            whiteSpace: "nowrap",
             "&::-webkit-scrollbar": {
-              height: "4px", // Altura de la barra de scroll horizontal
+              height: "4px",
             },
             "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "#888", // Color del scroll horizontal
+              backgroundColor: theme.palette.grey[500],
               borderRadius: "4px",
             },
             "&::-webkit-scrollbar-thumb:hover": {
-              backgroundColor: "#555", // Color del scroll al pasar el cursor
+              backgroundColor: theme.palette.grey[700],
             },
           }}
         >
@@ -93,13 +93,21 @@ const Clientes = () => {
       renderCell: (params) =>
         params.value === "Empresa" ? (
           <span
-            style={{ color: "#2ecc71", fontWeight: "bold", fontSize: "0.8rem" }}
+            style={{
+              color: theme.palette.success.main,
+              fontWeight: "bold",
+              fontSize: "0.8rem",
+            }}
           >
             Empresa
           </span>
         ) : (
           <span
-            style={{ color: "#3498db", fontWeight: "bold", fontSize: "0.8rem" }}
+            style={{
+              color: theme.palette.info.main,
+              fontWeight: "bold",
+              fontSize: "0.8rem",
+            }}
           >
             Persona
           </span>
@@ -115,12 +123,16 @@ const Clientes = () => {
           <Box
             sx={{
               borderRadius: "50%",
-              backgroundColor: params.value ? "#27ae60" : "#e74c3c",
+              backgroundColor: params.value
+                ? theme.palette.success.main
+                : theme.palette.error.main,
             }}
           />
           <Typography
             sx={{
-              color: params.value ? "#27ae60" : "#e74c3c",
+              color: params.value
+                ? theme.palette.success.main
+                : theme.palette.error.main,
               fontWeight: "bold",
               fontSize: "0.8rem",
             }}
@@ -145,7 +157,9 @@ const Clientes = () => {
           </IconButton>
           <IconButton
             color="primary"
-            onClick={() => navigate(`/clientes/editar/${params.row.id_cliente}`)}
+            onClick={() =>
+              navigate(`/clientes/editar/${params.row.id_cliente}`)
+            }
           >
             <EditRoundedIcon />
           </IconButton>
@@ -273,15 +287,19 @@ const Clientes = () => {
             height: "100%",
             "& .MuiDataGrid-root": {
               border: "none",
+              backgroundColor: theme.palette.background.paper,
             },
             "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: "#e8f0fe",
-              color: "#333",
+              backgroundColor:
+                theme.palette.mode === "light"
+                  ? theme.palette.grey[200]
+                  : theme.palette.grey[800],
+              color: theme.palette.text.primary,
               fontWeight: "bold",
               borderBottom: "1px solid #d1d9e6",
               borderColor: theme.palette.grey[300],
               "& > div": {
-                borderRight: "1px solid #d1d9e6", // Separadores entre columnas en encabezados
+                borderRight: "1px solid #d1d9e6",
               },
             },
             "& .MuiDataGrid-cell": {
@@ -289,15 +307,18 @@ const Clientes = () => {
               borderColor: theme.palette.grey[300],
               display: "flex",
               "&:not(:last-child)": {
-                borderRight: "1px solid #d1d9e6", // Separadores entre celdas
+                borderRight: "1px solid #d1d9e6",
               },
             },
             "& .MuiDataGrid-row:hover": {
               backgroundColor: theme.palette.action.hover,
             },
             "& .MuiDataGrid-footerContainer": {
-              backgroundColor: theme.palette.grey[200],
-              borderTop: "1px solid",
+              backgroundColor:
+                theme.palette.mode === "light"
+                  ? theme.palette.grey[100]
+                  : theme.palette.grey[900],
+              borderTop: `1px solid ${theme.palette.divider}`,
               borderColor: theme.palette.grey[300],
             },
           }}

@@ -18,8 +18,10 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useGetVentasTendenciaMensualQuery } from "../../../store/services/ventasEstadisticasApi";
+import { useTranslation } from "react-i18next";
 
 const RevenueTrendChart = () => {
+  const { t, i18n } = useTranslation();
   const currentYear = new Date().getFullYear();
   const [anio, setAnio] = useState(currentYear);
 
@@ -30,6 +32,15 @@ const RevenueTrendChart = () => {
   const handleChange = (event) => {
     setAnio(event.target.value);
   };
+
+  const currencyFormatter = new Intl.NumberFormat(
+    i18n.language === "es" ? "es-CL" : "en-US",
+    {
+      style: "currency",
+      currency: i18n.language === "es" ? "CLP" : "USD",
+      maximumFractionDigits: 0,
+    }
+  );
 
   return (
     <Box sx={{ height: 320, px: 3, py: 2 }}>
@@ -42,15 +53,15 @@ const RevenueTrendChart = () => {
         }}
       >
         <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-          📈 Tendencia de Ingresos Mensuales
+          📈 {t("dashboard.monthly_revenue_trend")}
         </Typography>
 
         <FormControl size="small">
-          <InputLabel>Año</InputLabel>
+          <InputLabel>{t("general.year")}</InputLabel>
           <Select
             value={anio}
             onChange={handleChange}
-            label="Año"
+            label={t("general.year")}
             sx={{ minWidth: 100 }}
           >
             {[currentYear, currentYear - 1, currentYear - 2].map((year) => (
@@ -68,7 +79,7 @@ const RevenueTrendChart = () => {
         </Box>
       ) : isError ? (
         <Typography variant="body2" color="error">
-          Error al cargar los datos.
+          {t("dashboard.error_loading_data")}
         </Typography>
       ) : (
         <ResponsiveContainer width="100%" height={260}>
@@ -76,13 +87,7 @@ const RevenueTrendChart = () => {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" tick={{ fontSize: 12 }} />
             <YAxis
-              tickFormatter={(value) =>
-                new Intl.NumberFormat("es-CL", {
-                  style: "currency",
-                  currency: "CLP",
-                  maximumFractionDigits: 0,
-                }).format(value)
-              }
+              tickFormatter={(value) => currencyFormatter.format(value)}
               tick={{ fontSize: 12 }}
             />
             <Tooltip
@@ -93,7 +98,7 @@ const RevenueTrendChart = () => {
                   maximumFractionDigits: 0,
                 }).format(value)
               }
-              labelFormatter={(label) => `Mes: ${label}`}
+              labelFormatter={(label) => `${t("dashboard.month")}: ${label}`}
             />
             <Line
               type="monotone"

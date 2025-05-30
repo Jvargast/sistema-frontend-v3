@@ -1,0 +1,80 @@
+{
+  "general": {
+    "welcome": "Bienvenido",
+    "dashboard": "Panel de control",
+    "settings": "Configuración",
+    "profile": "Mi perfil",
+    "logout": "Cerrar sesión",
+    "notifications": "Notificaciones",
+    "language": "Idioma",
+    "theme": "Tema",
+    "advanced_settings": "Configuración avanzada",
+    "year": "Año"
+  },
+  "buttons": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "reset_order": "Reiniciar Orden"
+  },
+  "menu": {
+    "home": "Inicio",
+    "orders": "Pedidos",
+    "sales": "Ventas",
+    "clients": "Clientes",
+    "products": "Productos",
+    "reports": "Reportes",
+    "users": "Usuarios"
+  },
+  "messages": {
+    "loading": "Cargando...",
+    "error": "Ha ocurrido un error",
+    "success": "Operación realizada con éxito",
+    "no_data": "No hay datos disponibles"
+  },
+  "profile": {
+    "name": "Nombre",
+    "role": "Rol",
+    "email": "Correo electrónico",
+    "phone": "Teléfono"
+  },
+  "dashboard": {
+    "top_selling_product": "Producto/Insumo Más Vendido",
+    "no_sales_recorded": "Sin ventas registradas",
+    "units": "unidades",
+    "no_product_sales": "No hay ventas de productos o insumos",
+    "total_sales_today": "Ventas totales del día",
+    "orders": "pedidos",
+    "total_amount": "Monto total",
+    "reset_order": "Reiniciar orden",
+    "charts": "Gráficos",
+    "kpis": "KPIs",
+    "view_more": "Ver más",
+    "revenue": "Ingresos",
+    "sales": "Ventas",
+    "clients": "Clientes",
+    "products": "Productos",
+    "monthly_summary": "Resumen mensual",
+    "daily_summary": "Resumen diario",
+    "average_ticket": "Ticket promedio",
+    "conversion_rate": "Tasa de conversión",
+    "income_today": "Ingresos Hoy",
+    "orders_created_today": "Pedidos Creados Hoy",
+    "weekly_sales": "Ventas Semanales",
+    "loading_sales_chart": "Cargando gráfico de ventas...",
+    "no_sales_this_week": "Aún no hay ventas registradas esta semana.",
+    "come_back_later": "Vuelve más tarde para ver el resumen semanal.",
+    "sales_by_delivery_type": "Ventas por Tipo de Entrega",
+    "error_loading_data": "Error al cargar datos.",
+    "no_data_today": "No hay datos disponibles para hoy.",
+    "monthly_revenue_trend": "Tendencia de Ingresos Mensuales",
+    "month": "Mes",
+    "best_selling_products": "Productos e Insumos Más Vendidos",
+    "no_data_available_today": "No hay datos disponibles para hoy.",
+    "product_or_supply": "Producto/Insumo"
+  }
+}

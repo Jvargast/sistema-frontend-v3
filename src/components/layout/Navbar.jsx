@@ -2,14 +2,12 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import {
   Menu as MenuIcon,
-  Search,
   SettingsOutlined,
   ArrowDropDownOutlined,
   ExpandLess,
   ExpandMore,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import {
   AppBar,
@@ -17,7 +15,6 @@ import {
   Box,
   Typography,
   IconButton,
-  InputBase,
   Toolbar,
   Menu,
   MenuItem,
@@ -40,25 +37,23 @@ import FlexBetween from "./FlexBetween";
 import { modulesData } from "../../utils/modulesData";
 import { markAllAsRead } from "../../store/reducers/notificacionesSlice";
 import NotificationsMenu from "./NotificationMenu";
-
+import SearchBar from "./SearchBar";
+import ConfigMenu from "./ConfigMenu";
+import { setMode } from "../../store/reducers/globalSlice";
+import { useTranslation } from "react-i18next";
 const rolColors = {
-  chofer: "#FFD54F",       // amarillo
-  administrador: "#90CAF9", // azul claro
-  vendedor: "#A5D6A7",      // verde claro
-  default: "#E4DFDF",       // color por defecto
+  chofer: "#FFD54F",
+  administrador: "#90CAF9",
+  vendedor: "#A5D6A7",
+  default: "#E4DFDF",
 };
-
-
-
 
 const Navbar = ({ user, rol, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
-  /* const isNonMobile = useMediaQuery("(min-width: 600px)"); */
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-  //const isTablet = useMediaQuery("(min-width: 600px) and (max-width: 1023px)");
-  //const isMobile = useMediaQuery("(max-width: 599px)");
   const isTabletOrMobile = useMediaQuery("(max-width:1023px)");
+  const { i18n } = useTranslation();
 
   const navbarColor = rolColors[rol?.toLowerCase()] || rolColors.default;
 
@@ -83,7 +78,6 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
     }
   };
 
-  // Manejo de apertura y cierre del menú
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
   const permisos = useSelector((state) => state.auth.permisos);
@@ -97,10 +91,8 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
     }));
   };
 
-  // Obtenemos la lista de notificaciones
   const notificaciones = useSelector((state) => state.notificaciones.items);
 
-  // Estado local para manejar el Menu anclado al ícono
   const [anchorNoti, setAnchorNoti] = useState(null);
   const isNotiOpen = Boolean(anchorNoti);
 
@@ -111,19 +103,15 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
     setAnchorNoti(null);
   };
 
-  // Ejemplo de acción para marcar leídas al abrir el menú
   const handleOpenNotificationsMenu = (event) => {
     handleOpenNoti(event);
     dispatch(markAllAsRead());
   };
   const handleSelectNotification = (notif) => {
     console.log("Notificación clickeada:", notif);
-    // Lógica de navegación o acción
     if (notif.tipo === "pedido_asignado") {
-      // Ejemplo: ir a /pedidos
       navigate("/pedidos");
     }
-    // Cierra el menú
     handleCloseNoti();
   };
 
@@ -135,9 +123,10 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
         boxShadow: "none",
       }}
     >
-      <Toolbar sx={{ justifyContent: "space-between", background: navbarColor }}>
+      <Toolbar
+        sx={{ justifyContent: "space-between", background: navbarColor }}
+      >
         {/* LADO IZQUIERDO */}
-        {/* Botón para abrir/cerrar Sidebar */}
         {isTabletOrMobile ? (
           <FlexBetween>
             <IconButton
@@ -191,30 +180,27 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
             >
               <MenuIcon />
             </IconButton>
-
-            <FlexBetween
-              backgroundColor={
-                theme.palette.mode === "dark" ? "#000000" : "#FFFFFF"
-              }
-              borderRadius="2rem"
-              gap="1rem"
-              p="0.1rem 1rem"
-              border="1px solid #5c5c5a"
-            >
-              <InputBase
-                placeholder="Buscar..."
-                aria-label="Buscar contenido"
+            <Box sx={{ flexGrow: 1, maxWidth: "600px" }}>
+              <SearchBar
+                onResultSelect={(item) => {
+                  console.log("Seleccionaste:", item);
+                }}
               />
-              <IconButton>
-                <Search />
-              </IconButton>
-            </FlexBetween>
+            </Box>
           </FlexBetween>
         )}
 
         {/* LADO DERECHO */}
         {!isTabletOrMobile && (
-          <FlexBetween gap="1.5rem">
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              gap: "1.5rem",
+            }}
+          >
+            {/* Menu de notificaciones */}
             <IconButton
               aria-label="Ver notificaciones"
               onClick={handleOpenNotificationsMenu}
@@ -229,12 +215,53 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
                 <NotificationsNoneOutlinedIcon sx={{ fontSize: "25px" }} />
               </Badge>
             </IconButton>
-            {/* Menu de notificaciones */}
-            <IconButton aria-label="Abrir configuración">
-              <SettingsOutlined sx={{ fontSize: "25px" }} />
-            </IconButton>
-            <Button onClick={handleClick} sx={{ textTransform: "none" }}>
-              <AccountCircleIcon fontSize="large" />
+
+            {/* Menu de configuración */}
+            <ConfigMenu
+              onToggleTheme={() => {
+                dispatch(setMode());
+              }}
+              onChangeLanguage={(lang) => {
+                i18n.changeLanguage(lang);
+                localStorage.setItem("language", lang);
+              }}
+              currentLang={i18n.language}
+            />
+
+            {/* Perfil */}
+            <Button
+              onClick={handleClick}
+              sx={{
+                textTransform: "none",
+                backgroundColor:
+                  theme.palette.mode === "light"
+                    ? "#f5f5f5"
+                    : theme.palette.background.paper,
+                borderRadius: "999px",
+                padding: "6px 12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.75rem",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                "&:hover": {
+                  backgroundColor:
+                    theme.palette.mode === "light"
+                      ? "#e0e0e0"
+                      : theme.palette.background.default,
+                },
+              }}
+            >
+              <Avatar
+                sx={{
+                  width: 36,
+                  height: 36,
+                  backgroundColor: "#3F51B5",
+                  fontSize: "0.9rem",
+                  fontWeight: "bold",
+                }}
+              >
+                {user?.nombre ? user.nombre.charAt(0).toUpperCase() : "U"}
+              </Avatar>
               <Box
                 sx={{
                   display: "flex",
@@ -245,37 +272,31 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
                 <Typography
                   fontWeight="bold"
                   fontSize="0.85rem"
-                  sx={{
-                    color:
-                      theme.palette.mode === "dark"
-                        ? theme.palette.primary[100]
-                        : theme.palette.secondary[50],
-                  }}
+                  color={theme.palette.text.primary}
+                  sx={{ lineHeight: 1.2 }}
                 >
                   {user?.nombre || ""}
                 </Typography>
                 <Typography
                   fontSize="0.75rem"
-                  sx={{
-                    color:
-                      theme.palette.mode === "dark"
-                        ? theme.palette.primary[100]
-                        : theme.palette.secondary[50],
-                  }}
+                  color={theme.palette.text.secondary}
+                  sx={{ lineHeight: 1.2 }}
                 >
-                  {rol || ""}
+                  {rol ? rol.charAt(0).toUpperCase() + rol.slice(1) : ""}
                 </Typography>
               </Box>
-
-              <ArrowDropDownOutlined sx={{ fontSize: "25px" }} />
+              <ArrowDropDownOutlined
+                sx={{ fontSize: "25px", color: theme.palette.text.primary }}
+              />
             </Button>
+
             <Menu anchorEl={anchorEl} open={isOpen} onClose={handleClose}>
               <MenuItem onClick={() => navigate("/miperfil")}>
                 Mi Perfil
               </MenuItem>
               <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
             </Menu>
-          </FlexBetween>
+          </Box>
         )}
         <NotificationsMenu
           anchorEl={anchorNoti}

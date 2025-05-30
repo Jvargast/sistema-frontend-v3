@@ -1,14 +1,16 @@
-import { Box, Typography, Link } from "@mui/material";
+import { Box, Typography, Link, useTheme } from "@mui/material";
 
 const Footer = () => {
+  const theme = useTheme();
+
   return (
     <Box
       component="footer"
       sx={{
         mt: 8,
         py: 2,
-        borderTop: "1px solid #e0e0e0",
-        backgroundColor: "#fafafa",
+        borderTop: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.palette.background.paper,
         textAlign: "center",
       }}
     >

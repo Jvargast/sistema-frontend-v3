@@ -11,8 +11,8 @@ import {
 import { Box, Typography, CircularProgress, useTheme } from "@mui/material";
 import { useGetResumenProductosPorFechaQuery } from "../../../store/services/productosEstadisticasApi";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
-// 🎨 Paleta de colores pastel profesional
 const colors = [
   "#A3C4F3",
   "#BFD8AF",
@@ -25,6 +25,7 @@ const colors = [
 
 const BestSellingProductsChart = () => {
   const theme = useTheme();
+  const { t, i18n } = useTranslation();
   const hoy = dayjs().format("YYYY-MM-DD");
   const { data, isLoading, isError } = useGetResumenProductosPorFechaQuery(hoy);
 
@@ -38,6 +39,14 @@ const BestSellingProductsChart = () => {
         }))
     : [];
 
+  const numberFormatter = new Intl.NumberFormat(
+    i18n.language === "es" ? "es-CL" : "en-US",
+    {
+      style: "decimal",
+      maximumFractionDigits: 0,
+    }
+  );
+
   return (
     <Box
       sx={{
@@ -45,14 +54,13 @@ const BestSellingProductsChart = () => {
         py: 3,
         height: 320,
         borderRadius: 3,
-        backgroundColor: theme.palette.background.paper,
         display: "flex",
         flexDirection: "column",
         userSelect: "none",
       }}
     >
       <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-        🏆 Productos e Insumos Más Vendidos
+        🏆 {t("dashboard.best_selling_products")}
       </Typography>
 
       {isLoading || isError || chartData.length === 0 ? (
@@ -68,11 +76,11 @@ const BestSellingProductsChart = () => {
             <CircularProgress size={28} />
           ) : isError ? (
             <Typography variant="body2" color="error">
-              Error al cargar los datos.
+              {t("dashboard.error_loading_data")}
             </Typography>
           ) : (
             <Typography variant="body2" color="text.secondary">
-              No hay datos disponibles para hoy.
+              {t("dashboard.no_data_available_today")}
             </Typography>
           )}
         </Box>
@@ -88,13 +96,10 @@ const BestSellingProductsChart = () => {
               tick={{ fontSize: 12 }}
             />
             <Tooltip
-              formatter={(value) =>
-                new Intl.NumberFormat("es-CL", {
-                  style: "decimal",
-                  maximumFractionDigits: 0,
-                }).format(value)
+              formatter={(value) => numberFormatter.format(value)}
+              labelFormatter={(label) =>
+                `${t("dashboard.product_or_supply")}: ${label}`
               }
-              labelFormatter={(label) => `Producto/Insumo: ${label}`}
             />
             <Bar dataKey="cantidad" barSize={30}>
               {chartData.map((entry, index) => (
