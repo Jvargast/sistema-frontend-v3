@@ -10,12 +10,10 @@ import {
 import { Box, Typography, CircularProgress } from "@mui/material";
 import { useGetVentasResumenSemanalQuery } from "../../../store/services/ventasEstadisticasApi";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 import "dayjs/locale/es";
+import "dayjs/locale/en";
 
-// Establecer español como idioma global de dayjs
-dayjs.locale("es");
-
-// Formateador CLP
 const CLPFormatter = new Intl.NumberFormat("es-CL", {
   style: "currency",
   currency: "CLP",
@@ -23,6 +21,8 @@ const CLPFormatter = new Intl.NumberFormat("es-CL", {
 });
 
 const SalesChart = () => {
+  const { t, i18n } = useTranslation();
+  dayjs.locale(i18n.language);
   const { data, isLoading, isError } = useGetVentasResumenSemanalQuery();
 
   const formateado =
@@ -33,13 +33,12 @@ const SalesChart = () => {
       ventas: parseFloat(d.total),
     })) ?? [];
 
-  // Estado: cargando
   if (isLoading) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <CircularProgress />
         <Typography variant="body1" sx={{ mt: 2 }}>
-          Cargando gráfico de ventas...
+          {t("dashboard.loading_sales_chart")}
         </Typography>
       </Box>
     );
@@ -48,25 +47,10 @@ const SalesChart = () => {
   return (
     <Box sx={{ p: 1, height: 320, display: "flex", flexDirection: "column" }}>
       <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
-        📅 Ventas Semanales (CLP)
+        📅 {t("dashboard.weekly_sales")} (CLP)
       </Typography>
 
-      {isLoading ? (
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <CircularProgress />
-          <Typography variant="body1" sx={{ mt: 2 }}>
-            Cargando gráfico de ventas...
-          </Typography>
-        </Box>
-      ) : !formateado.length || isError ? (
+      {!formateado.length || isError ? (
         <Box
           sx={{
             flex: 1,
@@ -79,10 +63,10 @@ const SalesChart = () => {
           }}
         >
           <Typography variant="h6">
-            💤 Aún no hay ventas registradas esta semana.
+            💤 {t("dashboard.no_sales_this_week")}
           </Typography>
           <Typography variant="body2" color="text.disabled">
-            Vuelve más tarde para ver el resumen semanal.
+            {t("dashboard.come_back_later")}
           </Typography>
         </Box>
       ) : (

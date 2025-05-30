@@ -41,6 +41,21 @@ const DataTable = ({
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const rol = useSelector((state) => state?.auth?.rol);
 
+  const headerBg =
+    theme.palette.mode === "light"
+      ? theme.palette.grey[200]
+      : theme.palette.background.paper;
+
+  const footerBg =
+    theme.palette.mode === "light"
+      ? theme.palette.grey[100]
+      : theme.palette.background.paper;
+
+  const borderColor =
+    theme.palette.mode === "light"
+      ? theme.palette.grey[300]
+      : theme.palette.grey[700];
+
   if (loading) {
     return (
       <Box
@@ -140,9 +155,11 @@ const DataTable = ({
                       key={`header-${col.id}`}
                       align="center"
                       sx={{
-                        bgcolor: "#f4f6f8",
+                        bgcolor: headerBg,
+                        color: theme.palette.text.primary,
                         fontWeight: "bold",
                         whiteSpace: "nowrap",
+                        borderBottom: `1px solid ${borderColor}`,
                       }}
                     >
                       {col.label}
@@ -152,7 +169,16 @@ const DataTable = ({
               </TableHead>
               <TableBody>
                 {rows.map((row, index) => (
-                  <TableRow key={row.id || `row-${index}`} hover>
+                  <TableRow
+                    key={row.id || `row-${index}`}
+                    hover
+                    sx={{
+                      backgroundColor:
+                        theme.palette.mode === "dark"
+                          ? theme.palette.background.default
+                          : "#fff",
+                    }}
+                  >
                     {columns.map((col) => {
                       const cellValue = col.render
                         ? col.render(row)
@@ -170,6 +196,8 @@ const DataTable = ({
                           sx={{
                             fontSize: { xs: "0.8rem", sm: "0.95rem" },
                             whiteSpace: "nowrap",
+                            color: theme.palette.text.primary,
+                            borderBottom: `1px solid ${borderColor}`,
                           }}
                         >
                           {formattedValue}
@@ -191,9 +219,10 @@ const DataTable = ({
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             sx={{
-              backgroundColor: "#f4f6f8",
-              borderTop: "1px solid #ddd",
+              backgroundColor: footerBg,
+              borderTop: `1px solid ${borderColor}`,
               fontSize: { xs: "0.8rem", sm: "0.95rem" },
+              color: theme.palette.text.primary,
             }}
           />
         </Paper>

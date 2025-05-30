@@ -79,6 +79,9 @@ const Sidebar = ({
     }
   };
 
+  const initialHomePath = getInitialRoute(rol, permisos); // ejemplo: "/dashboard"
+  const initialHomeValue = initialHomePath.replace("/", ""); // "dashboard"
+
   return (
     <Box component="nav">
       {isSidebarOpen && isNonMobile && (
@@ -222,12 +225,11 @@ const Sidebar = ({
       {/* Bottom Navigation for Mobile */}
       {!isNonMobile && (
         <BottomNavigation
-          value={active}
+          value={pathname.substring(1)}
           onChange={(event, newValue) => {
-            if (newValue === "home") {
-              const initial = getInitialRoute(rol, permisos);
-              navigate(initial);
-              setActive("home");
+            if (newValue === initialHomeValue) {
+              navigate(initialHomePath);
+              setActive(newValue);
             } else if (newValue !== "logout") {
               navigate(`/${newValue}`);
               setActive(newValue);
@@ -238,20 +240,40 @@ const Sidebar = ({
             bottom: 0,
             left: 0,
             right: 0,
-            backgroundColor: theme.palette.background.paper,
+            backgroundColor: "#2C2C2C",
+            boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.2)",
+            borderTop: "1px solid rgba(255, 255, 255, 0.1)",
             zIndex: 999,
           }}
         >
           <BottomNavigationAction
             label="Home"
-            value="home"
+            value={initialHomeValue}
             icon={<HomeOutlined />}
+            sx={{
+              color:
+                pathname.substring(1) === initialHomeValue
+                  ? "#FFFFFF"
+                  : "rgba(255, 255, 255, 0.6)",
+              "& .MuiSvgIcon-root": {
+                fontSize: "1.8rem",
+              },
+            }}
           />
           {rol === "chofer" && (
             <BottomNavigationAction
               label="Mis Ventas"
               value="misventas"
               icon={<ShoppingCartOutlined />}
+              sx={{
+                color:
+                  pathname.substring(1) === "misventas"
+                    ? "#FFFFFF"
+                    : "rgba(255, 255, 255, 0.6)",
+                "& .MuiSvgIcon-root": {
+                  fontSize: "1.8rem",
+                },
+              }}
             />
           )}
 
@@ -260,18 +282,45 @@ const Sidebar = ({
               label="Pedidos"
               value="pedidos"
               icon={<ShoppingCartOutlined />}
+              sx={{
+                color:
+                  pathname.substring(1) === "pedidos"
+                    ? "#FFFFFF"
+                    : "rgba(255, 255, 255, 0.6)",
+                "& .MuiSvgIcon-root": {
+                  fontSize: "1.8rem",
+                },
+              }}
             />
           )}
           <BottomNavigationAction
             label="Perfil"
             value="miperfil"
             icon={<AccountCircle />}
+            sx={{
+              color:
+                pathname.substring(1) === "miperfil"
+                  ? "#FFFFFF"
+                  : "rgba(255, 255, 255, 0.6)",
+              "& .MuiSvgIcon-root": {
+                fontSize: "1.8rem",
+              },
+            }}
           />
           <BottomNavigationAction
             label="Cerrar Sesión"
             value="logout"
             icon={<LogoutOutlined />}
             onClick={handleLogout}
+            sx={{
+              color:
+                pathname.substring(1) === "logout"
+                  ? "#FFFFFF"
+                  : "rgba(255, 255, 255, 0.6)",
+              "& .MuiSvgIcon-root": {
+                fontSize: "1.8rem",
+              },
+            }}
           />
         </BottomNavigation>
       )}

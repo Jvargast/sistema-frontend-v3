@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { createSwapy } from "swapy";
 import {
   Box,
@@ -33,10 +34,11 @@ const chartsData = [
 ];
 
 const DashboardCentral = () => {
-  /* const hoy = dayjs().format("YYYY-MM-DD"); */
   const { data: ventas } = useGetKpiVentasPorFechaQuery();
   const { data: pedidos } = useGetKpiPedidosPorFechaQuery();
   const { data: producto } = useGetKpiProductoPorFechaQuery();
+
+  const { t } = useTranslation();
 
   const containerRef = useRef(null);
   const swapyRef = useRef(null);
@@ -45,32 +47,36 @@ const DashboardCentral = () => {
   const kpiData = [
     ventas?.total_ventas !== undefined && {
       id: "ingresos",
-      title: getKpiConfig("ingresos").label,
+      title: t(getKpiConfig("ingresos").labelKey),
       value: `${formatCLP(ventas.total_ventas)}`,
-      subtitle: `Ventas totales del día`,
+      subtitle: t("dashboard.total_sales_today"),
       icon: getKpiConfig("ingresos").icon,
       color: getKpiConfig("ingresos").color,
     },
+
     pedidos?.total_pedidos !== undefined && {
       id: "pedidos",
-      title: getKpiConfig("pedidos").label,
-      value: `${pedidos.total_pedidos} pedidos`,
-      subtitle: `Monto total: ${formatCLP(
+      title: t(getKpiConfig("pedidos").labelKey),
+      value: `${pedidos.total_pedidos} ${t("dashboard.orders")}`,
+      subtitle: `${t("dashboard.total_amount")}: ${formatCLP(
         pedidos.detalles.reduce((acc, p) => acc + p.monto_total, 0)
       )}`,
       icon: getKpiConfig("pedidos").icon,
       color: getKpiConfig("pedidos").color,
     },
+
     {
       id: "producto",
-      title: "Producto/Insumo Más Vendido",
-      value: producto?.producto_destacado?.nombre || "Sin ventas registradas",
+      title: t(getKpiConfig("producto_destacado").labelKey),
+      value:
+        producto?.producto_destacado?.nombre ||
+        t("dashboard.no_sales_recorded"),
       subtitle:
         producto?.producto_destacado?.cantidad !== undefined
-          ? `${producto.producto_destacado.cantidad} unidades · ${formatCLP(
-              producto.producto_destacado.monto_total
-            )}`
-          : "No hay ventas de productos o insumos",
+          ? `${producto.producto_destacado.cantidad} ${t(
+              "dashboard.units"
+            )} · ${formatCLP(producto.producto_destacado.monto_total)}`
+          : t("dashboard.no_product_sales"),
       icon: getKpiConfig("producto_destacado").icon,
       color: getKpiConfig("producto_destacado").color,
     },
@@ -91,7 +97,6 @@ const DashboardCentral = () => {
     };
   }, [kpiData.length, ventas, pedidos, producto]);
 
-  // 🔄 Restablecer el orden original
   const resetLayout = () => {
     if (!originalOrderRef.current.length || !containerRef.current) return;
 
@@ -100,7 +105,6 @@ const DashboardCentral = () => {
       containerRef.current.querySelectorAll("[data-swapy-item]")
     );
 
-    // 🔄 Restaurar el orden visual del DOM
     originalOrderRef.current.forEach((itemId, index) => {
       const slot = slots[index];
       const item = items.find(
@@ -111,7 +115,6 @@ const DashboardCentral = () => {
       }
     });
 
-    // 🧼 Resetear Swapy
     swapyRef.current?.destroy();
     swapyRef.current = createSwapy(containerRef.current);
   };
@@ -119,17 +122,16 @@ const DashboardCentral = () => {
   return (
     <Box sx={{ p: 3, mb: 3 }}>
       <Typography variant="h4" gutterBottom>
-        📊 Panel de Control
+        📊 {t("general.dashboard")}
       </Typography>
 
-      {/* 🔄 Botón para reiniciar el orden */}
       <Button
         variant="contained"
         color="secondary"
         sx={{ mb: 2 }}
         onClick={resetLayout}
       >
-        🔄 Reiniciar Orden
+        🔄 {t("buttons.reset_order")}
       </Button>
 
       {/* 📌 Contenedor de Swapy */}

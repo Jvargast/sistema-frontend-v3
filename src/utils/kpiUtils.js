@@ -1,21 +1,21 @@
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart"; 
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 export const getKpiConfig = (tipo) => {
   const map = {
     ingresos: {
-      label: "Ingresos Hoy",
+      labelKey: "dashboard.income_today",
       icon: AttachMoneyIcon,
       color: "success",
     },
     pedidos: {
-      label: "Pedidos Creados Hoy",
+      labelKey: "dashboard.orders_created_today",
       icon: PlaylistAddCheckIcon,
       color: "info",
     },
     producto_destacado: {
-      label: "Producto Más Vendido",
+      labelKey: "dashboard.top_selling_product",
       icon: ShoppingCartIcon,
       color: "warning",
     },
@@ -23,7 +23,7 @@ export const getKpiConfig = (tipo) => {
 
   return (
     map[tipo] || {
-      label: tipo,
+      labelKey: tipo,
       icon: AttachMoneyIcon,
       color: "primary",
     }
