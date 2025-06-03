@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
-import { Box, Button, IconButton, useTheme } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { alpha, Box, Button, IconButton, useTheme } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import EditIcon from "@mui/icons-material/Edit";
 import { useDispatch } from "react-redux";
@@ -75,37 +76,63 @@ const Productos = () => {
   }, [location.state, refetch, navigate]);
 
   const columns = [
-    { field: "id", headerName: "ID", flex: 0.25 },
+    { field: "id", headerName: "ID", flex: 0.15 },
     {
       field: "image_url",
       headerName: "Imagen",
-      width: 100,
+      flex: 0.2,
       renderCell: (params) => (
         <img
-          src={params.value || "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg"}
+          src={
+            params.value ||
+            "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg"
+          }
           alt="Producto"
           style={{ width: "50px", height: "50px", borderRadius: "8px" }}
         />
       ),
     },
-    { field: "nombre", headerName: "Nombre", flex: 0.5 },
-    { field: "categoria", headerName: "Categoría", flex: 0.4 },
-    { field: "stock", headerName: "Stock", flex: 0.3 },
+    { field: "nombre", headerName: "Nombre", flex: 0.3},
+    { field: "categoria", headerName: "Categoría", flex: 0.3 },
+    { field: "stock", headerName: "Stock", flex: 0.15 },
     ...(canEditProducto
       ? [
           {
             field: "acciones",
             headerName: "Acciones",
-            flex: 0.3,
+            flex: 0.2,
             sortable: false,
             renderCell: (params) => (
               <Box display="flex" gap={1}>
                 <IconButton
-                  color="primary"
-                  onClick={() => navigate(`/productos/editar/${params.row.id}`)}
+                  color="info"
+                  aria-label="Ver producto"
+                  onClick={() =>
+                    navigate(`/productos/ver/${params.row.id}`, {
+                      state: { refetch: false },
+                    })
+                  }
+                  sx={{
+                    color: theme.palette.success.main,
+                    "&:hover": {
+                      backgroundColor: alpha(theme.palette.success.main, 0.12),
+                    },
+                  }}
                 >
-                  <EditIcon />
+                  <VisibilityIcon />
                 </IconButton>
+
+                {canEditProducto && (
+                  <IconButton
+                    color="primary"
+                    aria-label="Editar producto"
+                    onClick={() =>
+                      navigate(`/productos/editar/${params.row.id}`)
+                    }
+                  >
+                    <EditIcon />
+                  </IconButton>
+                )}
               </Box>
             ),
           },
@@ -171,16 +198,15 @@ const Productos = () => {
     <Box
       sx={{
         padding: "2rem",
-        backgroundColor: "#f9f9f9",
+        backgroundColor: theme.palette.background.paper,
         borderRadius: "8px",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+        boxShadow: theme.shadows[3],
         maxWidth: "1200px",
         margin: "auto",
-        overflow: "hidden", // Prevenir scroll horizontal
+        overflow: "hidden",
       }}
     >
       <Header title="Productos" subtitle="Gestión de productos" />
-      {/* Botones de acción */}
       <Box
         sx={{
           display: "flex",
@@ -225,41 +251,57 @@ const Productos = () => {
         )}
       </Box>
 
-      {/* DataGrid con estilos */}
       <Box
         sx={{
-          height: "600px", // Altura fija con scroll interno
+          height: "600px",
           "& .MuiDataGrid-root": {
             border: "none",
             borderRadius: "8px",
-            overflow: "hidden", // Prevenir scroll externo
+            overflow: "hidden",
+            backgroundColor: theme.palette.background.paper,
           },
           "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: "#f4f4f4",
-            color: "#333",
+            backgroundColor:
+              theme.palette.mode === "light"
+                ? theme.palette.grey[200]
+                : theme.palette.grey[800],
+            color: theme.palette.text.primary,
             fontWeight: "bold",
             fontSize: "1rem",
-            borderBottom: "1px solid #d1d9e6",
             borderColor: theme.palette.grey[300],
+            borderBottom: `1px solid ${theme.palette.divider}`,
             "& > div": {
-              borderRight: "1px solid #d1d9e6", // Separadores entre columnas en encabezados
+              borderRight: `1px solid ${theme.palette.divider}`,
             },
           },
           "& .MuiDataGrid-cell": {
-            borderBottom: "1px solid",
+            borderBottom: `1px solid ${theme.palette.divider}`,
             borderColor: theme.palette.grey[300],
-            color: "#555",
-            display: "flex",
+            color: theme.palette.text.primary,
             "&:not(:last-child)": {
-              borderRight: "1px solid #d1d9e6", // Separadores entre celdas
+              borderRight: `1px solid ${theme.palette.divider}`,
             },
+            display: "flex",
           },
           "& .MuiDataGrid-footerContainer": {
-            backgroundColor: "#f4f4f4",
-            borderTop: "1px solid #ddd",
+            backgroundColor:
+              theme.palette.mode === "light"
+                ? theme.palette.grey[100]
+                : theme.palette.grey[800],
+            borderTop: `1px solid ${theme.palette.divider}`,
           },
           "& .MuiDataGrid-toolbarContainer": {
             padding: "0.5rem",
+          },
+          "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
+            outline: "none",
+          },
+          "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within":
+            {
+              outline: "none",
+            },
+          "& .MuiIconButton-root:focus, & .MuiIconButton-root:focus-visible": {
+            outline: "none",
           },
         }}
       >
@@ -287,7 +329,6 @@ const Productos = () => {
         />
       </Box>
 
-      {/* AlertDialog para confirmación */}
       <AlertDialog
         openAlert={openAlert}
         title="¿Eliminar Producto?"
@@ -296,7 +337,6 @@ const Productos = () => {
         onCloseAlert={() => setOpenAlert(false)}
       />
 
-      {/* ModalForm para agregar o editar productos */}
       <ModalForm
         open={open}
         onClose={() => setOpen(false)}

@@ -29,6 +29,7 @@ import { productosEstadisticasApi } from "./productosEstadisticasApi";
 import { cotizacionesApi } from "./cotizacionesApi";
 import { cuentasPorCobrarApi } from "./cuentasPorCobrarApi";
 import { busquedaApi } from "./busquedaApi";
+import { formulaProductoApi } from "./FormulaProductoApi";
 
 export const apiMiddleware = [
   authApi.middleware,
@@ -44,6 +45,7 @@ export const apiMiddleware = [
   insumoApi.middleware,
   tipoInsumoApi.middleware,
   estadoProductoApi.middleware,
+  formulaProductoApi.middleware,
   cajaApi.middleware,
   movimientoCajaApi.middleware,
   ventasApi.middleware,
@@ -77,6 +79,7 @@ export const apiReducers = {
   [productoApi.reducerPath]: productoApi.reducer,
   [insumoApi.reducerPath]: insumoApi.reducer,
   [estadoProductoApi.reducerPath]: estadoProductoApi.reducer,
+  [formulaProductoApi.reducerPath]: formulaProductoApi.reducer,
   [tipoInsumoApi.reducerPath]: tipoInsumoApi.reducer,
   [cajaApi.reducerPath]: cajaApi.reducer,
   [movimientoCajaApi.reducerPath]: movimientoCajaApi.reducer,
@@ -112,6 +115,7 @@ const apiServices = {
   insumoApi,
   estadoProductoApi,
   tipoInsumoApi,
+  formulaProductoApi,
   cajaApi,
   movimientoCajaApi,
   ventasApi,

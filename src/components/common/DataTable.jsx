@@ -17,13 +17,7 @@ import {
 import PropTypes from "prop-types";
 import BackButton from "./BackButton";
 import { useSelector } from "react-redux";
-
-const formatoCLP = (valor) =>
-  new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: "CLP",
-    maximumFractionDigits: 0,
-  }).format(valor);
+import { formatCLP } from "../../utils/formatUtils";
 
 const DataTable = ({
   columns,
@@ -36,6 +30,7 @@ const DataTable = ({
   loading,
   errorMessage,
   title,
+  headerAction,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -80,20 +75,31 @@ const DataTable = ({
   return (
     <Box sx={{ p: 2, maxWidth: "100%", mx: "auto", mb: 3 }}>
       <BackButton to={rol === "chofer" ? "/viajes" : "/admin"} label="Volver" />
-      <Typography
-        variant="h5"
-        fontWeight="bold"
-        align="center"
+      <Box
         sx={{
           mb: 2,
-          color: "#4A90E2",
-          fontSize: { xs: "1.2rem", sm: "1.6rem" },
+          display: "flex",
+          alignItems: "center",
+          justifyContent: headerAction ? "space-between" : "center",
+          gap: 2,
+          flexWrap: "wrap",
         }}
       >
-        {title}
-      </Typography>
+        <Typography
+          variant="h5"
+          fontWeight="bold"
+          align="center"
+          sx={{
+            mb: 2,
+            color: "#4A90E2",
+            fontSize: { xs: "1.2rem", sm: "1.6rem" },
+          }}
+        >
+          {title}
+        </Typography>
+        {headerAction && <Box>{headerAction}</Box>}
+      </Box>
 
-      {/* Vista Mobile: Tarjetas */}
       {isMobile ? (
         <Box display="flex" flexDirection="column" gap={2}>
           {rows.map((row, idx) => (
@@ -110,7 +116,7 @@ const DataTable = ({
                 const cellValue = col.render ? col.render(row) : row[col.id];
                 const value =
                   col.format === "currency" && typeof cellValue === "number"
-                    ? formatoCLP(cellValue)
+                    ? formatCLP(cellValue)
                     : cellValue;
 
                 return (
@@ -144,7 +150,6 @@ const DataTable = ({
           ))}
         </Box>
       ) : (
-        // Vista Escritorio: Tabla clásica
         <Paper elevation={3} sx={{ borderRadius: 2 }}>
           <TableContainer sx={{ maxHeight: "calc(100vh - 260px)" }}>
             <Table stickyHeader size="small">
@@ -186,7 +191,7 @@ const DataTable = ({
                       const formattedValue =
                         col.format === "currency" &&
                         typeof cellValue === "number"
-                          ? formatoCLP(cellValue)
+                          ? formatCLP(cellValue)
                           : cellValue;
 
                       return (
@@ -248,6 +253,7 @@ DataTable.propTypes = {
   loading: PropTypes.bool.isRequired,
   errorMessage: PropTypes.string,
   title: PropTypes.string.isRequired,
+  headerAction: PropTypes.node,
 };
 
 export default DataTable;

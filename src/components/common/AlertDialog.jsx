@@ -8,6 +8,7 @@ import {
   DialogTitle,
   Button,
   Slide,
+  useTheme,
 } from "@mui/material";
 import { WarningAmber, CheckCircle, Close } from "@mui/icons-material";
 
@@ -22,6 +23,7 @@ const AlertDialog = ({
   title,
   message,
 }) => {
+  const theme = useTheme();
   return (
     <Dialog
       open={openAlert}
@@ -39,7 +41,6 @@ const AlertDialog = ({
         },
       }}
     >
-      {/* Encabezado del diálogo */}
       <DialogTitle
         id="confirm-dialog-title"
         sx={{
@@ -54,19 +55,17 @@ const AlertDialog = ({
         {title}
       </DialogTitle>
 
-      {/* Contenido del diálogo */}
       <DialogContent>
         <DialogContentText
           sx={{
             fontSize: "1rem",
-            color: "#424242",
+            color: theme.palette.error,
           }}
         >
           {message}
         </DialogContentText>
       </DialogContent>
 
-      {/* Acciones (Botones) */}
       <DialogActions sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}>
         <Button
           onClick={onCloseAlert}
