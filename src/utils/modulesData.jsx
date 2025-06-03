@@ -1,24 +1,36 @@
-import { AdminPanelSettingsOutlined, CategoryOutlined, ChecklistOutlined, Groups2Outlined, HomeOutlined, MapOutlined, /* PieChartOutlined, */ PointOfSaleOutlined, ReceiptLongOutlined, ShoppingCartOutlined, /* TrendingUpOutlined, */ WarehouseOutlined } from "@mui/icons-material";
+import {
+  AdminPanelSettingsOutlined,
+  CategoryOutlined,
+  ChecklistOutlined,
+  Groups2Outlined,
+  HomeOutlined,
+  MapOutlined,
+  /* PieChartOutlined, */ PointOfSaleOutlined,
+  ReceiptLongOutlined,
+  ShoppingCartOutlined,
+  /* TrendingUpOutlined, */ WarehouseOutlined,
+} from "@mui/icons-material";
 import EventIcon from "@mui/icons-material/Event";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import RequestQuoteOutlinedIcon from "@mui/icons-material/RequestQuoteOutlined";
 import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
-import ConstructionOutlinedIcon from '@mui/icons-material/ConstructionOutlined';
-import AttachMoneyOutlinedIcon from '@mui/icons-material/AttachMoneyOutlined';
-
+import ConstructionOutlinedIcon from "@mui/icons-material/ConstructionOutlined";
+import AttachMoneyOutlinedIcon from "@mui/icons-material/AttachMoneyOutlined";
+import BuildIcon from "@mui/icons-material/Build";
+import ProductionQuantityLimitsOutlinedIcon from "@mui/icons-material/ProductionQuantityLimitsOutlined";
 export const modulesData = [
   {
     name: "Dashboard",
     icon: <HomeOutlined />,
     path: "dashboard",
     permission: "vistas.dashboard.ver",
-    children: null, 
+    children: null,
   },
   {
     name: "Modulo Ventas",
-    icon: null, 
+    icon: null,
     permission: "vistas.puntoventa.ver",
     children: [
       {
@@ -87,6 +99,18 @@ export const modulesData = [
         path: "tipo-insumo",
         permission: "vistas.tipoinsumos.ver",
       },
+      {
+        text: "Fórmulas",
+        icon: <BuildIcon />,
+        path: "formulas",
+        permission: "vistas.productos.ver",
+      },
+      {
+        text: "Producción",
+        icon: <ProductionQuantityLimitsOutlinedIcon />,
+        path: "produccion",
+        permission: "vistas.productos.ver",
+      },
     ],
   },
   {
@@ -125,13 +149,13 @@ export const modulesData = [
       },
       {
         text: "Mis Pedidos",
-        icon: <AssignmentOutlinedIcon />, 
+        icon: <AssignmentOutlinedIcon />,
         path: "mis-pedidos",
         permission: "vistas.mispedidos.ver",
       },
       {
         text: "Mis Ventas",
-        icon: <AttachMoneyOutlinedIcon />, 
+        icon: <AttachMoneyOutlinedIcon />,
         path: "misventas",
         permission: "vistas.mispedidos.ver",
       },

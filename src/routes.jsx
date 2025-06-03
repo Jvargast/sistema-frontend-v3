@@ -53,6 +53,11 @@ import VerAgendaCarga from "./pages/agenda_carga/VerAgendaCarga";
 import ListarMisVentas from "./pages/ventas_chofer/ListarMisVentas";
 import VerVentaChofer from "./pages/ventas_chofer/VerVentaChofer";
 import ListarVentasChofer from "./pages/ventas_chofer/ListarVentasChofer";
+import VerProducto from "./pages/productos/VerProducto";
+import PanelProduccion from "./pages/produccion";
+import ListarFormulasProductos from "./pages/formulas";
+import CrearFormula from "./pages/formulas/CrearFormula";
+import VerFormula from "./pages/formulas/VerFormula";
 
 // Configuración de rutas
 const router = createHashRouter([
@@ -238,7 +243,6 @@ const router = createHashRouter([
             ),
           },
           {
-            //cambiar permiso ver_tipo_insumo
             path: "tipo-insumo",
             element: (
               <RoleBasedRoute requiredPermission="vistas.tipoinsumos.ver">
@@ -255,10 +259,50 @@ const router = createHashRouter([
             ),
           },
           {
+            path: "productos/ver/:id",
+            element: (
+              <RoleBasedRoute requiredPermission="vistas.productos.ver">
+                <VerProducto />
+              </RoleBasedRoute>
+            ),
+          },
+          {
             path: "productos/editar/:id",
             element: (
               <RoleBasedRoute requiredPermission="vistas.productos.ver">
                 <EditarProducto />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "produccion",
+            element: (
+              <RoleBasedRoute requiredPermission="vistas.productos.ver">
+                <PanelProduccion />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "formulas",
+            element: (
+              <RoleBasedRoute requiredPermission="vistas.productos.ver">
+                <ListarFormulasProductos />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "formulas/ver/:id",
+            element: (
+              <RoleBasedRoute requiredPermission="vistas.productos.ver">
+                <VerFormula />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "formulas/nuevo",
+            element: (
+              <RoleBasedRoute requiredPermission="vistas.productos.ver">
+                <CrearFormula />
               </RoleBasedRoute>
             ),
           },

@@ -1,5 +1,5 @@
 import { Search } from "@mui/icons-material";
-import { IconButton, TextField, InputAdornment } from "@mui/material";
+import { IconButton, TextField, InputAdornment, useTheme } from "@mui/material";
 import {
   GridToolbarDensitySelector,
   GridToolbarContainer,
@@ -9,64 +9,57 @@ import PropTypes from "prop-types";
 import FlexBetween from "../layout/FlexBetween";
 
 const DataGridCustomToolbar = ({ searchInput, setSearchInput, setSearch }) => {
-  // Función para ejecutar la búsqueda
+  const theme = useTheme();
+
   const handleSearch = () => {
-    setSearch(searchInput);
-    setSearchInput(""); // Limpia el campo después de buscar
+    setSearch(searchInput.trim());
+    setSearchInput("");
   };
+
   return (
     <GridToolbarContainer>
       <FlexBetween sx={{ width: "100%", justifyContent: "space-between" }}>
-        {/* Opciones de columnas y densidad */}
         <FlexBetween>
           <GridToolbarColumnsButton />
           <GridToolbarDensitySelector />
         </FlexBetween>
 
-        {/* Barra de búsqueda */}
         <TextField
           placeholder="Buscar..."
-          InputLabelProps={{
-            style: { color: "rgba(28, 26, 26, 0.7)" }, // Texto del label en blanco tenue
-          }}
+          size="small"
           sx={{
-            mb: "0.5rem",
-            width: "15rem",
-            borderRadius: "20px", // Borde más redondeado
+            width: { xs: "10rem", sm: "12rem" },
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: "20px",
             "& .MuiInputBase-root": {
-              paddingLeft: "12px", // Espaciado interno más cómodo
-              fontSize: "0.9rem", // Fuente más pequeña para un diseño minimalista
-              color: "#0d0c0c", // Texto blanco
-              backgroundColor: "transparent", // Fondo transparente
-              border: "1px solid rgba(0, 0, 0, 0.433)", // Borde blanco tenue
-              borderRadius: "20px", // Redondeado completo
+              paddingLeft: "10px",
+              fontSize: "0.85rem",
+              color: theme.palette.text.primary,
             },
             "& .MuiOutlinedInput-root": {
-              "&:hover": {
-                borderColor: "#3498db", // Borde azul al hover
+              "& fieldset": {
+                borderColor: theme.palette.divider,
+              },
+              "&:hover fieldset": {
+                borderColor: theme.palette.primary.main,
               },
             },
           }}
-          onChange={(e) => setSearchInput(e.target.value)}
           value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
           variant="outlined"
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSearch(); // Ejecuta la búsqueda al presionar Enter
-            }
+            if (e.key === "Enter") handleSearch();
           }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton
-                  onClick={() => {
-                    setSearch(searchInput);
-                    setSearchInput("");
-                  }}
+                  onClick={handleSearch}
                   sx={{
-                    color: "#ffffff", // Color del icono blanco
+                    color: theme.palette.text.secondary,
                     "&:hover": {
-                      color: "#3498db", // Icono azul al hover
+                      color: theme.palette.primary.main,
                     },
                   }}
                 >

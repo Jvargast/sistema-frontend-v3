@@ -91,7 +91,7 @@ const Clientes = () => {
       resizable: false,
       flex: 0.2,
       renderCell: (params) =>
-        params.value === "Empresa" ? (
+        params.value === "empresa" ? (
           <span
             style={{
               color: theme.palette.success.main,
