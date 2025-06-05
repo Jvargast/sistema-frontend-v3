@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Box, Typography, Paper, Button, Divider } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { useGetClienteByIdQuery, useUpdateClienteMutation } from "../../store/services/clientesApi";
+import {
+  useGetClienteByIdQuery,
+  useUpdateClienteMutation,
+} from "../../store/services/clientesApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import InfoFieldGroup from "../../components/common/InfoFieldGroup";
-
 
 const EditarCliente = () => {
   const navigate = useNavigate();
@@ -104,62 +106,60 @@ const EditarCliente = () => {
   return (
     <Box
       sx={{
-        m: 3,
         display: "flex",
         flexDirection: "column",
         gap: 3,
-        backgroundColor: "#f8f9fa",
-        borderRadius: "12px",
-        p: 3,
+        borderRadius: 3,
+        p: { xs: 1, sm: 3 },
+        maxWidth: 950,
+        margin: "0 auto",
       }}
     >
-      {/* Header */}
       <Box
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        sx={{
-          mb: 3,
-        }}
+        sx={{ mb: 2, gap: 2 }}
       >
-        <Typography variant="h4" fontWeight="bold" color="primary">
+        <Typography
+          variant="h4"
+          fontWeight="bold"
+          color="primary"
+          sx={{ letterSpacing: 0.3 }}
+        >
           Editar Cliente
         </Typography>
       </Box>
-  
-      {/* Información del Cliente */}
       <Paper
-        elevation={3}
+        elevation={4}
         sx={{
-          p: 4,
-          borderRadius: "16px",
-          backgroundColor: "#ffffff",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+          p: { xs: 2, sm: 4 },
+          borderRadius: 4,
+          backgroundColor: (theme) => theme.palette.background.paper,
+          boxShadow: (theme) => theme.shadows[3],
         }}
       >
-        {/* Título de la Sección */}
         <Box
           display="flex"
           justifyContent="space-between"
           alignItems="center"
-          mb={3}
+          mb={2}
         >
           <Typography
             variant="h5"
             fontWeight="bold"
-            color="textPrimary"
+            color="primary"
+            sx={{ letterSpacing: 0.2 }}
           >
             Información del Cliente
           </Typography>
         </Box>
-        <Divider sx={{ mb: 4 }} />
-  
-        {/* Campos del Formulario */}
+        <Divider sx={{ mb: { xs: 2, sm: 3 } }} />
         <Box
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-            gap: 3,
+            gap: { xs: 2, sm: 3 },
           }}
         >
           <InfoFieldGroup
@@ -235,13 +235,11 @@ const EditarCliente = () => {
             ]}
           />
         </Box>
-  
-        {/* Botones */}
         <Box
           sx={{
             display: "flex",
             justifyContent: "flex-end",
-            mt: 4,
+            mt: { xs: 3, sm: 4 },
             gap: 2,
           }}
         >
@@ -251,11 +249,18 @@ const EditarCliente = () => {
             onClick={() => navigate("/clientes")}
             sx={{
               height: "3rem",
-              minWidth: "150px",
+              minWidth: "130px",
               fontSize: "1rem",
               fontWeight: "bold",
-              borderRadius: "8px",
+              borderRadius: 2,
               textTransform: "none",
+              borderColor: (theme) => theme.palette.grey[400],
+              color: (theme) => theme.palette.text.secondary,
+              "&:hover": {
+                borderColor: (theme) => theme.palette.primary.main,
+                color: (theme) => theme.palette.primary.main,
+                background: (theme) => theme.palette.primary.light + "11",
+              },
             }}
           >
             Cancelar
@@ -270,8 +275,13 @@ const EditarCliente = () => {
               minWidth: "150px",
               fontSize: "1rem",
               fontWeight: "bold",
-              borderRadius: "8px",
+              borderRadius: 2,
               textTransform: "none",
+              boxShadow: "none",
+              background: (theme) => theme.palette.primary.main,
+              "&:hover": {
+                background: (theme) => theme.palette.primary.dark,
+              },
             }}
           >
             {isUpdating ? "Actualizando..." : "Guardar Cambios"}
@@ -280,8 +290,6 @@ const EditarCliente = () => {
       </Paper>
     </Box>
   );
-  
-  
 };
 
 export default EditarCliente;

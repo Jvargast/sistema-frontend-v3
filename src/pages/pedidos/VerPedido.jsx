@@ -1,5 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Typography, Grid, Paper, Button, Chip } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Grid,
+  Paper,
+  Button,
+  Chip,
+  useTheme,
+} from "@mui/material";
 import BackButton from "../../components/common/BackButton";
 import { useGetPedidoByIdQuery } from "../../store/services/pedidosApi";
 import LoaderComponent from "../../components/common/LoaderComponent";
@@ -13,6 +21,7 @@ import { useGetCuentaPorCobrarByVentaIdQuery } from "../../store/services/cuenta
 const VerPedido = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const theme = useTheme();
   const { data, error, isLoading } = useGetPedidoByIdQuery(id);
   const { data: ventaData } = useGetVentaByIdQuery(data?.id_venta, {
     skip: !data?.id_venta,
@@ -43,26 +52,54 @@ const VerPedido = () => {
   }
 
   return (
-    <Box sx={{ p: 3, maxWidth: "1200px", mx: "auto" }}>
+    <Box
+      sx={{
+        p: { xs: 1.5, md: 3 },
+        maxWidth: "1200px",
+        mx: "auto",
+        width: "100%",
+      }}
+    >
       <BackButton to="/pedidos" label="Volver a Pedidos" />
 
       <Paper
         elevation={4}
         sx={{
-          p: 3,
-          borderRadius: 2,
+          p: { xs: 2, md: 3 },
+          borderRadius: 3,
           mb: 3,
-          background: "linear-gradient(135deg, #3f51b5, #2196f3)",
-          color: "#fff",
+          background:
+            theme.palette.mode === "dark"
+              ? `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`
+              : `linear-gradient(135deg, ${theme.palette.primary.light} 70%, ${theme.palette.primary.main})`,
+          color: theme.palette.getContrastText(theme.palette.primary.main),
+          boxShadow: theme.shadows[5],
         }}
       >
         <Chip
           label={`Estado: ${data.estado_pago || "Desconocido"}`}
           color={data.pagado ? "success" : "warning"}
-          sx={{ fontWeight: "bold", mb: 2 }}
+          sx={{
+            fontWeight: "bold",
+            mb: 2,
+            bgcolor: data.pagado
+              ? theme.palette.success.main
+              : theme.palette.warning.main,
+            color: theme.palette.getContrastText(
+              data.pagado
+                ? theme.palette.success.main
+                : theme.palette.warning.main
+            ),
+          }}
         />
 
-        <Typography variant="h5" textAlign="center" fontWeight="bold" mb={2}>
+        <Typography
+          variant="h5"
+          textAlign="center"
+          fontWeight="bold"
+          mb={2}
+          sx={{ color: "inherit" }}
+        >
           📦 Detalles del Pedido #{data.id_pedido}
         </Typography>
         {tipoDocumento === "factura" && facturaData?.estado === "pendiente" && (
@@ -76,8 +113,14 @@ const VerPedido = () => {
             <Typography
               fontWeight="bold"
               sx={{
-                bgcolor: "#FFF3CD",
-                color: "#856404",
+                bgcolor:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.warning.dark
+                    : theme.palette.warning.light,
+                color:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.warning.contrastText
+                    : theme.palette.warning.dark,
                 p: 2,
                 borderRadius: 2,
                 textAlign: "center",
@@ -90,12 +133,23 @@ const VerPedido = () => {
             <Button
               variant="contained"
               sx={{
-                backgroundColor: "#ffffff",
-                color: "#007AFF",
+                bgcolor:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.background.paper
+                    : "#ffffff",
+                color: theme.palette.primary.main,
                 fontWeight: "bold",
-                border: "1px solid #ffffff",
+                border: `1px solid ${
+                  theme.palette.mode === "dark"
+                    ? theme.palette.primary.main
+                    : "#ffffff"
+                }`,
                 "&:hover": {
-                  backgroundColor: "#e3f2fd",
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.background.default
+                      : theme.palette.primary.light,
+                  color: theme.palette.primary.dark,
                 },
                 cursor: "pointer",
               }}
@@ -112,7 +166,15 @@ const VerPedido = () => {
               variant="contained"
               color="success"
               onClick={() => setOpenPago(true)}
-              sx={{ fontWeight: "bold", px: 3 }}
+              sx={{
+                fontWeight: "bold",
+                px: 3,
+                py: 1.2,
+                fontSize: "1.04rem",
+                boxShadow: theme.shadows[2],
+                borderRadius: 2,
+                textTransform: "none",
+              }}
             >
               Registrar Pago
             </Button>

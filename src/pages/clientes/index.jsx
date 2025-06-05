@@ -245,7 +245,6 @@ const Clientes = () => {
             fontWeight: "bold",
             fontSize: "1rem",
             padding: "0.5rem 1.5rem",
-            borderRadius: "8px",
           }}
         >
           Nuevo Cliente
@@ -254,9 +253,7 @@ const Clientes = () => {
       <Box
         sx={{
           flexGrow: 1,
-          borderRadius: "8px",
           overflow: "hidden",
-          backgroundColor: "#f9fafc",
           boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
         }}
       >
@@ -319,7 +316,6 @@ const Clientes = () => {
                   ? theme.palette.grey[100]
                   : theme.palette.grey[900],
               borderTop: `1px solid ${theme.palette.divider}`,
-              borderColor: theme.palette.grey[300],
             },
           }}
         />

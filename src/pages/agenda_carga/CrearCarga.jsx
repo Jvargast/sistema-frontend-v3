@@ -8,6 +8,8 @@ import {
   Button,
   CircularProgress,
   Alert,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { useGetAllChoferesQuery } from "../../store/services/usuariosApi";
@@ -31,6 +33,7 @@ import NoUsuarioCamionDialog from "../../components/chofer/NoUsuarioCamionDialog
 import { emitRefetchAgendaViajes } from "../../utils/eventBus";
 import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
 import { convertirFechaLocal } from "../../utils/fechaUtils";
+import CapacidadCargaCamion from "../../components/agenda_carga/CapacidadCargaCamion";
 
 const CreateAgendaCargaForm = () => {
   const {
@@ -73,6 +76,13 @@ const CreateAgendaCargaForm = () => {
   const [openModal, setOpenModal] = useState(false);
   const [puedeCrearAgenda, setPuedeCrearAgenda] = useState(true);
 
+  const [tabIndex, setTabIndex] = useState(0);
+  const {
+    data: inventarioData,
+    isLoading: loadingInventario,
+    error: errorInventario,
+  } = useGetEstadoInventarioCamionQuery(Number(idCamion), { skip: !idCamion });
+
   const [openNoCajaModal, setOpenNoCajaModal] = useState(false);
   const [openNoUsuarioCamionModal, setOpenNoUsuarioCamionModal] =
     useState(false);
@@ -105,10 +115,10 @@ const CreateAgendaCargaForm = () => {
       }
     );
 
-  const { refetch: refetchInventarioCamion } =
+  /*   const { refetch: refetchInventarioCamion } =
     useGetEstadoInventarioCamionQuery(Number(idCamion), {
       skip: !idCamion,
-    });
+    }); */
 
   useEffect(() => {
     if (idChofer && !loadingCaja && cajaAsignada?.asignada === false) {
@@ -286,7 +296,6 @@ const CreateAgendaCargaForm = () => {
           maxWidth: 800,
           p: 3,
           borderRadius: 2,
-          bgcolor: "background.paper",
         }}
       >
         <Box
@@ -295,16 +304,21 @@ const CreateAgendaCargaForm = () => {
           gap={1}
           mb={2}
           pb={1}
-          borderBottom="1px solid #e0e0e0"
+          borderBottom={(theme) => `1.5px solid ${theme.palette.divider}`}
         >
-          <CalendarTodayIcon color="action" fontSize="medium" />
+          <CalendarTodayIcon
+            fontSize="medium"
+            sx={{ color: (theme) => theme.palette.primary.main }}
+          />
           <Typography
             variant="h6"
             fontWeight={600}
             letterSpacing={0.5}
             sx={{
-              color: "grey.900",
+              color: (theme) => theme.palette.text.primary,
               textTransform: "uppercase",
+              fontSize: { xs: "1rem", sm: "1.15rem" },
+              fontFamily: "inherit",
             }}
           >
             Crear Agenda de Carga
@@ -325,31 +339,49 @@ const CreateAgendaCargaForm = () => {
               mb={3}
               px={1}
               py={1}
-              sx={{
+              sx={(theme) => ({
                 backgroundColor: "transparent",
                 borderBottom: "1px solid",
-                borderColor: "grey.200",
-              }}
+                borderColor:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.grey[800]
+                    : theme.palette.grey[200],
+              })}
             >
               <Button
                 onClick={() => setOpenModal(true)}
                 size="medium"
                 variant="outlined"
-                sx={{
+                sx={(theme) => ({
                   textTransform: "none",
                   fontWeight: 500,
                   px: 2.5,
                   py: 1.2,
                   mb: 1,
                   borderRadius: 2,
-                  color: "grey.900",
-                  borderColor: "grey.300",
-                  backgroundColor: "white",
+                  color:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.grey[100]
+                      : theme.palette.grey[900],
+                  borderColor:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.grey[700]
+                      : theme.palette.grey[300],
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.grey[900]
+                      : "#fff",
                   "&:hover": {
-                    backgroundColor: "grey.50",
-                    borderColor: "grey.400",
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.grey[800]
+                        : theme.palette.grey[50],
+                    borderColor:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.grey[500]
+                        : theme.palette.grey[400],
                   },
-                }}
+                })}
               >
                 Ver mi Agenda de Hoy
               </Button>
@@ -357,16 +389,20 @@ const CreateAgendaCargaForm = () => {
               {agendaCarga?.data?.fecha_hora && (
                 <Typography
                   variant="body2"
-                  sx={{
-                    color: "grey.700",
+                  sx={(theme) => ({
+                    color:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.grey[400]
+                        : theme.palette.grey[700],
                     fontStyle: "italic",
-                  }}
+                  })}
                 >
                   Agenda del día:&nbsp;
                   <Typography
                     component="span"
                     fontWeight="medium"
                     color="text.primary"
+                    sx={{ fontStyle: "normal" }}
                   >
                     {convertirFechaLocal(agendaCarga.data.fecha_hora)}
                   </Typography>
@@ -413,16 +449,37 @@ const CreateAgendaCargaForm = () => {
             />
           )}
           <Divider sx={{ my: 3 }} />
-          {/* Aquí se invoca el componente de inventario del camión */}
-          {idCamion && (
+          {idCamion && inventarioData && (
             <Box mt={3}>
-              <InventarioCamion
-                idCamion={Number(idCamion)}
-                modo="simulacion"
-                productos={productos}
-                productosReservados={productosReservados}
-                onValidezCambio={setPuedeCrearAgenda}
-              />
+              <Tabs
+                value={tabIndex}
+                onChange={(_, newValue) => setTabIndex(newValue)}
+                sx={{ mb: 2 }}
+              >
+                <Tab label="Vista Gráfica" />
+                <Tab label="Detalle Capacidad" />
+              </Tabs>
+              {tabIndex === 0 && (
+                <InventarioCamion
+                  inventarioData={inventarioData.data}
+                  productos={productos}
+                  productosReservados={productosReservados}
+                  modo="simulacion"
+                />
+              )}
+              {tabIndex === 1 && (
+                <CapacidadCargaCamion
+                  capacidadTotal={inventarioData.data.capacidad_total}
+                  reservadosRetornables={
+                    inventarioData.data.reservados_retornables
+                  }
+                  disponibles={inventarioData.data.disponibles}
+                  retorno={inventarioData.data.retorno}
+                  productos={productos}
+                  productosReservados={productosReservados}
+                  onValidezCambio={setPuedeCrearAgenda}
+                />
+              )}
             </Box>
           )}
 

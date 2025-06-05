@@ -1,10 +1,11 @@
 import PropTypes from "prop-types";
 import { Droppable } from "@hello-pangea/dnd";
-import { Paper, Typography, Box } from "@mui/material";
+import { Paper, Typography, Box, useTheme } from "@mui/material";
 import PedidoCard from "./PedidoCard";
 
 const Column = ({ droppableId, title, pedidos }) => {
-  const EMPTY_SLOT_COUNT = 4; // o más si deseas
+  const theme = useTheme();
+  const EMPTY_SLOT_COUNT = 4;
   const showEmptySlots = pedidos.length < EMPTY_SLOT_COUNT;
 
   return (
@@ -12,31 +13,72 @@ const Column = ({ droppableId, title, pedidos }) => {
       {(provided, snapshot) => (
         <Paper
           component="div"
-          elevation={1}
+          elevation={snapshot.isDraggingOver ? 3 : 1}
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className={
-            "min-w-[280px] max-w-[320px] w-full sm:w-72 " +
-            "max-h-[80vh] overflow-y-auto rounded-lg " +
-            "p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col " +
-            "border border-gray-400 hover:border-rose-400 transition-colors duration-300 " +
-            (snapshot.isDraggingOver ? "bg-pink-50" : "bg-white")
-          }
-          
+          sx={{
+            width: "100%",
+            height: "100%",
+            boxSizing: "border-box",
+            overflowY: "auto",
+            borderRadius: 3,
+            p: 1,
+            boxShadow: snapshot.isDraggingOver
+              ? "0 6px 24px 0 rgba(240,77,110,0.11)"
+              : theme.shadows[1],
+            border: `2px solid ${
+              snapshot.isDraggingOver
+                ? theme.palette.primary.light
+                : theme.palette.divider
+            }`,
+            background: snapshot.isDraggingOver
+              ? theme.palette.mode === "dark"
+                ? theme.palette.primary.dark + "11"
+                : theme.palette.primary.light + "22"
+              : theme.palette.background.paper,
+            transition: "all 0.2s",
+            display: "flex",
+            flexDirection: "column",
+          }}
         >
-          {/* Título */}
-          <div className="text-center mb-4">
+          <Box sx={{ textAlign: "center", mb: 2 }}>
             <Typography
               variant="h6"
-              className="font-bold text-black tracking-wide uppercase"
+              sx={{
+                fontWeight: "bold",
+                color:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.text.primary
+                    : "#305088",
+                letterSpacing: 0.5,
+                textTransform: "uppercase",
+                mb: 0.5,
+              }}
             >
               {title}
             </Typography>
-            <div className="mx-auto mt-1 mb-2 h-[2px] w-16 bg-indigo-200"></div>
-          </div>
+            <Box
+              sx={{
+                mx: "auto",
+                height: 2,
+                width: 48,
+                borderRadius: 1,
+                background:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.primary.main + "55"
+                    : "#C7DAFF",
+              }}
+            />
+          </Box>
 
-          {/* Contenido */}
-          <div className="flex flex-col gap-3 min-h-[240px]">
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              minHeight: 240,
+            }}
+          >
             {pedidos.map((pedido, index) => (
               <PedidoCard
                 key={pedido.id_pedido}
@@ -45,25 +87,31 @@ const Column = ({ droppableId, title, pedidos }) => {
               />
             ))}
 
-            {/* Slots visuales vacíos */}
             {showEmptySlots &&
-              Array.from({
-                length: EMPTY_SLOT_COUNT - pedidos.length,
-              }).map((_, idx) => (
-                <Box
-                  key={`slot-${idx}`}
-                  sx={{
-                    height: 130,
-                    borderRadius: 2,
-                    backgroundColor: "#F5F5F5",
-                    border: "1px dashed #E0E0E0",
-                    opacity: 0.6,
-                  }}
-                />
-              ))}
+              Array.from({ length: EMPTY_SLOT_COUNT - pedidos.length }).map(
+                (_, idx) => (
+                  <Box
+                    key={`slot-${idx}`}
+                    sx={{
+                      height: 130,
+                      borderRadius: 2,
+                      backgroundColor:
+                        theme.palette.mode === "dark"
+                          ? theme.palette.grey[800]
+                          : "#F5F7FB",
+                      border: `1.5px dashed ${
+                        theme.palette.mode === "dark"
+                          ? theme.palette.primary.light + "99"
+                          : "#C7DAFF"
+                      }`,
+                      opacity: 0.45,
+                    }}
+                  />
+                )
+              )}
 
             {provided.placeholder}
-          </div>
+          </Box>
         </Paper>
       )}
     </Droppable>

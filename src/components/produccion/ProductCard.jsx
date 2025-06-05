@@ -8,6 +8,7 @@ import {
   Chip,
 } from "@mui/material";
 import { useState } from "react";
+import PropTypes from 'prop-types';
 
 const ProductCard = ({ producto, onAdd }) => {
   const [cantidad, setCantidad] = useState(1);
@@ -99,6 +100,15 @@ const ProductCard = ({ producto, onAdd }) => {
       </CardContent>
     </Card>
   );
+};
+ProductCard.propTypes = {
+  producto: PropTypes.shape({
+    nombre: PropTypes.string.isRequired,
+    descripcion: PropTypes.string,
+    stock: PropTypes.number.isRequired,
+    tipo: PropTypes.string.isRequired,
+  }).isRequired,
+  onAdd: PropTypes.func.isRequired,
 };
 
 export default ProductCard;

@@ -141,7 +141,6 @@ const CrearPedido = () => {
         maxWidth: 1200,
         mx: "auto",
         p: 4,
-        backgroundColor: "#fff",
         borderRadius: 2,
         display: "grid",
         gridTemplateRows: "auto auto 1fr",

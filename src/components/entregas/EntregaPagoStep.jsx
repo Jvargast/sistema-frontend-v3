@@ -15,7 +15,6 @@ const EntregaPagoStep = ({ register, errors, detallePedido, watch }) => {
       sx={{
         p: 3,
         borderRadius: 3,
-        backgroundColor: "#F9FAFC",
         boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.05)",
       }}
     >

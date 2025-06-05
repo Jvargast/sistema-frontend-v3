@@ -10,204 +10,284 @@ import {
   Select,
   MenuItem,
   CircularProgress,
+  Switch,
+  FormControlLabel,
+  useTheme,
+  Grid,
 } from "@mui/material";
+import BackButton from "../../components/common/BackButton";
 
 const Edition = ({
   handleSubmit,
   handleChange,
   formData,
-  setFormData,
   tipos,
   navigate,
   isUpdating,
   imagePreview,
 }) => {
+  const theme = useTheme();
 
-  const formFields = [
-    {
-      label: "Nombre del Insumo",
-      name: "nombre_insumo",
-      type: "text",
-      multiline: false,
-      rows: 1,
-    },
-    {
-      label: "Descripción",
-      name: "descripcion",
-      type: "text",
-      multiline: true,
-      rows: 3,
-    },
-    {
-      label: "Código de Barra",
-      name: "codigo_barra",
-      type: "text",
-      multiline: false,
-      rows: 1,
-    },
-    {
-      label: "Precio",
-      name: "precio",
-      type: "number",
-      multiline: false,
-      rows: 1,
-    },
-    {
-      label: "Stock",
-      name: "stock",
-      type: "number",
-      multiline: false,
-      rows: 1,
-    },
-    {
-      label: "URL de la Imagen",
-      name: "image_url",
-      type: "text",
-      multiline: false,
-      rows: 1,
-    },
-  ];
+  // Helpers para renderizar campos, siguiendo el patrón del otro ejemplo
+  const renderTextField = (
+    label,
+    name,
+    type = "text",
+    multiline = false,
+    rows = 1
+  ) => (
+    <TextField
+      fullWidth
+      label={label}
+      name={name}
+      type={type}
+      value={formData[name] || ""}
+      onChange={handleChange}
+      multiline={multiline}
+      rows={rows}
+      variant="outlined"
+      sx={{
+        mb: 2,
+        "& .MuiOutlinedInput-root": {
+          borderRadius: 2,
+          backgroundColor:
+            theme.palette.mode === "light"
+              ? theme.palette.background.paper
+              : theme.palette.background.default,
+          "& fieldset": {
+            borderColor: theme.palette.divider,
+          },
+          "&:hover fieldset": {
+            borderColor: theme.palette.primary.main,
+          },
+          "&.Mui-focused fieldset": {
+            borderColor: theme.palette.primary.main,
+            boxShadow: `0 0 0 2px ${theme.palette.primary.main}22`,
+          },
+          transition: "border-color 0.3s, box-shadow 0.3s",
+        },
+        "& input, & textarea": {
+          padding: "12px",
+        },
+      }}
+      aria-label={label}
+    />
+  );
+
+  // Switch field (¿Es para venta?)
+  const renderSwitchField = (label, name) => (
+    <FormControlLabel
+      control={
+        <Switch
+          checked={Boolean(formData[name])}
+          onChange={handleChange}
+          name={name}
+          color="primary"
+          sx={{
+            "& .MuiSwitch-thumb": {
+              boxShadow: theme.shadows[2],
+            },
+          }}
+        />
+      }
+      label={label}
+      sx={{ mb: 2 }}
+    />
+  );
+
+  // Select field
+  const renderSelectField = (label, name, options) => (
+    <FormControl
+      fullWidth
+      variant="outlined"
+      sx={{
+        mb: 2,
+        backgroundColor:
+          theme.palette.mode === "light"
+            ? theme.palette.grey[50]
+            : theme.palette.grey[900],
+        borderRadius: 2,
+        boxShadow: theme.shadows[1],
+        "& .MuiOutlinedInput-root": {
+          borderRadius: 2,
+          transition: "box-shadow 0.3s",
+          "& fieldset": {
+            borderColor: theme.palette.divider,
+          },
+          "&:hover fieldset": {
+            borderColor: theme.palette.primary.main,
+          },
+          "&.Mui-focused fieldset": {
+            borderColor: theme.palette.primary.main,
+            boxShadow: theme.shadows[4],
+          },
+        },
+      }}
+    >
+      <InputLabel>{label}</InputLabel>
+      <Select
+        labelId={`${name}-label`}
+        name={name}
+        value={formData[name] || ""}
+        onChange={handleChange}
+        label={label}
+        required
+      >
+        {options.map((option) => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
+
+  // Opciones para tipos de insumo
+  const tipoOptions = tipos
+    ? tipos.map((tipo) => ({
+        value: tipo.id_tipo_insumo,
+        label: tipo.nombre_tipo,
+      }))
+    : [];
 
   return (
     <Box
       sx={{
-        padding: "2rem",
         maxWidth: "1200px",
-        margin: "auto",
-        backgroundColor: "#f4f6f8",
-        borderRadius: "10px",
-        boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)",
-        display: "flex",
-        gap: "2rem",
+        mx: "auto",
+        py: 5,
+        px: 3,
+        minHeight: "100vh",
+        backgroundColor: theme.palette.background.default,
+        display: "grid",
+        gridTemplateColumns: { xs: "1fr", lg: "1fr 2fr" },
+        gap: 4,
       }}
     >
       {/* Imagen del Insumo */}
       <Box
         sx={{
-          flex: "1",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          flexDirection: "column",
-          backgroundColor: "#ffffff",
-          padding: "1.5rem",
-          borderRadius: "10px",
-          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+          backgroundColor: theme.palette.background.paper,
+          boxShadow: theme.shadows[3],
+          borderRadius: 2,
+          height: "350px",
         }}
       >
-        <Typography variant="h6" gutterBottom>
-          Vista Previa
-        </Typography>
-        <Box
-          sx={{
-            width: "100%",
-            maxWidth: "300px",
-            height: "300px",
-            backgroundColor: "#e0e0e0",
-            borderRadius: "10px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            overflow: "hidden",
+        <img
+          src={imagePreview}
+          alt="Vista Previa"
+          style={{
+            maxHeight: "100%",
+            maxWidth: "100%",
+            objectFit: "contain",
+            borderRadius: "12px",
           }}
-        >
-          <img
-            src={imagePreview}
-            alt="Vista Previa"
-            style={{
-              maxHeight: "100%",
-              maxWidth: "100%",
-              objectFit: "contain",
-              borderRadius: "10px",
-            }}
-          />
-        </Box>
+        />
       </Box>
 
       {/* Formulario */}
-      <Box sx={{ flex: "2" }}>
-        <Typography variant="h4" gutterBottom>
+      <Box>
+        <BackButton to="/insumos" label="Volver" />
+
+        <Typography
+          variant="h4"
+          sx={{
+            color: theme.palette.text.primary,
+            fontWeight: "bold",
+            mb: 2,
+          }}
+        >
           Editar Insumo
         </Typography>
-        <Divider sx={{ marginBottom: "2rem" }} />
+        <Divider sx={{ mb: 3 }} />
 
-        <form onSubmit={handleSubmit}>
-          {formFields.map((field) => (
-            <TextField
-              key={field.name}
-              id={`field-${field.name}`}
-              label={field.label}
-              name={field.name}
-              value={formData[field.name] || ""}
-              onChange={handleChange}
-              fullWidth
-              type={field.type}
-              multiline={field.multiline}
-              rows={field.rows}
-              sx={{ marginBottom: "1.5rem" }}
-            />
-          ))}
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            gap: "1.5rem",
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{ color: theme.palette.text.secondary, fontWeight: "bold" }}
+          >
+            Información General
+          </Typography>
 
-          {/* Selector: Tipo de Insumo */}
-          <FormControl fullWidth sx={{ marginBottom: "1.5rem" }}>
-            <InputLabel id="tipo-insumo-label">Tipo de Insumo</InputLabel>
-            <Select
-              id="tipo-insumo-select"
-              labelId="tipo-insumo-label"
-              name="id_tipo_insumo"
-              label="id_tipo_insumo"
-              value={formData.id_tipo_insumo || ""}
-              onChange={handleChange}
-            >
-              {tipos?.map((tipo) => (
-                <MenuItem key={tipo.id_tipo_insumo} value={tipo.id_tipo_insumo}>
-                  {tipo.nombre_tipo}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              {renderTextField("Nombre del Insumo", "nombre_insumo")}
+            </Grid>
+            <Grid item xs={12} md={6}>
+              {renderTextField("Código de Barra", "codigo_barra")}
+            </Grid>
+            <Grid item xs={12}>
+              {renderTextField("Descripción", "descripcion", "text", true, 4)}
+            </Grid>
+          </Grid>
 
-          {/* Selector: ¿Es para venta? */}
-          <FormControl fullWidth sx={{ marginBottom: "1.5rem" }}>
-            <InputLabel id="es-para-venta-label">¿Es para venta?</InputLabel>
-            <Select
-              id="es-para-venta-select"
-              labelId="es-para-venta-label"
-              name="es-para-venta-label"
-              label="es-para-venta-label"
-              value={formData?.es_para_venta === true ? "true" : "false"} // Convierte el booleano a cadena
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  es_para_venta: e.target.value === "true", // Convierte la cadena de vuelta a booleano
-                })
-              }
-            >
-              <MenuItem value="true">Sí</MenuItem>
-              <MenuItem value="false">No</MenuItem>
-            </Select>
-          </FormControl>
+          <Typography
+            variant="h6"
+            sx={{ color: theme.palette.text.secondary, fontWeight: "bold" }}
+          >
+            Detalles del Insumo
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              {renderTextField("Precio", "precio", "number")}
+            </Grid>
+            <Grid item xs={12} md={6}>
+              {renderTextField("Stock Disponible", "stock", "number")}
+            </Grid>
+            <Grid item xs={12} md={6}>
+              {renderSelectField(
+                "Tipo de Insumo",
+                "id_tipo_insumo",
+                tipoOptions
+              )}
+            </Grid>
+          </Grid>
 
-          {/* Botones */}
-          <Box display="flex" justifyContent="flex-end" gap="1.5rem" mt="2rem">
+          <Typography
+            variant="h6"
+            sx={{ color: theme.palette.text.secondary, fontWeight: "bold" }}
+          >
+            Opciones de Insumo
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              {renderSwitchField("¿Es para venta?", "es_para_venta")}
+            </Grid>
+          </Grid>
+
+          <Typography
+            variant="h6"
+            sx={{ color: theme.palette.text.secondary, fontWeight: "bold" }}
+          >
+            Imagen del Insumo
+          </Typography>
+          {renderTextField("URL de la Imagen", "image_url")}
+
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
             <Button
               variant="outlined"
+              color="inherit"
               onClick={() => navigate("/insumos")}
-              sx={{
-                color: "#f44336",
-                borderColor: "#f44336",
-                "&:hover": {
-                  backgroundColor: "#f4433620",
-                },
-              }}
+              sx={{ borderRadius: 2, textTransform: "none" }}
             >
               Cancelar
             </Button>
             <Button
               variant="contained"
-              color="primary"
               type="submit"
+              color="primary"
               disabled={isUpdating}
+              sx={{ borderRadius: 2, textTransform: "none" }}
             >
               {isUpdating ? <CircularProgress size={24} /> : "Guardar Cambios"}
             </Button>
@@ -222,7 +302,6 @@ Edition.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   handleChange: PropTypes.func.isRequired,
   formData: PropTypes.object.isRequired,
-  setFormData: PropTypes.func.isRequired,
   tipos: PropTypes.array.isRequired,
   navigate: PropTypes.func.isRequired,
   isUpdating: PropTypes.bool.isRequired,

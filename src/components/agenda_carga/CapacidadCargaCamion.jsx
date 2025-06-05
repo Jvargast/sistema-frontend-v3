@@ -55,10 +55,8 @@ const CapacidadCargaCamion = ({
       sx={{
         p: { xs: 2, sm: 3 },
         borderRadius: 2,
-        bgcolor: "background.paper",
         textAlign: "center",
-        border: "2px solid #ddd",
-        boxShadow: 3,
+        boxShadow: 2,
       }}
     >
       <Typography
@@ -73,59 +71,86 @@ const CapacidadCargaCamion = ({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr", // 1 columna en pantallas muy pequeñas
-            sm: "1fr 1fr", // 2 columnas a partir de 600px
-          },
+          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
           gap: 2,
-          textAlign: "center",
           p: 2,
           borderRadius: 2,
-          bgcolor: "#f5f5f5",
+          backgroundColor: (theme) =>
+            theme.palette.mode === "dark"
+              ? theme.palette.background.paper
+              : "#f8fafc",
         }}
       >
-        <Typography
-          variant="body1"
-          sx={{ fontSize: { xs: "0.85rem", sm: "1rem" } }}
-        >
-          <strong>Capacidad Total:</strong> {capacidadTotal}
-        </Typography>
-        <Typography
-          variant="body1"
-          sx={{ fontSize: { xs: "0.85rem", sm: "1rem" } }}
-        >
-          <strong>Espacios Disponibles (Reales):</strong>{" "}
-          {espaciosDisponiblesParaRetornables}
-        </Typography>
-        <Typography
-          variant="body1"
-          sx={{ fontSize: { xs: "0.85rem", sm: "1rem" } }}
-        >
-          <strong>Productos ya Reservados (Retornables):</strong>{" "}
-          {cantidadTotalProductosReservados}
-        </Typography>
-        <Typography
-          variant="body1"
-          sx={{
+        {[
+          {
+            label: "Capacidad Total",
+            value: capacidadTotal,
+          },
+          {
+            label: "Espacios Disponibles (Reales)",
+            value: espaciosDisponiblesParaRetornables,
+          },
+          {
+            label: "Productos ya Reservados (Retornables)",
+            value: cantidadTotalProductosReservados,
+          },
+          {
+            label: "Productos Retornables a Cargar Ahora",
+            value: cantidadProductosRetornables,
             color: "#0097a7",
-            fontSize: { xs: "0.85rem", sm: "1rem" },
-          }}
-        >
-          <strong>Productos Retornables a Cargar Ahora:</strong>{" "}
-          {cantidadProductosRetornables}
-        </Typography>
-        <Typography
-          variant="body1"
-          sx={{ fontSize: { xs: "0.85rem", sm: "1rem" } }}
-        >
-          <strong>Retornos ya en Camión:</strong> {retorno}
-        </Typography>
-        <Typography
-          variant="body1"
-          sx={{ fontSize: { xs: "0.85rem", sm: "1rem" } }}
-        >
-          <strong>Disponibles ya en Camión:</strong> {disponibles}
-        </Typography>
+          },
+          {
+            label: "Retornos ya en Camión",
+            value: retorno,
+          },
+          {
+            label: "Disponibles ya en Camión",
+            value: disponibles,
+          },
+        ].map(({ label, value, color }) => (
+          <Box
+            key={label}
+            sx={{
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[900]
+                  : "#fff",
+              border: `1px solid`,
+              borderColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[800]
+                  : "#e3e8ee",
+              borderRadius: 2,
+              p: 2,
+              minHeight: 64,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: 0,
+            }}
+          >
+            <Typography
+              variant="body2"
+              fontWeight="bold"
+              color={color || "text.secondary"}
+              sx={{ mb: 0.5, textAlign: "center" }}
+            >
+              {label}
+            </Typography>
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              color={color ? color : "primary.main"}
+              sx={{
+                fontSize: { xs: "1rem", sm: "1.25rem" },
+                textAlign: "center",
+              }}
+            >
+              {value}
+            </Typography>
+          </Box>
+        ))}
       </Box>
 
       {/* Mensajes claros según la validación */}

@@ -9,6 +9,7 @@ import {
   Divider,
   IconButton,
   Tooltip,
+  useTheme,
 } from "@mui/material";
 import {
   Edit,
@@ -30,6 +31,7 @@ import { useDesasignarChoferMutation } from "../../store/services/camionesApi";
 import ModalInventarioCamion from "../inventario/ModalInventarioCamion";
 
 const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
+  const theme = useTheme();
   const [openModal, setOpenModal] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [open, setOpen] = useState(false);
@@ -65,34 +67,43 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
   return (
     <Card
       sx={{
-        boxShadow: 3,
+        boxShadow: 2,
         borderRadius: 3,
-        transition: "0.3s",
-        "&:hover": { boxShadow: 6 },
-        backgroundColor: "#fff",
+        backgroundColor: theme.palette.background.paper,
+        borderLeft: `6px solid ${
+          camion.estado === "Disponible"
+            ? theme.palette.success.main
+            : camion.estado === "En Ruta"
+            ? theme.palette.info.main
+            : theme.palette.warning.main
+        }`,
         height: "100%",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
       }}
     >
-      <CardContent sx={{ flexGrow: 1 }}>
+      <CardContent sx={{ flexGrow: 1, pb: 2 }}>
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            flexWrap: "wrap",
-            mb: 1,
+            mb: 2,
             gap: 1,
+            flexWrap: "wrap",
           }}
         >
-          <Box display="flex" alignItems="center">
-            <LocalShipping sx={{ mr: 1, color: "#1565C0" }} />
+          <Box display="flex" alignItems="center" gap={1.2}>
+            <LocalShipping
+              sx={{ color: theme.palette.primary.main, fontSize: 28 }}
+            />
             <Typography
               variant="subtitle2"
               sx={{
-                fontSize: { xs: "0.9rem", sm: "1rem" },
+                fontWeight: 700,
+                color: theme.palette.text.secondary,
+                fontSize: 16,
               }}
             >
               ID: {camion.id_camion}
@@ -100,65 +111,72 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
           </Box>
           {camion.id_chofer_asignado === null ? (
             <Button
-              variant="contained"
+              variant="outlined"
               color="primary"
               startIcon={<PersonAdd />}
               onClick={() => setOpenModal(true)}
-              disableRipple
               sx={{
-                fontSize: { xs: "0rem", sm: "0.65rem", md: "0.7rem" },
-                fontWeight: "bold",
-                py: { xs: 0.5, sm: 0.5, md: 0.7 },
-                px: { xs: 0.5, sm: 1.5, md: 2 },
-                width: "auto",
-                height: "auto",
-                minWidth: "unset",
+                fontWeight: 700,
+                px: 2,
+                py: 0.5,
+                fontSize: 14,
                 borderRadius: 2,
-                borderColor: "#1976D2",
-                color: "#000000",
-                "&:hover": {
-                  borderColor: "#115293",
-                },
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                boxShadow: "none",
                 textTransform: "none",
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.primary.dark + "08"
+                    : theme.palette.primary.light + "13",
               }}
             >
-              <Box sx={{ display: { xs: "none", sm: "block" } }}>
-                Asignar Chofer
-              </Box>
+              Asignar Chofer
             </Button>
           ) : (
             <Box
               sx={{
-                backgroundColor: "#E3F2FD",
-                padding: "8px",
-                borderRadius: "8px",
-                width: "fit-content",
-                textAlign: "center",
+                background:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.primary.dark + "12"
+                    : theme.palette.info.light + "22",
+                px: 2,
+                py: 1,
+                borderRadius: 2,
                 display: "flex",
+                alignItems: "center",
+                minWidth: 150,
+                gap: 1.2,
               }}
             >
               <Box>
                 <Typography
                   sx={{
-                    fontSize: "0.9rem",
-                    fontWeight: "bold",
-                    color: "#1565C0",
+                    fontWeight: 600,
+                    color: theme.palette.info.dark,
+                    fontSize: 15,
                   }}
                 >
                   Chofer: {camion.chofer?.nombre}
                 </Typography>
-                <Typography sx={{ fontSize: "0.85rem", color: "#444" }}>
+                <Typography
+                  sx={{
+                    fontSize: 13,
+                    color: theme.palette.text.secondary,
+                  }}
+                >
                   Rut: {camion.id_chofer_asignado}
                 </Typography>
               </Box>
-              <Box>
-                <IconButton onClick={() => setOpen(true)}>
-                  <RemoveCircleOutlineOutlinedIcon sx={{ color: "red" }} />
+              <Tooltip title="Remover chofer">
+                <IconButton
+                  onClick={() => setOpen(true)}
+                  size="small"
+                  sx={{ ml: 1 }}
+                >
+                  <RemoveCircleOutlineOutlinedIcon
+                    sx={{ color: theme.palette.error.main }}
+                  />
                 </IconButton>
-              </Box>
+              </Tooltip>
             </Box>
           )}
         </Box>
@@ -166,57 +184,82 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
           variant="h6"
           sx={{
             fontWeight: "bold",
-            color: "#333",
-            textTransform: "capitalize",
+            color: theme.palette.primary.dark,
+            textTransform: "uppercase",
             wordBreak: "break-word",
+            fontSize: 19,
+            mb: 0.5,
+            letterSpacing: 1,
           }}
         >
           Patente: {camion.placa}
         </Typography>
-        <Typography variant="body2" sx={{ color: "gray", mt: 1 }}>
-          Número de elementos: <strong>{camion.capacidad}</strong>
+        <Typography
+          variant="body2"
+          sx={{ color: theme.palette.text.secondary, mt: 0.5, fontSize: 15 }}
+        >
+          Capacidad:{" "}
+          <b style={{ color: theme.palette.info.dark }}>{camion.capacidad}</b>{" "}
+          elementos
         </Typography>
-
-        <Box sx={{ mt: { xs: 1, sm: 2 } }}>
+        <Box sx={{ mt: 2 }}>
           <InventarioCamion ref={inventarioRef} id_camion={camion.id_camion} />
         </Box>
-
         <Box display="flex" justifyContent="center" mt={2}>
           <Tooltip title="Ver detalle visual" arrow>
             <Button
-              variant="outlined"
+              variant="text"
               size="small"
               onClick={() => setOpenInventarioVisual(true)}
+              startIcon={<Visibility />}
               sx={{
-                fontSize: { xs: "0", sm: "0.75rem" },
+                color: theme.palette.info.main,
+                fontWeight: 600,
                 textTransform: "none",
                 px: 2,
-                py: 0.8,
                 borderRadius: 2,
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
+                "&:hover": { background: theme.palette.info.light + "33" },
               }}
-              startIcon={<Visibility />}
             >
-              <Box sx={{ display: { xs: "none", sm: "block" } }}>
-                Ver Detalle Visual
-              </Box>
+              Ver Detalle Visual
             </Button>
           </Tooltip>
         </Box>
 
+        {/* Estado - Pill Color */}
         <Box display="flex" justifyContent="center" mt={2}>
           <Chip
-            label={camion.estado}
-            color={
-              camion.estado === "Disponible"
-                ? "success"
-                : camion.estado === "En Ruta"
-                ? "warning"
-                : "error"
+            icon={
+              camion.estado === "Disponible" ? (
+                <LocalShipping />
+              ) : camion.estado === "En Ruta" ? (
+                <Visibility />
+              ) : (
+                <Edit />
+              )
             }
-            sx={{ fontSize: "0.85rem", fontWeight: "bold", px: 1.5, py: 1 }}
+            label={camion.estado}
+            sx={{
+              fontSize: 14,
+              fontWeight: 700,
+              px: 2,
+              py: 1,
+              borderRadius: 2,
+              color:
+                camion.estado === "Disponible"
+                  ? theme.palette.success.dark
+                  : camion.estado === "En Ruta"
+                  ? theme.palette.warning.dark
+                  : theme.palette.error.dark,
+              backgroundColor:
+                camion.estado === "Disponible"
+                  ? theme.palette.success.light + "44"
+                  : camion.estado === "En Ruta"
+                  ? theme.palette.warning.light + "44"
+                  : theme.palette.error.light + "44",
+              letterSpacing: 1,
+              textTransform: "capitalize",
+            }}
           />
         </Box>
       </CardContent>
@@ -229,28 +272,43 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-          gap: 1.2,
-          backgroundColor: "#F5F5F5",
+          gap: 1.5,
+          background:
+            theme.palette.mode === "dark"
+              ? theme.palette.grey[900]
+              : theme.palette.grey[50],
           zIndex: 1,
-          p: { xs: 1, sm: 1.5 },
+          p: { xs: 1, sm: 2 },
           width: "100%",
+          borderTop: `1px solid ${theme.palette.divider}`,
+          borderBottomLeftRadius: 12,
+          borderBottomRightRadius: 12,
+          boxShadow: "none",
         }}
       >
+        {/* Botón Editar */}
         <Button
           size="medium"
-          variant="contained"
-          disableRipple
+          variant="outlined"
+          color="primary"
           sx={{
-            backgroundColor: "#1565C0",
-            "&:hover": { backgroundColor: "#0D47A1" },
-            fontSize: { xs: "0.6rem", sm: "0.65rem", md: "0.7rem" },
-            fontWeight: "bold",
-            py: { xs: 1, sm: 1.2 },
-            px: { xs: 2, sm: 2.5 },
+            fontSize: { xs: "0.9rem", sm: "1rem" },
+            fontWeight: 700,
+            py: { xs: 1, sm: 1.1 },
+            px: { xs: 1.5, sm: 2 },
             width: "100%",
+            borderRadius: 2,
+            boxShadow: "none",
+            textTransform: "none",
+            letterSpacing: 0.3,
+            transition: "all 0.18s",
+            "&:hover": {
+              background: theme.palette.primary.light + "33",
+              borderColor: theme.palette.primary.main,
+            },
             "& .MuiButton-startIcon": {
               marginLeft: 0,
-              marginRight: 0,
+              marginRight: 0.5,
             },
           }}
           startIcon={<Edit />}
@@ -259,30 +317,40 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
         >
           Editar
         </Button>
+
+        {/* Botón Eliminar */}
         <Button
           size="medium"
           variant="contained"
           color="error"
-          disableRipple
           sx={{
-            fontSize: { xs: "0.6rem", sm: "0.65rem", md: "0.7rem" },
-            fontWeight: "bold",
-            py: { xs: 1, sm: 1.2 },
-            px: { xs: 2, sm: 2.5 },
+            fontSize: { xs: "0.9rem", sm: "1rem" },
+            fontWeight: 700,
+            py: { xs: 1, sm: 1.1 },
+            px: { xs: 1.5, sm: 2 },
             width: "100%",
-            /* maxWidth: { xs: "100%", sm: "160px", md: "200px" }, */
+            borderRadius: 2,
+            textTransform: "none",
+            letterSpacing: 0.3,
+            boxShadow: "none",
+            transition: "all 0.18s",
+            "&:hover": {
+              backgroundColor: theme.palette.error.dark,
+            },
             "& .MuiButton-startIcon": {
               marginLeft: 0,
-              marginRight: 0,
+              marginRight: 0.5,
             },
           }}
           startIcon={<Delete />}
           onClick={() => onDelete(camion.id_camion)}
           aria-label="Eliminar camión"
+          disabled={isDeleting}
         >
           {isDeleting ? "Eliminando..." : "Eliminar"}
         </Button>
       </CardActions>
+
       <AsignarChoferModal
         open={openModal}
         onClose={() => setOpenModal(false)}
@@ -313,7 +381,6 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
     </Card>
   );
 };
-
 
 CamionCard.propTypes = {
   camion: PropTypes.shape({

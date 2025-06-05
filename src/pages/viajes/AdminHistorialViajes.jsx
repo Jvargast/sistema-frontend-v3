@@ -55,7 +55,7 @@ const AdminHistorialViajes = () => {
 
       <Paper
         elevation={2}
-        sx={{ p: 3, borderRadius: 3, mb: 4, backgroundColor: "#fefefe" }}
+        sx={{ p: 3, borderRadius: 3, mb: 4 }}
       >
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>

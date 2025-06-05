@@ -6,13 +6,15 @@ import {
   CardContent,
   CardHeader,
   Divider,
+  useTheme,
+  LinearProgress,
 } from "@mui/material";
 import PropTypes from "prop-types";
 import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
-import { LinearProgress } from "@mui/material";
 import { useImperativeHandle, useMemo, forwardRef } from "react";
 
 const InventarioCamion = forwardRef(({ id_camion }, ref) => {
+  const theme = useTheme();
   const { data, isLoading, error, refetch } =
     useGetEstadoInventarioCamionQuery(id_camion);
 
@@ -24,11 +26,11 @@ const InventarioCamion = forwardRef(({ id_camion }, ref) => {
 
   const {
     capacidad_total = 0,
-    reservados_retornables = 0,
-    disponibles = 0,
+    vacios = 0,
   } = data?.data || {};
 
-  const en_uso = reservados_retornables;
+  const en_uso = capacidad_total - vacios;
+  const disponibles_actuales = vacios;
 
   const porcentajeUsado = useMemo(() => {
     if (!capacidad_total) return 0;
@@ -67,21 +69,23 @@ const InventarioCamion = forwardRef(({ id_camion }, ref) => {
     <Card
       sx={{
         borderRadius: 2,
-        /*  backgroundColor: "#f9f9f9",
-        border: "1px solid #ddd", */
-        bgcolor: "#F5F9FF",
+        bgcolor:
+          theme.palette.mode === "dark" ? theme.palette.grey[900] : "#F5F9FF",
         overflow: "hidden",
       }}
     >
       <CardHeader
         title="Inventario del Camión"
         titleTypographyProps={{
-          fontSize: { xs: "0.85rem", sm: "1rem", md: "1.1rem" },
+          fontSize: { xs: "0.95rem", sm: "1.1rem", md: "1.18rem" },
           fontWeight: "bold",
-          color: "#1565C0",
+          color: theme.palette.primary.main,
         }}
         sx={{
-          backgroundColor: "#E3F2FD",
+          backgroundColor:
+            theme.palette.mode === "dark"
+              ? theme.palette.primary.dark + "11"
+              : theme.palette.primary.light + "33",
           textAlign: "center",
           py: { xs: 0.5, sm: 1 },
         }}
@@ -98,16 +102,28 @@ const InventarioCamion = forwardRef(({ id_camion }, ref) => {
           }}
         >
           {[
-            { label: "Capacidad", value: capacidad_total, color: "#212121" },
-            { label: "En Uso", value: en_uso, color: "#EF6C00" },
-            { label: "Disponible", value: disponibles, color: "#2E7D32" },
+            {
+              label: "Capacidad",
+              value: capacidad_total,
+              color: theme.palette.grey[400],
+            },
+            {
+              label: "En Uso",
+              value: en_uso,
+              color: theme.palette.warning.main,
+            },
+            {
+              label: "Disponibles",
+              value: disponibles_actuales,
+              color: theme.palette.success.main,
+            },
           ].map((item) => (
             <Box key={item.label} flex={1}>
               <Typography
                 sx={{
-                  fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                  color: "#666",
-                  fontWeight: "medium",
+                  fontSize: { xs: "0.80rem", sm: "0.88rem" },
+                  color: theme.palette.text.secondary,
+                  fontWeight: 500,
                   mb: 0.5,
                 }}
               >
@@ -115,7 +131,7 @@ const InventarioCamion = forwardRef(({ id_camion }, ref) => {
               </Typography>
               <Typography
                 sx={{
-                  fontSize: { xs: "1.3rem", sm: "1.6rem" },
+                  fontSize: { xs: "1.28rem", sm: "1.58rem" },
                   fontWeight: "bold",
                   color: item.color,
                 }}
@@ -125,13 +141,13 @@ const InventarioCamion = forwardRef(({ id_camion }, ref) => {
             </Box>
           ))}
         </Box>
-        <Box sx={{ mt: 3 }}>
+        <Box sx={{ mt: 2.5 }}>
           <Typography
             variant="body2"
             sx={{
               mb: 1,
-              color: "#444",
-              fontWeight: "500",
+              color: theme.palette.text.primary,
+              fontWeight: 500,
               textAlign: "center",
             }}
           >
@@ -147,12 +163,15 @@ const InventarioCamion = forwardRef(({ id_camion }, ref) => {
                 borderRadius: 5,
                 backgroundColor:
                   porcentajeUsado < 50
-                    ? "#43A047"
+                    ? theme.palette.success.main
                     : porcentajeUsado < 80
-                    ? "#FFB300"
-                    : "#E53935",
+                    ? theme.palette.warning.main
+                    : theme.palette.error.main,
               },
-              backgroundColor: "#E0E0E0",
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[800]
+                  : "#E0E0E0",
             }}
           />
         </Box>
@@ -165,7 +184,7 @@ const InventarioCamion = forwardRef(({ id_camion }, ref) => {
           p: 1,
           textAlign: "center",
           display: "block",
-          ontSize: { xs: "0.65rem", sm: "0.75rem", md: "0.8rem" },
+          fontSize: { xs: "0.68rem", sm: "0.76rem", md: "0.82rem" },
         }}
       >
         Actualizado en tiempo real

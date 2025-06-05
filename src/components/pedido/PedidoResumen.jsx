@@ -1,20 +1,21 @@
-import { Box, Typography, Button, CircularProgress } from "@mui/material";
+import { Box, Typography, Button, CircularProgress, useTheme } from "@mui/material";
 import PropTypes from "prop-types";
 
 const PedidoResumen = ({ total, isLoading, error, onSubmit, submitLabel }) => {
+  const theme = useTheme();
   return (
     <Box
       sx={{
         p: 3,
         mt: 3,
         borderRadius: 2,
-        backgroundColor: "#ffffff",
-        boxShadow: "0px 2px 4px rgba(0,0,0,0.1)",
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: theme.shadows[2],
       }}
     >
       <Typography
         gutterBottom
-        sx={{ fontWeight: "bold", fontSize: "2.5rem", color: "#424242" }}
+        sx={{ fontWeight: "bold", fontSize: "2.5rem", color: theme.palette.text.primary, }}
       >
         Total: ${total.toFixed(0)}
       </Typography>

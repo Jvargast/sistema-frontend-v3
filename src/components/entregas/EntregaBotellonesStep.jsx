@@ -95,7 +95,6 @@ const EntregaBotellonesStep = ({
           elevation={2}
           sx={{
             p: 2,
-            backgroundColor: "#F0F4FF",
             borderRadius: 2,
             mb: 1,
           }}
@@ -147,7 +146,6 @@ const EntregaBotellonesStep = ({
             sx={{
               p: 2,
               borderRadius: 2,
-              backgroundColor: "#F4F6F8",
             }}
           >
             <Grid item xs={12} sm={4}>

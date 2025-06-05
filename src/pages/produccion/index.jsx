@@ -14,7 +14,7 @@ import {
   Stepper,
   TextField,
   Typography,
-  useTheme,
+  //useTheme,
 } from "@mui/material";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import IndicadoresPanel from "../../components/produccion/IndicadoresPanel";
@@ -23,12 +23,12 @@ import {
   useGetFormulaByIdQuery,
 } from "../../store/services/FormulaProductoApi";
 import ResumenLote from "../../components/produccion/ResumenLote";
-import BackButton from "../../components/common/BackButton";
 import AutocompleteGenerico from "../../components/produccion/AutoCompleteGenerico";
 import PreviewFormula from "../../components/formulas/PreviewFormula";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useCreateProduccionMutation } from "../../store/services/produccionApi";
 
 const steps = [
   "Seleccionar fórmula",
@@ -38,7 +38,7 @@ const steps = [
 ];
 
 const PanelProduccion = () => {
-  const theme = useTheme();
+  //const theme = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
@@ -51,8 +51,8 @@ const PanelProduccion = () => {
   );
   const { data: formulasResp, isFetching: loadingFormulas } =
     useGetAllFormulasQuery({ limit: 1000 });
-  /* const [crearProduccion, { isLoading: procesando }] =
-    useCrearProduccionMutation(); */
+  const [crearProduccion, { isLoading: procesando }] =
+    useCreateProduccionMutation();
 
   const formulas = formulasResp?.formulas ?? [];
 
@@ -79,17 +79,18 @@ const PanelProduccion = () => {
 
   const buildPayload = () => ({
     id_formula: formulaSel.id_formula,
-    unidades_fabricadas: unidadesSalida,
     insumos_consumidos: insumos.map((i) => ({
       id_insumo: i.id,
       cantidad: i.requerido,
       unidad: i.unidad,
     })),
+    cantidad_lote: cantLote,
   });
 
   const ejecutarProduccion = async () => {
     try {
-      /*  await crearProduccion(buildPayload()).unwrap(); */
+      await crearProduccion(buildPayload()).unwrap();
+      console.log(buildPayload())
       dispatch(
         showNotification({
           message: "Producción registrada con éxito",
@@ -110,7 +111,6 @@ const PanelProduccion = () => {
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
       <Stack direction="row" justifyContent="space-between" mb={2}>
-        <BackButton to="/formulas" label="Volver" />
         <Typography variant="h4" fontWeight="bold">
           Registro de Producción
         </Typography>
@@ -360,9 +360,9 @@ const PanelProduccion = () => {
                 color="success"
                 startIcon={<DoneAllIcon />}
                 onClick={ejecutarProduccion}
-                /* disabled={procesando} */
+                disabled={procesando}
               >
-                {ejecutarProduccion ? "Procesando…" : "Fabricar lote"}
+                {procesando ? "Procesando…" : "Fabricar lote"}
               </Button>
             </Stack>
           </CardContent>

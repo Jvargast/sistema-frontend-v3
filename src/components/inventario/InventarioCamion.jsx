@@ -1,46 +1,15 @@
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Alert,
-  Paper,
-  useMediaQuery,
-} from "@mui/material";
+import { Box, Typography, Paper, useMediaQuery } from "@mui/material";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
-import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
-import CapacidadCargaCamion from "../agenda_carga/CapacidadCargaCamion";
-
 const MotionBox = motion(Box);
 
 const InventarioCamion = ({
-  idCamion,
+  inventarioData,
   modo = "visual",
   productos = [],
   productosReservados = [],
-  onValidezCambio = null,
 }) => {
-  const { data, isLoading, error } =
-    useGetEstadoInventarioCamionQuery(idCamion);
   const isTablet = useMediaQuery("(max-width: 1024px)");
-
-  if (isLoading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="200px"
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-  if (error) {
-    return (
-      <Alert severity="error">Error al obtener el inventario del camión.</Alert>
-    );
-  }
 
   const {
     capacidad_total,
@@ -49,10 +18,9 @@ const InventarioCamion = ({
     reservados_no_retornables,
     retorno,
     vacios,
-  } = data.data;
+  } = inventarioData;
 
   const columnas = isTablet ? 6 : 10;
-
 
   const espaciosReservadosProyectados =
     modo === "simulacion"
@@ -72,17 +40,6 @@ const InventarioCamion = ({
         })
       : [];
 
-  /* const espaciosCamion = [
-    ...Array(reservados_retornables).fill({ tipo: "ReservadoRetornable" }),
-    ...Array(reservados_no_retornables).fill({ tipo: "ReservadoNoRetornable" }),
-    ...Array(retornablesACargarAhora).fill({ tipo: "ACargarAhora" }),
-    ...Array(disponibles).fill({ tipo: "Disponible" }),
-    ...Array(retorno).fill({ tipo: "Retorno" }),
-    ...arrayReservadosCarga,
-    ...Array(Math.max(0, vacios - espaciosReservadosProyectados)).fill({
-      tipo: "Vacío",
-    }),
-  ]; */
   const bloques = [
     ...Array(reservados_retornables).fill({ tipo: "ReservadoRetornable" }),
     ...Array(reservados_no_retornables).fill({ tipo: "ReservadoNoRetornable" }),
@@ -92,10 +49,8 @@ const InventarioCamion = ({
     ...arrayReservadosCarga,
   ];
 
-  // Si se pasa de la capacidad, recorta
   let espaciosCamion = bloques.slice(0, capacidad_total);
 
-  // Si queda espacio, agrega vacíos
   const faltantes = capacidad_total - espaciosCamion.length;
   if (faltantes > 0) {
     espaciosCamion = [
@@ -129,7 +84,6 @@ const InventarioCamion = ({
     <Paper
       sx={{
         p: 2,
-        bgcolor: "background.paper",
         borderRadius: 2,
         textAlign: "center",
         mt: 2,
@@ -155,7 +109,6 @@ const InventarioCamion = ({
             alignItems="center"
             justifyContent="center"
             bgcolor={getColor(item.tipo)}
-            color="white"
             borderRadius={1}
             fontSize="12px"
             fontWeight="bold"
@@ -214,24 +167,19 @@ const InventarioCamion = ({
           </strong>
         </Typography>
       </Box>
-
-      {modo === "simulacion" && (
-        <CapacidadCargaCamion
-          capacidadTotal={capacidad_total}
-          reservadosRetornables={reservados_retornables}
-          disponibles={disponibles}
-          retorno={retorno}
-          productos={productos}
-          productosReservados={productosReservados}
-          onValidezCambio={onValidezCambio}
-        />
-      )}
     </Paper>
   );
 };
 
 InventarioCamion.propTypes = {
-  idCamion: PropTypes.number.isRequired,
+  inventarioData: PropTypes.shape({
+    capacidad_total: PropTypes.number,
+    disponibles: PropTypes.number,
+    reservados_retornables: PropTypes.number,
+    reservados_no_retornables: PropTypes.number,
+    retorno: PropTypes.number,
+    vacios: PropTypes.number,
+  }).isRequired,
   modo: PropTypes.oneOf(["visual", "simulacion"]),
   productos: PropTypes.array,
   productosReservados: PropTypes.arrayOf(
@@ -243,7 +191,6 @@ InventarioCamion.propTypes = {
       es_retornable: PropTypes.bool,
     })
   ),
-  onValidezCambio: PropTypes.func,
 };
 
 export default InventarioCamion;

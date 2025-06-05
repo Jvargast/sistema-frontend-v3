@@ -4,23 +4,10 @@ import StoreIcon from "@mui/icons-material/Store";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import EventIcon from "@mui/icons-material/Event";
+import { obtenerFechaChile } from "../../utils/formatearHora";
 
 const CajaInfo = ({ caja }) => {
   if (!caja) return null;
-
-  // Formatear fecha de apertura
-  const formatFecha = (fecha) => {
-    if (!fecha) return "Fecha no disponible";
-    const date = new Date(fecha);
-    return date.toLocaleDateString("es-ES", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   return (
     <Paper
       elevation={3}
@@ -28,8 +15,11 @@ const CajaInfo = ({ caja }) => {
         borderRadius: 3,
         p: 2,
         mb: 3,
-        backgroundColor: "#f5f5f5",
         boxShadow: "0px 3px 10px rgba(0,0,0,0.1)",
+        backgroundColor: (theme) =>
+          theme.palette.mode === "dark"
+            ? theme.palette.grey[900]
+            : theme.palette.grey[400],
       }}
     >
       <Typography variant="h3" fontWeight="bold" textAlign="center" mb={2}>
@@ -89,7 +79,9 @@ const CajaInfo = ({ caja }) => {
         <Typography variant="h5" fontWeight="bold">
           Fecha de Apertura:
         </Typography>
-        <Typography variant="h5">{formatFecha(caja.fecha_apertura)}</Typography>
+        <Typography variant="h5">
+          {obtenerFechaChile(caja.fecha_apertura)}
+        </Typography>
       </Box>
     </Paper>
   );

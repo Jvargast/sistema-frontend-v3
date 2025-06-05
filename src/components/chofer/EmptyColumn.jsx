@@ -1,46 +1,100 @@
-import { Paper, Typography, Box } from "@mui/material";
+import { Paper, Typography, Box, useTheme } from "@mui/material";
 
-const EmptyColumn = () => (
-  <Paper
-    elevation={1}
-    className="
-      min-w-[280px] max-w-[320px] w-full sm:w-72
-      max-h-[80vh] overflow-y-auto rounded-lg
-      p-3 sm:p-4 flex flex-col shadow-sm hover:shadow-md
-      bg-gray-50 border border-gray-400 hover:border-rose-400
-      transition-all duration-300 opacity-90
-    "
-  >
-    {/* Encabezado estilo Column */}
-    <div className="text-center mb-4">
-      <Typography
-        variant="h6"
-        className="font-bold text-black tracking-wide uppercase"
-      >
-        <span className="block">Chofer</span>
-        <span className="text-sm font-normal text-gray-500 uppercase">
-          No Asignado
-        </span>
-      </Typography>
-      <div className="mx-auto mt-1 mb-2 h-[2px] w-16 bg-indigo-200"></div>
-    </div>
+const EmptyColumn = () => {
+  const theme = useTheme();
+  return (
+    <Paper
+      elevation={1}
+      sx={{
 
-    {/* Espacios visuales tipo PedidoCard */}
-    <div className="flex flex-col gap-3 min-h-[240px]">
-      {Array.from({ length: 4 }).map((_, idx) => (
-        <Box
-          key={`placeholder-${idx}`}
+        width: "100%",
+        height: "100%", 
+        boxSizing: "border-box",
+        borderRadius: 3,
+        p: 1,
+        boxShadow: theme.shadows[1],
+        border: `2px solid ${theme.palette.divider}`,
+        background:
+          theme.palette.mode === "dark" ? theme.palette.grey[900] : "#F5F7FB",
+        opacity: 0.88,
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Box sx={{ textAlign: "center", mb: 2 }}>
+        <Typography
+          fontSize={13}
           sx={{
-            height: 130,
-            borderRadius: 2,
-            backgroundColor: "#F5F5F5",
-            border: "1px dashed #E0E0E0",
-            opacity: 0.6,
+            fontWeight: "bold",
+            color:
+              theme.palette.mode === "dark"
+                ? theme.palette.text.primary
+                : "#305088",
+            letterSpacing: 0.5,
+            mb: 0.5
+          }}
+        >
+          Chofer
+        </Typography>
+        <Typography
+          fontSize={13}
+          fontWeight={400}
+          sx={{
+            color:
+              theme.palette.mode === "dark"
+                ? theme.palette.grey[400]
+                : theme.palette.grey[600],
+            textTransform: "uppercase",
+          }}
+        >
+          No Asignado
+        </Typography>
+        <Box
+          sx={{
+            mx: "auto",
+            height: 2,
+            width: 48,
+            borderRadius: 1,
+            background:
+              theme.palette.mode === "dark"
+                ? theme.palette.primary.main + "55"
+                : "#C7DAFF",
           }}
         />
-      ))}
-    </div>
-  </Paper>
-);
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          minHeight: 240,
+          flex: 1,
+          justifyContent: "flex-start",
+        }}
+      >
+        {Array.from({ length: 4 }).map((_, idx) => (
+          <Box
+            key={`placeholder-${idx}`}
+            sx={{
+              height: 130,
+              borderRadius: 2,
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[800]
+                  : "#F5F5F5",
+              border: `1.5px dashed ${
+                theme.palette.mode === "dark"
+                  ? theme.palette.primary.light + "99"
+                  : "#C7DAFF"
+              }`,
+              opacity: 0.48,
+            }}
+          />
+        ))}
+      </Box>
+    </Paper>
+  );
+};
 
 export default EmptyColumn;

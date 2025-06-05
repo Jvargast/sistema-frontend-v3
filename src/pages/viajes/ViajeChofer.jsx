@@ -310,7 +310,7 @@ const ViajeChofer = ({ viaje }) => {
           right: 24,
           zIndex: 1200,
           "& .MuiSpeedDialAction-fab": {
-            transition: "none !important", // ← elimina temporalmente transición
+            transition: "none !important", 
           },
         }}
         icon={<SpeedDialIcon onClick={toggleFab} />}

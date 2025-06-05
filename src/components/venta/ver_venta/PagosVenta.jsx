@@ -40,7 +40,6 @@ const PagosVenta = ({ pagos }) => {
               sx={{
                 p: 2,
                 borderRadius: 2,
-                backgroundColor: "#fff",
                 boxShadow: "0px 2px 6px rgba(0,0,0,0.05)",
                 flexDirection: isMobile ? "column" : "row",
                 alignItems: isMobile ? "flex-start" : "center",
@@ -77,7 +76,6 @@ const PagosVenta = ({ pagos }) => {
                 sx={{
                   mt: 1,
                   fontSize: "0.8rem",
-                  backgroundColor: "#e3f2fd",
                   maxWidth: "100%",
                 }}
               />

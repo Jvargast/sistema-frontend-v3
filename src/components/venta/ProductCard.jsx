@@ -33,7 +33,6 @@ const ProductCard = ({ product, onAddToCart }) => {
         maxWidth: 260,
         position: "relative",
         overflow: "hidden",
-        backgroundColor: "#f4f6f8",
       }}
     >
       {/* Chip tipo */}
@@ -88,7 +87,9 @@ const ProductCard = ({ product, onAddToCart }) => {
           <Typography
             variant="subtitle1"
             fontWeight="600"
-            sx={{ color: "#37474f" }}
+            sx={(theme) => ({
+              color: theme.palette.text.primary,
+            })}
             noWrap
           >
             {product.nombre_producto}
@@ -96,7 +97,9 @@ const ProductCard = ({ product, onAddToCart }) => {
           <Typography
             variant="subtitle2"
             fontWeight="bold"
-            sx={{ color: "#2e7d32" }}
+            sx={(theme) => ({
+              color: theme.palette.success.main,
+            })}
           >
             ${precio.toFixed(0)}
           </Typography>

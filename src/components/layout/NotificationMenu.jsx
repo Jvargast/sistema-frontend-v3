@@ -10,7 +10,7 @@ import {
 import CircleIcon from "@mui/icons-material/Circle";
 
 /**
- * Componente para mostrar una lista de notificaciones dentro de un menú.
+ * 
  *
  * @param {HTMLElement} anchorEl - El elemento HTML que ancla el menú.
  * @param {boolean} open - Indica si el menú está abierto.
@@ -23,7 +23,7 @@ const NotificationsMenu = ({
   anchorEl,
   open,
   onClose,
-  notifications = [], // Usamos default param
+  notifications = [], 
   onSelectNotification,
 }) => {
   return (
@@ -55,7 +55,7 @@ const NotificationsMenu = ({
             <MenuItem
               onClick={() => {
                 if (onSelectNotification) onSelectNotification(notif);
-                onClose(); // Cerrar el menú (si lo deseas)
+                onClose(); 
               }}
               sx={{
                 display: "flex",
@@ -64,7 +64,6 @@ const NotificationsMenu = ({
                 "&:hover": { backgroundColor: "#f5f5f5" },
               }}
             >
-              {/* Ícono o indicador de tipo (varía el color si lo deseas) */}
               <ListItemIcon sx={{ minWidth: 28 }}>
                 <CircleIcon
                   sx={{

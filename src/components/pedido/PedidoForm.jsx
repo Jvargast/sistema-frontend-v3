@@ -9,6 +9,7 @@ import {
   Checkbox,
   FormControlLabel,
   Typography,
+  useTheme,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PedidoClienteSelector from "./PedidoClienteSelector";
@@ -29,8 +30,11 @@ const PedidoForm = ({
   setTipoDocumento,
   extraFields,
 }) => {
+  const theme = useTheme();
   const [openClienteModal, setOpenClienteModal] = useState(false);
   const [useClientAddress, setUseClientAddress] = useState(true);
+
+  const isEmpresa = selectedCliente?.tipo_cliente === "empresa";
 
   useEffect(() => {
     if (!selectedCliente) {
@@ -46,9 +50,15 @@ const PedidoForm = ({
       tipoDocumento === "factura" &&
       !(selectedCliente?.rut && selectedCliente?.razon_social)
     ) {
-      setTipoDocumento?.("boleta"); 
+      setTipoDocumento?.("boleta");
     }
   }, [selectedCliente, tipoDocumento, setTipoDocumento]);
+
+  useEffect(() => {
+    if (isEmpresa && tipoDocumento === "boleta") {
+      setTipoDocumento?.("factura");
+    }
+  }, [isEmpresa, tipoDocumento, setTipoDocumento]);
 
   return (
     <Paper
@@ -57,17 +67,23 @@ const PedidoForm = ({
         p: 4,
         borderRadius: 3,
         mb: 3,
-        background: "linear-gradient(135deg, #f5f7fa, #c3cfe2)",
+        backgroundColor:
+          theme.palette.mode === "dark"
+            ? theme.palette.grey[900]
+            : theme.palette.background.paper,
       }}
     >
       <Typography
         variant="h6"
-        sx={{ mb: 3, fontWeight: "bold", color: "#333" }}
+        sx={{
+          mb: 3,
+          fontWeight: "bold",
+          color: theme.palette.text.primary,
+        }}
       >
         Datos del Pedido
       </Typography>
 
-      {/* Botón para seleccionar cliente */}
       <Box display="flex" alignItems="center" gap={1} mb={3}>
         <Button
           variant="contained"
@@ -100,7 +116,6 @@ const PedidoForm = ({
         }}
       />
 
-      {/* Checkbox para usar la dirección del cliente */}
       <FormControlLabel
         control={
           <Checkbox
@@ -110,10 +125,9 @@ const PedidoForm = ({
           />
         }
         label="Usar dirección del cliente"
-        sx={{ mb: 3, color: "#555" }}
+        sx={{ mb: 3, color: theme.palette.text.secondary }}
       />
 
-      {/* Dirección de entrega (editable solo si NO se usa la del cliente) */}
       <TextField
         fullWidth
         label="Dirección de Entrega"
@@ -123,12 +137,11 @@ const PedidoForm = ({
         disabled={useClientAddress && !!selectedCliente}
         sx={{
           mb: 3,
-          backgroundColor: "#fff",
+          backgroundColor: theme.palette.background.default,
           borderRadius: 1,
         }}
       />
 
-      {/* Tipo de documento */}
       {mostrarTipoDocumento && (
         <TextField
           select
@@ -137,16 +150,28 @@ const PedidoForm = ({
           value={tipoDocumento || ""}
           onChange={(e) => setTipoDocumento?.(e.target.value)}
           variant="outlined"
-          sx={{ mb: 3, backgroundColor: "#fff", borderRadius: 1 }}
+          sx={{
+            mb: 3,
+            backgroundColor: theme.palette.background.default,
+            borderRadius: 1,
+            input: { color: theme.palette.text.primary },
+            label: { color: theme.palette.text.secondary },
+          }}
         >
-          <MenuItem value="boleta">Boleta</MenuItem>
-          {selectedCliente?.rut && selectedCliente?.razon_social && (
-            <MenuItem value="factura">Factura</MenuItem>
-          )}
+          {isEmpresa &&
+            selectedCliente?.rut &&
+            selectedCliente?.razon_social && (
+              <MenuItem value="factura">Factura</MenuItem>
+            )}
+          {!isEmpresa && <MenuItem value="boleta">Boleta</MenuItem>}
+          {!isEmpresa &&
+            selectedCliente?.rut &&
+            selectedCliente?.razon_social && (
+              <MenuItem value="factura">Factura</MenuItem>
+            )}
         </TextField>
       )}
 
-      {/* Método de pago: usar IDs numéricos */}
       {(mostrarMetodoPago ||
         (mostrarTipoDocumento && tipoDocumento !== "factura")) && (
         <TextField
@@ -158,8 +183,10 @@ const PedidoForm = ({
           variant="outlined"
           sx={{
             mb: 3,
-            backgroundColor: "#fff",
+            backgroundColor: theme.palette.background.default,
             borderRadius: 1,
+            input: { color: theme.palette.text.primary },
+            label: { color: theme.palette.text.secondary },
           }}
         >
           <MenuItem value={1}>Efectivo</MenuItem>
@@ -169,7 +196,6 @@ const PedidoForm = ({
         </TextField>
       )}
 
-      {/* Notas del pedido */}
       <TextField
         fullWidth
         label="Notas"
@@ -180,8 +206,10 @@ const PedidoForm = ({
         rows={3}
         sx={{
           mb: 2,
-          backgroundColor: "#fff",
+          backgroundColor: theme.palette.background.default,
           borderRadius: 1,
+          input: { color: theme.palette.text.primary },
+          label: { color: theme.palette.text.secondary },
         }}
       />
       {extraFields && <Box mt={2}>{extraFields}</Box>}

@@ -51,14 +51,12 @@ const DocumentosVenta = ({ documentos }) => {
               sx={{
                 p: isMobile ? 1.5 : 2,
                 borderRadius: 2,
-                backgroundColor: "#fff",
                 boxShadow: "0px 2px 6px rgba(0,0,0,0.05)",
                 flexDirection: "column",
                 alignItems: "flex-start",
                 gap: isMobile ? 0.8 : 1.2,
               }}
             >
-              {/* Tipo de Documento */}
               <Box display="flex" alignItems="center" gap={1}>
                 <Description sx={{ color: "#1976d2" }} />
                 <Typography

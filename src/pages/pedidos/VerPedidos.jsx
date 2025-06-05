@@ -9,10 +9,13 @@ import { useGetAllChoferesQuery } from "../../store/services/usuariosApi";
 import Column from "../../components/chofer/Column";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
-import { Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import EmptyColumn from "../../components/chofer/EmptyColumn";
+import { useIsMobile } from "../../utils/useIsMobile";
+import MobilePedidosBoard from "./MobilePedidosBoard";
 
 const PedidosBoard = () => {
+  const isMobile = useIsMobile();
   const { data: allPedidosData, isLoading: allPedidosLoading } =
     useGetAllPedidosQuery();
 
@@ -131,73 +134,156 @@ const PedidosBoard = () => {
     }
   };
 
+  if (isMobile) {
+    return (
+      <MobilePedidosBoard
+        columnsState={columnsState}
+        choferes={choferesData || []}
+        asignarPedido={asignarPedido}
+        desasignarPedido={desasignarPedido}
+        allPedidosLoading={allPedidosLoading}
+        choferesLoading={choferesLoading}
+      />
+    );
+  }
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="pb-4">
-        <div className="flex flex-col items-start justify-between mb-4 px-4">
-          <Typography variant="h4" className="font-semibold text-gray-700">
+      <Box pb={4}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            mb: 4,
+            px: 4,
+          }}
+        >
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            sx={{
+              color: (theme) =>
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[100]
+                  : theme.palette.text.primary,
+              letterSpacing: 0.2,
+            }}
+          >
             Administración de Pedidos
           </Typography>
-          <Typography variant="subtitle1" className="text-gray-500">
+          <Typography
+            variant="subtitle1"
+            sx={{
+              color: (theme) =>
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[400]
+                  : theme.palette.grey[600],
+            }}
+          >
             Gestiona claramente la asignación de pedidos a cada chofer.
           </Typography>
-        </div>
-        <div className="overflow-x-auto">
-          <div
-            className="
-     flex flex-wrap gap-6
-      justify-center
-      bg-gray-50
-      min-h-screen
-      px-6
-      max-w-screen-2xl
-      mx-auto
-    "
+        </Box>
+        <Box sx={{ overflowX: "auto" }}>
+          <Box
+            sx={{
+              display: "grid",
+              gap: 3,
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(2, 1fr)",
+                md: "repeat(3, 1fr)",
+                lg: "repeat(4, 1fr)",
+              },
+              alignItems: "stretch",
+              width: "100%",
+              mt: 2,
+              mb: 4,
+            }}
           >
             <Column
               droppableId="sinAsignar"
               title={
-                <>
-                  <span className="font-semibold text-black">Chofer</span>
-                  <br />
-                  <span className="text-sm font-normal text-gray-500">
+                <Box>
+                  <Typography
+                    fontWeight="bold"
+                    sx={{
+                      color: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.text.primary
+                          : "#222",
+                    }}
+                  >
+                    Chofer
+                  </Typography>
+                  <Typography
+                    fontSize={13}
+                    fontWeight={400}
+                    sx={{
+                      color: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.grey[400]
+                          : theme.palette.grey[600],
+                    }}
+                  >
                     Sin Asignar
-                  </span>
-                </>
+                  </Typography>
+                </Box>
               }
               pedidos={columnsState.sinAsignar || []}
             />
 
             {(allPedidosLoading || choferesLoading) && (
-              <div className="flex items-center justify-center text-gray-600">
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? theme.palette.grey[400]
+                      : theme.palette.grey[600],
+                }}
+              >
                 Cargando datos...
-              </div>
+              </Box>
             )}
+
             {!choferesLoading &&
               choferesData?.map((chofer) => (
                 <Column
                   key={chofer.rut}
                   droppableId={chofer.rut}
                   title={
-                    <>
-                      <span>Chofer: {chofer.nombre}</span>
-                      <br />
-                      <span className="text-sm font-normal text-gray-500">
+                    <Box>
+                      <Typography fontWeight="bold">
+                        Chofer: {chofer.nombre}
+                      </Typography>
+                      <Typography
+                        fontSize={13}
+                        fontWeight={400}
+                        sx={{
+                          color: (theme) =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.grey[400]
+                              : theme.palette.grey[600],
+                        }}
+                      >
                         RUT: {chofer.rut}
-                      </span>
-                    </>
+                      </Typography>
+                    </Box>
                   }
                   pedidos={columnsState[chofer.rut] || []}
                 />
               ))}
-            {/* Columnas adicionales vacías para completar */}
             {!choferesLoading &&
               Array.from({ length: Math.max(0, 3 - choferesData.length) }).map(
                 (_, idx) => <EmptyColumn key={`empty-column-${idx}`} />
               )}
-          </div>
-        </div>
-      </div>
+          </Box>
+        </Box>
+      </Box>
     </DragDropContext>
   );
 };

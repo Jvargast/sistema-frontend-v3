@@ -130,9 +130,9 @@ const CamionesManagement = () => {
     <Box
       sx={{
         p: { xs: 2, sm: 4 },
-        backgroundColor: "#f4f6f8",
         minHeight: "100vh",
         width: "100%",
+        bgcolor: (theme) => theme.palette.background.default,
         overflowX: "hidden",
       }}
     >
@@ -141,9 +141,10 @@ const CamionesManagement = () => {
         sx={{
           p: { xs: 2, sm: 4 },
           borderRadius: 3,
-          backgroundColor: "#ffffff",
           width: "100%",
           boxSizing: "border-box",
+          bgcolor: (theme) => theme.palette.background.paper,
+          boxShadow: (theme) => theme.shadows[2],
         }}
       >
         <Box
@@ -160,7 +161,8 @@ const CamionesManagement = () => {
             variant="h5"
             sx={{
               fontWeight: "bold",
-              color: "#333",
+              color: (theme) => theme.palette.text.primary,
+              letterSpacing: 0.1,
               whiteSpace: "nowrap",
             }}
           >
@@ -169,20 +171,22 @@ const CamionesManagement = () => {
           <Button
             variant="contained"
             color="primary"
-            disableRipple
+            disableElevation
             startIcon={<Add />}
             onClick={() => setOpen(true)}
             disabled={isCreating}
             sx={{
-              fontSize: { xs: "0.75rem", sm: "0.9rem" },
-              fontWeight: "bold",
-              py: 1.5,
-              px: { xs: 1.5, sm: 3 },
+              fontSize: { xs: "0.78rem", sm: "0.92rem" },
+              fontWeight: 700,
+              py: 1.1,
+              px: { xs: 2, sm: 3 },
+              borderRadius: 2,
               minWidth: { xs: "40px", sm: "auto" },
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              "&:hover": { backgroundColor: "#115293" },
+              boxShadow: "none",
+              transition: "background 0.15s",
+              "&:hover": {
+                backgroundColor: (theme) => theme.palette.primary.dark,
+              },
               "& .MuiButton-startIcon": { margin: 0 },
             }}
             aria-label="Añadir Camión"
@@ -194,18 +198,22 @@ const CamionesManagement = () => {
         </Box>
 
         {camiones?.length === 0 ? (
-          <Box sx={{ textAlign: "center", mt: 4 }}>
-            <Typography variant="h6" color="textSecondary">
-              No hay camiones registrados.
-            </Typography>
+          <Box
+            sx={{
+              textAlign: "center",
+              mt: 4,
+              color: (theme) => theme.palette.text.secondary,
+            }}
+          >
+            <Typography variant="h6">No hay camiones registrados.</Typography>
           </Box>
         ) : (
           <Box
             sx={{
               display: "flex",
               flexWrap: "wrap",
-              justifyContent: "center", 
-              gap: 2, 
+              justifyContent: "center",
+              gap: 3,
               mt: 2,
             }}
           >
@@ -213,16 +221,21 @@ const CamionesManagement = () => {
               <Box
                 key={camion.id_camion}
                 sx={{
-                  flex: "1 1 320px",
-                  maxWidth: "450px", 
-                  width: "100%", 
+                  flex: "1 1 330px",
+                  maxWidth: "440px",
+                  minWidth: "300px",
+                  width: "100%",
+                  transition: "transform 0.18s",
+                  "&:hover": {
+                    transform: "translateY(-2px) scale(1.015)",
+                  },
                 }}
               >
                 <CamionCard
                   camion={camion}
                   onDelete={confirmDeleteCamion}
                   isDeleting={isDeleting}
-                  onCamionUpdated={refetch} 
+                  onCamionUpdated={refetch}
                 />
               </Box>
             ))}

@@ -167,7 +167,6 @@ const TipoInsumoManagement = () => {
     <Box
       sx={{
         p: 3,
-        backgroundColor: "#f9fafb",
         minHeight: "100vh",
       }}
     >

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   Box,
   Typography,
@@ -8,6 +9,9 @@ import {
   Button,
   Modal,
   Paper,
+  Fade,
+  IconButton,
+  Backdrop,
 } from "@mui/material";
 import { useRef } from "react";
 import {
@@ -43,7 +47,6 @@ const MisPedidos = () => {
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
 
-  // Estado inicial en hoy
   const [fechaSeleccionada, setFechaSeleccionada] = useState(today);
 
   const fechaHoy = formatFecha(today);
@@ -53,11 +56,10 @@ const MisPedidos = () => {
   const isQueryReady = useRef(false);
   const refetchRef = useRef(null);
 
-  // En tu primer useEffect
   useEffect(() => {
     isMounted.current = true;
     return () => {
-      isMounted.current = false; // evitar llamada si está desmontado
+      isMounted.current = false;
     };
   }, []);
 
@@ -75,7 +77,6 @@ const MisPedidos = () => {
     { refetchOnMountOrArgChange: true }
   );
 
-  // Cuando la query se monta y está lista
   useEffect(() => {
     if (refetch) {
       refetchRef.current = refetch;
@@ -138,7 +139,6 @@ const MisPedidos = () => {
     }
   };
 
-  // 🔹 Filtrar pedidos "Pendiente de Confirmación"
   const pedidosPendientes =
     pedidos?.data?.filter(
       (pedido) =>
@@ -177,14 +177,13 @@ const MisPedidos = () => {
         📦 Pedidos Pendientes de Confirmación
       </Typography>
 
-      {/* 🔹 Selector de fecha (Solo Hoy / Ayer) */}
       <Box display="flex" justifyContent="center" alignItems="center" mb={3}>
         <Button
           variant="contained"
           color="secondary"
           startIcon={<ArrowBackIos />}
           onClick={() => cambiarFecha(-1)}
-          disabled={formatFecha(fechaSeleccionada) === fechaAyer} // Bloquea si ya es ayer
+          disabled={formatFecha(fechaSeleccionada) === fechaAyer}
         >
           Ayer
         </Button>
@@ -196,13 +195,12 @@ const MisPedidos = () => {
           color="secondary"
           endIcon={<ArrowForwardIos />}
           onClick={() => cambiarFecha(1)}
-          disabled={formatFecha(fechaSeleccionada) === fechaHoy} // Bloquea si ya es hoy
+          disabled={formatFecha(fechaSeleccionada) === fechaHoy}
         >
           Mañana
         </Button>
       </Box>
 
-      {/* 🔹 Botón para abrir el historial */}
       <Box textAlign="center" mb={3}>
         <Button
           variant="contained"
@@ -214,14 +212,13 @@ const MisPedidos = () => {
         </Button>
       </Box>
 
-      {/* 🔹 Listado de pedidos */}
       <Grid container spacing={2} justifyContent="center">
         {pedidosPendientes.length > 0 ? (
           pedidosPendientes.map((pedido) => (
             <PedidoCard
               key={pedido.id_pedido}
               pedido={pedido}
-              confirmado={confirmado[pedido.id_pedido] ?? false} // Valor por defecto
+              confirmado={confirmado[pedido.id_pedido] ?? false}
               isConfirming={isConfirming}
               onConfirmar={handleConfirmar}
             />
@@ -233,23 +230,71 @@ const MisPedidos = () => {
         )}
       </Grid>
 
-      {/* 🔹 Modal del historial de pedidos */}
-      <Modal open={openHistorial} onClose={() => setOpenHistorial(false)}>
-        <Paper
-          sx={{
-            width: "90%",
-            maxWidth: 700,
-            p: 3,
-            mx: "auto",
-            mt: 5,
-            borderRadius: 2,
-          }}
-        >
-          <HistorialPedidos
-            onClose={() => setOpenHistorial(false)}
-            pedidos={pedidos?.data || []}
-          />
-        </Paper>
+      <Modal
+        open={openHistorial}
+        onClose={() => setOpenHistorial(false)}
+        closeAfterTransition
+        slots={{ backdrop: Backdrop }}
+        slotProps={{
+          backdrop: {
+            timeout: 300,
+          },
+        }}
+      >
+        <Fade in={openHistorial}>
+          <Box
+            sx={{
+              width: "92%",
+              maxWidth: 720,
+              mx: "auto",
+              mt: { xs: 4, sm: 7 },
+              borderRadius: 4,
+              outline: "none",
+            }}
+          >
+            <Paper
+              elevation={8}
+              sx={{
+                p: { xs: 2, sm: 4 },
+                borderRadius: 4,
+                maxWidth: 740, 
+                maxHeight: "85vh", 
+                overflowY: "auto", 
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.background.default
+                    : "#F8FAFC",
+                position: "relative",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  mb: 2.5,
+                }}
+              >
+                <Typography variant="h6" fontWeight="bold" color="primary">
+                  📅 Historial de Pedidos
+                </Typography>
+                <IconButton
+                  onClick={() => setOpenHistorial(false)}
+                  sx={{
+                    color: "text.secondary",
+                    "&:hover": { color: "error.main", bgcolor: "transparent" },
+                  }}
+                >
+                  <CloseIcon fontSize="medium" />
+                </IconButton>
+              </Box>
+              <HistorialPedidos
+                onClose={() => setOpenHistorial(false)}
+                pedidos={pedidos?.data || []}
+              />
+            </Paper>
+          </Box>
+        </Fade>
       </Modal>
     </Box>
   );
