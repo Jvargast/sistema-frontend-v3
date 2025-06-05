@@ -6,16 +6,27 @@ import {
   Grid,
   Box,
   Divider,
+  useTheme,
+  Badge,
+  Tooltip,
 } from "@mui/material";
 import PedidoListaProductos from "./PedidoListaProductos";
 import PropTypes from "prop-types";
+import { formatCLP } from "../../utils/formatUtils";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 
-const formatCLP = (value) =>
-  new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: "CLP",
-    maximumFractionDigits: 0,
-  }).format(value);
+const getEstadoColor = (estado, theme) => {
+  if (!estado) return "default";
+  if (["Entregado", "Finalizado", "Completado"].includes(estado))
+    return "success";
+  if (["En Entrega", "En Preparación", "Confirmado"].includes(estado))
+    return "info";
+  if (estado === "Pendiente" || estado === "Pendiente de Confirmación")
+    return "warning";
+  if (["Cancelado", "Anulado"].includes(estado)) return "error";
+  return theme.palette.mode === "dark" ? "info" : "primary";
+};
 
 const PedidoCard = ({
   pedido,
@@ -23,87 +34,199 @@ const PedidoCard = ({
   isConfirming,
   onConfirmar,
 }) => {
+  const theme = useTheme();
+  const estado = pedido?.EstadoPedido?.nombre_estado || "Desconocido";
+  const pagado = pedido?.pagado;
+  const estadoPago = pedido?.estado_pago;
+
+  const colorPago = pagado
+    ? theme.palette.success.main
+    : theme.palette.warning.main;
+
   return (
     <Grid item xs={12} sm={6} md={4} display="flex">
-      <Paper
-        elevation={4}
-        sx={{
-          p: 3,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          width: "100%",
-          minHeight: 350,
-          textAlign: "center",
-          borderRadius: 3,
-          bgcolor: confirmado ? "lightgray" : "white",
-          transition: "all 0.3s ease",
-          "&:hover": { boxShadow: 10, transform: "translateY(-5px)" },
-        }}
+      <Badge
+        color={pagado ? "success" : "warning"}
+        overlap="rectangular"
+        badgeContent={
+          <Tooltip title={pagado ? "Pedido Pagado" : "Pago Pendiente"}>
+            {pagado ? (
+              <CheckCircleIcon fontSize="medium" color="success" />
+            ) : (
+              <HourglassBottomIcon fontSize="medium" color="warning" />
+            )}
+          </Tooltip>
+        }
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        sx={{ width: "100%" }}
       >
-        {/* Estado del pedido */}
-        <Box mb={2} display="flex" justifyContent="center">
-          <Chip label={pedido.EstadoPedido.nombre_estado} color="warning" />
-        </Box>
+        <Paper
+          elevation={theme.palette.mode === "dark" ? 5 : 3}
+          sx={{
+            p: { xs: 2, sm: 3 },
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            width: "100%",
+            minHeight: 370,
+            textAlign: "center",
+            borderRadius: 3,
+            bgcolor: confirmado
+              ? theme.palette.action.selected
+              : theme.palette.background.paper,
+            transition: "all 0.25s cubic-bezier(.4,2,.6,1)",
+            "&:hover": {
+              boxShadow: theme.shadows[10],
+              transform: "translateY(-6px) scale(1.015)",
+            },
+            border: confirmado
+              ? `2.5px solid ${theme.palette.success.main}40`
+              : `1.5px solid ${theme.palette.divider}`,
+            position: "relative",
+          }}
+        >
+          <Box mb={2} display="flex" justifyContent="center">
+            <Chip
+              label={estado}
+              color={getEstadoColor(estado, theme)}
+              sx={{
+                fontWeight: "bold",
+                letterSpacing: 0.3,
+                textTransform: "capitalize",
+                px: 1.2,
+                fontSize: { xs: "0.91rem", sm: "1rem" },
+              }}
+            />
+          </Box>
 
-        {/* Información del pedido */}
-        <Typography variant="h6" fontWeight="bold">
-          Pedido #{pedido.id_pedido}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          📍 <strong>{pedido.direccion_entrega}</strong>
-        </Typography>
-
-        <Divider sx={{ my: 2 }} />
-
-        <Typography variant="body1" fontWeight="bold" color="primary">
-          Total: {formatCLP(pedido.total)}
-        </Typography>
-        <Typography variant="body2" color={pedido.pagado ? "green" : "red"}>
-          Pago: {pedido.estado_pago}
-        </Typography>
-
-        {/* Lista de productos */}
-        <PedidoListaProductos
-          productos={pedido.DetallesPedido.map((detalle) => ({
-            ...detalle,
-            subtotal: Number(detalle.subtotal), // 🔹 Convertir subtotal a número
-          }))}
-        />
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* Botón de confirmación */}
-        {confirmado ? (
           <Typography
-            mt={2}
-            color="green"
+            variant="h6"
             fontWeight="bold"
-            disabled
-            sx={{ cursor: "default" }}
+            sx={{
+              color: theme.palette.text.primary,
+              mb: 1,
+              fontSize: "1.15rem",
+            }}
           >
-            ✅ Pedido Confirmado
+            Pedido #{pedido.id_pedido}
           </Typography>
-        ) : (
-          <Button
-            variant="contained"
-            color="success"
-            fullWidth
-            sx={{ mt: 2, fontSize: "1rem", py: 1.2, borderRadius: 2 }}
-            onClick={() => onConfirmar(pedido.id_pedido)}
-            disabled={isConfirming}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
+              mb: 1,
+            }}
           >
-            {isConfirming ? "Confirmando..." : "✔ Confirmar Pedido"}
-          </Button>
-        )}
-      </Paper>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontWeight: 400, display: "flex", alignItems: "center" }}
+            >
+              📍
+            </Typography>
+            <Typography
+              variant="body2"
+              color="text.primary"
+              sx={{ fontWeight: "bold", wordBreak: "break-word" }}
+            >
+              {pedido.direccion_entrega}
+            </Typography>
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Box
+            sx={{
+              mb: 1.2,
+              display: "flex",
+              flexDirection: "column",
+              gap: 0.5,
+              alignItems: "center",
+            }}
+          >
+            <Typography
+              variant="body1"
+              fontWeight="bold"
+              color="primary"
+              sx={{ fontSize: "1.11rem" }}
+            >
+              Total: {formatCLP(pedido.total)}
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: colorPago,
+                fontWeight: "bold",
+                fontSize: "1rem",
+                display: "inline-block",
+                mt: 0.2,
+              }}
+            >
+              {pagado ? "Pagado" : "Pago Pendiente"} ({estadoPago})
+            </Typography>
+          </Box>
+
+          <PedidoListaProductos
+            productos={pedido.DetallesPedido.map((detalle) => ({
+              ...detalle,
+              subtotal: Number(detalle.subtotal),
+            }))}
+          />
+
+          <Divider sx={{ my: 2 }} />
+
+          {confirmado ? (
+            <Box
+              mt={2}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              gap={1}
+            >
+              <Chip
+                icon={<span style={{ fontSize: 18, marginRight: 2 }}>✅</span>}
+                label="Pedido Confirmado"
+                color="success"
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                  px: 2,
+                  letterSpacing: 0.3,
+                }}
+              />
+            </Box>
+          ) : (
+            <Button
+              variant="contained"
+              color="success"
+              fullWidth
+              sx={{
+                mt: 2,
+                fontSize: "1rem",
+                py: 1.1,
+                borderRadius: 2,
+                fontWeight: "bold",
+                textTransform: "none",
+                boxShadow: theme.shadows[2],
+                transition: "background 0.15s",
+              }}
+              onClick={() => onConfirmar(pedido.id_pedido)}
+              disabled={isConfirming}
+            >
+              {isConfirming ? "Confirmando..." : "✔ Confirmar Pedido"}
+            </Button>
+          )}
+        </Paper>
+      </Badge>
     </Grid>
   );
 };
 
 PedidoCard.propTypes = {
   pedido: PropTypes.object.isRequired,
-  confirmado: PropTypes.bool, // Ahora no es requerido
+  confirmado: PropTypes.bool,
   isConfirming: PropTypes.bool.isRequired,
   onConfirmar: PropTypes.func.isRequired,
 };

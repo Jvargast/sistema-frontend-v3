@@ -45,7 +45,6 @@ const AgendaCargaFormInputs = ({
 }) => {
   return (
     <>
-      {/* CHOFER */}
       <Grid item xs={12} sm={6}>
         <Box sx={circleNumberStyles}>1</Box>
         <FormControl fullWidth required sx={{ minWidth: 200, mt: 1 }}>
@@ -55,7 +54,17 @@ const AgendaCargaFormInputs = ({
             value={idChofer}
             label="Chofer"
             onChange={(e) => setIdChofer(e.target.value)}
-            sx={{ bgcolor: "white", borderRadius: 1 }}
+            sx={(theme) => ({
+              bgcolor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[900]
+                  : "#fff",
+              color:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[100]
+                  : theme.palette.text.primary,
+              borderRadius: 1,
+            })}
           >
             <MenuItem value="">
               <ListItemText primary="-- Selecciona Chofer --" />
@@ -75,17 +84,26 @@ const AgendaCargaFormInputs = ({
         </FormControl>
       </Grid>
 
-      {/* CAMION */}
       <Grid item xs={12} sm={6}>
         <Box sx={circleNumberStyles}>2</Box>
-        <FormControl fullWidth required sx={{ minWidth: 200, mt: 1  }}>
+        <FormControl fullWidth required sx={{ minWidth: 200, mt: 1 }}>
           <InputLabel id="camion-label">Camión</InputLabel>
           <Select
             labelId="camion-label"
             value={idCamion}
             label="Camión"
             onChange={(e) => setIdCamion(e.target.value)}
-            sx={{ bgcolor: "white", borderRadius: 1 }}
+            sx={(theme) => ({
+              bgcolor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[900]
+                  : "#fff",
+              color:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[100]
+                  : theme.palette.text.primary,
+              borderRadius: 1,
+            })}
           >
             <MenuItem value="">
               <ListItemText primary="-- Selecciona Camión --" />
@@ -105,17 +123,26 @@ const AgendaCargaFormInputs = ({
         </FormControl>
       </Grid>
 
-      {/* PRIORIDAD */}
       <Grid item xs={12} sm={6}>
         <Box sx={circleNumberStyles}>3</Box>
-        <FormControl fullWidth required sx={{ minWidth: 200, mt: 1  }}>
+        <FormControl fullWidth required sx={{ minWidth: 200, mt: 1 }}>
           <InputLabel id="prioridad-label">Prioridad</InputLabel>
           <Select
             labelId="prioridad-label"
             value={prioridad}
             label="Prioridad"
             onChange={(e) => setPrioridad(e.target.value)}
-            sx={{ bgcolor: "white", borderRadius: 1 }}
+            sx={(theme) => ({
+              bgcolor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[900]
+                  : "#fff",
+              color:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[100]
+                  : theme.palette.text.primary,
+              borderRadius: 1,
+            })}
           >
             <MenuItem value="Baja">Baja</MenuItem>
             <MenuItem value="Media">Media</MenuItem>
@@ -124,7 +151,6 @@ const AgendaCargaFormInputs = ({
         </FormControl>
       </Grid>
 
-      {/* NOTAS */}
       <Grid item xs={12} sm={6}>
         <Box sx={circleNumberStyles}>4</Box>
         <TextField
@@ -134,11 +160,25 @@ const AgendaCargaFormInputs = ({
           fullWidth
           multiline
           minRows={3}
-          sx={{ bgcolor: "white", borderRadius: 1, mt: 1  }}
+          sx={(theme) => ({
+            bgcolor:
+              theme.palette.mode === "dark" ? theme.palette.grey[900] : "#fff",
+            color:
+              theme.palette.mode === "dark"
+                ? theme.palette.grey[100]
+                : theme.palette.text.primary,
+            borderRadius: 1,
+            mt: 1,
+            "& .MuiInputBase-root": {
+              color:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[100]
+                  : theme.palette.text.primary,
+            },
+          })}
         />
       </Grid>
 
-      {/* CHECKBOX DESCARGAR RETORNABLES */}
       <Grid item xs={12}>
         <FormControlLabel
           control={
@@ -149,6 +189,7 @@ const AgendaCargaFormInputs = ({
             />
           }
           label="Descargar retornables antes de cargar"
+          sx={{ mt: 1 }}
         />
       </Grid>
     </>

@@ -1,4 +1,4 @@
-import { Box, Typography, Grid } from "@mui/material";
+import { Box, Typography, Grid, useTheme } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
   removeItem,
@@ -11,6 +11,7 @@ import { useState } from "react";
 const PedidoCarrito = () => {
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart.items);
+  const theme = useTheme();
 
   const handleQuantityChange = (id_producto, tipo, cantidad) => {
     if (cantidad < 1) return;
@@ -25,7 +26,6 @@ const PedidoCarrito = () => {
     dispatch(removeItem({ id_producto, tipo }));
   };
 
-  // Estado para el scroll del contenedor
   const [scrollPos, setScrollPos] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -36,18 +36,17 @@ const PedidoCarrito = () => {
     setScrollHeight(e.target.scrollHeight);
   };
 
-  // Determina si hay scroll "arriba" o "abajo"
-  const topFadeActive = scrollPos > 10; 
+  const topFadeActive = scrollPos > 10;
   const bottomDistance = scrollHeight - containerHeight - scrollPos;
-  const bottomFadeActive = bottomDistance > 10; 
+  const bottomFadeActive = bottomDistance > 10;
 
   return (
     <Box
       sx={{
         p: 3,
         borderRadius: 2,
-        backgroundColor: "#fff",
-        boxShadow: "0px 4px 12px rgba(0,0,0,0.1)",
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: theme.shadows[3],
         width: "100%",
         maxWidth: "100%",
         position: "relative",
@@ -69,19 +68,18 @@ const PedidoCarrito = () => {
               mt: 2,
               maxHeight: "400px",
               overflowY: "auto",
-              /* position: "relative", */
-              // Estilos del scrollbar (para navegadores webkit)
               "&::-webkit-scrollbar": {
                 width: "8px",
               },
               "&::-webkit-scrollbar-track": {
-                backgroundColor: "#f0f0f0",
+                backgroundColor: theme.palette.background.default,
                 borderRadius: "4px",
               },
               "&::-webkit-scrollbar-thumb": {
-                backgroundColor: "#bdbdbd",
+                backgroundColor: theme.palette.action.selected,
                 borderRadius: "4px",
               },
+              position: "relative",
             }}
           >
             <Grid container spacing={2}>
@@ -97,7 +95,6 @@ const PedidoCarrito = () => {
               ))}
             </Grid>
 
-            {/* Overlay superior (se muestra si hay scroll arriba) */}
             {topFadeActive && (
               <Box
                 sx={{
@@ -106,14 +103,13 @@ const PedidoCarrito = () => {
                   left: 0,
                   right: 0,
                   height: "20px",
-                  background: "linear-gradient(to bottom, #fff, transparent)",
+                  background: `linear-gradient(to bottom, ${theme.palette.background.paper}, transparent)`,
                   pointerEvents: "none",
                   transition: "background 0.2s ease",
                 }}
               />
             )}
 
-            {/* Overlay inferior (se muestra si hay scroll abajo) */}
             {bottomFadeActive && (
               <Box
                 sx={{
@@ -122,7 +118,7 @@ const PedidoCarrito = () => {
                   left: 0,
                   right: 0,
                   height: "20px",
-                  background: "linear-gradient(to top, #fff, transparent)",
+                  background: `linear-gradient(to top, ${theme.palette.background.paper}, transparent)`,
                   pointerEvents: "none",
                   transition: "background 0.2s ease",
                 }}
@@ -139,7 +135,12 @@ const PedidoCarrito = () => {
             justifyContent: "center",
           }}
         >
-          <Typography variant="body1" color="textSecondary" textAlign="center" component="div" >
+          <Typography
+            variant="body1"
+            color="textSecondary"
+            textAlign="center"
+            component="div"
+          >
             No hay productos en el carrito.
           </Typography>
         </Box>

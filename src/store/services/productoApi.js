@@ -62,39 +62,35 @@ export const productoApi = createApi({
       },
     }),
 
-    // Obtener producto por ID
     getProductoById: builder.query({
       query: (id) => `/productos/${id}`,
       providesTags: ["Producto"],
     }),
 
-    // Crear un nuevo producto
     createProducto: builder.mutation({
       query: (newProducto) => ({
         url: "/productos/",
         method: "POST",
         body: newProducto,
       }),
-      invalidatesTags: ["Producto"], // Invalidar caché de productos
+      invalidatesTags: ["Producto"], 
     }),
 
-    // Actualizar un producto existente
     updateProducto: builder.mutation({
       query: ({ id, ...updatedProducto }) => ({
         url: `/productos/${id}`,
         method: "PUT",
         body: updatedProducto,
       }),
-      invalidatesTags: ["Producto"], // Invalidar caché de productos
+      invalidatesTags: ["Producto"], 
     }),
 
-    // Eliminar un producto
     deleteProducto: builder.mutation({
       query: (id) => ({
         url: `/productos/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Producto"], // Invalidar caché de productos
+      invalidatesTags: ["Producto"], 
     }),
 
     deleteProductos: builder.mutation({
@@ -115,7 +111,6 @@ export const productoApi = createApi({
   }),
 });
 
-// Exportar hooks generados automáticamente
 export const {
   useGetAllProductosQuery,
   useGetAvailabreProductosQuery,

@@ -26,7 +26,7 @@ import {
     };
   
     return (
-      <Card elevation={3} sx={{ mb: 4, backgroundColor: "#f9f9f9" }}>
+      <Card elevation={3} sx={{ mb: 4 }}>
         <CardContent>
           <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
             📊 Resumen del Día

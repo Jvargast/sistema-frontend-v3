@@ -23,7 +23,7 @@ const estadosCamion = [
 ];
 
 const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
-  const dispatch= useDispatch();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     placa: "",
     capacidad: 0,
@@ -81,21 +81,24 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
       fullWidth
       maxWidth="sm"
       PaperProps={{
-        sx: {
+        sx: (theme) => ({
           borderRadius: 4,
-          px: { xs: 2, sm: 4 },
-          py: 3,
-          backgroundColor: "#fefefe",
-          boxShadow: 10,
-        },
+          backgroundColor:
+            theme.palette.mode === "dark"
+              ? theme.palette.background.default
+              : "#f9fbfd",
+          boxShadow: theme.shadows[12],
+        }),
       }}
     >
-      <DialogTitle sx={{ pb: 1 }}>
+      <DialogTitle sx={{ pb: 1.5 }}>
         <Typography
           variant="h6"
           fontWeight="bold"
           color="primary"
           component="div"
+          letterSpacing={0.4}
+          sx={{ mb: 0.5 }}
         >
           Editar Camión
         </Typography>
@@ -104,7 +107,7 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
         </Typography>
       </DialogTitle>
 
-      <Divider sx={{ my: 1 }} />
+      <Divider sx={{ my: 1.5 }} />
 
       <DialogContent>
         <Box
@@ -124,6 +127,10 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
             InputProps={{
               sx: {
                 borderRadius: 2,
+                background: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.grey[900]
+                    : theme.palette.grey[50],
               },
             }}
           />
@@ -138,6 +145,10 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
             InputProps={{
               sx: {
                 borderRadius: 2,
+                background: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.grey[900]
+                    : theme.palette.grey[50],
               },
             }}
           />
@@ -152,6 +163,10 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
             InputProps={{
               sx: {
                 borderRadius: 2,
+                background: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.grey[900]
+                    : theme.palette.grey[50],
               },
             }}
           >
@@ -164,19 +179,55 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ pt: 2, pb: 1.5, justifyContent: "space-between" }}>
-        <Button onClick={onClose} variant="outlined" sx={{ borderRadius: 2 }}>
+      <DialogActions
+        sx={{
+          pt: 2,
+          pb: 1.5,
+          px: { xs: 2, sm: 4 },
+          justifyContent: "space-between",
+          background: (theme) =>
+            theme.palette.mode === "dark"
+              ? theme.palette.background.paper
+              : "#f5f7fb",
+          borderBottomLeftRadius: 4,
+          borderBottomRightRadius: 4,
+        }}
+      >
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          color="primary"
+          sx={{
+            borderRadius: 2,
+            fontWeight: 700,
+            px: 2,
+            boxShadow: "none",
+            letterSpacing: 0.2,
+          }}
+        >
           Cancelar
         </Button>
         <Button
           onClick={handleSubmit}
           variant="contained"
+          color="primary"
           sx={{
             borderRadius: 2,
             px: 3,
-            fontWeight: "bold",
-            backgroundColor: "#1565C0",
-            "&:hover": { backgroundColor: "#0D47A1" },
+            fontWeight: 700,
+            letterSpacing: 0.2,
+            boxShadow: "none",
+            background: (theme) =>
+              theme.palette.mode === "dark"
+                ? theme.palette.primary.dark
+                : theme.palette.primary.main,
+            "&:hover": {
+              background: (theme) =>
+                theme.palette.mode === "dark"
+                  ? theme.palette.primary.main
+                  : theme.palette.primary.dark,
+            },
+            transition: "all 0.18s",
           }}
           disabled={isLoading}
         >

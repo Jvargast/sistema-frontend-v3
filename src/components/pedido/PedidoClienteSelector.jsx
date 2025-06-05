@@ -10,6 +10,7 @@ import {
   Typography,
   CircularProgress,
   IconButton,
+  useTheme,
 } from "@mui/material";
 import PropTypes from "prop-types";
 import PersonIcon from "@mui/icons-material/Person";
@@ -26,6 +27,7 @@ const PedidoClienteSelector = ({
   selectedCliente,
   onSelect,
 }) => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [clientes, setClientes] = useState([]);
@@ -66,11 +68,9 @@ const PedidoClienteSelector = ({
 
   useEffect(() => {
     if (!open) return;
-
-    // Reinicia selección al abrir el modal
     setPreSelectedCliente(selectedCliente || null);
-    setPage(1); // Reinicia la paginación también
-    setSearchTerm(""); // Opcional: limpiar búsqueda al abrir
+    setPage(1);
+    setSearchTerm("");
   }, [open, selectedCliente]);
 
   useEffect(() => {
@@ -88,13 +88,16 @@ const PedidoClienteSelector = ({
           alignItems: "center",
           justifyContent: "space-between",
           fontWeight: "bold",
-          background: "linear-gradient(90deg, #4A90E2 0%, #0052D4 100%)",
-          color: "white",
+          background: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText,
           padding: "16px 24px",
         }}
       >
         <Box display="flex" alignItems="center" gap={1}>
-          <PersonIcon sx={{ fontSize: 30 }} /> Seleccionar Cliente
+          <PersonIcon
+            sx={{ fontSize: 30, color: theme.palette.primary.contrastText }}
+          />{" "}
+          Seleccionar Cliente
         </Box>
         <IconButton onClick={onClose} sx={{ color: "white" }}>
           <CloseIcon />
@@ -122,12 +125,12 @@ const PedidoClienteSelector = ({
               navigate("/clientes/crear");
             }}
             sx={{
-              borderColor: "#007AFF",
-              color: "#007AFF",
+              borderColor: theme.palette.primary.main,
+              color: theme.palette.primary.main,
               fontWeight: "bold",
               "&:hover": {
-                backgroundColor: "#E3F2FD",
-                borderColor: "#005BB5",
+                backgroundColor: theme.palette.action.hover,
+                borderColor: theme.palette.primary.dark,
               },
             }}
           >
@@ -144,8 +147,8 @@ const PedidoClienteSelector = ({
             mb={2}
             borderRadius="8px"
             sx={{
-              backgroundColor: "#D1E9FF",
-              border: "1px solid #4A90E2",
+              backgroundColor: theme.palette.primary.light,
+              border: `1px solid ${theme.palette.primary.main}`,
               boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
             }}
           >
@@ -187,10 +190,16 @@ const PedidoClienteSelector = ({
                 borderRadius: "8px",
                 backgroundColor:
                   preSelectedCliente?.id_cliente === cliente.id_cliente
-                    ? "#D1E9FF"
-                    : "#F9F9F9",
+                    ? theme.palette.action.selected
+                    : theme.palette.background.default,
                 transition: "background 0.2s",
-                "&:hover": { backgroundColor: "#D1E9FF" },
+                "&:hover": {
+                  backgroundColor: theme.palette.action.hover,
+                },
+                border:
+                  preSelectedCliente?.id_cliente === cliente.id_cliente
+                    ? `1.5px solid ${theme.palette.primary.main}`
+                    : `1px solid ${theme.palette.divider}`,
               }}
             >
               <Typography fontWeight="bold">{cliente.nombre}</Typography>

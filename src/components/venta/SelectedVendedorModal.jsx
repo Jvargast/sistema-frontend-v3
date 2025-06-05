@@ -28,9 +28,6 @@ const SelectVendedorModal = ({
       sx={{
         "& .MuiDialog-paper": {
           borderRadius: "12px",
-          padding: "20px",
-          backgroundColor: "#F9FAFB",
-          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
         },
       }}
     >
@@ -52,14 +49,13 @@ const SelectVendedorModal = ({
         <Typography
           variant="body1"
           color="textSecondary"
-          sx={{ marginBottom: "10px", fontSize: "1.1rem", textAlign: "center" }}
+          sx={{ marginBottom: "10px", fontSize: "1.1rem", textAlign: "center", mt: 2 }}
         >
           Elige un vendedor para continuar con el proceso.
         </Typography>
 
         <Box
           sx={{
-            backgroundColor: "#fff",
             padding: "12px",
             borderRadius: "8px",
             boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.1)",
@@ -77,7 +73,6 @@ const SelectVendedorModal = ({
               fontSize: "1.1rem",
               fontWeight: "bold",
               padding: "12px",
-              backgroundColor: "#F3F4F6",
               borderRadius: "8px",
             }}
           >

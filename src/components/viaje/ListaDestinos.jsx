@@ -14,7 +14,12 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PropTypes from "prop-types";
 
-const ListaDestinos = ({ destinos, entregas, onOpenEntrega, onVerDetallePedido }) => {
+const ListaDestinos = ({
+  destinos,
+  entregas,
+  onOpenEntrega,
+  onVerDetallePedido,
+}) => {
   return (
     <Card elevation={3} sx={{ mb: 4 }}>
       <CardContent>
@@ -32,13 +37,16 @@ const ListaDestinos = ({ destinos, entregas, onOpenEntrega, onVerDetallePedido }
                     width: "100%",
                     p: 2,
                     borderRadius: 2,
-                    backgroundColor: entregas[destino.id_pedido]?.entregado
-                      ? "#e8f5e9"
-                      : "#ffffff",
+                    backgroundColor: (theme) =>
+                      entregas[destino.id_pedido]?.entregado
+                        ? theme.palette.success.light
+                        : theme.palette.background.paper,
                     transition: "all 0.3s",
-                    boxShadow: entregas[destino.id_pedido]?.entregado
-                      ? "0 0 6px rgba(0,128,0,0.2)"
-                      : "none",
+                    boxShadow: (theme) =>
+                      entregas[destino.id_pedido]?.entregado
+                        ? theme.shadows[2]
+                        : "none",
+                    border: (theme) => `1.5px solid ${theme.palette.divider}`,
                   }}
                 >
                   <Stack
@@ -94,7 +102,7 @@ const ListaDestinos = ({ destinos, entregas, onOpenEntrega, onVerDetallePedido }
                           }
                         }}
                         disabled={entregas[destino.id_pedido]?.entregado}
-                        sx={{ textTransform: "none", fontWeight: 500, mr: 1}}
+                        sx={{ textTransform: "none", fontWeight: 500, mr: 1 }}
                       >
                         {entregas[destino.id_pedido]?.entregado
                           ? "Entregado"

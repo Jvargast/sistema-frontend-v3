@@ -1,7 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { 
-  Dialog, DialogTitle, DialogContent, DialogActions, 
-  Button, TextField, Box, Typography, CircularProgress, IconButton
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Box,
+  Typography,
+  CircularProgress,
+  IconButton,
 } from "@mui/material";
 import PropTypes from "prop-types";
 import PersonIcon from "@mui/icons-material/Person";
@@ -13,10 +21,10 @@ import { useGetAllClientesQuery } from "../../store/services/clientesApi";
 import LoaderComponent from "../common/LoaderComponent";
 
 const SelectClienteModal = ({ open, onClose, selectedCliente, onSelect }) => {
-  const [searchTerm, setSearchTerm] = useState(""); 
-  const [clientes, setClientes] = useState([]); 
-  const [page, setPage] = useState(1); 
-  const [hasMore, setHasMore] = useState(true); 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [clientes, setClientes] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   const { data, isLoading, isFetching, refetch } = useGetAllClientesQuery({
     page,
@@ -24,19 +32,21 @@ const SelectClienteModal = ({ open, onClose, selectedCliente, onSelect }) => {
   });
 
   const observer = useRef();
-  const lastClienteRef = useCallback((node) => {
-    if (isFetching || !hasMore) return;
-    if (observer.current) observer.current.disconnect();
-    
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        setPage((prev) => prev + 1); 
-      }
-    });
+  const lastClienteRef = useCallback(
+    (node) => {
+      if (isFetching || !hasMore) return;
+      if (observer.current) observer.current.disconnect();
 
-    if (node) observer.current.observe(node);
-  }, [isFetching, hasMore]);
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          setPage((prev) => prev + 1);
+        }
+      });
 
+      if (node) observer.current.observe(node);
+    },
+    [isFetching, hasMore]
+  );
 
   useEffect(() => {
     if (data?.clientes) {
@@ -49,7 +59,6 @@ const SelectClienteModal = ({ open, onClose, selectedCliente, onSelect }) => {
     }
   }, [data, page]);
 
-
   useEffect(() => {
     setPage(1);
     refetch();
@@ -59,15 +68,15 @@ const SelectClienteModal = ({ open, onClose, selectedCliente, onSelect }) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle 
-        sx={{ 
-          display: "flex", 
-          alignItems: "center", 
+      <DialogTitle
+        sx={{
+          display: "flex",
+          alignItems: "center",
           justifyContent: "space-between",
           fontWeight: "bold",
           background: "linear-gradient(90deg, #4A90E2 0%, #0052D4 100%)",
           color: "white",
-          padding: "16px 24px"
+          padding: "16px 24px",
         }}
       >
         <Box display="flex" alignItems="center" gap={1}>
@@ -77,7 +86,7 @@ const SelectClienteModal = ({ open, onClose, selectedCliente, onSelect }) => {
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      
+
       <DialogContent sx={{ p: 3 }}>
         <Box mb={2} display="flex" alignItems="center">
           <SearchIcon sx={{ color: "#666", mr: 1 }} />
@@ -92,23 +101,23 @@ const SelectClienteModal = ({ open, onClose, selectedCliente, onSelect }) => {
         </Box>
 
         {selectedCliente && (
-          <Box 
-            display="flex" 
-            alignItems="center" 
+          <Box
+            display="flex"
+            alignItems="center"
             justifyContent="space-between"
-            p={2} 
+            p={2}
             mb={2}
             borderRadius="8px"
-            sx={{ 
-              backgroundColor: "#D1E9FF", 
+            sx={{
               border: "1px solid #4A90E2",
-              boxShadow: "0px 4px 10px rgba(0,0,0,0.1)"
+              boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
             }}
           >
             <Box>
               <Typography fontWeight="bold">Cliente Seleccionado</Typography>
               <Typography fontSize="0.9rem" color="textSecondary">
-                {clientes.find(c => c.id_cliente === selectedCliente)?.nombre || "Desconocido"}
+                {clientes.find((c) => c.id_cliente === selectedCliente)
+                  ?.nombre || "Desconocido"}
               </Typography>
             </Box>
             <IconButton onClick={() => onSelect(null)} color="error">
@@ -123,14 +132,32 @@ const SelectClienteModal = ({ open, onClose, selectedCliente, onSelect }) => {
               key={cliente.id_cliente}
               ref={index === clientes.length - 1 ? lastClienteRef : null}
               onClick={() => onSelect(cliente.id_cliente)}
-              sx={{
-                p: 2,
-                mb: 1,
-                cursor: "pointer",
-                borderRadius: "8px",
-                backgroundColor: selectedCliente === cliente.id_cliente ? "#D1E9FF" : "#F9F9F9",
-                transition: "background 0.2s",
-                "&:hover": { backgroundColor: "#D1E9FF" },
+              sx={(theme) => {
+                const isSelected = selectedCliente === cliente.id_cliente;
+                return {
+                  p: 2,
+                  mb: 1,
+                  cursor: "pointer",
+                  borderRadius: "8px",
+                  backgroundColor: isSelected
+                    ? theme.palette.mode === "dark"
+                      ? "#1e2a36"
+                      : "#c0d0df"
+                    : theme.palette.mode === "dark"
+                    ? "#23272b"
+                    : "#f7fafd",
+                  transition: "background 0.2s",
+                  "&:hover": {
+                    backgroundColor: isSelected
+                      ? theme.palette.mode === "dark"
+                        ? "#263241"
+                        : "#adc5db"
+                      : theme.palette.mode === "dark"
+                      ? "#31353a"
+                      : "#e3eaf3",
+                  },
+                  color: theme.palette.text.primary,
+                };
               }}
             >
               <Typography fontWeight="bold">{cliente.nombre}</Typography>
@@ -156,11 +183,11 @@ const SelectClienteModal = ({ open, onClose, selectedCliente, onSelect }) => {
           )}
         </Box>
       </DialogContent>
-      
+
       <DialogActions sx={{ p: 3 }}>
-        <Button 
-          onClick={onClose} 
-          variant="contained" 
+        <Button
+          onClick={onClose}
+          variant="contained"
           sx={{
             backgroundColor: "#FF5252",
             color: "white",
@@ -170,9 +197,9 @@ const SelectClienteModal = ({ open, onClose, selectedCliente, onSelect }) => {
         >
           Cancelar
         </Button>
-        <Button 
-          onClick={() => onClose()} 
-          variant="contained" 
+        <Button
+          onClick={() => onClose()}
+          variant="contained"
           sx={{
             backgroundColor: "#007AFF",
             color: "white",

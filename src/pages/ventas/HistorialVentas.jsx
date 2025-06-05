@@ -148,16 +148,16 @@ const HistorialVentas = ({
                       fontWeight: "bold",
                       backgroundColor:
                         venta.estadoVenta?.nombre_estado === "Pagada"
-                          ? "#4CAF50" // Verde fuerte para Pagada
+                          ? "#4CAF50" 
                           : venta.estadoVenta?.nombre_estado === "Rechazada"
-                          ? "#E53935" // Rojo más oscuro para Rechazada
+                          ? "#E53935"
                           : venta.estadoVenta?.nombre_estado === "Cancelada"
-                          ? "#FB8C00" // Naranja fuerte para Cancelada
+                          ? "#FB8C00" 
                           : venta.estadoVenta?.nombre_estado ===
                             "Pendiente de Pago"
-                          ? "#FFCA28" // Amarillo fuerte para Pendiente de Pago
-                          : "#BDBDBD", // Gris claro para desconocido
-                      color: "#fff", // Texto siempre blanco
+                          ? "#FFCA28" 
+                          : "#BDBDBD", 
+                      color: "#fff", 
                       borderRadius: "8px",
                       px: 1.5,
                       py: 0.5,
@@ -205,7 +205,6 @@ const HistorialVentas = ({
                       sx={{
                         fontWeight: "bold",
                         textAlign: "center",
-                        backgroundColor: "#f4f6f8",
                       }}
                     >
                       {header}
@@ -241,18 +240,18 @@ const HistorialVentas = ({
                             fontWeight: "bold",
                             backgroundColor:
                               venta.estadoVenta?.nombre_estado === "Pagada"
-                                ? "#4CAF50" // Verde fuerte para Pagada
+                                ? "#4CAF50" 
                                 : venta.estadoVenta?.nombre_estado ===
                                   "Rechazada"
-                                ? "#E53935" // Rojo más oscuro para Rechazada
+                                ? "#E53935" 
                                 : venta.estadoVenta?.nombre_estado ===
                                   "Cancelada"
-                                ? "#FB8C00" // Naranja fuerte para Cancelada
+                                ? "#FB8C00" 
                                 : venta.estadoVenta?.nombre_estado ===
                                   "Pendiente de Pago"
-                                ? "#FFCA28" // Amarillo fuerte para Pendiente de Pago
-                                : "#BDBDBD", // Gris claro para desconocido
-                            color: "#fff", // Texto siempre blanco
+                                ? "#FFCA28" 
+                                : "#BDBDBD", 
+                            color: "#fff", 
                             borderRadius: "8px",
                             px: 1.5,
                             py: 0.5,
@@ -318,7 +317,6 @@ const HistorialVentas = ({
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           sx={{
-            backgroundColor: "#f4f6f8",
             borderRadius: 2,
             px: 2,
           }}

@@ -1,5 +1,4 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-/* import { apiReducers, apiMiddleware } from "../services/api-backend"; */
 import { setupListeners } from "@reduxjs/toolkit/query";
 import reducers from "./reducers";
 import { apiMiddleware, apiReducers } from "./services";
@@ -28,7 +27,6 @@ const store = configureStore({
   devTools: true,
 });
 
-// Configurar reintentos automáticos para RTK Query
 setupListeners(store.dispatch);
 
 export default store;

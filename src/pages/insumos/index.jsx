@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from "react";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Tab, Tabs } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +31,7 @@ const Insumos = () => {
     () => tiposData?.map((tipo) => tipo.nombre_tipo) || [],
     [tiposData]
   );
-  const [searchInputs, setSearchInputs] = useState({}); // Maneja el input de búsqueda por tipo
+  const [searchInputs, setSearchInputs] = useState({});
   const [searches, setSearches] = useState({});
   const [selectedRows, setSelectedRows] = useState({});
   const [openModal, setOpenModal] = useState(false);
@@ -43,18 +43,22 @@ const Insumos = () => {
   const canCreateInsumo = useHasPermission("inventario.insumo.crear");
   const canDeleteInsumo = useHasPermission("inventario.insumo.eliminar");
 
+  const [tabIndex, setTabIndex] = useState(0);
+  const handleTabChange = (_, newValue) => {
+    setTabIndex(newValue);
+  };
 
   const handleSearchInputChange = (tipo, value) => {
     setSearchInputs((prev) => ({
       ...prev,
-      [tipo]: value, // Actualiza el input de búsqueda para el tipo
+      [tipo]: value,
     }));
   };
 
   const handleSearch = (tipo) => {
     setSearches((prev) => ({
       ...prev,
-      [tipo]: searchInputs[tipo], // Aplica la búsqueda para el tipo
+      [tipo]: searchInputs[tipo],
     }));
   };
 
@@ -116,8 +120,8 @@ const Insumos = () => {
   const handleDelete = async () => {
     const idsToDelete = Object.values(selectedRows)
       .flat()
-      .map((id) => Number(id)) // Convertir a números explícitamente
-      .filter((id) => !isNaN(id)); // Filtrar valores no válidos
+      .map((id) => Number(id))
+      .filter((id) => !isNaN(id));
 
     if (idsToDelete.length === 0) {
       dispatch(
@@ -163,51 +167,76 @@ const Insumos = () => {
     <Box sx={{ padding: "2rem" }}>
       <Header title="Insumos" subtitle="Lista de Insumos" />
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        {canDeleteInsumo && (<Button
-          color="error"
-          variant="contained"
-          onClick={() => setOpenAlert(true)}
-          disabled={
-            Object.values(selectedRows).flat().length === 0 || isDeleting
-          } 
-          sx={{
-            textTransform: "none",
-            fontWeight: "bold",
-            fontSize: "1rem",
-            padding: "0.5rem 1.5rem",
-            borderRadius: "8px",
-          }}
-        >
-          {isDeleting ? "Eliminando..." : "Eliminar Seleccionados"}
-        </Button>)}
-        {canCreateInsumo && <Button
-          variant="contained"
-          color="primary"
-          startIcon={<Add />}
-          onClick={() => setOpenModal(true)}
-          sx={{
-            textTransform: "none",
-            fontWeight: "bold",
-            fontSize: "1rem",
-            padding: "0.5rem 1.5rem",
-            borderRadius: "8px",
-          }}
-        >
-          Nuevo Insumo
-        </Button>}
+        {canDeleteInsumo && (
+          <Button
+            color="error"
+            variant="contained"
+            onClick={() => setOpenAlert(true)}
+            disabled={
+              Object.values(selectedRows).flat().length === 0 || isDeleting
+            }
+            sx={{
+              textTransform: "none",
+              fontWeight: "bold",
+              fontSize: "1rem",
+              padding: "0.5rem 1.5rem",
+              borderRadius: "8px",
+            }}
+          >
+            {isDeleting ? "Eliminando..." : "Eliminar Seleccionados"}
+          </Button>
+        )}
+        {canCreateInsumo && (
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<Add />}
+            onClick={() => setOpenModal(true)}
+            sx={{
+              textTransform: "none",
+              fontWeight: "bold",
+              fontSize: "1rem",
+              padding: "0.5rem 1.5rem",
+              borderRadius: "8px",
+            }}
+          >
+            Nuevo Insumo
+          </Button>
+        )}
       </Box>
 
-      {tipos.map((tipo) => (
-        <GroupedInsumos
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
+        <Tabs
+          value={tabIndex}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+        >
+          {tipos.map((tipo) => (
+            <Tab label={tipo} key={tipo} />
+          ))}
+        </Tabs>
+      </Box>
+
+      {tipos.map((tipo, idx) => (
+        <Box
           key={tipo}
-          tipo={tipo}
-          search={searches[tipo] || ""}
-          searchInput={searchInputs[tipo] || ""}
-          setSearchInput={(value) => handleSearchInputChange(tipo, value)}
-          setSearch={() => handleSearch(tipo)}
-          handleEdit={handleEdit} // Pasar handleEdit
-          setSelectedRows={setSelectedRows} // Para manejar la selección
-        />
+          role="tabpanel"
+          hidden={tabIndex !== idx}
+          sx={{ mt: 2 }}
+        >
+          {tabIndex === idx && (
+            <GroupedInsumos
+              tipo={tipo}
+              search={searches[tipo] || ""}
+              searchInput={searchInputs[tipo] || ""}
+              setSearchInput={(value) => handleSearchInputChange(tipo, value)}
+              setSearch={() => handleSearch(tipo)}
+              handleEdit={handleEdit}
+              setSelectedRows={setSelectedRows}
+            />
+          )}
+        </Box>
       ))}
 
       <AlertDialog

@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { Calendar } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import "../../reactCalendarMui.css";
 import PropTypes from "prop-types";
 import { useGetHistorialPedidosQuery } from "../../store/services/pedidosApi";
 
@@ -20,10 +21,8 @@ const HistorialPedidos = ({ onClose }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
 
-  // 🔹 Formatear fecha a YYYY-MM-DD para enviarla correctamente al backend
   const fechaFormatted = fechaSeleccionada.toISOString().split("T")[0];
 
-  // 🔹 Obtener datos del historial de pedidos con paginación
   const {
     data: pedidosData,
     isLoading,
@@ -35,9 +34,11 @@ const HistorialPedidos = ({ onClose }) => {
   );
 
   const pedidos = pedidosData?.pedidos || [];
-  const paginacion = pedidosData?.paginacion || { totalPages: 1, currentPage: 1 };
+  const paginacion = pedidosData?.paginacion || {
+    totalPages: 1,
+    currentPage: 1,
+  };
 
-  // 🔹 Refetch cuando cambia la fecha o la página
   useEffect(() => {
     setCurrentPage(1);
     refetch({ fecha: fechaFormatted, page: 1, limit });
@@ -47,12 +48,10 @@ const HistorialPedidos = ({ onClose }) => {
     refetch({ fecha: fechaFormatted, page: currentPage, limit });
   }, [currentPage, fechaFormatted, refetch]);
 
-  // 🔹 Manejar cambio de fecha
   const handleFechaChange = (newFecha) => {
     setFechaSeleccionada(newFecha);
   };
 
-  // 🔹 Manejar cambio de página
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
@@ -64,26 +63,16 @@ const HistorialPedidos = ({ onClose }) => {
         flexDirection: "column",
         alignItems: "center",
         width: "100%",
-        height: "85vh",
-        overflow: "hidden",
-        bgcolor: "#fff",
+        overflow: "visible",
         p: 3,
         borderRadius: 3,
-        boxShadow: 1, // Sombra sutil
       }}
     >
-      <Typography variant="h5" fontWeight="bold" color="primary" gutterBottom>
-        📅 Historial de Pedidos
-      </Typography>
-
-      {/* Calendario con estilo limpio */}
       <Box
         sx={{
           mb: 2,
           p: 2,
           borderRadius: 2,
-          border: "1px solid #ddd",
-          backgroundColor: "#fafafa",
         }}
       >
         <Calendar
@@ -95,12 +84,11 @@ const HistorialPedidos = ({ onClose }) => {
 
       <Typography variant="body1" mb={2} fontWeight="500">
         Mostrando pedidos de:{" "}
-        <strong style={{ color: "#1976d2" }}>
+        <strong style={{ color: "#17b396" }}>
           {fechaSeleccionada.toLocaleDateString()}
         </strong>
       </Typography>
 
-      {/* Contenedor scrollable para los pedidos */}
       <Box
         sx={{
           width: "100%",
@@ -109,13 +97,16 @@ const HistorialPedidos = ({ onClose }) => {
           overflowY: "auto",
           p: 2,
           borderRadius: 3,
-          border: "1px solid #ddd",
           maxHeight: "50vh",
-          backgroundColor: "#fafafa",
         }}
       >
         {isLoading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+          >
             <CircularProgress />
           </Box>
         ) : isError ? (
@@ -131,15 +122,17 @@ const HistorialPedidos = ({ onClose }) => {
                   mb: 2,
                   p: 2,
                   borderRadius: 2,
-                  backgroundColor: "#fff",
-                  border: "1px solid #ddd",
+                  border: (theme) => `1px solid ${theme.palette.divider}`,
                   transition: "all 0.3s",
+                  backgroundColor: (theme) => theme.palette.background.paper,
                   "&:hover": {
-                    backgroundColor: "#f0f8ff",
+                    backgroundColor: (theme) => theme.palette.action.hover,
                   },
                 }}
               >
-                <ListItem sx={{ display: "flex", justifyContent: "space-between" }}>
+                <ListItem
+                  sx={{ display: "flex", justifyContent: "space-between" }}
+                >
                   <ListItemText
                     primary={`Pedido #${pedido.id_pedido}`}
                     secondary={`Total: $${pedido.total}`}
@@ -160,8 +153,6 @@ const HistorialPedidos = ({ onClose }) => {
           </Typography>
         )}
       </Box>
-
-      {/* Paginación limpia y mejor alineada */}
       {paginacion.totalPages > 1 && (
         <Pagination
           count={paginacion.totalPages}
@@ -171,8 +162,6 @@ const HistorialPedidos = ({ onClose }) => {
           sx={{ mt: 2, "& .MuiPaginationItem-root": { fontSize: "0.875rem" } }}
         />
       )}
-
-      {/* Botón de cerrar más compacto y responsivo */}
       <Button
         variant="contained"
         color="primary"
@@ -185,7 +174,7 @@ const HistorialPedidos = ({ onClose }) => {
           borderRadius: 2,
           textTransform: "none",
           "@media (max-width: 600px)": {
-            width: "100%", // Se adapta en móviles
+            width: "100%",
           },
         }}
         onClick={onClose}

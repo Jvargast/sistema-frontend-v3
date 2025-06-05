@@ -10,14 +10,15 @@ import {
   SupervisorAccountOutlined,
 } from "@mui/icons-material";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
-import AttachMoneyOutlinedIcon from '@mui/icons-material/AttachMoneyOutlined';
+import AttachMoneyOutlinedIcon from "@mui/icons-material/AttachMoneyOutlined";
 import BusinessIcon from "@mui/icons-material/Business";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/common/Header";
-import AirportShuttleOutlinedIcon from '@mui/icons-material/AirportShuttleOutlined';
-import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
-import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
-import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
+import AirportShuttleOutlinedIcon from "@mui/icons-material/AirportShuttleOutlined";
+import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
+import HistoryEduOutlinedIcon from "@mui/icons-material/HistoryEduOutlined";
 
 const navItems = [
   {
@@ -45,7 +46,6 @@ const navItems = [
     path: "/cotizaciones",
   },
   {
-
     text: "Ventas Chofer",
     icon: <MonetizationOnOutlinedIcon className="text-zinc-700" />,
     description: "Gestión de ventas chofer",
@@ -62,6 +62,12 @@ const navItems = [
     icon: <PeopleAltOutlined className="text-cyan-500" />,
     description: "Gestión de proveedores y comunicación interna",
     path: "/proveedores-mensajes",
+  },
+  {
+    text: "Historial Producción",
+    icon: <HistoryEduOutlinedIcon className="text-orange-500" />,
+    description: "Revisa el historial de producciones",
+    path: "/produccion/historial",
   },
   {
     text: "Análisis",
@@ -124,12 +130,12 @@ const Administration = () => {
         alignItems: "center",
         flexDirection: "column",
         backgroundColor: "gray.50",
-        p:1,
-        mb: 4
+        p: 1,
+        mb: 4,
       }}
     >
-      <Header title="Menú Administrador" subtitle=""/>
-      <Grid2 container spacing={2} justifyContent="center" wrap="wrap" mt={2} >
+      <Header title="Menú Administrador" subtitle="" />
+      <Grid2 container spacing={2} justifyContent="center" wrap="wrap" mt={2}>
         {navItems.map((item, index) => (
           <Grid2
             key={index}
@@ -151,11 +157,18 @@ const Administration = () => {
                 <Typography
                   variant="h6"
                   component="div"
-                  className="font-bold text-gray-800"
+                  sx={{
+                    fontWeight: "bold",
+                    color: (theme) => theme.palette.text.primary,
+                  }}
                 >
                   {item.text}
                 </Typography>
-                <Typography variant="body2" className="text-gray-600">
+                <Typography
+                  variant="body2"
+                  className="text-gray-600"
+                  sx={{ color: (theme) => theme.palette.main }}
+                >
                   {item.description}
                 </Typography>
               </CardContent>

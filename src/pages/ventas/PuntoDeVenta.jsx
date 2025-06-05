@@ -792,7 +792,6 @@ const PuntoDeVenta = () => {
             sx={{
               borderRadius: 3,
               p: 2,
-              backgroundColor: "#fff",
               boxShadow: "0px 4px 12px rgba(0,0,0,0.1)",
             }}
           >

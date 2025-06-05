@@ -58,6 +58,9 @@ import PanelProduccion from "./pages/produccion";
 import ListarFormulasProductos from "./pages/formulas";
 import CrearFormula from "./pages/formulas/CrearFormula";
 import VerFormula from "./pages/formulas/VerFormula";
+import HistorialProduccion from "./pages/produccion/HistorialProduccion";
+import VerProduccion from "./pages/produccion/VerProduccion";
+import VerInsumo from "./pages/insumos/VerInsumo";
 
 // Configuración de rutas
 const router = createHashRouter([
@@ -283,6 +286,22 @@ const router = createHashRouter([
             ),
           },
           {
+            path: "produccion/historial",
+            element: (
+              <RoleBasedRoute requiredPermission="vistas.productos.ver">
+                <HistorialProduccion />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "produccion/historial/ver/:id",
+            element: (
+              <RoleBasedRoute requiredPermission="vistas.productos.ver">
+                <VerProduccion />
+              </RoleBasedRoute>
+            ),
+          },
+          {
             path: "formulas",
             element: (
               <RoleBasedRoute requiredPermission="vistas.productos.ver">
@@ -311,6 +330,14 @@ const router = createHashRouter([
             element: (
               <RoleBasedRoute requiredPermission="vistas.insumos.ver">
                 <Insumos />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "insumos/ver/:id",
+            element: (
+              <RoleBasedRoute requiredPermission="vistas.insumos.ver">
+                <VerInsumo />
               </RoleBasedRoute>
             ),
           },

@@ -10,6 +10,7 @@ import {
   Divider,
   Chip,
   Grid,
+  useTheme,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { useGetClienteByIdQuery } from "../../store/services/clientesApi";
@@ -18,6 +19,7 @@ import { showNotification } from "../../store/reducers/notificacionSlice";
 import BackButton from "../../components/common/BackButton";
 
 const VerCliente = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const { id } = useParams();
   const dispatch = useDispatch();
@@ -68,18 +70,16 @@ const VerCliente = () => {
   }
 
   return (
-    <Box m={3}>
-      {/* Back Button */}
+    <Box sx={{ p: { xs: 2, sm: 4 }, maxWidth: 950, margin: "0 auto" }}>
       <BackButton to="/clientes" label="Volver" />
-
-      {/* Información del Cliente */}
       <Paper
         elevation={3}
         sx={{
-          p: 3,
-          borderRadius: "12px",
-          backgroundColor: "#f9fafc",
-          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+          p: { xs: 2, sm: 4 },
+          borderRadius: 4,
+          backgroundColor: theme.palette.background.paper,
+          boxShadow: theme.shadows[3],
+          mt: 2,
         }}
       >
         <Box
@@ -87,8 +87,18 @@ const VerCliente = () => {
           alignItems="center"
           justifyContent="space-between"
           mb={2}
+          flexWrap="wrap"
+          gap={2}
         >
-          <Typography variant="h5" fontWeight="bold" color="textPrimary">
+          <Typography
+            variant="h5"
+            fontWeight="bold"
+            color={theme.palette.primary.main}
+            letterSpacing={0.5}
+            sx={{
+              fontSize: { xs: "1.2rem", sm: "1.4rem" },
+            }}
+          >
             Información del Cliente
           </Typography>
           <Button
@@ -99,64 +109,129 @@ const VerCliente = () => {
               textTransform: "none",
               fontWeight: "bold",
               fontSize: "1rem",
-              borderRadius: "8px",
+              borderRadius: 3,
+              px: 3,
+              boxShadow: "none",
+              transition: "background 0.2s",
+              background: theme.palette.primary.main,
+              "&:hover": {
+                background: theme.palette.primary.dark,
+              },
             }}
           >
             Editar Cliente
           </Button>
         </Box>
+
         <Divider sx={{ mb: 3 }} />
 
-        <Grid container spacing={3}>
-          {/* Primera Columna */}
+        <Grid container spacing={4}>
           <Grid item xs={12} sm={6}>
             <Box mb={2}>
-              <Typography fontWeight="bold">RUT</Typography>
+              <Typography
+                variant="overline"
+                fontWeight="bold"
+                color="text.secondary"
+              >
+                RUT
+              </Typography>
               <Typography variant="body1">{formData.rut}</Typography>
             </Box>
             <Box mb={2}>
-              <Typography fontWeight="bold">Nombre</Typography>
+              <Typography
+                variant="overline"
+                fontWeight="bold"
+                color="text.secondary"
+              >
+                Nombre
+              </Typography>
               <Typography variant="body1">{formData.nombre}</Typography>
             </Box>
             {formData.tipo_cliente?.toLowerCase() === "empresa" && (
               <Box mb={2}>
-                <Typography fontWeight="bold">Razón Social</Typography>
+                <Typography
+                  variant="overline"
+                  fontWeight="bold"
+                  color="text.secondary"
+                >
+                  Razón Social
+                </Typography>
                 <Typography variant="body1">{formData.razon_social}</Typography>
               </Box>
             )}
             <Box mb={2}>
-              <Typography fontWeight="bold">Email</Typography>
+              <Typography
+                variant="overline"
+                fontWeight="bold"
+                color="text.secondary"
+              >
+                Email
+              </Typography>
               <Typography variant="body1">{formData.email}</Typography>
             </Box>
             <Box mb={2} display="flex" alignItems="center" gap={1}>
-              <Typography fontWeight="bold">Estado</Typography>
+              <Typography
+                variant="overline"
+                fontWeight="bold"
+                color="text.secondary"
+              >
+                Estado
+              </Typography>
               <Chip
                 label={formData.activo ? "Activo" : "Inactivo"}
                 sx={{
-                  backgroundColor: formData.activo ? "#2ecc71" : "#e74c3c",
-                  color: "white",
+                  backgroundColor: formData.activo
+                    ? theme.palette.success.main
+                    : theme.palette.error.main,
+                  color: theme.palette.common.white,
                   fontWeight: "bold",
+                  letterSpacing: 0.6,
+                  fontSize: "0.85rem",
+                  px: 1.2,
                 }}
               />
             </Box>
           </Grid>
 
-          {/* Segunda Columna */}
           <Grid item xs={12} sm={6}>
             <Box mb={2}>
-              <Typography fontWeight="bold">Teléfono</Typography>
+              <Typography
+                variant="overline"
+                fontWeight="bold"
+                color="text.secondary"
+              >
+                Teléfono
+              </Typography>
               <Typography variant="body1">{formData.telefono}</Typography>
             </Box>
             <Box mb={2}>
-              <Typography fontWeight="bold">Dirección</Typography>
+              <Typography
+                variant="overline"
+                fontWeight="bold"
+                color="text.secondary"
+              >
+                Dirección
+              </Typography>
               <Typography variant="body1">{formData.direccion}</Typography>
             </Box>
             <Box mb={2}>
-              <Typography fontWeight="bold">Tipo de Cliente</Typography>
+              <Typography
+                variant="overline"
+                fontWeight="bold"
+                color="text.secondary"
+              >
+                Tipo de Cliente
+              </Typography>
               <Typography variant="body1">{formData.tipo_cliente}</Typography>
             </Box>
             <Box mb={2}>
-              <Typography fontWeight="bold">Fecha de Registro</Typography>
+              <Typography
+                variant="overline"
+                fontWeight="bold"
+                color="text.secondary"
+              >
+                Fecha de Registro
+              </Typography>
               <Typography variant="body1">
                 {formData.fecha_registro
                   ? format(new Date(formData.fecha_registro), "dd-MM-yyyy", {

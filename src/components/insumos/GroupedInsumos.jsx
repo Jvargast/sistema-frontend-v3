@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, IconButton, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useGetAllInsumosQuery } from "../../store/services/insumoApi";
 import LoaderComponent from "../common/LoaderComponent";
@@ -9,6 +9,10 @@ import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import EditIcon from "@mui/icons-material/Edit";
 import { useHasPermission } from "../../utils/useHasPermission";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { alpha } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
+import ImageNotSupportedOutlinedIcon from "@mui/icons-material/ImageNotSupportedOutlined";
 
 const GroupedInsumos = ({
   tipo,
@@ -21,6 +25,7 @@ const GroupedInsumos = ({
 }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
+  const navigate = useNavigate();
   const [pagination, setPagination] = useState({ page: 0, pageSize: 10 });
 
   const canEditInsumo = useHasPermission("inventario.insumo.editar");
@@ -47,7 +52,6 @@ const GroupedInsumos = ({
     }
   }, [isError, dispatch]);
 
-  // Preprocesar filas con useMemo
   const rows = useMemo(() => {
     return data?.data?.items
       ? data.data.items.map((row) => ({
@@ -55,7 +59,7 @@ const GroupedInsumos = ({
           stock:
             row.inventario?.cantidad !== undefined
               ? row.inventario.cantidad
-              : "Sin Stock", // Calcula el stock
+              : "Sin Stock",
         }))
       : [];
   }, [data?.data?.items]);
@@ -64,38 +68,38 @@ const GroupedInsumos = ({
 
   return (
     <Box sx={{ marginBottom: "2rem" }}>
-      <Typography sx={{ fontWeight: 600, fontSize: "1rem" }}>{tipo}</Typography>
       <Box
         sx={{
-          height: "600px", // Altura fija con scroll interno
+          height: "600px",
           "& .MuiDataGrid-root": {
             border: "none",
             borderRadius: "8px",
-            overflow: "hidden", // Prevenir scroll externo
+            overflow: "hidden",
           },
           "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: "#f4f4f4",
-            color: "#333",
+            backgroundColor:
+              theme.palette.mode === "dark" ? "#23272f" : "#f4f4f4",
+            color: (theme) => theme.palette.text.primary,
             fontWeight: "bold",
             fontSize: "1rem",
-            borderBottom: "1px solid #d1d9e6",
+            borderBottom: `1px solid ${theme.palette.divider}`,
             borderColor: theme.palette.grey[300],
             "& > div": {
-              borderRight: "1px solid #d1d9e6", // Separadores entre columnas en encabezados
+              borderRight: `1px solid ${theme.palette.divider}`,
             },
           },
           "& .MuiDataGrid-cell": {
-            borderBottom: "1px solid",
-            borderColor: theme.palette.grey[300],
-            color: "#555",
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            color: theme.palette.text.secondary,
             display: "flex",
             "&:not(:last-child)": {
-              borderRight: "1px solid #d1d9e6", // Separadores entre celdas
+              borderRight: "1px solid #d1d9e6",
             },
           },
           "& .MuiDataGrid-footerContainer": {
-            backgroundColor: "#f4f4f4",
-            borderTop: "1px solid #ddd",
+            backgroundColor:
+              theme.palette.mode === "dark" ? "#23272f" : "#f4f4f4",
+            borderTop: `1px solid ${theme.palette.divider}`,
           },
           "& .MuiDataGrid-toolbarContainer": {
             padding: "0.5rem",
@@ -113,13 +117,22 @@ const GroupedInsumos = ({
               sortable: false,
               resizable: false,
               width: 100,
-              renderCell: (params) => (
-                <img
-                  src={params.value || "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg"}
-                  alt="Insumo"
-                  style={{ width: "50px", height: "50px", borderRadius: "8px" }}
-                />
-              ),
+              renderCell: (params) =>
+                params.value ? (
+                  <img
+                    src={params.value}
+                    alt="Insumo"
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      borderRadius: "8px",
+                    }}
+                  />
+                ) : (
+                  <ImageNotSupportedOutlinedIcon
+                    sx={{ width: 50, height: 50, color: "grey.400" }}
+                  />
+                ),
             },
             {
               field: "nombre_insumo",
@@ -145,10 +158,33 @@ const GroupedInsumos = ({
                     renderCell: (params) => (
                       <Box sx={{ display: "flex", gap: 1 }}>
                         <IconButton
+                          color="info"
+                          aria-label="Ver insumo"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/insumos/ver/${params.row.id_insumo}`, {
+                              state: { refetch: false },
+                            });
+                          }}
+                          sx={{
+                            color: theme.palette.info.main,
+                            "&:hover": {
+                              backgroundColor: alpha(
+                                theme.palette.info.main,
+                                0.1
+                              ),
+                            },
+                          }}
+                        >
+                          <VisibilityIcon />
+                        </IconButton>
+
+                        {/* Botón Editar */}
+                        <IconButton
                           color="primary"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleEdit(params.row); // Llamar a handleEdit con la fila seleccionada
+                            handleEdit(params.row);
                           }}
                         >
                           <EditIcon />
@@ -172,7 +208,7 @@ const GroupedInsumos = ({
 
             setSelectedRows((prev) => ({
               ...prev,
-              [tipo]: selectedInsumos, // Actualiza las selecciones del tipo actual
+              [tipo]: selectedInsumos,
             }));
           }}
           onPaginationModelChange={handlePaginationChange}

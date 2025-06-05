@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import {
-  Box,
-  Typography,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { useGetInsumoByIdQuery, useUpdateInsumoMutation } from "../../store/services/insumoApi";
+import {
+  useGetInsumoByIdQuery,
+  useUpdateInsumoMutation,
+} from "../../store/services/insumoApi";
 import { useGetAllTiposQuery } from "../../store/services/tipoInsumoApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import Edition from "../../components/insumos/Edition";
@@ -16,15 +15,11 @@ const EditarInsumo = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Obtener datos del insumo
   const { data, isLoading, isError } = useGetInsumoByIdQuery(id);
 
-  // Obtener tipos de insumo
   const { data: tipos, isLoading: isLoadingTipos } = useGetAllTiposQuery();
 
-  // Actualizar insumo
-  const [updateInsumo, { isLoading: isUpdating }] =
-    useUpdateInsumoMutation();
+  const [updateInsumo, { isLoading: isUpdating }] = useUpdateInsumoMutation();
 
   const [formData, setFormData] = useState({});
   const [imagePreview, setImagePreview] = useState(
@@ -42,18 +37,30 @@ const EditarInsumo = () => {
         precio: data.precio || 0,
         unidad_de_medida: data.unidad_de_medida || "",
         stock: data.inventario?.cantidad || 0,
-        image_url: data.image_url || "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg",
+        image_url:
+          data.image_url ||
+          "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg",
       });
-      setImagePreview(data.image_url || "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg");
+      setImagePreview(
+        data.image_url ||
+          "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg"
+      );
     }
   }, [data]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type, checked } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
 
     if (name === "image_url") {
-      setImagePreview(value || "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg");
+      setImagePreview(
+        (type === "checkbox" ? checked : value) ||
+          "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg"
+      );
     }
   };
 
@@ -62,7 +69,7 @@ const EditarInsumo = () => {
 
     try {
       if (!formData.codigo_barra || formData.codigo_barra.trim() === "") {
-        delete formData.codigo_barra; 
+        delete formData.codigo_barra;
       }
       const payload = {
         ...formData,

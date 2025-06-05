@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RouterProvider } from "react-router-dom";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
-import "./App.css";
+import "./App.css"; 
 import router from "./routes";
 import { themeSettings } from "./theme";
 import { useGetAuthenticatedUserQuery } from "./store/services/authApi";

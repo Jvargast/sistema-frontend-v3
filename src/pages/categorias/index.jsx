@@ -50,7 +50,7 @@ const CategoriaManagement = () => {
 
   const { data: categoria, isLoading: isLoadingCategoria } =
     useGetCategoriaByIdQuery(selectedCategoriaId, {
-      skip: !selectedCategoriaId, // Skip the query if no ID is selected);
+      skip: !selectedCategoriaId, 
     });
 
   const {
@@ -61,15 +61,14 @@ const CategoriaManagement = () => {
   } = useGetAllCategoriasQuery();
 
   const handleEdit = (id) => {
-    setSelectedCategoriaId(id); // Establece el ID de la categoría seleccionada
-    setOpen(true); // Abre el modal
+    setSelectedCategoriaId(id); 
+    setOpen(true); 
   };
 
   const handleSubmit = async (data) => {
     try {
       if (selectedCategoriaId) {
         const updatedCategoria = data;
-        // Actualización
         await updateCategoria({
           id: selectedCategoriaId,
           updatedCategoria,
@@ -81,7 +80,6 @@ const CategoriaManagement = () => {
           })
         );
       } else {
-        // Creación
         await createCategoria({ ...data }).unwrap();
         dispatch(
           showNotification({
@@ -172,7 +170,6 @@ const CategoriaManagement = () => {
     <Box
       sx={{
         p: 3,
-        backgroundColor: "#f9fafb",
         minHeight: "100vh",
       }}
     >

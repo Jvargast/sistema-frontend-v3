@@ -79,11 +79,11 @@ const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
               sx={{
                 borderRadius: 3,
                 bgcolor: "background.paper",
-                height: "100%", // 🔹 Hace que todas las tarjetas tengan la misma altura
+                height: "100%", 
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "space-between", // 🔹 Asegura que el contenido esté bien distribuido
-                minHeight: "250px", // 🔹 Altura mínima para evitar colapsos en diferentes pantallas
+                justifyContent: "space-between", 
+                minHeight: "250px",
               }}
             >
               <CardContent sx={{ flex: 1 }}>

@@ -74,8 +74,6 @@ const VerAgendaCarga = () => {
           p: 3,
           borderRadius: 4,
           mb: 4,
-          bgcolor: "#f5f7fa",
-          border: "1px solid #e0e0e0",
         }}
       >
         <Box display="flex" flexWrap="wrap" columnGap={4} rowGap={3}>

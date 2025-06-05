@@ -24,7 +24,7 @@ const Layout = () => {
   if (!user) return <LoaderComponent />;
 
   return (
-    <LayoutContext.Provider value={{ drawerWidth }}>
+    <LayoutContext.Provider value={{ drawerWidth, isSidebarOpen }}>
       <Box display="flex" height="100%" width="100%">
         <Sidebar
           user={user}
