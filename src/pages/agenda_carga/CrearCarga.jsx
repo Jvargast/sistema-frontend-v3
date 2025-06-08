@@ -235,9 +235,6 @@ const CreateAgendaCargaForm = () => {
           severity: "success",
         })
       );
-      if (refetchInventarioCamion && idCamion) {
-        await refetchInventarioCamion();
-      }
       emitRefetchAgendaViajes();
       setIdChofer("");
       setIdCamion("");
@@ -287,6 +284,27 @@ const CreateAgendaCargaForm = () => {
   const { productos: listaProductosOriginal = [] } = productosDisponibles || {};
   const listaProductos = listaProductosOriginal.filter((p) => p.es_retornable);
 
+  if (idCamion && loadingInventario) {
+    return (
+      <Box
+        mt={3}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        minHeight={140}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (idCamion && errorInventario) {
+    return (
+      <Alert severity="error" sx={{ mt: 3 }}>
+        Error al cargar el inventario del camión.
+      </Alert>
+    );
+  }
   return (
     <Box display="flex" justifyContent="center" alignItems="flex-start" p={4}>
       <Paper

@@ -59,7 +59,6 @@ const VerVentaChofer = () => {
             sx={{
               borderRadius: 2,
               borderColor: "#dcdcdc",
-              backgroundColor: "#fafafa",
             }}
           >
             <CardContent>
@@ -81,7 +80,7 @@ const VerVentaChofer = () => {
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Card elevation={2} sx={{ borderRadius: 3 }}>
+          <Card sx={{ borderRadius: 2, borderColor: "#dcdcdc" }} variant="outlined">
             <CardContent>
               <Typography variant="subtitle2" gutterBottom>
                 <PaidIcon fontSize="small" sx={{ mr: 1 }} /> Método de Pago
@@ -118,7 +117,6 @@ const VerVentaChofer = () => {
             p: 2,
             borderRadius: 2,
             border: "1px solid #e0e0e0",
-            backgroundColor: "#fff",
           }}
         >
           {venta.detallesChofer.map((item, idx) => (

@@ -93,7 +93,6 @@ const RoleManagement = () => {
         justifyContent: "flex-start",
         overflow: "auto",
         padding: 3,
-        backgroundColor: "#f9fafb",
         gap: 1,
       }}
     >
@@ -108,10 +107,14 @@ const RoleManagement = () => {
         }}
       >
         <BackButton to="/admin" label="Volver al menú" />
-        <Typography variant="h3" className="font-bold text-gray-800">
+        <Typography
+          variant="h3"
+          className="font-bold"
+          sx={{ color: (theme) => theme.palette.text.primary }}
+        >
           Gestión de Roles
         </Typography>
-        {canCreateRole && ( // Mostrar botón solo si tiene permiso
+        {canCreateRole && (
           <Button
             variant="contained"
             color="primary"
@@ -156,28 +159,35 @@ const RoleManagement = () => {
               <CardContent>
                 <Typography
                   variant="h5"
-                  className="font-semibold text-gray-700 capitalize"
+                  className="font-semibold capitalize"
+                  sx={{ color: (theme) => theme.palette.text.primary }}
                 >
                   {role.nombre}
                 </Typography>
-                <Typography variant="body1" className="text-gray-500 mt-2">
+                <Typography
+                  variant="body1"
+                  className="mt-2"
+                  sx={{ color: (theme) => theme.palette.grey[500] }}
+                >
                   {role.descripcion}
                 </Typography>
                 <Typography
                   variant="subtitle1"
-                  className="font-medium text-gray-600 mt-4"
+                  className="font-medium mt-4"
+                  sx={{ color: (theme) => theme.palette.text.secondary }}
                 >
                   Permisos Aprobados: {role.permissionsCount?.approved || 0}
                 </Typography>
                 <Typography
                   variant="subtitle1"
-                  className="font-medium text-gray-600 mt-2"
+                  className="font-medium"
+                  sx={{ color: (theme) => theme.palette.text.secondary }}
                 >
                   Permisos Denegados: {role.permissionsCount?.notApproved || 0}
                 </Typography>
               </CardContent>
               <CardActions className="flex justify-between">
-                {canEditRole && ( // Mostrar botón solo si tiene permiso
+                {canEditRole && (
                   <Button
                     size="small"
                     color="primary"
@@ -188,7 +198,7 @@ const RoleManagement = () => {
                     Editar Permisos
                   </Button>
                 )}
-                {canDeleteRole && ( // Mostrar botón solo si tiene permiso
+                {canDeleteRole && (
                   <Button
                     size="medium"
                     color="error"

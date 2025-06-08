@@ -1,5 +1,6 @@
 import { Tabs, Tab, Box, Paper } from "@mui/material";
 import { useState } from "react";
+import PropTypes from 'prop-types';
 import InventarioCamion from "./InventarioCamion";
 import CapacidadCargaCamion from "../agenda_carga/CapacidadCargaCamion";
 
@@ -75,5 +76,15 @@ function CamionTabs({
     </Paper>
   );
 }
+CamionTabs.propTypes = {
+  idCamion: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  productos: PropTypes.array.isRequired,
+  productosReservados: PropTypes.array.isRequired,
+  capacidadTotal: PropTypes.number.isRequired,
+  reservadosRetornables: PropTypes.number.isRequired,
+  disponibles: PropTypes.number.isRequired,
+  retorno: PropTypes.number.isRequired,
+  onValidezCambio: PropTypes.func.isRequired,
+};
 
 export default CamionTabs;

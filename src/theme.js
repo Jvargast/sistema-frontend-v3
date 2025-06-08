@@ -5,7 +5,7 @@ export const tokensDark = {
       10: "#f6f6f6",
       50: "#5a8dd5",
       100: "#e0e0e0",
-      200: "#d3d3d3", // Corregido para evitar valores duplicados
+      200: "#d3d3d3", 
       300: "#a3a3a3",
       400: "#858585",
       500: "#666666",
@@ -20,9 +20,9 @@ export const tokensDark = {
       200: "#bdd1ee",
       300: "#9cbbe6",
       400: "#7ba4dd",
-      450: "#6a94c4", // Ajustado para mayor contraste
+      450: "#6a94c4", 
       500: "#5a8dd5",
-      600: "#4870ab", // Corregido para consistencia
+      600: "#4870ab", 
       700: "#365580",
       800: "#a2bce0",
       900: "#121c2b",

@@ -9,8 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import LoaderComponent from "../common/LoaderComponent";
-import PropTypes from 'prop-types';
-
+import PropTypes from "prop-types";
 
 const PaginatedTable = ({
   title,
@@ -20,7 +19,7 @@ const PaginatedTable = ({
   paginacion,
   columns,
 }) => {
-  const currentPage = (paginacion?.currentPage || 1) - 1; // Convertir a índice basado en 0
+  const currentPage = (paginacion?.currentPage || 1) - 1;
   const totalItems = paginacion?.totalItems || 0;
   const rowsPerPage = paginacion?.pageSize || 5;
 
@@ -29,12 +28,10 @@ const PaginatedTable = ({
     rowsPerPageOptions.push(rowsPerPage);
   }
 
-  // Manejar cambios de página
   const handleChangePage = (event, newPage) => {
     onPageChange(newPage, rowsPerPage);
   };
 
-  // Manejar cambios en el número de filas por página
   const handleChangeRowsPerPage = (event) => {
     const newRowsPerPage = parseInt(event.target.value, 10);
     onPageChange(0, newRowsPerPage);
@@ -46,17 +43,18 @@ const PaginatedTable = ({
 
   return (
     <div>
-      <Typography >
-        {title}
-      </Typography>
+      <Typography>{title}</Typography>
       <TableContainer>
         <Table>
           <TableHead>
-            <TableRow className="bg-gray-100">
+            <TableRow>
               {columns.map((column) => (
                 <TableCell
                   key={column.field}
-                  style={{ width: column.width || "auto", minWidth: column.minWidth || "auto" }}
+                  style={{
+                    width: column.width || "auto",
+                    minWidth: column.minWidth || "auto",
+                  }}
                 >
                   {column.headerName}
                 </TableCell>

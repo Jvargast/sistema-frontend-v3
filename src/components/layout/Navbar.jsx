@@ -2,7 +2,6 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import {
   Menu as MenuIcon,
-  SettingsOutlined,
   ArrowDropDownOutlined,
   ExpandLess,
   ExpandMore,
@@ -41,11 +40,14 @@ import SearchBar from "./SearchBar";
 import ConfigMenu from "./ConfigMenu";
 import { setMode } from "../../store/reducers/globalSlice";
 import { useTranslation } from "react-i18next";
+import { isColorLight } from "../../utils/colorUtil";
+
 const rolColors = {
-  chofer: "#FFD54F",
-  administrador: "#90CAF9",
+  chofer: "#FFE082",
+  administrador: "#81D4FA",
   vendedor: "#A5D6A7",
-  default: "#E4DFDF",
+  supervisor: "#FFCCBC",
+  default: "#ECEFF1",
 };
 
 const Navbar = ({ user, rol, setIsSidebarOpen }) => {
@@ -54,8 +56,8 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const isTabletOrMobile = useMediaQuery("(max-width:1023px)");
   const { i18n } = useTranslation();
-
   const navbarColor = rolColors[rol?.toLowerCase()] || rolColors.default;
+  const iconNavbarColor = isColorLight(navbarColor) ? "#2c3e50" : "#fff";
 
   const navigate = useNavigate();
 
@@ -67,7 +69,6 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
 
   const [openSections, setOpenSections] = useState({});
 
-  // Manejo del logout
   const handleLogout = async () => {
     try {
       await logout().unwrap();
@@ -128,29 +129,60 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
       >
         {/* LADO IZQUIERDO */}
         {isTabletOrMobile ? (
-          <FlexBetween>
-            <IconButton
-              onClick={() => setMobileMenuOpen(true)}
-              aria-label="Abrir menú"
-            >
-              <MenuIcon />
-            </IconButton>
-            <IconButton
-              aria-label="Ver notificaciones"
-              onClick={handleOpenNotificationsMenu}
-            >
-              <Badge
-                badgeContent={notificaciones.filter((n) => !n.leida).length}
-                color="secondary"
+          <Box
+            sx={{
+              display: "flex",
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            {/* IZQUIERDA: Menú hamburguesa */}
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <IconButton
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Abrir menú"
+                sx={{
+                  color: iconNavbarColor,
+                  "&:hover": {
+                    backgroundColor: "rgba(44,62,80,0.07)",
+                  },
+                }}
               >
-                <NotificationsNoneOutlinedIcon sx={{ fontSize: "25px" }} />
-              </Badge>
-            </IconButton>
+                <MenuIcon />
+              </IconButton>
+            </Box>
 
-            <IconButton aria-label="Abrir configuración">
-              <SettingsOutlined sx={{ fontSize: "25px" }} />
-            </IconButton>
-          </FlexBetween>
+            {/* DERECHA: Notificaciones + Configuración */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <IconButton
+                aria-label="Ver notificaciones"
+                onClick={handleOpenNotificationsMenu}
+                sx={{
+                  color: iconNavbarColor,
+                  "&:hover": {
+                    backgroundColor: "rgba(44,62,80,0.07)",
+                  },
+                }}
+              >
+                <Badge
+                  badgeContent={notificaciones.filter((n) => !n.leida).length}
+                  color="secondary"
+                >
+                  <NotificationsNoneOutlinedIcon sx={{ fontSize: 25 }} />
+                </Badge>
+              </IconButton>
+              <ConfigMenu
+                iconColor={iconNavbarColor}
+                onToggleTheme={() => dispatch(setMode())}
+                onChangeLanguage={(lang) => {
+                  i18n.changeLanguage(lang);
+                  localStorage.setItem("language", lang);
+                }}
+                currentLang={i18n.language}
+              />
+            </Box>
+          </Box>
         ) : (
           <FlexBetween>
             <IconButton
@@ -163,9 +195,14 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
               }}
               sx={{
                 display: isDesktop ? "block" : "none",
-                color: theme.palette.mode === "light" ? "#000000" : "#ffffff",
                 border: "none",
                 outline: "none",
+                transition: "background 0.2s",
+                bgcolor: "transparent",
+                color: iconNavbarColor,
+                "&:hover": {
+                  backgroundColor: "rgba(44,62,80,0.07)",
+                },
                 borderWidth: 0,
                 ":focus": {
                   outline: "none",
@@ -174,6 +211,18 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
                 ":active": {
                   outline: "none",
                   boxShadow: "none",
+                },
+                "&:focus": {
+                  outline: "none !important",
+                  boxShadow: "none !important",
+                },
+                "&:focus-visible": {
+                  outline: "none !important",
+                  boxShadow: "none !important",
+                },
+                "&:active": {
+                  outline: "none !important",
+                  boxShadow: "none !important",
                 },
               }}
               aria-label="Abrir o cerrar menú lateral"
@@ -204,12 +253,27 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
             <IconButton
               aria-label="Ver notificaciones"
               onClick={handleOpenNotificationsMenu}
+              sx={{
+                color: iconNavbarColor,
+                "&:hover": {
+                  backgroundColor: "rgba(44,62,80,0.07)",
+                  "&:focus": {
+                    outline: "none",
+                    boxShadow: "none",
+                  },
+                  "&:active": {
+                    outline: "none",
+                    boxShadow: "none",
+                  },
+                  "&:focus-visible": {
+                    outline: "none",
+                    boxShadow: "none",
+                  },
+                },
+              }}
             >
               <Badge
-                badgeContent={
-                  // Contamos cuántas no están leídas, si tienes esa info
-                  notificaciones.filter((n) => !n.leida).length
-                }
+                badgeContent={notificaciones.filter((n) => !n.leida).length}
                 color="secondary"
               >
                 <NotificationsNoneOutlinedIcon sx={{ fontSize: "25px" }} />
@@ -218,6 +282,7 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
 
             {/* Menu de configuración */}
             <ConfigMenu
+              iconColor={iconNavbarColor}
               onToggleTheme={() => {
                 dispatch(setMode());
               }}
@@ -271,14 +336,14 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
               >
                 <Typography
                   fontWeight="bold"
-                  fontSize="0.85rem"
+                  fontSize="0.7rem"
                   color={theme.palette.text.primary}
                   sx={{ lineHeight: 1.2 }}
                 >
                   {user?.nombre || ""}
                 </Typography>
                 <Typography
-                  fontSize="0.75rem"
+                  fontSize="0.65rem"
                   color={theme.palette.text.secondary}
                   sx={{ lineHeight: 1.2 }}
                 >

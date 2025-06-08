@@ -166,7 +166,7 @@ const UserManagement = () => {
   if (isAllLoading) return <LoaderComponent />;
 
   return (
-    <Box sx={{ padding: 4, backgroundColor: "#f4f6f8", minHeight: "100vh" }}>
+    <Box sx={{ padding: 4, minHeight: "100vh" }}>
       <BackButton to="/admin" label="Volver al menú" />
       <Typography variant="h4" sx={{ fontWeight: "bold", marginBottom: 2 }}>
         Gestión de Usuarios

@@ -85,7 +85,6 @@ const PanelViajeChofer = () => {
             mx: "auto",
             p: isMobile ? 3 : 5,
             borderRadius: 4,
-            backgroundColor: "#fdfdfd",
             textAlign: "center",
           }}
         >

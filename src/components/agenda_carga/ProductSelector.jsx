@@ -8,6 +8,7 @@ import {
   MenuItem,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -20,9 +21,11 @@ const ProductSelectorRow = ({
   onChangeNotas,
   onRemoveRow,
 }) => {
+  const theme = useTheme();
+  const isRetornable = !!selectedProduct?.es_retornable;
+
   return (
     <Grid container spacing={2} alignItems="center">
-      {/* Seleccionar producto */}
       <Grid item xs={12} sm={4}>
         <FormControl fullWidth size="small">
           <InputLabel id={`producto-label-${index}`}>Producto</InputLabel>
@@ -33,7 +36,21 @@ const ProductSelectorRow = ({
             onChange={(e) => onChangeProduct(index, e.target.value)}
             sx={{
               borderRadius: 2,
-              backgroundColor: "background.paper",
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.background.paper
+                  : "#fff",
+            }}
+            MenuProps={{
+              PaperProps: {
+                sx: {
+                  borderRadius: 2,
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.background.paper
+                      : "#fff",
+                },
+              },
             }}
           >
             <MenuItem value="">-- Selecciona producto --</MenuItem>
@@ -46,23 +63,25 @@ const ProductSelectorRow = ({
         </FormControl>
       </Grid>
 
-      {/* Mostrar si el producto es retornable o no */}
       <Grid item xs={12} sm={2}>
         <Typography
           variant="body2"
           sx={{
             fontWeight: 500,
             textAlign: "center",
-            color: selectedProduct?.es_retornable
-              ? "success.main"
-              : "text.secondary",
+            color: isRetornable ? "success.main" : "text.secondary",
+            bgcolor: isRetornable
+              ? theme.palette.success.light
+              : theme.palette.background.default,
+            px: 1,
+            borderRadius: 2,
+            transition: "background .3s",
           }}
         >
-          {selectedProduct?.es_retornable ? "♻️ Retornable" : "No retornable"}
+          {isRetornable ? "♻️ Retornable" : "No retornable"}
         </Typography>
       </Grid>
 
-      {/* Cantidad */}
       <Grid item xs={12} sm={2}>
         <TextField
           label="Cantidad"
@@ -75,13 +94,15 @@ const ProductSelectorRow = ({
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: 2,
-              backgroundColor: "white",
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.background.default
+                  : "#fff",
             },
           }}
         />
       </Grid>
 
-      {/* Notas */}
       <Grid item xs={12} sm={3}>
         <TextField
           label="Notas"
@@ -92,23 +113,35 @@ const ProductSelectorRow = ({
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: 2,
-              backgroundColor: "white",
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.background.default
+                  : "#fff",
             },
           }}
         />
       </Grid>
 
-      {/* Botón Eliminar */}
       <Grid item xs={12} sm={1} textAlign="center">
         <IconButton
           onClick={() => onRemoveRow(index)}
           sx={{
             borderRadius: "50%",
-            backgroundColor: "grey.100",
-            color: "error.main",
+            backgroundColor:
+              theme.palette.mode === "dark"
+                ? theme.palette.error.dark
+                : "grey.100",
+            color:
+              theme.palette.mode === "dark"
+                ? theme.palette.error.light
+                : "error.main",
             "&:hover": {
-              backgroundColor: "grey.200",
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.error.main
+                  : "grey.200",
             },
+            transition: "background .2s",
           }}
         >
           <DeleteIcon fontSize="small" />
@@ -132,7 +165,7 @@ ProductSelectorRow.propTypes = {
     id_producto: PropTypes.number,
     cantidad: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     notas: PropTypes.string,
-    es_retornable: PropTypes.bool, // ✅ Agregar validación para retornable
+    es_retornable: PropTypes.bool,
   }),
   onChangeProduct: PropTypes.func.isRequired,
   onChangeCantidad: PropTypes.func.isRequired,
