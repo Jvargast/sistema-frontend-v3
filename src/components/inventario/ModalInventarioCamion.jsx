@@ -4,6 +4,9 @@ import {
   DialogContent,
   IconButton,
   Slide,
+  CircularProgress,
+  Box,
+  Alert,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PropTypes from "prop-types";
@@ -11,7 +14,13 @@ import InventarioCamion from "./InventarioCamion";
 
 const Transition = Slide;
 
-const ModalInventarioCamion = ({ open, onClose, idCamion }) => {
+const ModalInventarioCamion = ({
+  open,
+  onClose,
+  inventarioData,
+  isLoading,
+  error,
+}) => {
   return (
     <Dialog
       open={open}
@@ -84,13 +93,30 @@ const ModalInventarioCamion = ({ open, onClose, idCamion }) => {
           borderBottomRightRadius: 16,
         })}
       >
-        <InventarioCamion
-          idCamion={idCamion}
-          modo="visual"
-          productos={[]}
-          productosReservados={[]}
-          onValidezCambio={() => {}}
-        />
+        {isLoading ? (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            minHeight={180}
+          >
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Alert severity="error">
+            Error al obtener el inventario del camión
+          </Alert>
+        ) : (
+          inventarioData && (
+            <InventarioCamion
+              inventarioData={inventarioData.data}
+              modo="visual"
+              productos={[]}
+              productosReservados={[]}
+              onValidezCambio={() => {}}
+            />
+          )
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -99,7 +125,9 @@ const ModalInventarioCamion = ({ open, onClose, idCamion }) => {
 ModalInventarioCamion.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  idCamion: PropTypes.number.isRequired,
+  inventarioData: PropTypes.object,
+  isLoading: PropTypes.bool,
+  error: PropTypes.any,
 };
 
 export default ModalInventarioCamion;

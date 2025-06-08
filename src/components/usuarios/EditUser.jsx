@@ -3,17 +3,14 @@ import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
-  Typography,
   Button,
-  Divider,
   TextField,
   InputAdornment,
   IconButton,
   MenuItem,
   CircularProgress,
-  Card,
-  CardContent,
   Grid,
+  Container,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
@@ -87,152 +84,142 @@ const EditUserForm = ({
   }
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 }, display: "flex", justifyContent: "center" }}>
-      <Card
-        sx={{
-          width: "100%",
-          maxWidth: "780px",
-          p: { xs: 3, sm: 4 },
-          borderRadius: "12px",
-          background: "linear-gradient(135deg, #ffffff 30%, #f5f7fa 100%)",
-          border: "1px solid #dfe6e9", 
-        }}
-      >
-        <CardContent>
-          <Typography variant="h4" fontWeight="bold" sx={{ mb: 3, color: "#2c3e50", textAlign: "center" }}>
-            Información del Usuario
-          </Typography>
-          <Divider sx={{ mb: 3 }} />
-          
-          <Grid container spacing={2}>
-            {fieldConfig.flatMap((group, groupIndex) =>
-              group.map((field, fieldIndex) => (
-                <Grid item key={`${groupIndex}-${fieldIndex}`} xs={12} sm={6}>
-                  {field.name === "password" ? (
-                    <TextField
-                      fullWidth
-                      label={field.label}
-                      name={field.name}
-                      type={showPassword ? "text" : "password"}
-                      value={formData[field.name] || ""}
-                      onChange={handleInputChange}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton onClick={togglePasswordVisibility} edge="end">
-                              {showPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                      variant="outlined"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "10px",
-                          transition: "0.3s",
-                          bgcolor: "#ffffff",
-                          border: "1px solid #dfe6e9",
-                          "&:hover fieldset": { borderColor: "#3498db" },
-                          "&.Mui-focused fieldset": { borderColor: "#2980b9" },
-                        },
-                      }}
-                    />
-                  ) : field.type === "select" ? (
-                    <TextField
-                      fullWidth
-                      label={field.label}
-                      name={field.name}
-                      value={formData[field.name] || ""}
-                      onChange={handleInputChange}
-                      select
-                      variant="outlined"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "10px",
-                          transition: "0.3s",
-                          bgcolor: "#ffffff",
-                          border: "1px solid #dfe6e9",
-                          "&:hover fieldset": { borderColor: "#3498db" },
-                          "&.Mui-focused fieldset": { borderColor: "#2980b9" },
-                        },
-                      }}
-                    >
-                      {field.options?.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  ) : (
-                    <TextField
-                      fullWidth
-                      label={field.label}
-                      name={field.name}
-                      value={formData[field.name] || ""}
-                      onChange={handleInputChange}
-                      variant="outlined"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "10px",
-                          transition: "0.3s",
-                          bgcolor: "#ffffff",
-                          border: "1px solid #dfe6e9",
-                          "&:hover fieldset": { borderColor: "#3498db" },
-                          "&.Mui-focused fieldset": { borderColor: "#2980b9" },
-                        },
-                      }}
-                    />
-                  )}
-                </Grid>
-              ))
-            )}
-          </Grid>
+    <Container maxWidth="md" sx={{ py: { xs: 2, md: 6 } }}>
+      <Grid container spacing={3}>
+        {fieldConfig.flatMap((group, groupIndex) =>
+          group.map((field, fieldIndex) => (
+            <Grid item key={`${groupIndex}-${fieldIndex}`} xs={12} sm={6}>
+              {field.name === "password" ? (
+                <TextField
+                  fullWidth
+                  label={field.label}
+                  name={field.name}
+                  type={showPassword ? "text" : "password"}
+                  value={formData[field.name] || ""}
+                  onChange={handleInputChange}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={togglePasswordVisibility}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  variant="outlined"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                      fontSize: "1.08rem",
+                      bgcolor: "background.default",
+                      "&:hover fieldset": { borderColor: "primary.light" },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "primary.main",
+                      },
+                    },
+                  }}
+                />
+              ) : field.type === "select" ? (
+                <TextField
+                  fullWidth
+                  label={field.label}
+                  name={field.name}
+                  value={formData[field.name] || ""}
+                  onChange={handleInputChange}
+                  select
+                  variant="outlined"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                      fontSize: "1.08rem",
+                      bgcolor: "background.default",
+                      "&:hover fieldset": { borderColor: "primary.light" },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "primary.main",
+                      },
+                    },
+                  }}
+                >
+                  {field.options?.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ) : (
+                <TextField
+                  fullWidth
+                  label={field.label}
+                  name={field.name}
+                  value={formData[field.name] || ""}
+                  onChange={handleInputChange}
+                  variant="outlined"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                      fontSize: "1.08rem",
+                      bgcolor: "background.default",
+                      "&:hover fieldset": { borderColor: "primary.light" },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "primary.main",
+                      },
+                    },
+                  }}
+                />
+              )}
+            </Grid>
+          ))
+        )}
+      </Grid>
 
-          {/* Botones de acción */}
-          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4, gap: 2 }}>
-            <Button
-              variant="outlined"
-              onClick={onCancel || (() => navigate(-1))}
-              sx={{
-                minWidth: 150,
-                fontWeight: "bold",
-                textTransform: "none",
-                color: "#e74c3c",
-                borderColor: "#e74c3c",
-                fontSize: "1rem",
-                borderRadius: "10px",
-                transition: "0.3s",
-                "&:hover": {
-                  color: "#ffffff",
-                  backgroundColor: "#e74c3c",
-                  borderColor: "#e74c3c",
-                },
-              }}
-            >
-              Cancelar
-            </Button>
-
-            <Button
-              variant="contained"
-              onClick={handleSubmit}
-              disabled={isUpdating}
-              sx={{
-                minWidth: 150,
-                fontSize: "1rem",
-                textTransform: "none",
-                borderRadius: "10px",
-                backgroundColor: "#3498db",
-                color: "#fff",
-                transition: "0.3s",
-                "&:hover": { backgroundColor: "#2980b9" },
-              }}
-            >
-              {isUpdating ? "Guardando..." : "Guardar Cambios"}
-            </Button>
-          </Box>
-        </CardContent>
-      </Card>
-    </Box>
+      {/* Acciones */}
+      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 6 }}>
+        <Button
+          variant="outlined"
+          onClick={onCancel || (() => navigate(-1))}
+          sx={{
+            minWidth: 140,
+            borderRadius: 3,
+            fontWeight: 600,
+            textTransform: "none",
+            fontSize: "1rem",
+            color: "error.main",
+            borderColor: "error.main",
+            "&:hover": {
+              bgcolor: "error.main",
+              color: "#fff",
+              borderColor: "error.main",
+            },
+          }}
+        >
+          Cancelar
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={isUpdating}
+          sx={{
+            minWidth: 160,
+            borderRadius: 3,
+            fontWeight: 700,
+            textTransform: "none",
+            fontSize: "1rem",
+            bgcolor: "primary.main",
+            color: "#fff",
+            boxShadow: "none",
+            "&:hover": {
+              bgcolor: "primary.dark",
+              color: "#fff",
+            },
+          }}
+        >
+          {isUpdating ? "Guardando..." : "Guardar Cambios"}
+        </Button>
+      </Box>
+    </Container>
   );
 };
 

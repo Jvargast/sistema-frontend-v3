@@ -25,7 +25,6 @@ const EditUser = () => {
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   //const [passwordData, setPasswordData] = useState({ newPassword: "" });
 
-  // Fetch data
   const {
     data: userData,
     isFetching,
@@ -65,40 +64,45 @@ const EditUser = () => {
     [updateUser, dispatch, navigate]
   );
 
-  const handlePasswordChange = useCallback(async (newPassword) => {
-    try {
-      console.log("Contraseña recibida en handlePasswordChange:", newPassword);
-      if (!newPassword || newPassword.trim().length < 8) {
+  const handlePasswordChange = useCallback(
+    async (newPassword) => {
+      try {
+        console.log(
+          "Contraseña recibida en handlePasswordChange:",
+          newPassword
+        );
+        if (!newPassword || newPassword.trim().length < 8) {
+          dispatch(
+            showNotification({
+              message: "La contraseña debe tener al menos 8 caracteres.",
+              severity: "error",
+            })
+          );
+          return;
+        }
+        await updateUserPassword({ rut: id, newPassword });
         dispatch(
           showNotification({
-            message: "La contraseña debe tener al menos 8 caracteres.",
+            message: "Contraseña actualizada correctamente.",
+            severity: "success",
+          })
+        );
+        setPasswordModalOpen(false);
+      } catch (err) {
+        console.log(err);
+        dispatch(
+          showNotification({
+            message: `Error al cambiar la contraseña: ${
+              err?.data?.error || "Desconocido"
+            }`,
             severity: "error",
           })
         );
-        return;
       }
-      await updateUserPassword({ rut: id, newPassword });
-      dispatch(
-        showNotification({
-          message: "Contraseña actualizada correctamente.",
-          severity: "success",
-        })
-      );
-      setPasswordModalOpen(false);
-    } catch (err) {
-      console.log(err)
-      dispatch(
-        showNotification({
-          message: `Error al cambiar la contraseña: ${
-            err?.data?.error || "Desconocido"
-          }`,
-          severity: "error",
-        })
-      );
-    }
-  }, [updateUserPassword, id, dispatch]);
+    },
+    [updateUserPassword, id, dispatch]
+  );
 
-  // Options for dropdowns
   const rolesOptions =
     rolesData?.roles?.map((role) => ({
       value: role.id,
@@ -179,80 +183,88 @@ const EditUser = () => {
   return (
     <Box
       sx={{
-        p: { xs: 3, sm: 4 },
+        p: { xs: 2, md: 5 },
+        maxWidth: 900,
+        mx: "auto",
+        my: { xs: 2, md: 6 },
+        bgcolor: "background.paper",
+        borderRadius: 6,
+        boxShadow: "0 8px 36px 0 rgba(35, 55, 99, 0.14)",
         display: "flex",
         flexDirection: "column",
-        gap: 3,
-        maxWidth: "800px",
-        mx: "auto",
-        bgcolor: "background.paper",
-        borderRadius: "12px",
+        gap: 4,
       }}
     >
-      {/* Encabezado con botón */}
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
           alignItems: "center",
+          justifyContent: "space-between",
           flexWrap: "wrap",
-          gap: 1,
+          gap: 2,
+          mb: 1,
         }}
       >
         <Typography
           variant="h4"
-          fontWeight="bold"
-          sx={{ color: "#2c3e50", flex: 1, minWidth: "200px" }}
+          fontWeight={800}
+          sx={{
+            color: "primary.main",
+            letterSpacing: 0.5,
+          }}
         >
-          Editar Usuario
+          Editar usuario
         </Typography>
         <Button
-          variant="contained"
-          sx={{
-            backgroundColor: "#3498db",
-            color: "#fff",
-            "&:hover": { backgroundColor: "#2980b9" },
-            textTransform: "none",
-            px: 3,
-            py: 1.2,
-            borderRadius: "10px",
-            fontSize: "0.9rem",
-          }}
           onClick={() => setPasswordModalOpen(true)}
+          variant="contained"
+          size="large"
+          sx={{
+            borderRadius: 3,
+            px: 3.5,
+            py: 1.2,
+            fontWeight: 600,
+            fontSize: "1.08rem",
+            boxShadow: "0 2px 8px 0 rgba(80,80,120,0.07)",
+            background: "linear-gradient(90deg, #2563eb 0%, #1e3a8a 100%)",
+            color: "#fff",
+            textTransform: "none",
+            transition: "all 0.15s",
+            "&:hover": {
+              background: "linear-gradient(90deg, #1e40af 0%, #1e293b 100%)",
+              transform: "scale(1.03)",
+            },
+          }}
         >
-          Cambiar Contraseña
+          Cambiar contraseña
         </Button>
       </Box>
 
-      <Divider />
+      <Divider sx={{ my: 0 }} />
 
-      {/* Formulario de edición con altura ajustada */}
-      <Box sx={{ p: 1 }}>
-        <EditUserForm
-          userId={id}
-          fetchUserData={() => userData}
-          updateUser={handleUpdateUser}
-          fieldConfig={fieldConfig}
-          onSuccess={() =>
-            dispatch(
-              showNotification({
-                message: "Usuario actualizado correctamente.",
-                severity: "success",
-              })
-            )
-          }
-          onError={(err) =>
-            dispatch(
-              showNotification({
-                message: `Error: ${err?.message || "Desconocido"}`,
-                severity: "error",
-              })
-            )
-          }
-        />
-      </Box>
+      <EditUserForm
+        userId={id}
+        fetchUserData={() => userData}
+        updateUser={handleUpdateUser}
+        fieldConfig={fieldConfig}
+        onSuccess={() =>
+          dispatch(
+            showNotification({
+              message: "Usuario actualizado correctamente.",
+              severity: "success",
+            })
+          )
+        }
+        onError={(err) =>
+          dispatch(
+            showNotification({
+              message: `Error: ${err?.message || "Desconocido"}`,
+              severity: "error",
+            })
+          )
+        }
+      />
 
-      {/* Modal de cambio de contraseña */}
       <PasswordModal
         open={passwordModalOpen}
         onClose={() => setPasswordModalOpen(false)}

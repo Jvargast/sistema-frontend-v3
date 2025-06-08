@@ -1,5 +1,7 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import LoginIcon from "@mui/icons-material/Login";
 import {
   Box,
   Card,
@@ -11,7 +13,7 @@ import {
   Button,
   Grid,
   useTheme,
-  useMediaQuery,
+  Paper,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -25,87 +27,185 @@ import PasswordModal from "../../components/profile/PasswordModal";
 import BackButton from "../../components/common/BackButton";
 import { getInitialRoute } from "../../utils/navigationUtils";
 
-const PerfilHeader = ({ nombre, apellido, email }) => (
-  <Box
-    display="flex"
-    alignItems="center"
-    flexDirection={{ xs: "column", sm: "row" }}
-    mb={4}
-    textAlign={{ xs: "center", sm: "left" }}
-  >
-    <Avatar
+const PerfilHeader = ({ nombre, apellido, email }) => {
+  const theme = useTheme();
+
+  const initials = `${nombre?.[0] || ""}${apellido?.[0] || ""}`.toUpperCase();
+
+  return (
+    <Card
+      variant="outlined"
       sx={{
-        width: { xs: 80, sm: 100 },
-        height: { xs: 80, sm: 100 },
-        bgcolor: "primary.main",
-        fontSize: { xs: 30, sm: 40 },
+        borderRadius: 4,
+        borderColor:
+          theme.palette.mode === "dark"
+            ? theme.palette.primary.dark + "33"
+            : "#E2E8F0",
+        background:
+          theme.palette.mode === "dark"
+            ? theme.palette.background.paper
+            : "#F9FAFB",
+        boxShadow:
+          theme.palette.mode === "dark"
+            ? "0 4px 24px rgba(30,34,54,0.24)"
+            : "0 4px 18px rgba(0,0,0,0.09)",
+        p: { xs: 2, sm: 3 },
+        mb: 4,
+        display: "flex",
+        alignItems: "center",
+        flexDirection: { xs: "column", sm: "row" },
+        gap: { xs: 2, sm: 4 },
       }}
     >
-      {nombre[0]}
-    </Avatar>
-    <Box
-      ml={{ sm: 3 }}
-      mt={{ xs: 2, sm: 0 }}
-      sx={{
-        wordBreak: "break-word",
-        overflowWrap: "break-word",
-        maxWidth: "100%",
-      }}
-    >
-      <Typography
-        variant="h5"
+      <Avatar
         sx={{
-          fontWeight: "bold",
-          wordBreak: "break-word",
-          overflowWrap: "break-word",
+          width: { xs: 72, sm: 96 },
+          height: { xs: 72, sm: 96 },
+          bgcolor: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText,
+          fontSize: { xs: 34, sm: 42 },
+          fontWeight: 600,
+          boxShadow:
+            theme.palette.mode === "dark"
+              ? "0 1px 6px #1a2236"
+              : "0 1px 8px #e0e7ef",
         }}
       >
-        {nombre} {apellido}
-      </Typography>
-      <Typography
-        variant="subtitle1"
-        color="text.secondary"
-        sx={{ wordBreak: "break-word", overflowWrap: "break-word" }}
+        {initials}
+      </Avatar>
+      <Box
+        sx={{
+          textAlign: { xs: "center", sm: "left" },
+          flex: 1,
+          maxWidth: { sm: "calc(100% - 128px)" },
+        }}
       >
-        {email}
-      </Typography>
-    </Box>
-  </Box>
-);
+        <Typography
+          variant="h5"
+          fontWeight={700}
+          color="text.primary"
+          sx={{
+            letterSpacing: 0.2,
+            mb: 0.3,
+            lineHeight: 1.17,
+            wordBreak: "break-word",
+          }}
+        >
+          {nombre} {apellido}
+        </Typography>
+        <Typography
+          variant="subtitle1"
+          color="text.secondary"
+          sx={{
+            fontWeight: 400,
+            letterSpacing: 0.05,
+            fontSize: { xs: 16, sm: 18 },
+            wordBreak: "break-word",
+            mt: 0.4,
+          }}
+        >
+          {email}
+        </Typography>
+      </Box>
+    </Card>
+  );
+};
 PerfilHeader.propTypes = {
   nombre: PropTypes.string.isRequired,
   apellido: PropTypes.string.isRequired,
   email: PropTypes.string.isRequired,
 };
 
+function formatLabel(label) {
+  return label.charAt(0).toUpperCase() + label.slice(1).replace(/_/g, " ");
+}
 
-
-const PerfilInfo = ({ data, editMode, handleInputChange }) => (
-  <>
-    <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
-      Información General
-    </Typography>
-    <Grid container spacing={2}>
-      {Object.entries(data).map(([key, value]) => (
-        <Grid item xs={12} sm={6} key={key}>
-          {editMode ? (
-            <TextField
-              fullWidth
-              label={key}
-              name={key}
-              defaultValue={value}
-              onChange={handleInputChange}
-            />
-          ) : (
-            <Typography variant="body1">
-              <strong>{key}:</strong> {value}
-            </Typography>
-          )}
-        </Grid>
-      ))}
-    </Grid>
-  </>
-);
+const PerfilInfo = ({ data, editMode, handleInputChange }) => {
+  const theme = useTheme();
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        p: { xs: 1, sm: 2 },
+        mb: 2,
+        borderRadius: 3,
+        backgroundColor:
+          theme.palette.mode === "dark"
+            ? theme.palette.background.paper
+            : "#FAFAFA",
+      }}
+    >
+      <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
+        Información General
+      </Typography>
+      <Grid container spacing={2}>
+        {Object.entries(data).map(([key, value]) => (
+          <Grid item xs={12} sm={6} key={key}>
+            {editMode ? (
+              <TextField
+                fullWidth
+                label={formatLabel(key)}
+                name={key}
+                defaultValue={value}
+                onChange={handleInputChange}
+                variant="outlined"
+                sx={{
+                  bgcolor:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.grey[900]
+                      : "#fff",
+                  borderRadius: 2,
+                  input: { color: theme.palette.text.primary },
+                }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.grey[900]
+                      : "#F4F4F8",
+                  borderRadius: 2,
+                  border: `1px solid ${
+                    theme.palette.mode === "dark"
+                      ? theme.palette.grey[800]
+                      : theme.palette.grey[200]
+                  }`,
+                  minHeight: 64,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                }}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontWeight: 500,
+                  }}
+                >
+                  {formatLabel(key)}
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: theme.palette.text.primary,
+                    fontWeight: 600,
+                  }}
+                >
+                  {value || (
+                    <span style={{ color: "#bbb" }}>Sin información</span>
+                  )}
+                </Typography>
+              </Box>
+            )}
+          </Grid>
+        ))}
+      </Grid>
+    </Paper>
+  );
+};
 
 PerfilInfo.propTypes = {
   data: PropTypes.object.isRequired,
@@ -113,27 +213,116 @@ PerfilInfo.propTypes = {
   handleInputChange: PropTypes.func.isRequired,
 };
 
-const PerfilActividad = ({ fecha_registro, ultimo_login }) => (
-  <>
-    <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
-      Actividad
-    </Typography>
-    <Grid container spacing={3}>
-      <Grid item xs={12} sm={6}>
-        <Typography variant="body1">
-          <strong>Fecha de registro:</strong>{" "}
-          {new Date(fecha_registro).toLocaleString()}
-        </Typography>
+const PerfilActividad = ({ fecha_registro, ultimo_login }) => {
+  const theme = useTheme();
+  const formatearFecha = (date) =>
+    date ? new Date(date).toLocaleString() : "Sin información";
+
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        p: { xs: 2, sm: 3 },
+        mb: 2,
+        borderRadius: 3,
+        backgroundColor:
+          theme.palette.mode === "dark"
+            ? theme.palette.background.paper
+            : "#FAFAFA",
+      }}
+    >
+      <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
+        Actividad
+      </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={1.5}
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              bgcolor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[900]
+                  : "#F4F4F8",
+              border: `1px solid ${
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[800]
+                  : theme.palette.grey[200]
+              }`,
+              minHeight: 70,
+            }}
+          >
+            <AccessTimeIcon
+              sx={{
+                color: theme.palette.info.main,
+                fontSize: 28,
+              }}
+            />
+            <Box>
+              <Typography
+                variant="subtitle2"
+                sx={{ color: theme.palette.text.secondary, fontWeight: 500 }}
+              >
+                Fecha de registro
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{ color: theme.palette.text.primary, fontWeight: 600 }}
+              >
+                {formatearFecha(fecha_registro)}
+              </Typography>
+            </Box>
+          </Box>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={1.5}
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              bgcolor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[900]
+                  : "#F4F4F8",
+              border: `1px solid ${
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[800]
+                  : theme.palette.grey[200]
+              }`,
+              minHeight: 70,
+            }}
+          >
+            <LoginIcon
+              sx={{
+                color: theme.palette.success.main,
+                fontSize: 28,
+              }}
+            />
+            <Box>
+              <Typography
+                variant="subtitle2"
+                sx={{ color: theme.palette.text.secondary, fontWeight: 500 }}
+              >
+                Último login
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{ color: theme.palette.text.primary, fontWeight: 600 }}
+              >
+                {formatearFecha(ultimo_login)}
+              </Typography>
+            </Box>
+          </Box>
+        </Grid>
       </Grid>
-      <Grid item xs={12} sm={6}>
-        <Typography variant="body1">
-          <strong>Último login:</strong>{" "}
-          {new Date(ultimo_login).toLocaleString()}
-        </Typography>
-      </Grid>
-    </Grid>
-  </>
-);
+    </Paper>
+  );
+};
 PerfilActividad.propTypes = {
   fecha_registro: PropTypes.string.isRequired,
   ultimo_login: PropTypes.string.isRequired,
@@ -204,8 +393,6 @@ const PerfilUsuario = () => {
   const [updateMyProfile] = useUpdateMyProfileMutation();
   const [changePassword] = useChangePasswordMutation();
   const dispatch = useDispatch();
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
@@ -269,7 +456,7 @@ const PerfilUsuario = () => {
   const inicial = getInitialRoute(rol?.nombre, permisos);
 
   return (
-    <Box p={3} bgcolor="grey.100">
+    <Box p={3}>
       <Card
         elevation={3}
         sx={{

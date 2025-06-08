@@ -29,6 +29,7 @@ import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useDesasignarChoferMutation } from "../../store/services/camionesApi";
 import ModalInventarioCamion from "../inventario/ModalInventarioCamion";
+import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
 
 const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
   const theme = useTheme();
@@ -40,6 +41,12 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
   const dispatch = useDispatch();
 
   const [desasignarChofer] = useDesasignarChoferMutation();
+
+  const {
+    data: inventarioData,
+    isLoading: isLoadingInventario,
+    error: errorInventario,
+  } = useGetEstadoInventarioCamionQuery(camion?.id_camion);
 
   const handleDesasignarChofer = async () => {
     try {
@@ -376,7 +383,9 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
       <ModalInventarioCamion
         open={openInventarioVisual}
         onClose={() => setOpenInventarioVisual(false)}
-        idCamion={camion.id_camion}
+        inventarioData={inventarioData}
+        isLoading={isLoadingInventario}
+        error={errorInventario}
       />
     </Card>
   );

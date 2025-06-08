@@ -86,7 +86,7 @@ const SearchBar = ({ onResultSelect }) => {
               theme.palette.mode === "dark" ? "#ffffff" : "#000000",
             "& input::placeholder": {
               color: (theme) =>
-                theme.palette.mode === "dark" ? "#181818" : "#666666",
+                theme.palette.mode === "dark" ? "#f4f4f4" : "#666666",
               opacity: 1,
             },
             fontSize: "0.9rem",

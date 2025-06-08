@@ -7,13 +7,28 @@ const usePaginatedData = (queryFn, initialPageSize = 10) => {
     ? initialPageSize
     : allowedPageSizes[0];
 
-  const [page, setPage] = useState(0); // DataGrid usa 0-based
+  const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(safePageSize);
 
   const { data, isLoading, isError, refetch } = queryFn({
-    page: page + 1, // backend espera 1-based
+    page: page + 1,
     limit: pageSize,
   });
+
+
+  const paginacion = {
+    currentPage: data?.paginacion?.currentPage ?? page,
+    totalItems: data?.paginacion?.totalItems ?? 0,
+    totalPages: data?.paginacion?.totalPages ?? 1,
+    pageSize: data?.paginacion?.pageSize ?? pageSize,
+  };
+  const rows =
+    data?.usuarios ||
+    data?.logs ||
+    data?.productos ||
+    data?.auditLogs ||
+    data?.data ||
+    [];
 
   const handlePageChange = (newPage, newPageSize = pageSize) => {
     if (newPageSize !== pageSize) {
@@ -24,22 +39,13 @@ const usePaginatedData = (queryFn, initialPageSize = 10) => {
     }
   };
 
-  const paginacion = {
-    totalItems: data?.total || data?.paginacion?.totalItems || 0,
-    totalPages:
-      data?.paginacion?.totalPages || Math.ceil((data?.total || 0) / pageSize),
-  };
-
-  const rows =
-    data?.usuarios || data?.logs || data?.productos || data?.auditLogs || [];
-
   return {
     data: rows,
     isLoading,
     isError,
     refetch,
     page,
-    pageSize,
+    pageSize: paginacion.pageSize,
     paginacion,
     handlePageChange,
   };

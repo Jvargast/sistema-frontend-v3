@@ -11,6 +11,7 @@ import {
   Divider,
   Avatar,
   Button,
+  useTheme,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import BackButton from "../../../components/common/BackButton";
@@ -34,6 +35,8 @@ const Empresa = () => {
   } = useGetAllSucursalsQuery();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const theme = useTheme();
 
   useEffect(() => {
     if (location.state?.refetch) {
@@ -75,56 +78,109 @@ const Empresa = () => {
     );
   }
 
-  const empresa = empresas?.[0]; // Selecciona la primera empresa
+  const empresa = empresas?.[0];
 
   return (
-    <Box sx={{ padding: 4, backgroundColor: "#f0f4f8", minHeight: "100vh" }}>
+    <Box
+      sx={{
+        padding: 4,
+        minHeight: "100vh",
+        bgcolor: theme.palette.background.default,
+      }}
+    >
       <Box sx={{ maxWidth: "1200px", margin: "0 auto" }}>
-        {/* Perfil de la Empresa */}
         <BackButton to="/admin" label="Volver al menú" />
         <Card
           sx={{
             marginBottom: 4,
             borderRadius: 2,
-            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+            boxShadow: theme.shadows[4],
+            bgcolor: theme.palette.background.paper,
           }}
         >
           <CardContent>
             <Grid2 container spacing={4} alignItems="center">
-              <Grid2 xs={12} md={4} sx={{ display: "flex", justifyContent: "center" }}>
+              <Grid2
+                xs={12}
+                md={4}
+                sx={{ display: "flex", justifyContent: "center" }}
+              >
                 <Avatar
                   sx={{
                     width: 120,
                     height: 120,
-                    bgcolor: "primary.main",
                     fontSize: 36,
+                    bgcolor: theme.palette.primary.main,
+                    color: theme.palette.getContrastText(
+                      theme.palette.primary.main
+                    ),
+                    boxShadow: theme.shadows[3],
                   }}
                 >
                   {empresa?.nombre?.[0] || "E"}
                 </Avatar>
               </Grid2>
               <Grid2 xs={12} md={8}>
-                <Typography variant="h4" sx={{ fontWeight: "bold", color: "#333" }}>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: "bold",
+                    color: theme.palette.text.primary,
+                  }}
+                >
                   {empresa?.nombre || "Empresa no disponible"}
                 </Typography>
                 <Divider sx={{ marginY: 2 }} />
-                <Typography variant="body1" sx={{ color: "#555", marginBottom: 1 }}>
-                  <strong>RUT:</strong> {empresa?.rut_empresa || "No disponible"}
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    marginBottom: 1,
+                  }}
+                >
+                  <strong>RUT:</strong>{" "}
+                  {empresa?.rut_empresa || "No disponible"}
                 </Typography>
-                <Typography variant="body1" sx={{ color: "#555", marginBottom: 1 }}>
-                  <strong>Dirección:</strong> {empresa?.direccion || "No disponible"}
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    marginBottom: 1,
+                  }}
+                >
+                  <strong>Dirección:</strong>{" "}
+                  {empresa?.direccion || "No disponible"}
                 </Typography>
-                <Typography variant="body1" sx={{ color: "#555", marginBottom: 1 }}>
-                  <strong>Teléfono:</strong> {empresa?.telefono || "No disponible"}
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    marginBottom: 1,
+                  }}
+                >
+                  <strong>Teléfono:</strong>{" "}
+                  {empresa?.telefono || "No disponible"}
                 </Typography>
-                <Typography variant="body1" sx={{ color: "#555", marginBottom: 2 }}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    marginBottom: 2,
+                  }}
+                >
                   <strong>Email:</strong> {empresa?.email || "No disponible"}
                 </Typography>
                 <Button
                   variant="contained"
                   color="primary"
-                  sx={{ textTransform: "none", paddingX: 3 }}
-                  onClick={() => navigate(`/empresa/editar/${empresa?.id_empresa}`)}
+                  sx={{
+                    textTransform: "none",
+                    paddingX: 3,
+                    fontWeight: "bold",
+                  }}
+                  onClick={() =>
+                    navigate(`/empresa/editar/${empresa?.id_empresa}`)
+                  }
                 >
                   Editar Perfil Empresa
                 </Button>
@@ -134,7 +190,14 @@ const Empresa = () => {
         </Card>
 
         {/* Lista de Sucursales */}
-        <Typography variant="h5" sx={{ fontWeight: "bold", marginBottom: 3, color: "#333" }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: "bold",
+            marginBottom: 3,
+            color: theme.palette.text.primary,
+          }}
+        >
           Sucursales
         </Typography>
         <Grid2 container spacing={4}>
@@ -145,18 +208,23 @@ const Empresa = () => {
                 <Card
                   sx={{
                     borderRadius: 2,
-                    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+                    boxShadow: theme.shadows[2],
+                    bgcolor: theme.palette.background.paper,
                     transition: "transform 0.3s ease, box-shadow 0.3s ease",
                     "&:hover": {
                       transform: "scale(1.05)",
-                      boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
+                      boxShadow: theme.shadows[6],
                     },
                   }}
                 >
                   <CardContent>
                     <Typography
                       variant="h6"
-                      sx={{ fontWeight: "bold", color: "#444", marginBottom: 1 }}
+                      sx={{
+                        fontWeight: "bold",
+                        color: theme.palette.text.primary,
+                        marginBottom: 1,
+                      }}
                     >
                       {sucursal.nombre}
                     </Typography>
@@ -164,14 +232,30 @@ const Empresa = () => {
                     <List disablePadding>
                       <ListItem>
                         <ListItemText
-                          primary={<strong>Dirección</strong>}
-                          secondary={sucursal.direccion || "No disponible"}
+                          primary={
+                            <span style={{ fontWeight: 600 }}>Dirección</span>
+                          }
+                          secondary={
+                            <span
+                              style={{ color: theme.palette.text.secondary }}
+                            >
+                              {sucursal.direccion || "No disponible"}
+                            </span>
+                          }
                         />
                       </ListItem>
                       <ListItem>
                         <ListItemText
-                          primary={<strong>Teléfono</strong>}
-                          secondary={sucursal.telefono || "No disponible"}
+                          primary={
+                            <span style={{ fontWeight: 600 }}>Teléfono</span>
+                          }
+                          secondary={
+                            <span
+                              style={{ color: theme.palette.text.secondary }}
+                            >
+                              {sucursal.telefono || "No disponible"}
+                            </span>
+                          }
                         />
                       </ListItem>
                     </List>

@@ -4,23 +4,26 @@ import PropTypes from "prop-types";
 const SecuritySettings = ({ settings, onUpdate }) => {
   return (
     <Box
-    sx={{
-      maxWidth: "400px", // 📏 Ancho reducido
-      width: "100%", // Adaptable en móviles
-      padding: 3,
-      backgroundColor: "#FFFFFF",
-      borderRadius: "12px",
-      boxShadow: "0px 4px 12px rgba(0,0,0,0.1)",
-      margin: "0 auto", // Centrar en pantalla
-    }}
+      sx={{
+        width: "100%",
+        padding: 3,
+        borderRadius: "12px",
+        margin: "0 auto",
+      }}
     >
       <Typography variant="h5" fontWeight="bold" mb={2} color="primary">
         Configuraciones de Seguridad
       </Typography>
 
-      {/* Opción: Autenticación de Dos Factores */}
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-        <Typography variant="body1">Autenticación de Dos Factores (2FA)</Typography>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        mb={2}
+      >
+        <Typography variant="body1">
+          Autenticación de Dos Factores (2FA)
+        </Typography>
         <Switch
           color="primary"
           checked={settings.twoFactorEnabled}
@@ -29,9 +32,12 @@ const SecuritySettings = ({ settings, onUpdate }) => {
         />
       </Box>
       <Divider sx={{ mb: 2 }} />
-
-      {/* Opción: Bloqueo por intentos fallidos */}
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        mb={2}
+      >
         <Typography variant="body1">Bloqueo por intentos fallidos</Typography>
         <Switch
           color="primary"
@@ -42,7 +48,6 @@ const SecuritySettings = ({ settings, onUpdate }) => {
       </Box>
       <Divider sx={{ mb: 2 }} />
 
-      {/* Botón de Guardar */}
       <Button
         variant="contained"
         fullWidth

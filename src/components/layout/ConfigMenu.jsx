@@ -17,7 +17,12 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRightIcon } from "@mui/x-date-pickers";
 
-const ConfigMenu = ({ onToggleTheme, onChangeLanguage, currentLang }) => {
+const ConfigMenu = ({
+  iconColor,
+  onToggleTheme,
+  onChangeLanguage,
+  currentLang,
+}) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [languageMenuEl, setLanguageMenuEl] = useState(null);
   const isOpen = Boolean(anchorEl);
@@ -43,9 +48,32 @@ const ConfigMenu = ({ onToggleTheme, onChangeLanguage, currentLang }) => {
         aria-label="Abrir configuración"
         onClick={handleOpen}
         sx={{
-          color: theme.palette.text.primary,
+          color: iconColor,
           "&:hover": {
-            backgroundColor: theme.palette.action.hover,
+            backgroundColor: "rgba(44,62,80,0.07)",
+            border: "none",
+            outline: "none",
+            borderWidth: 0,
+            ":focus": {
+              outline: "none",
+              boxShadow: "none",
+            },
+            ":active": {
+              outline: "none",
+              boxShadow: "none",
+            },
+            "&:focus": {
+              outline: "none !important",
+              boxShadow: "none !important",
+            },
+            "&:focus-visible": {
+              outline: "none !important",
+              boxShadow: "none !important",
+            },
+            "&:active": {
+              outline: "none !important",
+              boxShadow: "none !important",
+            },
           },
         }}
       >
@@ -165,6 +193,7 @@ const ConfigMenu = ({ onToggleTheme, onChangeLanguage, currentLang }) => {
 };
 
 ConfigMenu.propTypes = {
+  iconColor: PropTypes.string,
   onToggleTheme: PropTypes.func.isRequired,
   onChangeLanguage: PropTypes.func.isRequired,
   currentLang: PropTypes.string.isRequired,

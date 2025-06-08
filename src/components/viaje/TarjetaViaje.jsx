@@ -84,7 +84,6 @@ const TarjetaViaje = ({ viaje }) => {
               mt={1}
               sx={{
                 fontStyle: "italic",
-                backgroundColor: "#f5f5f5",
                 p: 1,
                 borderRadius: 1,
               }}

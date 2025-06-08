@@ -41,7 +41,6 @@ const EditarEmpresa = () => {
   const [empresaData, setEmpresaData] = useState({});
   const [sucursalData, setSucursalData] = useState({});
 
-  // Sync empresa data with local state
   useEffect(() => {
     if (empresa) {
       setEmpresaData(empresa);
@@ -112,7 +111,6 @@ const EditarEmpresa = () => {
     <Box
       sx={{
         padding: 4,
-        backgroundColor: "#f4f6f8", // Fondo más claro y moderno
         minHeight: "100vh",
       }}
     >
@@ -122,44 +120,41 @@ const EditarEmpresa = () => {
           margin: "0 auto",
           padding: "20px",
           borderRadius: "12px",
-          backgroundColor: "#ffffff", // Fondo blanco para mayor contraste
-          boxShadow: "0px 6px 18px rgba(0, 0, 0, 0.06)", // Sombra moderna y sutil
         }}
       >
-        {/* Editar Empresa */}
         <BackButton to="/empresa" label="Volver" />
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: "bold",
+            marginBottom: 3,
+            color: (theme) => theme.palette.text.primary,
+            textTransform: "uppercase",
+            letterSpacing: "1.5px",
+          }}
+        >
+          Editar Empresa
+        </Typography>
+        <Divider
+          sx={{
+            marginBottom: 4,
+            borderColor: "rgba(0, 0, 0, 0.12)",
+          }}
+        />
         <Card
           sx={{
             marginTop: 4,
             marginBottom: 4,
             borderRadius: "12px",
-            boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.1)", // Sombra elegante
+            boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.1)",
             transition: "transform 0.3s ease, box-shadow 0.3s ease",
             "&:hover": {
               transform: "translateY(-2px)",
-              boxShadow: "0px 6px 24px rgba(0, 0, 0, 0.12)", // Sombra al hover
+              boxShadow: "0px 6px 24px rgba(0, 0, 0, 0.12)",
             },
           }}
         >
           <CardContent>
-            <Typography
-              variant="h5"
-              sx={{
-                fontWeight: "bold",
-                marginBottom: 3,
-                color: "rgba(0, 0, 0, 0.87)", // Color más visible y moderno
-                textTransform: "uppercase",
-                letterSpacing: "1.5px", // Estilo refinado
-              }}
-            >
-              Editar Empresa
-            </Typography>
-            <Divider
-              sx={{
-                marginBottom: 4,
-                borderColor: "rgba(0, 0, 0, 0.12)", // Color de la línea más tenue
-              }}
-            />
             <Grid2 container spacing={4}>
               <Grid2 xs={12} md={6}>
                 <TextField
@@ -268,7 +263,7 @@ const EditarEmpresa = () => {
                     paddingX: 4,
                     fontWeight: "bold",
                     borderRadius: "8px",
-                    backgroundColor: "#1976d2", // Azul moderno
+                    backgroundColor: "#1976d2",
                     "&:hover": {
                       backgroundColor: "#1565c0",
                     },
@@ -281,8 +276,6 @@ const EditarEmpresa = () => {
           </CardContent>
         </Card>
 
-        {/* Editar Sucursales */}
-        {/* Editar Sucursales */}
         <EditarSucursales
           sucursales={sucursales}
           idEmpresa={id}

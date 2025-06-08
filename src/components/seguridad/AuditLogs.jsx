@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography } from "@mui/material";
+import { Card, CardContent } from "@mui/material";
 import PaginatedTable from "./PaginatedTable";
 import PropTypes from "prop-types";
 
@@ -18,24 +18,8 @@ const AuditLogs = ({ logs, isLoading, onPageChange, paginacion }) => {
   ];
 
   return (
-    <Card
-      sx={{
-        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-        borderRadius: "12px",
-        backgroundColor: "#fff",
-      }}
-    >
+    <Card>
       <CardContent>
-        <Typography
-          variant="h5"
-          fontWeight="bold"
-          color="primary"
-          mb={2}
-          textAlign="center"
-        >
-          Logs de Auditoría 📜
-        </Typography>
-
         <PaginatedTable
           title="Registros de Auditoría"
           data={logs}

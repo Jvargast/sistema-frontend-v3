@@ -23,7 +23,7 @@ const EditarSucursales = ({
         sx={{
           fontWeight: "bold",
           marginBottom: 3,
-          color: "rgba(0, 0, 0, 0.87)",
+          color: (theme) => theme.palette.text.primary,
           textTransform: "uppercase",
           letterSpacing: 1,
         }}
@@ -51,7 +51,6 @@ const EditarSucursales = ({
                     transform: "scale(1.02)",
                     boxShadow: "0 6px 25px rgba(0, 0, 0, 0.15)",
                   },
-                  backgroundColor: "#ffffff",
                 }}
               >
                 <CardContent>
@@ -60,7 +59,7 @@ const EditarSucursales = ({
                     sx={{
                       fontWeight: "bold",
                       marginBottom: 2,
-                      color: "rgba(0, 0, 0, 0.87)",
+                      color: (theme) => theme.palette.text.primary,
                     }}
                   >
                     {sucursal.nombre}

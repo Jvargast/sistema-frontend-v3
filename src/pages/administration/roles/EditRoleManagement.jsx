@@ -116,7 +116,6 @@ const EditRole = () => {
     setSelectedPermisos((prev) => {
       const alreadySelected = prev.includes(permisoId);
 
-      // CASO: ACTIVAR (no estaba seleccionado)
       if (!alreadySelected) {
         const permisoBase = allPermisos.find((p) => p.id === permisoId);
         if (!permisoBase) return prev;
@@ -159,12 +158,10 @@ const EditRole = () => {
 
         return Array.from(toActivate);
       }
-      // CASO: DESACTIVAR (ya estaba seleccionado)
       else {
         const permisoBase = allPermisos.find((p) => p.id === permisoId);
         if (!permisoBase) return prev;
 
-        // BFS inverso en 'RequierenEste'
         const toRemove = new Set();
         const stack = [permisoBase];
 
@@ -183,9 +180,7 @@ const EditRole = () => {
           }
         }
 
-        // Si se va a remover más de 1 permiso (el principal + algunos dependientes), pedimos confirmación
         if (toRemove.size > 1) {
-          // Listamos los nombres de los dependientes que se van a remover
           const dependientes = [...toRemove].filter(
             (id) => id !== permisoBase.id
           );
@@ -202,12 +197,10 @@ const EditRole = () => {
             )}\n¿Deseas continuar?`
           );
           if (!proceed) {
-            // Si el usuario cancela, no hacemos cambios
             return prev;
           }
         }
 
-        // Procedemos a remover
         const cantidad = toRemove.size;
         if (cantidad > 1) {
           dispatch(
@@ -235,7 +228,7 @@ const EditRole = () => {
   if (isLoadingRole || isFetching) return <Typography>Cargando...</Typography>;
 
   return (
-    <Box sx={{ padding: 3, backgroundColor: "#f9fafb", minHeight: "100vh" }}>
+    <Box sx={{ padding: 3, minHeight: "100vh" }}>
       <Typography variant="h4" sx={{ fontWeight: "bold", marginBottom: 2 }}>
         Editar Rol: {role?.nombre}
       </Typography>

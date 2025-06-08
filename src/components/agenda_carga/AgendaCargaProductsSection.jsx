@@ -25,7 +25,6 @@ const AgendaCargaProductsSection = ({
             sx={{
               p: 2,
               borderRadius: 2,
-              bgcolor: "background.default",
             }}
           >
             <ProductSelectorRow
