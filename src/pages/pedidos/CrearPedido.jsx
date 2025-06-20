@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Stepper,
+  Step,
+  StepLabel,
+  Button,
+  Stack,
+  useTheme,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import StepConnector, { stepConnectorClasses } from "@mui/material/StepConnector";
 import { useSelector, useDispatch } from "react-redux";
 import { useCreatePedidoMutation } from "../../store/services/pedidosApi";
 import { addItem, clearCart } from "../../store/reducers/cartSlice";
@@ -12,6 +23,46 @@ import PedidoCategorias from "../../components/pedido/PedidoCategorias";
 import PedidoCarrito from "../../components/pedido/PedidoCarrito";
 import { useGetCajaAsignadaQuery } from "../../store/services/cajaApi";
 import NoCajaAsignadaDialog from "../../components/chofer/NoCajaAsignadaMessage";
+
+const StyledConnector = styled(StepConnector)(({ theme }) => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 12,
+  },
+  [`& .${stepConnectorClasses.line}`]: {
+    borderColor: theme.palette.divider,
+    borderTopWidth: 2,
+    borderRadius: 1,
+  },
+  [`&.${stepConnectorClasses.active} .${stepConnectorClasses.line}`]: {
+    borderColor: theme.palette.primary.main,
+  },
+  [`&.${stepConnectorClasses.completed} .${stepConnectorClasses.line}`]: {
+    borderColor: theme.palette.primary.main,
+  },
+}));
+
+const StepIconRoot = styled(Box)(({ theme, ownerState }) => ({
+  backgroundColor: ownerState.active || ownerState.completed
+    ? theme.palette.primary.main
+    : theme.palette.grey[400],
+  color: theme.palette.common.white,
+  width: 30,
+  height: 30,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: '50%',
+  fontWeight: 600,
+}));
+
+const StepIconComponent = (props) => {
+  const { active, completed, className, icon } = props;
+  return (
+    <StepIconRoot className={className} ownerState={{ active, completed }}>
+      {icon}
+    </StepIconRoot>
+  );
+};
 
 const CrearPedido = () => {
   const [selectedCliente, setSelectedCliente] = useState(null);
@@ -33,6 +84,11 @@ const CrearPedido = () => {
   const [createPedido, { isLoading, error }] = useCreatePedidoMutation();
 
   const [category, setCategory] = useState("all");
+  const steps = ["Datos", "Productos", "Carrito", "Resumen"];
+  const [activeStep, setActiveStep] = useState(0);
+
+  const nextStep = () => setActiveStep((s) => Math.min(s + 1, steps.length - 1));
+  const prevStep = () => setActiveStep((s) => Math.max(s - 1, 0));
 
   useEffect(() => {
     if (!loadingCaja && cajaAsignada?.asignada === false) {
@@ -135,57 +191,93 @@ const CrearPedido = () => {
     }
   };
 
+  const theme = useTheme();
+
   return (
-    <Box
-      sx={{
-        maxWidth: 1200,
-        mx: "auto",
-        p: 4,
-        borderRadius: 2,
-        display: "grid",
-        gridTemplateRows: "auto auto 1fr",
-        gap: 4,
-        minHeight: "80vh",
-      }}
-    >
-      <Box>
-        <Typography variant="h4" fontWeight={700} textAlign="center" mb={3}>
-          Crear Pedido
-        </Typography>
-        <PedidoForm
-          selectedCliente={selectedCliente}
-          setSelectedCliente={setSelectedCliente}
-          direccionEntrega={direccionEntrega}
-          setDireccionEntrega={setDireccionEntrega}
-          metodoPago={metodoPago}
-          setMetodoPago={setMetodoPago}
-          notas={notas}
-          setNotas={setNotas}
-          mostrarMetodoPago={tipoDocumento !== "factura"}
-          tipoDocumento={tipoDocumento}
-          setTipoDocumento={setTipoDocumento}
-        />
-      </Box>
+    <Box sx={{ maxWidth: 1200, mx: "auto", p: 4, borderRadius: 2 }}>
+      <Typography variant="h4" fontWeight={700} textAlign="center" mb={3}>
+        Crear Pedido
+      </Typography>
 
-      {/* Fila 2: Selector de Categorías */}
-      <Box>
-        <PedidoCategorias onSelectCategory={setCategory} />
-      </Box>
-
-      <Box
+      <Stepper
+        activeStep={activeStep}
+        alternativeLabel
+        connector={<StyledConnector />}
         sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "1.5fr 1fr" },
-          gap: 4,
+          mb: 4,
+          backgroundColor: theme.palette.background.paper,
+          p: 2,
+          borderRadius: 2,
         }}
       >
-        <PedidoProductos
-          selectedCategory={category}
-          onAddToCart={handleAddToCart}
-        />
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel StepIconComponent={StepIconComponent}>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
 
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      {activeStep === 0 && (
+        <Box>
+          <PedidoForm
+            selectedCliente={selectedCliente}
+            setSelectedCliente={setSelectedCliente}
+            direccionEntrega={direccionEntrega}
+            setDireccionEntrega={setDireccionEntrega}
+            metodoPago={metodoPago}
+            setMetodoPago={setMetodoPago}
+            notas={notas}
+            setNotas={setNotas}
+            mostrarMetodoPago={tipoDocumento !== "factura"}
+            tipoDocumento={tipoDocumento}
+            setTipoDocumento={setTipoDocumento}
+          />
+          <Stack direction="row" justifyContent="flex-end" mt={2}>
+            <Button variant="contained" onClick={nextStep}>
+              Siguiente
+            </Button>
+          </Stack>
+        </Box>
+      )}
+
+      {activeStep === 1 && (
+        <Box>
+          <PedidoCategorias onSelectCategory={setCategory} />
+          <PedidoProductos
+            selectedCategory={category}
+            onAddToCart={handleAddToCart}
+          />
+          <Stack direction="row" justifyContent="space-between" mt={2}>
+            <Button variant="outlined" onClick={prevStep}>
+              Atrás
+            </Button>
+            <Button variant="contained" onClick={nextStep}>
+              Siguiente
+            </Button>
+          </Stack>
+        </Box>
+      )}
+
+      {activeStep === 2 && (
+        <Box>
           <PedidoCarrito />
+          <Stack direction="row" justifyContent="space-between" mt={2}>
+            <Button variant="outlined" onClick={prevStep}>
+              Atrás
+            </Button>
+            <Button
+              variant="contained"
+              onClick={nextStep}
+              disabled={cart.length === 0}
+            >
+              Siguiente
+            </Button>
+          </Stack>
+        </Box>
+      )}
+
+      {activeStep === 3 && (
+        <Box>
           <PedidoResumen
             total={total}
             isLoading={isLoading}
@@ -193,8 +285,14 @@ const CrearPedido = () => {
             onSubmit={handleCreatePedido}
             submitLabel="Generar Pedido"
           />
+          <Stack direction="row" justifyContent="flex-start" mt={2}>
+            <Button variant="outlined" onClick={prevStep} disabled={isLoading}>
+              Atrás
+            </Button>
+          </Stack>
         </Box>
-      </Box>
+      )}
+
       <NoCajaAsignadaDialog
         open={openNoCajaModal}
         handleClose={() => setOpenNoCajaModal(false)}
