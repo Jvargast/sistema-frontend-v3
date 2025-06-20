@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 const Boxkpi = ({
   title,
