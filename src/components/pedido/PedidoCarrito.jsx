@@ -55,10 +55,12 @@ const PedidoCarrito = () => {
       {cart.length > 0 ? (
         <>
           <Typography
-            variant="h5"
-            color="primary"
-            fontWeight="bold"
-            textAlign="center"
+            variant="h6"
+            sx={{
+              fontWeight: "bold",
+              color: theme.palette.text.primary,
+              mb: 2,
+            }}
           >
             Carrito de Compras
           </Typography>

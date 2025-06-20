@@ -97,6 +97,7 @@ const PedidoForm = ({
             onClick={() => {
               setSelectedCliente(null);
               setDireccionEntrega("");
+              setTipoDocumento?.("boleta");
             }}
             color="error"
             size="small"
@@ -110,6 +111,15 @@ const PedidoForm = ({
         onClose={() => setOpenClienteModal(false)}
         onSelect={(cliente) => {
           setSelectedCliente(cliente);
+          if (
+            cliente?.tipo_cliente === "empresa" &&
+            cliente?.rut &&
+            cliente?.razon_social
+          ) {
+            setTipoDocumento?.("factura");
+          } else {
+            setTipoDocumento?.("boleta");
+          }
         }}
       />
 

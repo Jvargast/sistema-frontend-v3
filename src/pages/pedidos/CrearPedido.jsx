@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   Typography,
@@ -10,7 +11,9 @@ import {
   useTheme,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import StepConnector, { stepConnectorClasses } from "@mui/material/StepConnector";
+import StepConnector, {
+  stepConnectorClasses,
+} from "@mui/material/StepConnector";
 import { useSelector, useDispatch } from "react-redux";
 import { useCreatePedidoMutation } from "../../store/services/pedidosApi";
 import { addItem, clearCart } from "../../store/reducers/cartSlice";
@@ -41,19 +44,19 @@ const StyledConnector = styled(StepConnector)(({ theme }) => ({
 }));
 
 const StepIconRoot = styled(Box)(({ theme, ownerState }) => ({
-  backgroundColor: ownerState.active || ownerState.completed
-    ? theme.palette.primary.main
-    : theme.palette.grey[400],
+  backgroundColor:
+    ownerState.active || ownerState.completed
+      ? theme.palette.primary.main
+      : theme.palette.grey[400],
   color: theme.palette.common.white,
   width: 30,
   height: 30,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  borderRadius: '50%',
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: "50%",
   fontWeight: 600,
 }));
-
 const StepIconComponent = (props) => {
   const { active, completed, className, icon } = props;
   return (
@@ -63,10 +66,17 @@ const StepIconComponent = (props) => {
   );
 };
 
+StepIconComponent.propTypes = {
+  active: PropTypes.bool,
+  completed: PropTypes.bool,
+  className: PropTypes.string,
+  icon: PropTypes.node,
+};
+
 const CrearPedido = () => {
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [direccionEntrega, setDireccionEntrega] = useState("");
-  const [tipoDocumento, setTipoDocumento] = useState("boleta");
+  const [tipoDocumento, setTipoDocumento] = useState("");
   const [openNoCajaModal, setOpenNoCajaModal] = useState(false);
 
   const [metodoPago, setMetodoPago] = useState(null);
@@ -86,7 +96,8 @@ const CrearPedido = () => {
   const steps = ["Datos", "Productos", "Carrito", "Resumen"];
   const [activeStep, setActiveStep] = useState(0);
 
-  const nextStep = () => setActiveStep((s) => Math.min(s + 1, steps.length - 1));
+  const nextStep = () =>
+    setActiveStep((s) => Math.min(s + 1, steps.length - 1));
   const prevStep = () => setActiveStep((s) => Math.max(s - 1, 0));
 
   useEffect(() => {
@@ -211,14 +222,9 @@ const CrearPedido = () => {
         {steps.map((label) => (
           <Step key={label}>
             <StepLabel StepIconComponent={StepIconComponent}>{label}</StepLabel>
-      <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
           </Step>
         ))}
       </Stepper>
-
       {activeStep === 0 && (
         <Box>
           <PedidoForm
@@ -244,6 +250,16 @@ const CrearPedido = () => {
 
       {activeStep === 1 && (
         <Box>
+          <Typography
+            variant="h6"
+            sx={{
+              mb: 3,
+              fontWeight: "bold",
+              color: theme.palette.text.primary,
+            }}
+          >
+            Productos
+          </Typography>
           <PedidoCategorias onSelectCategory={setCategory} />
           <PedidoProductos
             selectedCategory={category}
