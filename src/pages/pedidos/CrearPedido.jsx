@@ -15,7 +15,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { useCreatePedidoMutation } from "../../store/services/pedidosApi";
 import { addItem, clearCart } from "../../store/reducers/cartSlice";
 import { showNotification } from "../../store/reducers/notificacionSlice";
-
 import PedidoForm from "../../components/pedido/PedidoForm";
 import PedidoResumen from "../../components/pedido/PedidoResumen";
 import PedidoProductos from "../../components/pedido/PedidoProductos";
@@ -198,7 +197,6 @@ const CrearPedido = () => {
       <Typography variant="h4" fontWeight={700} textAlign="center" mb={3}>
         Crear Pedido
       </Typography>
-
       <Stepper
         activeStep={activeStep}
         alternativeLabel
@@ -213,6 +211,10 @@ const CrearPedido = () => {
         {steps.map((label) => (
           <Step key={label}>
             <StepLabel StepIconComponent={StepIconComponent}>{label}</StepLabel>
+      <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
           </Step>
         ))}
       </Stepper>
