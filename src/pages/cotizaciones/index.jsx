@@ -26,7 +26,7 @@ const calcularFechaVencimiento = (dias) => {
     .hour(12)
     .minute(0)
     .second(0)
-    .format(); // ISO completo
+    .format(); 
 };
 
 const CrearCotizacion = () => {
@@ -46,12 +46,6 @@ const CrearCotizacion = () => {
 
   const [createCotizacion, { isLoading, error }] =
     useCreateCotizacionMutation();
-
-  /*   const calcularFechaVencimiento = (dias) => {
-    const hoy = new Date();
-    hoy.setDate(hoy.getDate() + dias);
-    return hoy.toISOString().split("T")[0];
-  }; */
 
   useEffect(() => {
     if (selectedCliente && selectedCliente.direccion) {
@@ -162,6 +156,8 @@ const CrearCotizacion = () => {
           notas={notas}
           mostrarMetodoPago={false}
           mostrarTipoDocumento={false}
+          tipoDocumento={""}
+          setTipoDocumento={() => {}}
           setNotas={setNotas}
           extraFields={
             <>

@@ -1,7 +1,7 @@
 import { Box, Typography, Paper, useMediaQuery } from "@mui/material";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 const InventarioCamion = ({
   inventarioData,

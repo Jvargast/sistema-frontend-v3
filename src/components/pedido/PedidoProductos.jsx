@@ -25,7 +25,7 @@ const PedidoProductos = ({ selectedCategory, onAddToCart }) => {
     <Box>
       {productosData?.productos.length > 0 ? (
         <>
-          <Grid container spacing={2} mb={3}>
+          <Grid container spacing={1} mb={3}>
             {productosData?.productos?.map((product) => (
               <Grid item xs={12} sm={6} md={3} lg={3} key={product.id_producto}>
                 <ProductCard

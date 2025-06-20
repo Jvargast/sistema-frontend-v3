@@ -47,18 +47,15 @@ const PedidoForm = ({
 
   useEffect(() => {
     if (
-      tipoDocumento === "factura" &&
-      !(selectedCliente?.rut && selectedCliente?.razon_social)
+      selectedCliente?.tipo_cliente === "empresa" &&
+      selectedCliente?.rut &&
+      selectedCliente?.razon_social
     ) {
-      setTipoDocumento?.("boleta");
+      if (tipoDocumento !== "factura") setTipoDocumento("factura");
+    } else {
+      if (tipoDocumento !== "boleta") setTipoDocumento("boleta");
     }
   }, [selectedCliente, tipoDocumento, setTipoDocumento]);
-
-  useEffect(() => {
-    if (isEmpresa && tipoDocumento === "boleta") {
-      setTipoDocumento?.("factura");
-    }
-  }, [isEmpresa, tipoDocumento, setTipoDocumento]);
 
   return (
     <Paper
@@ -146,6 +143,8 @@ const PedidoForm = ({
         <TextField
           select
           fullWidth
+          id="tipo-documento"
+          name="tipoDocumento"
           label="Tipo de Documento"
           value={tipoDocumento || ""}
           onChange={(e) => setTipoDocumento?.(e.target.value)}
@@ -159,16 +158,12 @@ const PedidoForm = ({
           }}
         >
           {isEmpresa &&
-            selectedCliente?.rut &&
-            selectedCliente?.razon_social && (
-              <MenuItem value="factura">Factura</MenuItem>
-            )}
-          {!isEmpresa && <MenuItem value="boleta">Boleta</MenuItem>}
-          {!isEmpresa &&
-            selectedCliente?.rut &&
-            selectedCliente?.razon_social && (
-              <MenuItem value="factura">Factura</MenuItem>
-            )}
+          selectedCliente?.rut &&
+          selectedCliente?.razon_social ? (
+            <MenuItem value="factura">Factura</MenuItem>
+          ) : (
+            <MenuItem value="boleta">Boleta</MenuItem>
+          )}
         </TextField>
       )}
 

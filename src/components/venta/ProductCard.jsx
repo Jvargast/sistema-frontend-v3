@@ -50,6 +50,7 @@ const ProductCard = ({ product, onAddToCart }) => {
         <Box
           height={160}
           display="flex"
+          flexDirection="column"
           alignItems="center"
           justifyContent="center"
           sx={{
@@ -59,6 +60,13 @@ const ProductCard = ({ product, onAddToCart }) => {
           }}
         >
           <BrokenImageIcon sx={{ fontSize: 48, color: "#9e9e9e" }} />
+          <Typography
+            variant="caption"
+            color="textSecondary"
+            sx={{ mt: 1, opacity: 0.7 }}
+          >
+            No image
+          </Typography>
         </Box>
       ) : (
         <CardMedia

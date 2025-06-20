@@ -172,11 +172,10 @@ const CrearPedido = () => {
         <PedidoCategorias onSelectCategory={setCategory} />
       </Box>
 
-      {/* Fila 3: Dos columnas */}
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
+          gridTemplateColumns: { xs: "1fr", md: "1.5fr 1fr" },
           gap: 4,
         }}
       >
