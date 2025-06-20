@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Stepper,
+  Step,
+  StepLabel,
+  Button,
+  Stack,
+} from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { useCreatePedidoMutation } from "../../store/services/pedidosApi";
 import { addItem, clearCart } from "../../store/reducers/cartSlice";
@@ -33,6 +41,11 @@ const CrearPedido = () => {
   const [createPedido, { isLoading, error }] = useCreatePedidoMutation();
 
   const [category, setCategory] = useState("all");
+  const steps = ["Datos", "Productos", "Carrito", "Resumen"];
+  const [activeStep, setActiveStep] = useState(0);
+
+  const nextStep = () => setActiveStep((s) => Math.min(s + 1, steps.length - 1));
+  const prevStep = () => setActiveStep((s) => Math.max(s - 1, 0));
 
   useEffect(() => {
     if (!loadingCaja && cajaAsignada?.asignada === false) {
@@ -136,56 +149,80 @@ const CrearPedido = () => {
   };
 
   return (
-    <Box
-      sx={{
-        maxWidth: 1200,
-        mx: "auto",
-        p: 4,
-        borderRadius: 2,
-        display: "grid",
-        gridTemplateRows: "auto auto 1fr",
-        gap: 4,
-        minHeight: "80vh",
-      }}
-    >
-      <Box>
-        <Typography variant="h4" fontWeight={700} textAlign="center" mb={3}>
-          Crear Pedido
-        </Typography>
-        <PedidoForm
-          selectedCliente={selectedCliente}
-          setSelectedCliente={setSelectedCliente}
-          direccionEntrega={direccionEntrega}
-          setDireccionEntrega={setDireccionEntrega}
-          metodoPago={metodoPago}
-          setMetodoPago={setMetodoPago}
-          notas={notas}
-          setNotas={setNotas}
-          mostrarMetodoPago={tipoDocumento !== "factura"}
-          tipoDocumento={tipoDocumento}
-          setTipoDocumento={setTipoDocumento}
-        />
-      </Box>
+    <Box sx={{ maxWidth: 1200, mx: "auto", p: 4, borderRadius: 2 }}>
+      <Typography variant="h4" fontWeight={700} textAlign="center" mb={3}>
+        Crear Pedido
+      </Typography>
 
-      {/* Fila 2: Selector de Categorías */}
-      <Box>
-        <PedidoCategorias onSelectCategory={setCategory} />
-      </Box>
+      <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
 
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "1.5fr 1fr" },
-          gap: 4,
-        }}
-      >
-        <PedidoProductos
-          selectedCategory={category}
-          onAddToCart={handleAddToCart}
-        />
+      {activeStep === 0 && (
+        <Box>
+          <PedidoForm
+            selectedCliente={selectedCliente}
+            setSelectedCliente={setSelectedCliente}
+            direccionEntrega={direccionEntrega}
+            setDireccionEntrega={setDireccionEntrega}
+            metodoPago={metodoPago}
+            setMetodoPago={setMetodoPago}
+            notas={notas}
+            setNotas={setNotas}
+            mostrarMetodoPago={tipoDocumento !== "factura"}
+            tipoDocumento={tipoDocumento}
+            setTipoDocumento={setTipoDocumento}
+          />
+          <Stack direction="row" justifyContent="flex-end" mt={2}>
+            <Button variant="contained" onClick={nextStep}>
+              Siguiente
+            </Button>
+          </Stack>
+        </Box>
+      )}
 
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      {activeStep === 1 && (
+        <Box>
+          <PedidoCategorias onSelectCategory={setCategory} />
+          <PedidoProductos
+            selectedCategory={category}
+            onAddToCart={handleAddToCart}
+          />
+          <Stack direction="row" justifyContent="space-between" mt={2}>
+            <Button variant="outlined" onClick={prevStep}>
+              Atrás
+            </Button>
+            <Button variant="contained" onClick={nextStep}>
+              Siguiente
+            </Button>
+          </Stack>
+        </Box>
+      )}
+
+      {activeStep === 2 && (
+        <Box>
           <PedidoCarrito />
+          <Stack direction="row" justifyContent="space-between" mt={2}>
+            <Button variant="outlined" onClick={prevStep}>
+              Atrás
+            </Button>
+            <Button
+              variant="contained"
+              onClick={nextStep}
+              disabled={cart.length === 0}
+            >
+              Siguiente
+            </Button>
+          </Stack>
+        </Box>
+      )}
+
+      {activeStep === 3 && (
+        <Box>
           <PedidoResumen
             total={total}
             isLoading={isLoading}
@@ -193,8 +230,14 @@ const CrearPedido = () => {
             onSubmit={handleCreatePedido}
             submitLabel="Generar Pedido"
           />
+          <Stack direction="row" justifyContent="flex-start" mt={2}>
+            <Button variant="outlined" onClick={prevStep} disabled={isLoading}>
+              Atrás
+            </Button>
+          </Stack>
         </Box>
-      </Box>
+      )}
+
       <NoCajaAsignadaDialog
         open={openNoCajaModal}
         handleClose={() => setOpenNoCajaModal(false)}
