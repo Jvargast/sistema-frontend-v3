@@ -7,7 +7,10 @@ import {
   StepLabel,
   Button,
   Stack,
+  useTheme,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import StepConnector, { stepConnectorClasses } from "@mui/material/StepConnector";
 import { useSelector, useDispatch } from "react-redux";
 import { useCreatePedidoMutation } from "../../store/services/pedidosApi";
 import { addItem, clearCart } from "../../store/reducers/cartSlice";
@@ -20,6 +23,46 @@ import PedidoCategorias from "../../components/pedido/PedidoCategorias";
 import PedidoCarrito from "../../components/pedido/PedidoCarrito";
 import { useGetCajaAsignadaQuery } from "../../store/services/cajaApi";
 import NoCajaAsignadaDialog from "../../components/chofer/NoCajaAsignadaMessage";
+
+const StyledConnector = styled(StepConnector)(({ theme }) => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 12,
+  },
+  [`& .${stepConnectorClasses.line}`]: {
+    borderColor: theme.palette.divider,
+    borderTopWidth: 2,
+    borderRadius: 1,
+  },
+  [`&.${stepConnectorClasses.active} .${stepConnectorClasses.line}`]: {
+    borderColor: theme.palette.primary.main,
+  },
+  [`&.${stepConnectorClasses.completed} .${stepConnectorClasses.line}`]: {
+    borderColor: theme.palette.primary.main,
+  },
+}));
+
+const StepIconRoot = styled(Box)(({ theme, ownerState }) => ({
+  backgroundColor: ownerState.active || ownerState.completed
+    ? theme.palette.primary.main
+    : theme.palette.grey[400],
+  color: theme.palette.common.white,
+  width: 30,
+  height: 30,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: '50%',
+  fontWeight: 600,
+}));
+
+const StepIconComponent = (props) => {
+  const { active, completed, className, icon } = props;
+  return (
+    <StepIconRoot className={className} ownerState={{ active, completed }}>
+      {icon}
+    </StepIconRoot>
+  );
+};
 
 const CrearPedido = () => {
   const [selectedCliente, setSelectedCliente] = useState(null);
@@ -148,16 +191,28 @@ const CrearPedido = () => {
     }
   };
 
+  const theme = useTheme();
+
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", p: 4, borderRadius: 2 }}>
       <Typography variant="h4" fontWeight={700} textAlign="center" mb={3}>
         Crear Pedido
       </Typography>
 
-      <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+      <Stepper
+        activeStep={activeStep}
+        alternativeLabel
+        connector={<StyledConnector />}
+        sx={{
+          mb: 4,
+          backgroundColor: theme.palette.background.paper,
+          p: 2,
+          borderRadius: 2,
+        }}
+      >
         {steps.map((label) => (
           <Step key={label}>
-            <StepLabel>{label}</StepLabel>
+            <StepLabel StepIconComponent={StepIconComponent}>{label}</StepLabel>
           </Step>
         ))}
       </Stepper>
