@@ -6,12 +6,14 @@ import {
   Button,
   Box,
   Chip,
+  useTheme,
 } from "@mui/material";
 import BrokenImageIcon from "@mui/icons-material/BrokenImage";
 import PropTypes from "prop-types";
 import { useState } from "react";
 
 const ProductCard = ({ product, onAddToCart }) => {
+  const theme = useTheme();
   const [imageError, setImageError] = useState(false);
   const precio = Number(product.precio || 0);
   const stock = product?.inventario?.cantidad || 0;
@@ -23,11 +25,12 @@ const ProductCard = ({ product, onAddToCart }) => {
     <Card
       sx={{
         borderRadius: 4,
-        boxShadow: 3,
+        boxShadow: 'none',
+        border: `1px solid ${theme.palette.divider}`,
         transition: "transform 0.25s ease, box-shadow 0.3s ease",
         "&:hover": {
           transform: "translateY(-4px)",
-          boxShadow: 6,
+          boxShadow: 3,
         },
         width: "100%",
         maxWidth: 260,

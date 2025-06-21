@@ -149,7 +149,6 @@ const PedidoClienteSelector = ({
             sx={{
               backgroundColor: theme.palette.primary.light,
               border: `1px solid ${theme.palette.primary.main}`,
-              boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
             }}
           >
             <Typography fontWeight="bold">
