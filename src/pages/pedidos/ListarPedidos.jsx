@@ -1,8 +1,15 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { IconButton, Chip } from "@mui/material";
-import { Visibility, Edit } from "@mui/icons-material";
-import { useGetAllPedidosQuery } from "../../store/services/pedidosApi";
+import { IconButton, Chip, Tooltip } from "@mui/material";
+import { Visibility, Edit, Cancel, Delete } from "@mui/icons-material";
+import {
+  useGetAllPedidosQuery,
+  useDeletePedidoMutation,
+  useRejectPedidoMutation,
+} from "../../store/services/pedidosApi";
+import { useDispatch } from "react-redux";
+import { showNotification } from "../../store/reducers/notificacionSlice";
+import AlertDialog from "../../components/common/AlertDialog";
 import DataTable from "../../components/common/DataTable";
 import EmptyState from "../../components/common/EmptyState";
 
@@ -16,6 +23,67 @@ const ListarPedidos = () => {
     page: page + 1,
     limit: rowsPerPage,
   });
+
+  const [deletePedido] = useDeletePedidoMutation();
+  const [rejectPedido] = useRejectPedidoMutation();
+  const dispatch = useDispatch();
+  const [openAlert, setOpenAlert] = useState(false);
+  const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
+
+  const handleRejectPedido = async (pedido) => {
+    try {
+      await rejectPedido(pedido.id_pedido).unwrap();
+      refetch();
+      dispatch(
+        showNotification({
+          message: "Pedido rechazado correctamente.",
+          severity: "success",
+        })
+      );
+    } catch (error) {
+      console.error("Error al rechazar pedido:", error);
+      dispatch(
+        showNotification({
+          message: `Error al rechazar: ${error?.data?.error}`,
+          severity: "error",
+        })
+      );
+    }
+  };
+
+  const handleDeletePedidoConfirmado = async () => {
+    if (!pedidoSeleccionado) return;
+    try {
+      await deletePedido(pedidoSeleccionado.id_pedido).unwrap();
+      refetch();
+      dispatch(
+        showNotification({
+          message: "Pedido eliminado correctamente.",
+          severity: "success",
+        })
+      );
+    } catch (error) {
+      console.error("Error al eliminar pedido:", error);
+      dispatch(
+        showNotification({
+          message: `Error al eliminar: ${error?.data?.error}`,
+          severity: "error",
+        })
+      );
+    }
+    setOpenAlert(false);
+    setPedidoSeleccionado(null);
+  };
+
+  const handleConfirmDelete = (pedido) => {
+    setPedidoSeleccionado(pedido);
+    setOpenAlert(true);
+  };
+
+  const handleCloseAlert = () => {
+    setOpenAlert(false);
+    setPedidoSeleccionado(null);
+  };
 
   useEffect(() => {
     refetch();
@@ -88,19 +156,42 @@ const ListarPedidos = () => {
     {
       id: "acciones",
       label: "Acciones",
-      render: (row) => (
-        <>
-          <IconButton
-            color="primary"
-            onClick={() => navigate(`/pedidos/ver/${row.id_pedido}`)}
-          >
-            <Visibility />
-          </IconButton>
-          <IconButton color="inherit">
-            <Edit />
-          </IconButton>
-        </>
-      ),
+      render: (row) => {
+        const estado = row.EstadoPedido?.nombre_estado;
+        const puedeEliminar = estado === "Rechazado";
+        return (
+          <>
+            <Tooltip title="Ver Detalle">
+              <IconButton
+                color="primary"
+                onClick={() => navigate(`/pedidos/ver/${row.id_pedido}`)}
+              >
+                <Visibility />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Editar">
+              <IconButton color="inherit">
+                <Edit />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Rechazar Pedido">
+              <IconButton
+                color="warning"
+                onClick={() => handleRejectPedido(row)}
+              >
+                <Cancel />
+              </IconButton>
+            </Tooltip>
+            {puedeEliminar && (
+              <Tooltip title="Eliminar Pedido">
+                <IconButton color="error" onClick={() => handleConfirmDelete(row)}>
+                  <Delete />
+                </IconButton>
+              </Tooltip>
+            )}
+          </>
+        );
+      },
     },
   ];
   if (!isLoading && pedidos.length === 0) {
@@ -115,21 +206,30 @@ const ListarPedidos = () => {
   }
 
   return (
-    <DataTable
-      title="🗒️ Listado de Pedidos"
-      columns={columns}
-      rows={pedidos}
-      totalItems={totalItems}
-      rowsPerPage={rowsPerPage}
-      page={page}
-      handleChangePage={(_, newPage) => setPage(newPage)}
-      handleChangeRowsPerPage={(event) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0);
-      }}
-      loading={isLoading}
-      errorMessage="No se pudieron cargar los pedidos o no existen datos disponibles."
-    />
+    <>
+      <DataTable
+        title="🗒️ Listado de Pedidos"
+        columns={columns}
+        rows={pedidos}
+        totalItems={totalItems}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        handleChangePage={(_, newPage) => setPage(newPage)}
+        handleChangeRowsPerPage={(event) => {
+          setRowsPerPage(parseInt(event.target.value, 10));
+          setPage(0);
+        }}
+        loading={isLoading}
+        errorMessage="No se pudieron cargar los pedidos o no existen datos disponibles."
+      />
+      <AlertDialog
+        openAlert={openAlert}
+        onCloseAlert={handleCloseAlert}
+        onConfirm={handleDeletePedidoConfirmado}
+        title="Confirmar Eliminación"
+        message="¿Estás seguro que deseas eliminar este pedido? Esta acción no se puede deshacer."
+      />
+    </>
   );
 };
 

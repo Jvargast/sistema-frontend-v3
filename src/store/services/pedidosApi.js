@@ -139,6 +139,22 @@ export const pedidosApi = createApi({
       },
     }),
 
+    // Rechazar un pedido
+    rejectPedido: builder.mutation({
+      query: (id_pedido) => ({
+        url: `/pedidos/${id_pedido}/rechazar`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Pedidos"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Error al rechazar el pedido:", error);
+        }
+      },
+    }),
+
     // Eliminar un pedido
     deletePedido: builder.mutation({
       query: (id_pedido) => ({
@@ -191,6 +207,7 @@ export const {
   useAsignarPedidoMutation,
   useDesasignarPedidoMutation,
   useDeletePedidoMutation,
+  useRejectPedidoMutation,
   useGetDetalleConTotalQuery,
   useRegistrarDesdePedidoMutation
 } = pedidosApi;
