@@ -155,6 +155,22 @@ export const pedidosApi = createApi({
       },
     }),
 
+    // Revertir un pedido rechazado
+    revertPedido: builder.mutation({
+      query: (id_pedido) => ({
+        url: `/pedidos/${id_pedido}/revertir`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Pedidos"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Error al revertir el pedido:", error);
+        }
+      },
+    }),
+
     // Eliminar un pedido
     deletePedido: builder.mutation({
       query: (id_pedido) => ({
@@ -208,6 +224,7 @@ export const {
   useDesasignarPedidoMutation,
   useDeletePedidoMutation,
   useRejectPedidoMutation,
+  useRevertPedidoMutation,
   useGetDetalleConTotalQuery,
   useRegistrarDesdePedidoMutation
 } = pedidosApi;

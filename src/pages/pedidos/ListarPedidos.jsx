@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { IconButton, Chip, Tooltip } from "@mui/material";
-import { Visibility, Edit, Cancel, Delete } from "@mui/icons-material";
+import { Visibility, Edit, Cancel, Delete, Undo } from "@mui/icons-material";
 import {
   useGetAllPedidosQuery,
   useDeletePedidoMutation,
   useRejectPedidoMutation,
+  useRevertPedidoMutation,
 } from "../../store/services/pedidosApi";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
@@ -26,6 +27,7 @@ const ListarPedidos = () => {
 
   const [deletePedido] = useDeletePedidoMutation();
   const [rejectPedido] = useRejectPedidoMutation();
+  const [revertPedido] = useRevertPedidoMutation();
   const dispatch = useDispatch();
   const [openAlert, setOpenAlert] = useState(false);
   const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
@@ -45,6 +47,27 @@ const ListarPedidos = () => {
       dispatch(
         showNotification({
           message: `Error al rechazar: ${error?.data?.error}`,
+          severity: "error",
+        })
+      );
+    }
+  };
+
+  const handleRevertPedido = async (pedido) => {
+    try {
+      await revertPedido(pedido.id_pedido).unwrap();
+      refetch();
+      dispatch(
+        showNotification({
+          message: "Pedido revertido correctamente.",
+          severity: "success",
+        })
+      );
+    } catch (error) {
+      console.error("Error al revertir pedido:", error);
+      dispatch(
+        showNotification({
+          message: `Error al revertir: ${error?.data?.error}`,
           severity: "error",
         })
       );
@@ -159,6 +182,7 @@ const ListarPedidos = () => {
       render: (row) => {
         const estado = row.EstadoPedido?.nombre_estado;
         const puedeEliminar = estado === "Rechazado";
+        const puedeRevertir = estado === "Rechazado";
         return (
           <>
             <Tooltip title="Ver Detalle">
@@ -182,6 +206,13 @@ const ListarPedidos = () => {
                 <Cancel />
               </IconButton>
             </Tooltip>
+            {puedeRevertir && (
+              <Tooltip title="Revertir Pedido">
+                <IconButton color="info" onClick={() => handleRevertPedido(row)}>
+                  <Undo />
+                </IconButton>
+              </Tooltip>
+            )}
             {puedeEliminar && (
               <Tooltip title="Eliminar Pedido">
                 <IconButton color="error" onClick={() => handleConfirmDelete(row)}>
