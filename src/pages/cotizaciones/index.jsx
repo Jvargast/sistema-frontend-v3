@@ -1,5 +1,19 @@
 import { useEffect, useState } from "react";
-import { Box, Button, TextField, Typography } from "@mui/material";
+import PropTypes from "prop-types";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Stepper,
+  Step,
+  StepLabel,
+  Stack,
+  useTheme,
+  Divider,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import StepConnector, { stepConnectorClasses } from "@mui/material/StepConnector";
 import { useSelector, useDispatch } from "react-redux";
 import { useCreateCotizacionMutation } from "../../store/services/cotizacionesApi";
 import { addItem, clearCart } from "../../store/reducers/cartSlice";
@@ -13,6 +27,59 @@ import { useNavigate } from "react-router";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+
+const StyledConnector = styled(StepConnector)(({ theme }) => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 12,
+  },
+  [`& .${stepConnectorClasses.line}`]: {
+    borderColor: theme.palette.divider,
+    borderTopWidth: 2,
+    borderRadius: 1,
+  },
+  [`&.${stepConnectorClasses.active} .${stepConnectorClasses.line}`]: {
+    borderColor: theme.palette.primary.main,
+  },
+  [`&.${stepConnectorClasses.completed} .${stepConnectorClasses.line}`]: {
+    borderColor: theme.palette.primary.main,
+  },
+}));
+
+const StepIconRoot = styled(Box)(({ theme, ownerState }) => ({
+  backgroundColor: theme.palette.background.paper,
+  border: `2px solid ${
+    ownerState.active || ownerState.completed
+      ? theme.palette.primary.main
+      : theme.palette.divider
+  }`,
+  color:
+    ownerState.active || ownerState.completed
+      ? theme.palette.primary.main
+      : theme.palette.text.disabled,
+  width: 30,
+  height: 30,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: "50%",
+  fontWeight: 600,
+}));
+
+const StepIconComponent = (props) => {
+  const { active, completed, className, icon } = props;
+  return (
+    <StepIconRoot className={className} ownerState={{ active, completed }}>
+      {icon}
+    </StepIconRoot>
+  );
+};
+
+StepIconComponent.propTypes = {
+  active: PropTypes.bool,
+  completed: PropTypes.bool,
+  className: PropTypes.string,
+  icon: PropTypes.node,
+};
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -43,6 +110,13 @@ const CrearCotizacion = () => {
   const [fechaVencimiento, setFechaVencimiento] = useState("");
   const [notas, setNotas] = useState("");
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("all");
+
+  const steps = ["Datos", "Productos", "Carrito", "Resumen"];
+  const [activeStep, setActiveStep] = useState(0);
+  const nextStep = () => setActiveStep((s) => Math.min(s + 1, steps.length - 1));
+  const prevStep = () => setActiveStep((s) => Math.max(s - 1, 0));
+
+  const theme = useTheme();
 
   const [createCotizacion, { isLoading, error }] =
     useCreateCotizacionMutation();
@@ -130,123 +204,167 @@ const CrearCotizacion = () => {
   };
 
   return (
-    <Box
-      sx={{
-        maxWidth: 1200,
-        mx: "auto",
-        p: 4,
-        display: "grid",
-        gridTemplateRows: "auto auto 1fr",
-        gap: 4,
-        minHeight: "80vh",
-      }}
-    >
-      <Box>
-        <Typography variant="h4" fontWeight={700} textAlign="center" mb={3}>
-          Crear Cotización
-        </Typography>
-
-        <PedidoForm
-          selectedCliente={selectedCliente}
-          setSelectedCliente={setSelectedCliente}
-          direccionEntrega={direccionEntrega}
-          setDireccionEntrega={setDireccionEntrega}
-          metodoPago={""}
-          setMetodoPago={() => {}}
-          notas={notas}
-          mostrarMetodoPago={false}
-          mostrarTipoDocumento={false}
-          tipoDocumento={""}
-          setTipoDocumento={() => {}}
-          setNotas={setNotas}
-          extraFields={
-            <>
-              <Typography sx={{ fontWeight: "bold", mt: 2 }}>
-                Fecha de vencimiento:
-              </Typography>
-              <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-                {[15, 30, 60].map((dias) => (
-                  <Button
-                    key={dias}
-                    variant="outlined"
-                    onClick={() =>
-                      setFechaVencimiento(calcularFechaVencimiento(dias))
-                    }
-                  >
-                    +{dias} días
-                  </Button>
-                ))}
-              </Box>
-              <TextField
-                type="date"
-                label="Fecha de vencimiento"
-                value={
-                  fechaVencimiento
-                    ? dayjs(fechaVencimiento)
-                        .tz(ZONA_HORARIA)
-                        .format("YYYY-MM-DD")
-                    : ""
-                }
-                onChange={(e) => {
-                  const fecha = dayjs(e.target.value)
-                    .tz(ZONA_HORARIA)
-                    .hour(12)
-                    .minute(0)
-                    .second(0)
-                    .format();
-                  setFechaVencimiento(fecha);
-                }}
-                InputLabelProps={{ shrink: true }}
-                fullWidth
-                sx={{ mb: 3 }}
-              />
-
-              <TextField
-                label="Impuesto (%)"
-                type="number"
-                value={isNaN(impuesto) ? "" : impuesto * 100}
-                onChange={(e) => {
-                  const value = parseFloat(e.target.value);
-                  setImpuesto(isNaN(value) ? 0 : value / 100);
-                }}
-                fullWidth
-                sx={{ mb: 3 }}
-              />
-
-              <TextField
-                label="Descuento total (%)"
-                type="number"
-                value={isNaN(descuentoPorcentaje) ? "" : descuentoPorcentaje}
-                onChange={(e) => {
-                  const value = parseFloat(e.target.value);
-                  setDescuentoPorcentaje(isNaN(value) ? 0 : value);
-                }}
-                fullWidth
-                sx={{ mb: 3 }}
-              />
-            </>
-          }
-        />
-      </Box>
-
-      <Box>
-        <PedidoCategorias onSelectCategory={setCategoriaSeleccionada} />
-      </Box>
-
-      <Box
+    <Box sx={{ maxWidth: 1200, mx: "auto", p: 4, borderRadius: 2 }}>
+      <Typography variant="h4" fontWeight={700} textAlign="center" mb={3}>
+        Crear Cotización
+      </Typography>
+      <Stepper
+        activeStep={activeStep}
+        alternativeLabel
+        connector={<StyledConnector />}
         sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
-          gap: 4,
+          mb: 4,
+          backgroundColor: theme.palette.background.paper,
+          p: 2,
+          borderRadius: 2,
+          border: `1px solid ${theme.palette.divider}`,
         }}
       >
-        <PedidoProductos
-          selectedCategory={categoriaSeleccionada}
-          onAddToCart={handleAddToCart}
-        />
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel StepIconComponent={StepIconComponent}>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
 
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      {activeStep === 0 && (
+        <Box>
+          <PedidoForm
+            selectedCliente={selectedCliente}
+            setSelectedCliente={setSelectedCliente}
+            direccionEntrega={direccionEntrega}
+            setDireccionEntrega={setDireccionEntrega}
+            metodoPago={""}
+            setMetodoPago={() => {}}
+            notas={notas}
+            mostrarMetodoPago={false}
+            mostrarTipoDocumento={false}
+            tipoDocumento={""}
+            setTipoDocumento={() => {}}
+            setNotas={setNotas}
+            extraFields={
+              <>
+                <Typography sx={{ fontWeight: "bold", mt: 2 }}>
+                  Fecha de vencimiento:
+                </Typography>
+                <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+                  {[15, 30, 60].map((dias) => (
+                    <Button
+                      key={dias}
+                      variant="outlined"
+                      onClick={() =>
+                        setFechaVencimiento(calcularFechaVencimiento(dias))
+                      }
+                    >
+                      +{dias} días
+                    </Button>
+                  ))}
+                </Box>
+                <TextField
+                  type="date"
+                  label="Fecha de vencimiento"
+                  value={
+                    fechaVencimiento
+                      ? dayjs(fechaVencimiento)
+                          .tz(ZONA_HORARIA)
+                          .format("YYYY-MM-DD")
+                      : ""
+                  }
+                  onChange={(e) => {
+                    const fecha = dayjs(e.target.value)
+                      .tz(ZONA_HORARIA)
+                      .hour(12)
+                      .minute(0)
+                      .second(0)
+                      .format();
+                    setFechaVencimiento(fecha);
+                  }}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  sx={{ mb: 3 }}
+                />
+
+                <TextField
+                  label="Impuesto (%)"
+                  type="number"
+                  value={isNaN(impuesto) ? "" : impuesto * 100}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    setImpuesto(isNaN(value) ? 0 : value / 100);
+                  }}
+                  fullWidth
+                  sx={{ mb: 3 }}
+                />
+
+                <TextField
+                  label="Descuento total (%)"
+                  type="number"
+                  value={isNaN(descuentoPorcentaje) ? "" : descuentoPorcentaje}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    setDescuentoPorcentaje(isNaN(value) ? 0 : value);
+                  }}
+                  fullWidth
+                  sx={{ mb: 3 }}
+                />
+              </>
+            }
+          />
+          <Stack direction="row" justifyContent="flex-end" mt={2}>
+            <Button variant="contained" onClick={nextStep}>
+              Siguiente
+            </Button>
+          </Stack>
+        </Box>
+      )}
+
+      {activeStep === 1 && (
+        <Box>
+          <Typography
+            variant="h5"
+            fontWeight="bold"
+            color="primary"
+            gutterBottom
+          >
+            Productos
+          </Typography>
+          <Divider sx={{ mb: 3 }} />
+          <PedidoCategorias onSelectCategory={setCategoriaSeleccionada} />
+          <PedidoProductos
+            selectedCategory={categoriaSeleccionada}
+            onAddToCart={handleAddToCart}
+          />
+          <Stack direction="row" justifyContent="space-between" mt={2}>
+            <Button variant="outlined" onClick={prevStep}>
+              Atrás
+            </Button>
+            <Button variant="contained" onClick={nextStep}>
+              Siguiente
+            </Button>
+          </Stack>
+        </Box>
+      )}
+
+      {activeStep === 2 && (
+        <Box>
           <PedidoCarrito />
+          <Stack direction="row" justifyContent="space-between" mt={2}>
+            <Button variant="outlined" onClick={prevStep}>
+              Atrás
+            </Button>
+            <Button
+              variant="contained"
+              onClick={nextStep}
+              disabled={cart.length === 0}
+            >
+              Siguiente
+            </Button>
+          </Stack>
+        </Box>
+      )}
+
+      {activeStep === 3 && (
+        <Box>
           <PedidoResumen
             total={total}
             isLoading={isLoading}
@@ -254,8 +372,13 @@ const CrearCotizacion = () => {
             onSubmit={handleCreateAndRedirect}
             submitLabel="Ver Cotización"
           />
+          <Stack direction="row" justifyContent="flex-start" mt={2}>
+            <Button variant="outlined" onClick={prevStep} disabled={isLoading}>
+              Atrás
+            </Button>
+          </Stack>
         </Box>
-      </Box>
+      )}
     </Box>
   );
 };
