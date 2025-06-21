@@ -9,6 +9,7 @@ import {
   Button,
   Stack,
   useTheme,
+  Divider,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import StepConnector, {
@@ -44,11 +45,16 @@ const StyledConnector = styled(StepConnector)(({ theme }) => ({
 }));
 
 const StepIconRoot = styled(Box)(({ theme, ownerState }) => ({
-  backgroundColor:
+  backgroundColor: theme.palette.background.paper,
+  border: `2px solid ${
     ownerState.active || ownerState.completed
       ? theme.palette.primary.main
-      : theme.palette.grey[400],
-  color: theme.palette.common.white,
+      : theme.palette.divider
+  }`,
+  color:
+    ownerState.active || ownerState.completed
+      ? theme.palette.primary.main
+      : theme.palette.text.disabled,
   width: 30,
   height: 30,
   display: "flex",
@@ -217,6 +223,7 @@ const CrearPedido = () => {
           backgroundColor: theme.palette.background.paper,
           p: 2,
           borderRadius: 2,
+          border: `1px solid ${theme.palette.divider}`,
         }}
       >
         {steps.map((label) => (
@@ -251,15 +258,14 @@ const CrearPedido = () => {
       {activeStep === 1 && (
         <Box>
           <Typography
-            variant="h6"
-            sx={{
-              mb: 3,
-              fontWeight: "bold",
-              color: theme.palette.text.primary,
-            }}
+            variant="h5"
+            fontWeight="bold"
+            color="primary"
+            gutterBottom
           >
             Productos
           </Typography>
+          <Divider sx={{ mb: 3 }} />
           <PedidoCategorias onSelectCategory={setCategory} />
           <PedidoProductos
             selectedCategory={category}

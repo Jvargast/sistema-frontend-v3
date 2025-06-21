@@ -1,4 +1,4 @@
-import { Box, Typography, Grid, useTheme } from "@mui/material";
+import { Box, Typography, Grid, Divider, useTheme } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
   removeItem,
@@ -45,8 +45,9 @@ const PedidoCarrito = () => {
       sx={{
         p: 3,
         borderRadius: 2,
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: theme.shadows[3],
+        backgroundColor: theme.palette.background.default,
+        border: `1px solid ${theme.palette.divider}`,
+        boxShadow: "none",
         width: "100%",
         maxWidth: "100%",
         position: "relative",
@@ -64,6 +65,7 @@ const PedidoCarrito = () => {
           >
             Carrito de Compras
           </Typography>
+          <Divider sx={{ mb: 2 }} />
           <Box
             onScroll={handleScroll}
             sx={{

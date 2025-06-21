@@ -1,4 +1,11 @@
-import { Box, Typography, Button, CircularProgress, useTheme } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  CircularProgress,
+  useTheme,
+  Divider,
+} from "@mui/material";
 import PropTypes from "prop-types";
 
 const PedidoResumen = ({ total, isLoading, error, onSubmit, submitLabel }) => {
@@ -9,13 +16,22 @@ const PedidoResumen = ({ total, isLoading, error, onSubmit, submitLabel }) => {
         p: 3,
         mt: 3,
         borderRadius: 2,
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: theme.shadows[2],
+        backgroundColor: theme.palette.background.default,
+        border: `1px solid ${theme.palette.divider}`,
+        boxShadow: "none",
       }}
     >
+      <Typography variant="h5" fontWeight="bold" color="primary" gutterBottom>
+        Resumen
+      </Typography>
+      <Divider sx={{ mb: 2 }} />
       <Typography
         gutterBottom
-        sx={{ fontWeight: "bold", fontSize: "2.5rem", color: theme.palette.text.primary, }}
+        sx={{
+          fontWeight: "bold",
+          fontSize: "2.5rem",
+          color: theme.palette.text.primary
+        }}
       >
         Total: ${total.toFixed(0)}
       </Typography>
@@ -42,7 +58,7 @@ const PedidoResumen = ({ total, isLoading, error, onSubmit, submitLabel }) => {
       </Button>
       {error && (
         <Typography variant="body2" color="error" sx={{ mt: 2 }}>
-          Error: {error?.data?.message }
+          Error: {error?.data?.message}
         </Typography>
       )}
     </Box>

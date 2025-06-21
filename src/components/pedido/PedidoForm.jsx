@@ -5,11 +5,11 @@ import {
   TextField,
   MenuItem,
   Box,
-  Paper,
   Checkbox,
   FormControlLabel,
   Typography,
   useTheme,
+  Divider,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PedidoClienteSelector from "./PedidoClienteSelector";
@@ -58,35 +58,30 @@ const PedidoForm = ({
   }, [selectedCliente, tipoDocumento, setTipoDocumento]);
 
   return (
-    <Paper
-      elevation={4}
+    <Box
       sx={{
         p: 4,
-        borderRadius: 3,
+        borderRadius: 2,
         mb: 3,
-        backgroundColor:
+        /*         backgroundColor:
           theme.palette.mode === "dark"
             ? theme.palette.grey[900]
-            : theme.palette.background.paper,
+            : theme.palette.background.paper, */
+        backgroundColor: theme.palette.background.default,
+        border: `1px solid ${theme.palette.divider}`,
       }}
     >
-      <Typography
-        variant="h6"
-        sx={{
-          mb: 3,
-          fontWeight: "bold",
-          color: theme.palette.text.primary,
-        }}
-      >
+      <Typography variant="h5" fontWeight="bold" color="primary" gutterBottom>
         Datos del Pedido
       </Typography>
+      <Divider sx={{ mb: 3 }} />
 
       <Box display="flex" alignItems="center" gap={1} mb={3}>
         <Button
           variant="contained"
           fullWidth
           onClick={() => setOpenClienteModal(true)}
-          sx={{ textTransform: "none", fontSize: 16, boxShadow: 2 }}
+          sx={{ textTransform: "none", fontSize: 16, boxShadow: "none" }}
         >
           {selectedCliente
             ? `Cliente: ${selectedCliente.nombre}`
@@ -218,7 +213,7 @@ const PedidoForm = ({
         }}
       />
       {extraFields && <Box mt={2}>{extraFields}</Box>}
-    </Paper>
+    </Box>
   );
 };
 
