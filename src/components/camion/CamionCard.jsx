@@ -386,6 +386,7 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
         inventarioData={inventarioData}
         isLoading={isLoadingInventario}
         error={errorInventario}
+        id_camion={camion.id_camion}
       />
     </Card>
   );

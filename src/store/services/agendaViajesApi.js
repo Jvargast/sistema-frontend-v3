@@ -13,9 +13,10 @@ export const agendaViajesApi = createApi({
 
     // Finalizar un viaje
     finalizarViaje: builder.mutation({
-      query: ({ id_agenda_viaje }) => ({
+      query: ({ id_agenda_viaje, descargarAuto = true, descargarDisponibles = false }) => ({
         url: `/agenda-viajes/${id_agenda_viaje}/finalizar`,
         method: "POST",
+        body: { descargarAuto, descargarDisponibles },
       }),
       invalidatesTags: ["AgendaViajes"],
     }),

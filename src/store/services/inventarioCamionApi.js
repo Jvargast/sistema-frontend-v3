@@ -60,6 +60,15 @@ export const inventarioCamionApi = createApi({
       }),
       invalidatesTags: ["InventarioCamion"],
     }),
+
+    vaciarCamion: builder.mutation({
+      query: ({ id_camion, descargarDisponibles = true, descargarRetorno = true }) => ({
+        url: `/inventario-camion/vaciar/${id_camion}`,
+        method: "POST",
+        body: { descargarDisponibles, descargarRetorno },
+      }),
+      invalidatesTags: ["InventarioCamion"],
+    }),
   }),
 });
 
@@ -71,4 +80,5 @@ export const {
   useGetProductsByCamionQuery,
   useAddProductToCamionMutation,
   useReturnProductsMutation,
+  useVaciarCamionMutation,
 } = inventarioCamionApi;

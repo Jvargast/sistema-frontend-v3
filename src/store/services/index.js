@@ -31,6 +31,7 @@ import { cuentasPorCobrarApi } from "./cuentasPorCobrarApi";
 import { busquedaApi } from "./busquedaApi";
 import { formulaProductoApi } from "./FormulaProductoApi";
 import { produccionApi } from "./produccionApi";
+import { productoRetornableApi } from "./productoRetornableApi";
 
 export const apiMiddleware = [
   authApi.middleware,
@@ -65,7 +66,8 @@ export const apiMiddleware = [
   pedidosEstadisticasApi.middleware,
   productosEstadisticasApi.middleware,
   busquedaApi.middleware,
-  produccionApi.middleware
+  produccionApi.middleware,
+  productoRetornableApi.middleware
 ];
 
 export const apiReducers = {
@@ -102,6 +104,7 @@ export const apiReducers = {
   [productosEstadisticasApi.reducerPath]: productosEstadisticasApi.reducer,
   [busquedaApi.reducerPath]: busquedaApi.reducer,
   [produccionApi.reducerPath]: produccionApi.reducer,
+  [productoRetornableApi.reducerPath]: productoRetornableApi.reducer,
 };
 
 const apiServices = {
@@ -137,7 +140,8 @@ const apiServices = {
   ventasEstadisticasApi,
   productosEstadisticasApi,
   busquedaApi,
-  produccionApi
+  produccionApi,
+  productoRetornableApi
 };
 
 export default apiServices;
