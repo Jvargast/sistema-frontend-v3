@@ -46,7 +46,7 @@ const ListarPedidos = () => {
       console.error("Error al rechazar pedido:", error);
       dispatch(
         showNotification({
-          message: `Error al rechazar: ${error?.data?.error}`,
+          message: `${error?.data?.message}`,
           severity: "error",
         })
       );
