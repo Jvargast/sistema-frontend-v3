@@ -361,7 +361,7 @@ const router = createHashRouter([
           {
             path: "inventario-camion",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.inventariocamion.ver">
+              <RoleBasedRoute requiredPermission="vistas.camiones.ver">
                 <InspeccionRetornables />
               </RoleBasedRoute>
             ),
