@@ -218,7 +218,11 @@ const ViajeChofer = ({ viaje }) => {
 
   const handleFinalizarViaje = async () => {
     try {
-      await finalizarViaje({ id_agenda_viaje: viaje.id_agenda_viaje }).unwrap();
+      await finalizarViaje({
+        id_agenda_viaje: viaje.id_agenda_viaje,
+        descargarAuto: true,
+        descargarDisponibles: false,
+      }).unwrap();
       dispatch(
         showNotification({
           message: "¡Viaje finalizado con éxito!",
