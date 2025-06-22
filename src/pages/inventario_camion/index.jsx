@@ -23,14 +23,17 @@ const InspeccionRetornables = () => {
   const [rows, setRows] = useState([]);
 
   useEffect(() => {
-    if (data?.data) {
-      setRows(
-        data.data.map((item) => ({
-          ...item,
-          estado: "reutilizable",
-          tipo_defecto: "",
-        }))
-      );
+    if (data) {
+      const items = Array.isArray(data) ? data : data.data;
+      if (Array.isArray(items)) {
+        setRows(
+          items.map((item) => ({
+            ...item,
+            estado: "reutilizable",
+            tipo_defecto: "",
+          }))
+        );
+      }
     }
   }, [data]);
 
@@ -59,7 +62,6 @@ const InspeccionRetornables = () => {
             id_camion,
             items: items.map((i) => ({
               id_producto: i.id_producto,
-              id_insumo: i.id_insumo,
               cantidad: i.cantidad,
               estado: i.estado,
               tipo_defecto: i.estado === "defectuoso" ? i.tipo_defecto : null,
@@ -111,7 +113,7 @@ const InspeccionRetornables = () => {
         rows.map((row, idx) => (
           <Paper key={idx} sx={{ p: 2, mb: 2 }}>
             <Typography fontWeight="bold">
-              Camión {row.id_camion} - Producto {row.id_producto || row.id_insumo}
+              Camión {row.id_camion} - Producto {row.id_producto}
             </Typography>
             <Typography sx={{ mb: 1 }}>Cantidad: {row.cantidad}</Typography>
             <Select
