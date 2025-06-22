@@ -133,7 +133,7 @@ export const modulesData = [
         text: "Inventario Camión",
         icon: <Inventory2OutlinedIcon />,
         path: "inventario-camion",
-        permission: "vistas.inventariocamion.ver",
+        permission: "vistas.camiones.ver",
       },
       {
         text: "Agenda Carga",
