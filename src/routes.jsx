@@ -61,6 +61,7 @@ import VerFormula from "./pages/formulas/VerFormula";
 import HistorialProduccion from "./pages/produccion/HistorialProduccion";
 import VerProduccion from "./pages/produccion/VerProduccion";
 import VerInsumo from "./pages/insumos/VerInsumo";
+import InspeccionRetornables from "./pages/inventario_camion";
 
 // Configuración de rutas
 const router = createHashRouter([
@@ -354,6 +355,14 @@ const router = createHashRouter([
             element: (
               <RoleBasedRoute requiredPermission="vistas.camiones.ver">
                 <CamionesManagement />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: "inventario-camion",
+            element: (
+              <RoleBasedRoute requiredPermission="vistas.inventariocamion.ver">
+                <InspeccionRetornables />
               </RoleBasedRoute>
             ),
           },
