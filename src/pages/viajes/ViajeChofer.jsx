@@ -27,7 +27,10 @@ import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import SpeedDial from "@mui/material/SpeedDial";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
 import SpeedDialIcon from "@mui/material/SpeedDialIcon";
-import { emitRefetchAgendaViajes, onRefetchAgendaViajes } from "../../utils/eventBus";
+import {
+  emitRefetchAgendaViajes,
+  onRefetchAgendaViajes,
+} from "../../utils/eventBus";
 import { useGetPedidoByIdQuery } from "../../store/services/pedidosApi";
 import { useGetEntregasByAgendaIdQuery } from "../../store/services/entregasApi";
 import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
@@ -35,6 +38,7 @@ import { useFinalizarViajeMutation } from "../../store/services/agendaViajesApi"
 import { useErrorChecker } from "../../utils/useErrorChecker";
 import PermissionMessage from "../../components/common/PermissionMessage";
 import InventarioCamion from "../../components/inventario/InventarioCamion";
+import DialogFinalizarViaje from "../../components/viaje/DialogFinalizarViaje";
 
 const ViajeChofer = ({ viaje }) => {
   const dispatch = useDispatch();
@@ -42,6 +46,15 @@ const ViajeChofer = ({ viaje }) => {
   const theme = useTheme();
   const isTabletOrMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [openInventarioModal, setOpenInventarioModal] = useState(false);
+
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [dejaRetornables, setDejaRetornables] = useState(true);
+  const [descargarAuto, setDescargarAuto] = useState(true);
+  const [descargarDisponibles, setDescargarDisponibles] = useState(false);
+
+  const handleAbrirDialogoFinalizar = () => {
+    setConfirmDialogOpen(true);
+  };
 
   const toggleFab = () => {
     setFabOpen((prev) => {
@@ -220,8 +233,9 @@ const ViajeChofer = ({ viaje }) => {
     try {
       await finalizarViaje({
         id_agenda_viaje: viaje.id_agenda_viaje,
-        descargarAuto: true,
-        descargarDisponibles: false,
+        descargarAuto,
+        descargarDisponibles,
+        dejaRetornablesEnPlanta: dejaRetornables,
       }).unwrap();
       dispatch(
         showNotification({
@@ -285,7 +299,7 @@ const ViajeChofer = ({ viaje }) => {
           open={modalOpen}
           onClose={() => {
             setModalOpen(false);
-            refetchEntregas(); 
+            refetchEntregas();
           }}
           destino={destinoSeleccionado}
           id_agenda_viaje={viaje.id_agenda_viaje}
@@ -314,7 +328,7 @@ const ViajeChofer = ({ viaje }) => {
           right: 24,
           zIndex: 1200,
           "& .MuiSpeedDialAction-fab": {
-            transition: "none !important", 
+            transition: "none !important",
           },
         }}
         icon={<SpeedDialIcon onClick={toggleFab} />}
@@ -342,7 +356,7 @@ const ViajeChofer = ({ viaje }) => {
             (viaje?.destinos?.length === 0 || todasEntregasCompletadas),
           <DoneIcon />,
           "Finalizar Viaje",
-          handleFinalizarViaje
+          handleAbrirDialogoFinalizar
         )}
       </SpeedDial>
 
@@ -401,9 +415,24 @@ const ViajeChofer = ({ viaje }) => {
         </Box>
 
         <Box sx={{ p: 2 }}>
-          <InventarioCamion idCamion={viaje.id_camion} modo="visual" />
+          <InventarioCamion
+            idCamion={viaje.id_camion}
+            modo="visual"
+            inventarioData={inventarioCamion?.data}
+          />
         </Box>
       </Dialog>
+      <DialogFinalizarViaje
+        open={confirmDialogOpen}
+        onClose={() => setConfirmDialogOpen(false)}
+        onConfirm={handleFinalizarViaje}
+        dejaRetornables={dejaRetornables}
+        setDejaRetornables={setDejaRetornables}
+        descargarAuto={descargarAuto}
+        setDescargarAuto={setDescargarAuto}
+        descargarDisponibles={descargarDisponibles}
+        setDescargarDisponibles={setDescargarDisponibles}
+      />
     </Container>
   );
 };

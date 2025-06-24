@@ -13,8 +13,8 @@ export const productoRetornableApi = createApi({
       providesTags: ["ProductoRetornable"],
     }),
     inspeccionar: builder.mutation({
-      query: ({ id_camion, items }) => ({
-        url: `/producto-retornable/inspeccionar/${id_camion}`,
+      query: ({ items }) => ({
+        url: "/producto-retornable/inspeccionar",
         method: "POST",
         body: { items },
       }),
@@ -23,7 +23,5 @@ export const productoRetornableApi = createApi({
   }),
 });
 
-export const {
-  useGetPendientesQuery,
-  useInspeccionarMutation,
-} = productoRetornableApi;
+export const { useGetPendientesQuery, useInspeccionarMutation } =
+  productoRetornableApi;
