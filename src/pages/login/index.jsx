@@ -88,7 +88,7 @@ const Login = () => {
 
   return (
     <Box
-      height="100vh"
+      minHeight="100vh"
       display="flex"
       justifyContent="center"
       alignItems="center"

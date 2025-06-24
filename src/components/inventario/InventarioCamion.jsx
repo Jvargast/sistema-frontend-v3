@@ -179,7 +179,7 @@ InventarioCamion.propTypes = {
     reservados_no_retornables: PropTypes.number,
     retorno: PropTypes.number,
     vacios: PropTypes.number,
-  }).isRequired,
+  }),
   modo: PropTypes.oneOf(["visual", "simulacion"]),
   productos: PropTypes.array,
   productosReservados: PropTypes.arrayOf(
