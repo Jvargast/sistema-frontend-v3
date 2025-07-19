@@ -1,13 +1,4 @@
-import {
-  Box,
-  Typography,
-  List,
-  /*   ListItem,
-  ListItemText,
-  ListItemSecondaryAction, */
-  IconButton,
-  TextField,
-} from "@mui/material";
+import { Box, Typography, List, IconButton, TextField } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import PropTypes from "prop-types";
@@ -86,7 +77,7 @@ const PasoRetornables = ({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    backgroundColor: "background.paper",
+                    backgroundColor: (theme) => theme.palette.background.paper,
                     boxShadow: 1,
                   }}
                 >
@@ -134,7 +125,7 @@ const PasoRetornables = ({
                           fontSize: "1rem",
                           px: 1,
                           py: 0.5,
-                          backgroundColor: "white",
+                           backgroundColor: (theme) => theme.palette.background.paper,
                         },
                       }}
                     />

@@ -15,6 +15,7 @@ import {
   useTheme,
   Grid,
 } from "@mui/material";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {
@@ -23,7 +24,7 @@ import {
 } from "../../store/services/productoApi";
 import { useGetAllCategoriasQuery } from "../../store/services/categoriaApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
-import BackButton from "../../components/common/BackButton";
+import { useIsMobile } from "../../utils/useIsMobile";
 
 const EditarProducto = () => {
   const { id } = useParams();
@@ -31,6 +32,8 @@ const EditarProducto = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const theme = useTheme();
+
+  const isMobile = useIsMobile();
 
   const { data, isLoading, isError, refetch } = useGetProductoByIdQuery(id);
   const { data: categorias, isLoading: isLoadingCategorias } =
@@ -92,9 +95,9 @@ const EditarProducto = () => {
   useEffect(() => {
     if (location.state?.refetch) {
       refetch();
-      navigate(`/productos/editar/${id}`, { replace: true }); // Limpia el estado
+      navigate(`/productos/editar/${id}`, { replace: true });
     } else {
-      refetch(); // Siempre refresca al cargar
+      refetch();
     }
   }, [location.state, refetch, navigate, id]);
 
@@ -278,7 +281,7 @@ const EditarProducto = () => {
       sx={{
         maxWidth: "1200px",
         mx: "auto",
-        py: 5,
+        py: 4,
         px: 3,
         minHeight: "100vh",
         backgroundColor: theme.palette.background.default,
@@ -290,28 +293,81 @@ const EditarProducto = () => {
       <Box
         sx={{
           display: "flex",
+          flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
           backgroundColor: theme.palette.background.paper,
           boxShadow: theme.shadows[3],
           borderRadius: 2,
           height: "350px",
+          p: isMobile ? 2 : 0,
+          gap: isMobile ? 2 : 0,
+          position: "relative",
+          overflow: "hidden",
         }}
       >
-        <img
-          src={imagePreview}
-          alt="Vista Previa"
-          style={{
-            maxHeight: "100%",
-            maxWidth: "100%",
-            objectFit: "contain",
-            borderRadius: "12px",
-          }}
-        />
+        {imagePreview &&
+        imagePreview !==
+          "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg" ? (
+          <a
+            href={imagePreview}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: "block", width: "100%" }}
+            tabIndex={-1}
+          >
+            <img
+              src={imagePreview}
+              alt="Vista Previa"
+              style={{
+                maxHeight: "220px",
+                maxWidth: "100%",
+                objectFit: "contain",
+                borderRadius: "12px",
+                display: "block",
+                margin: "0 auto",
+                transition: "box-shadow 0.3s",
+                boxShadow: "0 2px 16px 0 #0001",
+                cursor: "pointer",
+              }}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "";
+              }}
+            />
+          </a>
+        ) : (
+          <Box
+            sx={{
+              width: 140,
+              height: 140,
+              borderRadius: 3,
+              background: `linear-gradient(135deg, ${theme.palette.grey[100]}, ${theme.palette.grey[200]})`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mb: 2,
+              boxShadow: "0 2px 12px 0 #0002",
+            }}
+          >
+            <ImageOutlinedIcon
+              sx={{ fontSize: 64, color: theme.palette.grey[400] }}
+            />
+          </Box>
+        )}
+        {isMobile && (
+          <TextField
+            fullWidth
+            label="URL de la Imagen"
+            name="image_url"
+            value={formData.image_url}
+            onChange={handleChange}
+            variant="outlined"
+            sx={{ mt: 2 }}
+          />
+        )}
       </Box>
       <Box>
-        <BackButton to="/productos" label="Volver" />
-
         <Typography
           variant="h4"
           sx={{ color: theme.palette.text.primary, fontWeight: "bold", mb: 2 }}
@@ -400,7 +456,7 @@ const EditarProducto = () => {
           >
             Imagen del Producto
           </Typography>
-          {renderTextField("URL de la Imagen", "image_url")}
+          {!isMobile && renderTextField("URL de la Imagen", "image_url")}
 
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
             <Button

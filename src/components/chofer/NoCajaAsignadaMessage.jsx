@@ -18,7 +18,7 @@ const NoCajaAsignadaDialog = ({ open, handleClose, choferName }) => {
   const rol = useSelector((state) => state?.auth?.rol);
 
   const handleIrACajas = () => {
-    handleClose(); // Cierra el diálogo antes de redirigir
+    handleClose();
     navigate("/cajas");
   };
   return (
@@ -28,6 +28,8 @@ const NoCajaAsignadaDialog = ({ open, handleClose, choferName }) => {
       maxWidth="xs"
       fullWidth
       aria-labelledby="no-caja-dialog-title"
+      disableEnforceFocus
+      
     >
       <DialogTitle
         id="no-caja-dialog-title"
@@ -37,15 +39,11 @@ const NoCajaAsignadaDialog = ({ open, handleClose, choferName }) => {
           gap: 1,
           py: 1.5,
           px: 2,
+          displayPrint: "none",
         }}
       >
         <ErrorOutlineIcon sx={{ color: "error.main", fontSize: 28 }} />
-        <Typography
-          variant="h6"
-          sx={{ color: "error.main", fontWeight: "bold" }}
-        >
-          Sin caja asignada
-        </Typography>
+        Sin caja asignada
       </DialogTitle>
 
       <Divider />
@@ -67,6 +65,7 @@ const NoCajaAsignadaDialog = ({ open, handleClose, choferName }) => {
           variant="outlined"
           color="primary"
           sx={{ textTransform: "none" }}
+          autoFocus
         >
           Cerrar
         </Button>

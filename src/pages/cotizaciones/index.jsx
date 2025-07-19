@@ -185,10 +185,11 @@ const CrearCotizacion = () => {
       descuento_total_porcentaje: descuentoPorcentaje,
     };
 
+    //Cambiar
     try {
       const result = await createCotizacion(cotizacionData).unwrap();
       dispatch(clearCart());
-      navigate(`/cotizaciones/ver/${result.cotizacion.id_cotizacion}`);
+      navigate(`/admin/cotizaciones/ver/${result.cotizacion.id_cotizacion}`);
       setSelectedCliente(null);
       setDireccionEntrega("");
     } catch (err) {

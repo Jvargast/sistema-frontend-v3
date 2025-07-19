@@ -179,7 +179,7 @@ const Empresa = () => {
                     fontWeight: "bold",
                   }}
                   onClick={() =>
-                    navigate(`/empresa/editar/${empresa?.id_empresa}`)
+                    navigate(`/admin/empresa/editar/${empresa?.id_empresa}`)
                   }
                 >
                   Editar Perfil Empresa

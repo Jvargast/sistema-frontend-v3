@@ -7,10 +7,11 @@ import {
   Typography,
   Button,
   Grid2,
+  useTheme,
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   useCreateCategoriaMutation,
   useDeleteCategoriaMutation,
@@ -20,13 +21,15 @@ import {
 } from "../../store/services/categoriaApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import LoaderComponent from "../../components/common/LoaderComponent";
-import BackButton from "../../components/common/BackButton";
 import ModalForm from "../../components/common/ModalForm";
 import AlertDialog from "../../components/common/AlertDialog";
 import { useHasPermission } from "../../utils/useHasPermission";
-import { getInitialRoute } from "../../utils/navigationUtils";
+import { useIsMobile } from "../../utils/useIsMobile";
+import Header from "../../components/common/Header";
 
 const CategoriaManagement = () => {
+  const isMobile = useIsMobile();
+  const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [createCategoria, { isLoading: isCreating }] =
@@ -42,15 +45,17 @@ const CategoriaManagement = () => {
   const [openAlert, setOpenAlert] = useState(false);
   const [selectedCategoriaId, setSelectedCategoriaId] = useState(null);
 
-  const { permisos, rol } = useSelector((state) => state.auth);
-
   const crearCategoria = useHasPermission("inventario.categoriaproducto.crear");
-  const editarCategoria = useHasPermission("inventario.categoriaproducto.editar");
-  const borrarCategoria = useHasPermission("inventario.categoriaproducto.eliminar");
+  const editarCategoria = useHasPermission(
+    "inventario.categoriaproducto.editar"
+  );
+  const borrarCategoria = useHasPermission(
+    "inventario.categoriaproducto.eliminar"
+  );
 
   const { data: categoria, isLoading: isLoadingCategoria } =
     useGetCategoriaByIdQuery(selectedCategoriaId, {
-      skip: !selectedCategoriaId, 
+      skip: !selectedCategoriaId,
     });
 
   const {
@@ -61,8 +66,8 @@ const CategoriaManagement = () => {
   } = useGetAllCategoriasQuery();
 
   const handleEdit = (id) => {
-    setSelectedCategoriaId(id); 
-    setOpen(true); 
+    setSelectedCategoriaId(id);
+    setOpen(true);
   };
 
   const handleSubmit = async (data) => {
@@ -164,8 +169,6 @@ const CategoriaManagement = () => {
     },
   ];
 
-  const inicial = getInitialRoute(rol, permisos);
-
   return (
     <Box
       sx={{
@@ -173,61 +176,135 @@ const CategoriaManagement = () => {
         minHeight: "100vh",
       }}
     >
-      <BackButton to={`${inicial}`} label="Volver" />
       <Box
         display="flex"
         justifyContent="space-between"
         alignItems="center"
         mb={3}
       >
-        <Typography variant="h3" fontWeight="bold" color="primary">
-          Gestión de Categorías
-        </Typography>
-        {crearCategoria && (
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => setOpen(true)}
-            sx={{
-              backgroundColor: "#1976d2",
-              color: "#fff",
-              "&:hover": {
-                backgroundColor: "#1565c0",
-              },
-            }}
-            disabled={isCreating}
-          >
-            Añadir Categoría
-          </Button>
-        )}
+        <Header title="Categorías" subtitle="Gestión de Categorías" />
+        {crearCategoria &&
+          (isMobile ? (
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: "50%",
+                background: `linear-gradient(145deg, ${theme.palette.primary.light} 60%, ${theme.palette.primary.main} 100%)`,
+                boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}22, 0 1.5px 8px 0 #0001`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: isCreating ? "not-allowed" : "pointer",
+                opacity: isCreating ? 0.7 : 1,
+                transition: "all 0.15s",
+                "&:hover": {
+                  background: `linear-gradient(120deg, ${theme.palette.primary.main} 70%, ${theme.palette.primary.dark} 100%)`,
+                  transform: "scale(1.08)",
+                  boxShadow: `0 4px 24px 0 ${theme.palette.primary.dark}33`,
+                },
+              }}
+              onClick={() => {
+                if (!isCreating) setOpen(true);
+              }}
+              title="Añadir Categoría"
+            >
+              <Add sx={{ color: "#fff", fontSize: 28 }} />
+            </Box>
+          ) : (
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setOpen(true)}
+              sx={{
+                backgroundColor: "#1976d2",
+                color: "#fff",
+                "&:hover": {
+                  backgroundColor: "#1565c0",
+                },
+              }}
+              disabled={isCreating}
+            >
+              Añadir Categoría
+            </Button>
+          ))}
       </Box>
 
-      <Grid2 container spacing={3}>
+      <Grid2 container spacing={3} alignItems="stretch">
         {categorias?.map((categoria) => (
-          <Grid2 key={categoria.id_categoria} xs={12} sm={6} md={4} lg={3}>
+          <Grid2
+            key={categoria.id_categoria}
+            xs={12}
+            sm={6}
+            md={4}
+            lg={3}
+            display="flex"
+          >
             <Card
               sx={{
-                borderRadius: "12px",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                borderRadius: "16px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                 transition: "transform 0.2s, box-shadow 0.2s",
+                minHeight: 170,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                width: "100%", // <-- esto asegura igual ancho
                 "&:hover": {
                   transform: "translateY(-4px)",
-                  boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)",
+                  boxShadow: "0 6px 16px rgba(0,0,0,0.18)",
                 },
               }}
             >
-              <CardContent>
-                <Typography variant="h5" fontWeight="bold" color="text.primary">
+              <CardContent
+                sx={{
+                  flex: 1,
+                  overflow: "hidden",
+                  pb: 0,
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  fontWeight={700}
+                  color="text.primary"
+                  noWrap
+                  title={categoria.nombre_categoria}
+                  sx={{ mb: 1 }}
+                >
                   {categoria.nombre_categoria}
                 </Typography>
-                <Typography variant="body2" color="text.secondary" mt={1}>
-                  {categoria.descripcion}
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    minHeight: 40,
+                    mb: 1,
+                  }}
+                  title={categoria.descripcion}
+                >
+                  {categoria.descripcion || "Sin descripción"}
                 </Typography>
-                <Typography variant="subtitle2" color="text.secondary" mt={2}>
+                <Typography
+                  variant="subtitle2"
+                  color="text.secondary"
+                  sx={{ fontSize: 13, mt: 1 }}
+                >
                   ID: {categoria.id_categoria}
                 </Typography>
               </CardContent>
-              <CardActions>
+              <CardActions
+                sx={{
+                  justifyContent: "flex-end",
+                  gap: 1,
+                  pb: 2,
+                  px: 2,
+                }}
+              >
                 {editarCategoria && (
                   <Button
                     size="small"
@@ -246,6 +323,7 @@ const CategoriaManagement = () => {
                       confirmDeleteCategoria(categoria.id_categoria)
                     }
                     sx={{ color: "#d32f2f", fontWeight: "bold" }}
+                    disabled={isDeleting}
                   >
                     {isDeleting ? "Eliminando..." : "Eliminar"}
                   </Button>

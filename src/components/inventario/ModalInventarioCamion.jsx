@@ -28,6 +28,7 @@ const ModalInventarioCamion = ({
   isLoading,
   error,
   id_camion,
+  onInventarioUpdated,
 }) => {
   const dispatch = useDispatch();
   const [descargarDisponibles, setDescargarDisponibles] = useState(true);
@@ -47,6 +48,10 @@ const ModalInventarioCamion = ({
           severity: "success",
         })
       );
+      if (typeof onInventarioUpdated === "function") {
+        onInventarioUpdated();
+      }
+
       onClose();
     } catch (err) {
       dispatch(
@@ -197,6 +202,7 @@ ModalInventarioCamion.propTypes = {
   isLoading: PropTypes.bool,
   error: PropTypes.any,
   id_camion: PropTypes.number.isRequired,
+  onInventarioUpdated: PropTypes.func,
 };
 
 export default ModalInventarioCamion;

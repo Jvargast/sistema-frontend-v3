@@ -94,10 +94,16 @@ const CreateAgendaCargaForm = () => {
 
   const camionesDisponibles = useMemo(() => {
     if (!camiones) return [];
-    return camiones.filter(
-      (c) => c.estado !== "En Ruta" && c.estado !== "En Tránsito"
-    );
-  }, [camiones]);
+
+    return camiones
+      .filter((c) => c.estado !== "En Ruta" && c.estado !== "En Tránsito")
+      .map((c) => ({
+        ...c,
+        tieneAgenda:
+          agendaCarga?.data?.id_camion &&
+          agendaCarga.data.id_camion === c.id_camion,
+      }));
+  }, [camiones, agendaCarga]);
 
   const camionSeleccionado = useMemo(() => {
     if (!camionesDisponibles) return null;
@@ -115,17 +121,11 @@ const CreateAgendaCargaForm = () => {
       }
     );
 
-  /*   const { refetch: refetchInventarioCamion } =
-    useGetEstadoInventarioCamionQuery(Number(idCamion), {
-      skip: !idCamion,
-    }); */
-
   useEffect(() => {
     if (idChofer && !loadingCaja && cajaAsignada?.asignada === false) {
       setOpenNoCajaModal(true);
-    } else {
-      setOpenNoCajaModal(false);
-    }
+      setIdChofer(""); 
+    } 
   }, [idChofer, loadingCaja, cajaAsignada]);
 
   useEffect(() => {
@@ -135,10 +135,51 @@ const CreateAgendaCargaForm = () => {
       !camionSeleccionado.id_chofer_asignado
     ) {
       setOpenNoUsuarioCamionModal(true);
-    } else {
-      setOpenNoUsuarioCamionModal(false);
+      setIdCamion("");
     }
   }, [idCamion, camionSeleccionado]);
+
+  useEffect(() => {
+    if (!inventarioData?.data) return;
+
+    const cantidadTotalProductosReservados = productosReservados.reduce(
+      (total, prod) => total + prod.cantidad,
+      0
+    );
+
+    const espacioUsadoActual =
+      inventarioData.data.reservados_retornables +
+      inventarioData.data.disponibles +
+      inventarioData.data.retorno;
+
+    const espaciosDisponiblesParaRetornables =
+      inventarioData.data.capacidad_total -
+      espacioUsadoActual -
+      cantidadTotalProductosReservados;
+
+    const productosRetornables = productos.filter(
+      (p) => p.es_retornable && Number(p.cantidad) > 0
+    );
+
+    const cantidadProductosRetornables = productosRetornables.reduce(
+      (total, p) => total + (Number(p.cantidad) || 0),
+      0
+    );
+
+    const cantidadNegativa = productosRetornables.some(
+      (p) => Number(p.cantidad) < 0
+    );
+
+    const excedeEspaciosDisponibles =
+      cantidadProductosRetornables > espaciosDisponiblesParaRetornables;
+
+    const sinEspacio = espaciosDisponiblesParaRetornables <= 0;
+
+    const esValido =
+      !cantidadNegativa && !excedeEspaciosDisponibles && !sinEspacio;
+
+    setPuedeCrearAgenda(esValido);
+  }, [productos, productosReservados, inventarioData]);
 
   const handleAddProductRow = () => {
     setProductos((prev) => [
@@ -305,6 +346,7 @@ const CreateAgendaCargaForm = () => {
       </Alert>
     );
   }
+
   return (
     <Box display="flex" justifyContent="center" alignItems="flex-start" p={4}>
       <Paper

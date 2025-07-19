@@ -14,6 +14,8 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import PedidoClienteSelector from "./PedidoClienteSelector";
 import PropTypes from "prop-types";
+import AutocompleteDireccion from "./AutocompleteDireccion";
+import MapSelector from "../maps/MapSelector";
 
 const PedidoForm = ({
   selectedCliente,
@@ -29,6 +31,8 @@ const PedidoForm = ({
   tipoDocumento,
   setTipoDocumento,
   extraFields,
+  setCoords,
+  coords,
 }) => {
   const theme = useTheme();
   const [openClienteModal, setOpenClienteModal] = useState(false);
@@ -37,13 +41,14 @@ const PedidoForm = ({
   const isEmpresa = selectedCliente?.tipo_cliente === "empresa";
 
   useEffect(() => {
-    if (!selectedCliente) {
-      setDireccionEntrega("");
-      setUseClientAddress(true);
-    } else if (selectedCliente && useClientAddress) {
-      setDireccionEntrega(selectedCliente.direccion || "");
+    if (useClientAddress) {
+      if (selectedCliente) {
+        setDireccionEntrega(selectedCliente.direccion || "");
+      } else {
+        setDireccionEntrega("");
+      }
     }
-  }, [selectedCliente, useClientAddress, setDireccionEntrega]);
+  }, [useClientAddress, selectedCliente]);
 
   useEffect(() => {
     if (
@@ -130,19 +135,34 @@ const PedidoForm = ({
         sx={{ mb: 3, color: theme.palette.text.secondary }}
       />
 
-      <TextField
-        fullWidth
-        label="Dirección de Entrega"
-        value={direccionEntrega}
-        onChange={(e) => setDireccionEntrega(e.target.value)}
-        variant="outlined"
-        disabled={useClientAddress && !!selectedCliente}
-        sx={{
-          mb: 3,
-          backgroundColor: theme.palette.background.default,
-          borderRadius: 1,
-        }}
-      />
+      {useClientAddress ? (
+        <TextField
+          fullWidth
+          label="Dirección de Entrega"
+          value={direccionEntrega}
+          variant="outlined"
+          disabled
+          sx={{
+            mb: 3,
+            backgroundColor: theme.palette.background.default,
+            borderRadius: 1,
+          }}
+        />
+      ) : (
+        <>
+          <AutocompleteDireccion
+            direccion={direccionEntrega}
+            setDireccion={setDireccionEntrega}
+            setCoords={setCoords}
+          />
+          <MapSelector
+            coords={coords}
+            setCoords={setCoords}
+            direccion={direccionEntrega}
+            setDireccion={setDireccionEntrega}
+          />
+        </>
+      )}
 
       {mostrarTipoDocumento && (
         <TextField
@@ -231,6 +251,8 @@ PedidoForm.propTypes = {
   mostrarTipoDocumento: PropTypes.bool,
   setTipoDocumento: PropTypes.func,
   extraFields: PropTypes.node,
+  setCoords: PropTypes.func,
+  coords: PropTypes.object,
 };
 
 export default PedidoForm;

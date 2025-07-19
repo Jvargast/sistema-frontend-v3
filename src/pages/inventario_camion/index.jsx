@@ -8,6 +8,7 @@ import {
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import ProductoRetornableCard from "../../components/producto_retornable/ProductoRetornableCard";
 import { useGetAllInsumosQuery } from "../../store/services/insumoApi";
+import Header from "../../components/common/Header";
 
 const InspeccionRetornables = () => {
   const dispatch = useDispatch();
@@ -79,7 +80,7 @@ const InspeccionRetornables = () => {
         });
       });
 
-      /* for (const item of items) {
+      for (const item of items) {
         const totalDefectuosos = item.defectuosos.reduce(
           (sum, f) => sum + (f.cantidad || 0),
           0
@@ -88,10 +89,10 @@ const InspeccionRetornables = () => {
         if (!item.id_producto_retornable || total === 0) {
           throw new Error("Hay productos sin asignación de cantidades.");
         }
-      } */
+      }
       console.log(items);
 
-      // await inspeccionar({ items }).unwrap();
+      await inspeccionar({ items }).unwrap();
 
       dispatch(
         showNotification({
@@ -100,6 +101,7 @@ const InspeccionRetornables = () => {
         })
       );
       refetch();
+      setAgrupados([]);
     } catch (err) {
       dispatch(
         showNotification({
@@ -131,11 +133,11 @@ const InspeccionRetornables = () => {
   }
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1000, mx: "auto" }}>
-      <Typography variant="h5" fontWeight="bold" mb={3}>
-        Inspección de Productos Retornables
-      </Typography>
-
+    <Box sx={{ p: 3, mx: "auto" }}>
+      <Header
+        title="Inspección de Productos Retornables"
+        subtitle="Gestión de Productos Retornables"
+      />
       {agrupados.length === 0 ? (
         <Typography color="text.secondary">
           No hay productos por inspeccionar.
@@ -143,14 +145,15 @@ const InspeccionRetornables = () => {
       ) : (
         <Fade in>
           <Box>
-            {agrupados.map((grupo) => (
-              <ProductoRetornableCard
-                key={grupo.id}
-                grupo={grupo}
-                insumos={insumos?.data}
-                onUpdate={handleUpdate}
-              />
-            ))}
+            {insumos &&
+              agrupados.map((grupo) => (
+                <ProductoRetornableCard
+                  key={grupo.id}
+                  grupo={grupo}
+                  insumos={insumos?.data}
+                  onUpdate={handleUpdate}
+                />
+              ))}
 
             <Box mt={4} textAlign="center">
               <Button

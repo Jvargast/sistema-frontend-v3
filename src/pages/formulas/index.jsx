@@ -117,7 +117,7 @@ const ListarFormulasProductos = () => {
         title="Aún no tienes fórmulas registradas"
         subtitle="Agrega tu primera fórmula para empezar."
         buttonText="Crear Fórmula"
-        onAction={() => navigate("/formulas/nuevo")}
+        onAction={() => navigate("/formulas/crear")}
       />
     );
   }
@@ -126,7 +126,7 @@ const ListarFormulasProductos = () => {
     <Button
       variant="contained"
       startIcon={<AddCircleOutline />}
-      onClick={() => navigate("/formulas/nuevo")}
+      onClick={() => navigate("/formulas/crear")}
       sx={{
         textTransform: "none",
         borderRadius: 2,
@@ -140,7 +140,8 @@ const ListarFormulasProductos = () => {
   return (
     <>
       <DataTable
-        title="🛠️ Fórmulas de Productos"
+        title="Fórmulas de Productos"
+        subtitle="Gestión de Fórmulas"
         headerAction={botonCrear}   
         columns={columns}
         rows={formulas}
@@ -154,6 +155,7 @@ const ListarFormulasProductos = () => {
         }}
         loading={isLoading}
         errorMessage="No se pudieron cargar las fórmulas o no existen datos disponibles."
+        showBackButton={false}
       />
 
       {formulaSel && (

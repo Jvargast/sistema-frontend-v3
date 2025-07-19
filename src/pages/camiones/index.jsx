@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Box, Typography, Button, Paper } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -13,6 +13,7 @@ import {
   useGetAllCamionesQuery,
 } from "../../store/services/camionesApi";
 import CamionCard from "../../components/camion/CamionCard";
+import Header from "../../components/common/Header";
 
 const CamionesManagement = () => {
   const navigate = useNavigate();
@@ -129,18 +130,14 @@ const CamionesManagement = () => {
   return (
     <Box
       sx={{
-        p: { xs: 2, sm: 4 },
-        minHeight: "100vh",
         width: "100%",
         bgcolor: (theme) => theme.palette.background.default,
         overflowX: "hidden",
       }}
     >
-      <Paper
-        elevation={3}
+      <Box
         sx={{
           p: { xs: 2, sm: 4 },
-          borderRadius: 3,
           width: "100%",
           boxSizing: "border-box",
           bgcolor: (theme) => theme.palette.background.paper,
@@ -157,17 +154,7 @@ const CamionesManagement = () => {
             gap: 2,
           }}
         >
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: "bold",
-              color: (theme) => theme.palette.text.primary,
-              letterSpacing: 0.1,
-              whiteSpace: "nowrap",
-            }}
-          >
-            Gestión de Camiones
-          </Typography>
+          <Header title="Camiones" subtitle="Gestión de Camiones" />
           <Button
             variant="contained"
             color="primary"
@@ -241,7 +228,7 @@ const CamionesManagement = () => {
             ))}
           </Box>
         )}
-      </Paper>
+      </Box>
 
       <ModalForm
         open={open}

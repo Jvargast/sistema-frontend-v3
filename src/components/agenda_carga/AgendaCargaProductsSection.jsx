@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
-import { Box, Typography, Button, Paper } from "@mui/material";
+import { Box, Typography, Button, Paper, Divider } from "@mui/material";
 import ProductSelectorRow from "./ProductSelector";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 
 const AgendaCargaProductsSection = ({
   productos,
@@ -13,9 +14,19 @@ const AgendaCargaProductsSection = ({
 }) => {
   return (
     <Box>
-      <Typography variant="h6" mb={2}>
-        Productos adicionales a cargar
-      </Typography>
+      <Box display="flex" alignItems="center" mb={2}>
+        <Inventory2OutlinedIcon
+          sx={{
+            fontSize: 28,
+            color: (theme) => theme.palette.primary.main,
+            mr: 1,
+          }}
+        />
+        <Typography variant="h6" fontWeight={700}>
+          Productos adicionales a cargar
+        </Typography>
+      </Box>
+      <Divider sx={{ mb: 3 }} />
 
       <Box display="flex" flexDirection="column" gap={2}>
         {productos.map((prod, index) => (

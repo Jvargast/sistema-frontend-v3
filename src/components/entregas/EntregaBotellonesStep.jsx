@@ -152,9 +152,9 @@ const EntregaBotellonesStep = ({
               <Select
                 fullWidth
                 value={item.id_producto}
-                onChange={(e) =>
-                  actualizarItem(index, "id_producto", e.target.value)
-                }
+                onChange={(e) => {
+                  actualizarItem(index, "id_producto", e.target.value);
+                }}
                 displayEmpty
               >
                 <MenuItem value="" disabled>
@@ -167,62 +167,74 @@ const EntregaBotellonesStep = ({
                 ))}
               </Select>
             </Grid>
-            <Grid item xs={6} sm={2}>
-              <TextField
-                type="number"
-                label="Cantidad"
-                value={item.cantidad}
-                inputProps={{
-                  min: 0,
-                  max:
-                    detallePedido?.detalle.find(
-                      (d) => d.id_producto === item.id_producto
-                    )?.cantidad || 1,
-                }}
-                onChange={(e) => {
-                  const cantidad = parseInt(e.target.value) || 0;
-                  const maxCantidad =
-                    detallePedido?.detalle.find(
-                      (d) => d.id_producto === item.id_producto
-                    )?.cantidad || Infinity;
-                  actualizarItem(
-                    index,
-                    "cantidad",
-                    Math.min(cantidad, maxCantidad)
-                  );
-                }}
-                fullWidth
-              />
-            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Box flex={1}>
+                  <TextField
+                    type="number"
+                    label="Cantidad"
+                    value={item.cantidad}
+                    inputMode="numeric"
+                    variant="outlined"
+                    inputProps={{
+                      min: 0,
+                      max:
+                        detallePedido?.detalle.find(
+                          (d) => d.id_producto === item.id_producto
+                        )?.cantidad || 1,
+                      pattern: "[0-9]*",
+                    }}
+                    onChange={(e) => {
+                      const cantidad = parseInt(e.target.value) || 0;
+                      const maxCantidad =
+                        detallePedido?.detalle.find(
+                          (d) => d.id_producto === item.id_producto
+                        )?.cantidad || Infinity;
+                      actualizarItem(
+                        index,
+                        "cantidad",
+                        Math.min(cantidad, maxCantidad)
+                      );
+                    }}
+                    fullWidth
+                  />
+                </Box>
 
-            <Grid item xs={6} sm={3}>
-              <Select
-                value={item.estado}
-                onChange={(e) =>
-                  actualizarItem(index, "estado", e.target.value)
-                }
-                fullWidth
-              >
-                <MenuItem value="reutilizable">♻️ Reutilizable</MenuItem>
-                <MenuItem value="defectuoso">⚠️ Defectuoso</MenuItem>
-              </Select>
-            </Grid>
-            <Grid item xs={12} sm={2}>
-              {item.estado === "defectuoso" && (
-                <TextField
-                  label="Tipo defecto"
-                  value={item.tipo_defecto}
-                  onChange={(e) =>
-                    actualizarItem(index, "tipo_defecto", e.target.value)
-                  }
-                  fullWidth
-                />
-              )}
-            </Grid>
-            <Grid item xs={12} sm={1}>
-              <IconButton onClick={() => eliminarProducto(index)} color="error">
-                <DeleteOutline />
-              </IconButton>
+                <Box width="120px">
+                  <Select
+                    value={item.estado}
+                    onChange={(e) =>
+                      actualizarItem(index, "estado", e.target.value)
+                    }
+                    variant="outlined"
+                    fullWidth
+                    displayEmpty
+                    inputProps={{
+                      style: {
+                        height: "56px", // igual al TextField por defecto
+                      },
+                    }}
+                  >
+                    <MenuItem value="reutilizable">♻️ Reutilizable</MenuItem>
+                    <MenuItem value="defectuoso">⚠️ Defectuoso</MenuItem>
+                  </Select>
+                </Box>
+
+                <Box>
+                  <IconButton
+                    onClick={() => eliminarProducto(index)}
+                    color="error"
+                    sx={{
+                      border: "1px solid #e0e0e0",
+                      borderRadius: 1,
+                      height: "56px",
+                      width: "56px",
+                    }}
+                  >
+                    <DeleteOutline />
+                  </IconButton>
+                </Box>
+              </Box>
             </Grid>
           </Grid>
         ))}

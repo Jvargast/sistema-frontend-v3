@@ -8,6 +8,7 @@ import { themeSettings } from "./theme";
 import { useGetAuthenticatedUserQuery } from "./store/services/authApi";
 import { logout } from "./store/reducers/authSlice";
 import LoaderComponent from "./components/common/LoaderComponent";
+import TabsPersister from "./store/TabPersister";
 
 function App() {
   const dispatch = useDispatch();
@@ -31,6 +32,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <TabsPersister />
       <RouterProvider router={router} />
     </ThemeProvider>
   );

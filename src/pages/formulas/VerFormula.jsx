@@ -7,9 +7,9 @@ import {
   CircularProgress,
   Stack,
   TextField,
+  useTheme,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -17,15 +17,16 @@ import {
   useGetFormulaByIdQuery,
   useUpdateFormulaMutation,
 } from "../../store/services/FormulaProductoApi";
-import ElementoDetalle from "../../components/formulas/ElementoDetalle";
-import React, { useEffect, useState } from "react";
+import /* React, */ { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
+import FormulaDisplay from "../../components/formulas/FormulaDisplay";
 
 const VerFormula = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const theme = useTheme();
 
   const [updateFormula, { isLoading: saving }] = useUpdateFormulaMutation();
   const {
@@ -116,7 +117,7 @@ const VerFormula = () => {
         mx: "auto",
         p: 4,
         borderRadius: 4,
-        backgroundColor: "background.default",
+        backgroundColor: theme.palette.background.paper
       }}
     >
       <Stack direction="row" justifyContent="space-between" mb={2}>
@@ -187,132 +188,29 @@ const VerFormula = () => {
         )}
       </Box>
       <Divider sx={{ mb: 3 }} />
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          flexWrap: { xs: "nowrap", md: "nowrap" },
-          alignItems: { xs: "center", md: "flex-start" },
-          gap: 2,
+      <FormulaDisplay
+        insumos={insumos}
+        productoFinal={productoFinal}
+        cantidadFinal={cantidadFinal}
+        editable={isEditing}
+        onInsumoChange={(idx, nuevo) =>
+          setInsumos((prev) =>
+            prev.map((item, i) => (i === idx ? { ...item, ...nuevo } : item))
+          )
+        }
+        onInsumoDelete={(idx) =>
+          setInsumos((prev) => prev.filter((_, i) => i !== idx))
+        }
+        onProductoChange={({ nombre, cantidad, objetoSeleccionado }) => {
+          if (objetoSeleccionado) setProductoFinal(objetoSeleccionado);
+          if (cantidad !== undefined) setCantidadFinal(cantidad);
+          if (nombre)
+            setProductoFinal((prev) => ({
+              ...prev,
+              nombre_producto: nombre,
+            }));
         }}
-      >
-        {isEditing && (
-          <Button
-            variant="outlined"
-            startIcon={<AddIcon />}
-            onClick={() =>
-              setInsumos((prev) => [
-                ...prev,
-                {
-                  id_formula_detalle: undefined, // ← nuevo
-                  nombre: "",
-                  cantidad: 1,
-                  descripcion: "u.",
-                  objetoSeleccionado: null,
-                },
-              ])
-            }
-            sx={{
-              alignSelf: { xs: "center", md: "flex-start" },
-              mb: { xs: 1, md: 0 },
-              textTransform: "none",
-            }}
-          >
-            Añadir insumo
-          </Button>
-        )}
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 2,
-            justifyContent: "center",
-            flex: "1 1 0",
-          }}
-        >
-          {insumos.map((det, idx) => (
-            <React.Fragment key={det.id_formula_detalle ?? idx}>
-              <Box
-                sx={{ display: "inline-flex", alignItems: "center", gap: 2 }}
-              >
-                <ElementoDetalle
-                  editable={isEditing}
-                  tipo="Insumo"
-                  nombre={det.nombre}
-                  cantidad={det.cantidad}
-                  descripcion={det.descripcion}
-                  objetoSeleccionado={det.objetoSeleccionado}
-                  onChange={(nuevo) =>
-                    setInsumos((prev) =>
-                      prev.map((item, i) =>
-                        i === idx ? { ...item, ...nuevo } : item
-                      )
-                    )
-                  }
-                  onDelete={() =>
-                    setInsumos((prev) => prev.filter((_, i) => i !== idx))
-                  }
-                />
-
-                {!isEditing && idx < insumos.length - 1 && (
-                  <AddIcon
-                    sx={{
-                      fontSize: 34,
-                      color: "text.secondary",
-                      alignSelf: "center",
-                      display: { xs: "none", md: "inline-flex" },
-                    }}
-                  />
-                )}
-              </Box>
-            </React.Fragment>
-          ))}
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            alignItems: "center",
-            gap: 2,
-            mt: { xs: 2, md: 0 },
-            alignSelf: { xs: "center", md: "flex-start" },
-          }}
-        >
-          {!isEditing && (
-            <Typography
-              variant="h4"
-              sx={{
-                color: "primary.main",
-                fontWeight: "bold",
-                mb: { xs: 1, md: 0 },
-              }}
-            >
-              =
-            </Typography>
-          )}
-
-          <ElementoDetalle
-            editable={isEditing}
-            tipo="Producto"
-            nombre={
-              (productoFinal && productoFinal.nombre_producto) ||
-              formula.Producto?.nombre_producto
-            }
-            cantidad={cantidadFinal ?? formula.cantidad_requerida}
-            descripcion="unidad"
-            onChange={({ nombre, cantidad, objetoSeleccionado }) => {
-              if (objetoSeleccionado) setProductoFinal(objetoSeleccionado);
-              if (cantidad !== undefined) setCantidadFinal(cantidad);
-              if (nombre)
-                setProductoFinal((prev) => ({
-                  ...prev,
-                  nombre_producto: nombre,
-                }));
-            }}
-          />
-        </Box>
-      </Box>
+      />
     </Box>
   );
 };

@@ -69,7 +69,8 @@ const ProductSelectorRow = ({
           sx={{
             fontWeight: 500,
             textAlign: "center",
-            color: isRetornable ? "success.main" : "text.secondary",
+            color: isRetornable ? theme.palette.success.paper
+              : theme.palette.background.default,
             bgcolor: isRetornable
               ? theme.palette.success.light
               : theme.palette.background.default,
@@ -85,7 +86,7 @@ const ProductSelectorRow = ({
       <Grid item xs={12} sm={2}>
         <TextField
           label="Cantidad"
-          inputProps={{ min: 0 }}
+          inputProps={{ min: 0, inputMode: "numeric", pattern: "[0-9]*" }}
           type="number"
           value={selectedProduct?.cantidad || ""}
           onChange={(e) => onChangeCantidad(index, e.target.value)}

@@ -2,6 +2,7 @@ import { Box, Typography, Grid, CircularProgress } from "@mui/material";
 import PropTypes from "prop-types";
 import { useGetHistorialViajesQuery } from "../../store/services/agendaViajesApi";
 import TarjetaViaje from "./TarjetaViaje";
+import Header from "../common/Header";
 
 const HistorialViajes = ({ usuario }) => {
   const { data, isLoading } = useGetHistorialViajesQuery({
@@ -28,11 +29,9 @@ const HistorialViajes = ({ usuario }) => {
 
   return (
     <Box mt={4}>
-      <Typography variant="h5" fontWeight="bold" mb={2}>
-        🗂 Historial de Viajes
-      </Typography>
+      <Header title="Historial de Viajes" subtitle="Viajes realizados" />
 
-      <Grid container spacing={3}>
+      <Grid container spacing={3} mb={1}>
         {viajes.map((viaje) => (
           <TarjetaViaje key={viaje.id_agenda_viaje} viaje={viaje} />
         ))}

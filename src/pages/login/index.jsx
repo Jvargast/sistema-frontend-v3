@@ -6,6 +6,7 @@ import {
   Typography,
   IconButton,
   InputAdornment,
+  useTheme,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -37,6 +38,7 @@ const formatRut = (value) => {
 };
 
 const Login = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [credentials, setCredentials] = useState({ rut: "", password: "" });
@@ -66,7 +68,7 @@ const Login = () => {
   }, [isAuthenticated, navigate, permisos, rol]);
 
   const handleLogin = async (e) => {
-    e.preventDefault(); // importante para evitar recarga
+    e.preventDefault();
     try {
       await login(credentials).unwrap();
       dispatch(
@@ -93,7 +95,7 @@ const Login = () => {
       justifyContent="center"
       alignItems="center"
       flexDirection="column"
-      sx={{ backgroundColor: "#f5f5f5" }}
+      sx={{ backgroundColor: theme.palette.background.default }}
     >
       <Box justifyContent="center" display="flex" alignItems="center">
         <Box
@@ -116,9 +118,9 @@ const Login = () => {
         width="300px"
         p="2rem"
         sx={{
-          backgroundColor: "white",
-          borderRadius: "10px",
-          boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: 3,
+          boxShadow: theme.shadows[4],
         }}
       >
         <Typography
@@ -133,7 +135,7 @@ const Login = () => {
           label="Rut"
           name="rut"
           value={credentials.rut}
-          autoComplete="username" 
+          autoComplete="username"
           onChange={(e) => {
             const raw = e.target.value.replace(/[^0-9kK.-]/g, "");
             setCredentials((prev) => ({ ...prev, rut: raw }));

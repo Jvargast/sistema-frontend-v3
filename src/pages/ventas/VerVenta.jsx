@@ -41,7 +41,7 @@ const VerVenta = () => {
         mx: "auto",
       }}
     >
-      <BackButton to="/ventas" label="Volver a Ventas" />
+      <BackButton to="/admin/ventas" label="Volver a Ventas" />
 
       <Paper
         elevation={4}

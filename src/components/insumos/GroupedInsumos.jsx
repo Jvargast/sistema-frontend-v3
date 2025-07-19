@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import { Box, IconButton, useTheme } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Pagination,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useGetAllInsumosQuery } from "../../store/services/insumoApi";
 import LoaderComponent from "../common/LoaderComponent";
@@ -13,6 +19,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { alpha } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import ImageNotSupportedOutlinedIcon from "@mui/icons-material/ImageNotSupportedOutlined";
+import { Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 
 const GroupedInsumos = ({
   tipo,
@@ -22,6 +29,7 @@ const GroupedInsumos = ({
   setSearchInput,
   handleEdit,
   setSelectedRows,
+  isMobile,
 }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -66,8 +74,171 @@ const GroupedInsumos = ({
 
   if (isLoading) return <LoaderComponent />;
 
+  if (isMobile) {
+    return (
+      <Box>
+        {rows.length === 0 ? (
+          <Box
+            sx={{
+              py: 8,
+              textAlign: "center",
+              color: theme.palette.text.secondary,
+            }}
+          >
+            No hay insumos.
+          </Box>
+        ) : (
+          rows.map((row) => (
+            <Box
+              key={row.id_insumo}
+              sx={{
+                mb: 2,
+                p: 2,
+                borderRadius: 2,
+                boxShadow: 2,
+                background: theme.palette.background.paper,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 2,
+              }}
+            >
+              <Box display="flex" alignItems="center" gap={2}>
+                {row.image_url ? (
+                  <img
+                    src={row.image_url}
+                    alt={row.nombre_insumo}
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 8,
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 8,
+                      background: theme.palette.grey[200],
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ImageNotSupportedOutlinedIcon
+                      sx={{ color: theme.palette.grey[400], fontSize: 32 }}
+                    />
+                  </Box>
+                )}
+                <Box>
+                  <strong>{row.nombre_insumo}</strong>
+                  <Typography fontSize={13} color="text.secondary">
+                    Stock: <b>{row.stock}</b>
+                  </Typography>
+                </Box>
+              </Box>
+              <Box display="flex" gap={1}>
+                <IconButton
+                  color="info"
+                  size="small"
+                  onClick={() =>
+                    navigate(`/insumos/ver/${row.id_insumo}`, {
+                      state: { refetch: false },
+                    })
+                  }
+                  sx={{
+                    background: `linear-gradient(120deg, ${theme.palette.info.light}, ${theme.palette.info.main})`,
+                    color: "#fff",
+                    borderRadius: "50%",
+                    width: 38,
+                    height: 38,
+                    "&:hover": {
+                      background: theme.palette.info.dark,
+                      transform: "scale(1.08)",
+                    },
+                    boxShadow: "0 2px 8px 0 #1976d222",
+                  }}
+                  title="Ver insumo"
+                >
+                  <VisibilityIcon sx={{ fontSize: 20 }} />
+                </IconButton>
+                {canEditInsumo && (
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={() => handleEdit(row)}
+                    sx={{
+                      background: `linear-gradient(120deg, ${theme.palette.primary.light}, ${theme.palette.primary.main})`,
+                      color: "#fff",
+                      borderRadius: "50%",
+                      width: 38,
+                      height: 38,
+                      "&:hover": {
+                        background: theme.palette.primary.dark,
+                        transform: "scale(1.08)",
+                      },
+                      boxShadow: "0 2px 8px 0 #1976d222",
+                    }}
+                    title="Editar insumo"
+                  >
+                    <EditIcon sx={{ fontSize: 20 }} />
+                  </IconButton>
+                )}
+              </Box>
+            </Box>
+          ))
+        )}
+        <Box
+          display="flex"
+          justifyContent="flex-end"
+          alignItems="center"
+          gap={1}
+          mb={1}
+        >
+          <FormControl size="small" sx={{ minWidth: 90 }}>
+            <InputLabel id="mobile-page-size-label">Por página</InputLabel>
+            <Select
+              labelId="mobile-page-size-label"
+              id="mobile-page-size"
+              value={pagination.pageSize}
+              label="Por página"
+              onChange={(e) => {
+                setPagination((prev) => ({
+                  ...prev,
+                  pageSize: Number(e.target.value),
+                  page: 0,
+                }));
+              }}
+            >
+              {[5, 10, 25, 50].map((option) => (
+                <MenuItem value={option} key={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+        <Box display="flex" justifyContent="center" mt={2}>
+          <Pagination
+            count={Math.ceil(
+              (data?.data?.totalItems || 0) / pagination.pageSize
+            )}
+            page={pagination.page + 1}
+            onChange={(_, value) =>
+              setPagination((prev) => ({ ...prev, page: value - 1 }))
+            }
+            color="primary"
+            size="large"
+          />
+        </Box>
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={{ marginBottom: "2rem" }}>
+    <Box>
       <Box
         sx={{
           height: "600px",
@@ -201,7 +372,6 @@ const GroupedInsumos = ({
           paginationModel={pagination}
           checkboxSelection
           onRowSelectionModelChange={(selectedIds) => {
-            // Mapea sequentialIds a id_insumo
             const selectedInsumos = selectedIds
               .map((id) => rows.find((row) => row.id_insumo === id)?.id_insumo)
               .filter((id) => id);
@@ -230,6 +400,7 @@ GroupedInsumos.propTypes = {
   setSearchInput: PropTypes.func.isRequired,
   setSelectedRows: PropTypes.func.isRequired,
   handleEdit: PropTypes.func.isRequired,
+  isMobile: PropTypes.bool.isRequired,
 };
 
 export default GroupedInsumos;

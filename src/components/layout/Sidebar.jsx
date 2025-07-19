@@ -12,6 +12,7 @@ import {
   Typography,
   useTheme,
   Collapse,
+  useMediaQuery,
 } from "@mui/material";
 import {
   HomeOutlined,
@@ -33,6 +34,8 @@ import { modulesData } from "../../utils/modulesData";
 import { resetCacheAndLogout } from "../../store/reducers/authSlice";
 import { useLogoutMutation } from "../../store/services/authApi";
 import { getInitialRoute } from "../../utils/navigationUtils";
+import { maximizeTab, openTab, setActiveTab } from "../../store/reducers/tabSlice";
+import { getTabKey } from "../../utils/tabUtil";
 
 const Sidebar = ({
   user,
@@ -46,10 +49,126 @@ const Sidebar = ({
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [active, setActive] = useState("");
   const [openSections, setOpenSections] = useState({});
   const permisos = useSelector((state) => state.auth.permisos);
   const [logout] = useLogoutMutation();
+  const currentPath = pathname.replace(/^\//, "");
+
+  const { openTabs } = useSelector((state) => state.tabs);
+
+  const routerOnlyPaths = [
+    "clientes/crear",
+    "clientes/ver",
+    "clientes/editar",
+    "productos/ver",
+    "productos/editar",
+    "usuarios/editar",
+    "roles/editar",
+    "empresa/editar",
+    "insumos/ver",
+    "insumos/editar",
+    "ventas/ver",
+    "pagos/ver",
+    "facturas/ver",
+    "pedidos/ver",
+    "cotizaciones/ver",
+    "formulas/ver",
+    "formulas/nuevo",
+    "produccion/historial/ver",
+    "agendas/ver",
+    "ventas-chofer/ver",
+    "produccion/historial",
+  ];
+  const tabEnabledPaths = [
+    "dashboard",
+    "punto-venta",
+    "ventas",
+    "punto-cotizacion",
+    "cotizaciones",
+    "punto-pedido",
+    "admin-pedidos",
+    "mis-pedidos",
+    "pedidos",
+    "pagos",
+    "facturas",
+    "clientes",
+    "categorias",
+    "tipo-insumo",
+    "productos",
+    "produccion",
+    "formulas",
+    "insumos",
+    "camiones",
+    "inventario-camion",
+    "viajes",
+    "misventas",
+    "ventas-chofer",
+    "admin-viajes",
+    "agenda-carga",
+    "agendas",
+    "usuarios",
+    "miperfil",
+    "admin",
+    "cajas",
+    "roles",
+    "seguridad",
+    "empresa",
+    "analisis",
+  ];
+  const routeToTabInfo = {
+    dashboard: { label: "Dashboard", icon: "HomeOutlined" },
+    "punto-venta": { label: "Punto de Venta", icon: "ShoppingCartOutlined" },
+    ventas: { label: "Ventas", icon: "AttachMoneyOutlined" },
+    "punto-cotizacion": {
+      label: "Punto Cotización",
+      icon: "RequestQuoteOutlined",
+    },
+    cotizaciones: { label: "Cotizaciones", icon: "RequestQuoteOutlined" },
+    "punto-pedido": { label: "Punto Pedido", icon: "ShoppingCartOutlined" },
+    "admin-pedidos": {
+      label: "Admin Pedidos",
+      icon: "AdminPanelSettingsOutlined",
+    },
+    "mis-pedidos": { label: "Mis Pedidos", icon: "PersonOutlined" },
+    pedidos: { label: "Pedidos", icon: "ShoppingCartOutlined" },
+    pagos: { label: "Pagos", icon: "PaymentOutlined" },
+    facturas: { label: "Facturas", icon: "ReceiptOutlined" },
+    clientes: { label: "Clientes", icon: "PeopleOutlined" },
+    categorias: { label: "Categorías", icon: "CategoryOutlined" },
+    "tipo-insumo": { label: "Tipo Insumo", icon: "InventoryOutlined" },
+    productos: { label: "Productos", icon: "Inventory2Outlined" },
+    produccion: { label: "Producción", icon: "PrecisionManufacturingOutlined" },
+    formulas: { label: "Fórmulas", icon: "ScienceOutlined" },
+    insumos: { label: "Insumos", icon: "InventoryOutlined" },
+    camiones: { label: "Camiones", icon: "LocalShippingOutlined" },
+    "inventario-camion": {
+      label: "Inventario Camión",
+      icon: "InventoryOutlined",
+    },
+    viajes: { label: "Viajes", icon: "TripOriginOutlined" },
+    misventas: { label: "Mis Ventas", icon: "PersonOutlined" },
+    "ventas-chofer": { label: "Ventas Chofer", icon: "LocalShippingOutlined" },
+    "admin-viajes": {
+      label: "Admin Viajes",
+      icon: "AdminPanelSettingsOutlined",
+    },
+    "agenda-carga": { label: "Agenda Carga", icon: "EventOutlined" },
+    agendas: { label: "Agendas", icon: "CalendarTodayOutlined" },
+    usuarios: { label: "Usuarios", icon: "PeopleOutlined" },
+    miperfil: { label: "Mi Perfil", icon: "AccountCircleOutlined" },
+    admin: { label: "Administración", icon: "AdminPanelSettingsOutlined" },
+    cajas: { label: "Cajas", icon: "AccountBalanceOutlined" },
+    roles: { label: "Roles", icon: "SecurityOutlined" },
+    seguridad: { label: "Seguridad", icon: "SecurityOutlined" },
+    empresa: { label: "Empresa", icon: "BusinessOutlined" },
+    analisis: { label: "Análisis", icon: "AnalyticsOutlined" },
+  };
+
+  const getActiveModule = () =>
+    modulesData.find((m) => currentPath.startsWith(m.path))?.path || null;
+  const activeModulePath = getActiveModule();
 
   useEffect(() => {
     setActive(pathname.substring(1));
@@ -64,11 +183,6 @@ const Sidebar = ({
     }));
   };
 
-  const handleNavigate = (path) => {
-    navigate(`/${path}`);
-    setActive(path);
-  };
-
   const handleLogout = async () => {
     try {
       await logout().unwrap();
@@ -79,8 +193,62 @@ const Sidebar = ({
     }
   };
 
-  const initialHomePath = getInitialRoute(rol, permisos); // ejemplo: "/dashboard"
-  const initialHomeValue = initialHomePath.replace("/", ""); // "dashboard"
+  const shouldUseRouter = (path) => {
+    return routerOnlyPaths.some(
+      (routerPath) =>
+        path.startsWith(routerPath) ||
+        path.includes("/ver/") ||
+        path.includes("/editar/") ||
+        path.includes("/crear")
+    );
+  };
+
+  const canUseTab = (path) => {
+    return (
+      isDesktop && tabEnabledPaths.includes(path) && !shouldUseRouter(path)
+    );
+  };
+
+  const handleNavigation = (item) => {
+    const path = item.path;
+    const key = getTabKey(path);
+
+    if (!isDesktop) {
+      navigate(`/${path}`);
+      setActive(path);
+      return;
+    }
+
+    if (canUseTab(key)) {
+      const tabInfo = routeToTabInfo[path] || {
+        label: item.text || item.name,
+        icon: item.icon?.type?.displayName || null,
+      };
+      const existingTab = openTabs.find((tab) => tab.key === key);
+
+      if (existingTab) {
+        if (existingTab.minimized) {
+          dispatch(maximizeTab(key));
+        }
+        dispatch(setActiveTab(key));
+      } else {
+        dispatch(
+          openTab({
+            key,
+            label: tabInfo.label,
+            icon: tabInfo.icon,
+            path,
+          })
+        );
+      }
+      navigate(`/${path}`);
+    } else {
+      navigate(`/${path}`);
+    }
+  };
+
+  const initialHomePath = getInitialRoute(rol, permisos);
+  const initialHomeValue = initialHomePath.replace("/", "");
 
   return (
     <Box component="nav">
@@ -115,6 +283,7 @@ const Sidebar = ({
             />
           </Box>
           <Divider />
+
           {/* Modules List */}
           <List>
             {modulesData
@@ -129,11 +298,11 @@ const Sidebar = ({
                     onClick={
                       module.children
                         ? () => handleToggleSection(module.name)
-                        : () => handleNavigate(module.path)
+                        : () => handleNavigation(module)
                     }
                     sx={{
                       backgroundColor:
-                        active === module.path
+                        activeModulePath === module.path
                           ? theme.palette.action.selected
                           : "transparent",
                       "&:hover": {
@@ -155,6 +324,7 @@ const Sidebar = ({
                       )
                     )}
                   </ListItemButton>
+
                   {/* Children (Submodules) */}
                   {module.children && (
                     <Collapse
@@ -168,7 +338,7 @@ const Sidebar = ({
                           .map((child) => (
                             <ListItemButton
                               key={child.path}
-                              onClick={() => handleNavigate(child.path)}
+                              onClick={() => handleNavigation(child)}
                               sx={{
                                 pl: 4,
                                 backgroundColor:
@@ -195,6 +365,7 @@ const Sidebar = ({
                 </Box>
               ))}
           </List>
+
           {/* Footer */}
           <Box bottom="2rem">
             <Divider />
@@ -222,6 +393,7 @@ const Sidebar = ({
           </Box>
         </Drawer>
       )}
+
       {/* Bottom Navigation for Mobile */}
       {!isNonMobile && (
         <BottomNavigation
@@ -327,6 +499,7 @@ const Sidebar = ({
     </Box>
   );
 };
+
 Sidebar.propTypes = {
   user: PropTypes.object,
   drawerWidth: PropTypes.oneOfType([PropTypes.number, PropTypes.string])

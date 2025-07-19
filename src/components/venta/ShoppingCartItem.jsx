@@ -26,15 +26,14 @@ const ShoppingCartItem = ({
         p: 2,
         mb: 2,
         borderRadius: 2,
-        backgroundColor: "#FAFAFA", // Cambia el fondo
-        border: "1px solid #E0E0E0", // Sutil
-        boxShadow: "none", // Quitamos la sombra
+        backgroundColor: "#FAFAFA",
+        border: "1px solid #E0E0E0",
+        boxShadow: "none",
         display: "flex",
         flexDirection: "column",
         gap: 1.5,
       }}
     >
-      {/* Nombre del producto */}
       <Typography
         variant="subtitle1"
         fontWeight="bold"
@@ -43,7 +42,6 @@ const ShoppingCartItem = ({
         {item.nombre}
       </Typography>
 
-      {/* Controles de cantidad */}
       <Stack
         direction="row"
         alignItems="center"
@@ -98,7 +96,6 @@ const ShoppingCartItem = ({
         </IconButton>
       </Stack>
 
-      {/* Precio y total alineados */}
       <Stack
         direction="row"
         alignItems="center"

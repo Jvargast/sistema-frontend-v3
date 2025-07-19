@@ -15,6 +15,7 @@ import dayjs from "dayjs";
 import { useGetAllViajesQuery } from "../../store/services/agendaViajesApi";
 import ViajeCard from "../../components/viaje/ViajeCard";
 import BackButton from "../../components/common/BackButton";
+import Header from "../../components/common/Header";
 
 const EstadosViaje = ["Todos", "Pendiente", "En Tránsito", "Finalizado"];
 
@@ -49,9 +50,7 @@ const AdminHistorialViajes = () => {
   return (
     <Box px={2} py={4}>
       <BackButton to="/admin" label="Volver al menú"/>
-      <Typography variant="h4" fontWeight="bold" textAlign="center" mb={4}>
-        Historial de Viajes
-      </Typography>
+      <Header title="Listado de Viajes" subtitle="Gestión de Viajes Choferes" />
 
       <Paper
         elevation={2}

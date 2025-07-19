@@ -188,7 +188,7 @@ const ListarPedidos = () => {
             <Tooltip title="Ver Detalle">
               <IconButton
                 color="primary"
-                onClick={() => navigate(`/pedidos/ver/${row.id_pedido}`)}
+                onClick={() => navigate(`/admin/pedidos/ver/${row.id_pedido}`)}
               >
                 <Visibility />
               </IconButton>
@@ -239,7 +239,8 @@ const ListarPedidos = () => {
   return (
     <>
       <DataTable
-        title="🗒️ Listado de Pedidos"
+        title="Listado de Pedidos"
+        subtitle="Gestión de Pedidos"
         columns={columns}
         rows={pedidos}
         totalItems={totalItems}

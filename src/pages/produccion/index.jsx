@@ -14,7 +14,6 @@ import {
   Stepper,
   TextField,
   Typography,
-  //useTheme,
 } from "@mui/material";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import IndicadoresPanel from "../../components/produccion/IndicadoresPanel";
@@ -29,6 +28,7 @@ import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useCreateProduccionMutation } from "../../store/services/produccionApi";
+import Header from "../../components/common/Header";
 
 const steps = [
   "Seleccionar fórmula",
@@ -111,9 +111,7 @@ const PanelProduccion = () => {
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
       <Stack direction="row" justifyContent="space-between" mb={2}>
-        <Typography variant="h4" fontWeight="bold">
-          Registro de Producción
-        </Typography>
+        <Header title="Registro de Producción" subtitle="Proceso Productivo" />
       </Stack>
 
       <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>

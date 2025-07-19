@@ -66,3 +66,21 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.custom-tabs-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #bdbdbd #f5f5f5;
+}
+.custom-tabs-scrollbar::-webkit-scrollbar {
+  height: 6px;
+  background: #f5f5f5;
+  border-radius: 6px;
+}
+.custom-tabs-scrollbar::-webkit-scrollbar-thumb {
+  background: #bdbdbd;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.custom-tabs-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #757575;
+}

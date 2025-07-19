@@ -7,31 +7,37 @@ const BackButton = ({ to, label }) => {
   const navigate = useNavigate();
   const theme = useTheme();
 
+  // Color negro en light, gris claro en dark
+  const borderColor =
+    theme.palette.mode === "dark" ? theme.palette.grey[700] : "#191919";
+
+  const textColor = theme.palette.mode === "dark" ? "#fff" : "#191919";
+
   return (
     <Button
-      startIcon={<ArrowBackIcon />}
+      startIcon={<ArrowBackIcon sx={{ color: textColor }} />}
       variant="outlined"
-      color="primary"
       onClick={() => navigate(to)}
       sx={{
         mb: 2,
         textTransform: "none",
-        fontSize: "1rem",
+        fontSize: "1.03rem",
         fontWeight: 500,
-        borderRadius: "50px",
-        padding: "0.4rem 1.2rem",
-        borderWidth: 2,
-        transition: "all 0.3s ease",
+        borderRadius: "8px",
+        padding: "0.37rem 1.15rem",
+        border: `1.5px solid ${borderColor}`,
+        color: textColor,
+        background: "transparent",
+        boxShadow: "none",
+        letterSpacing: 0.1,
+        minWidth: 0,
         "&:hover": {
-          backgroundColor:
-            theme.palette.mode === "light"
-              ? theme.palette.primary.light
-              : theme.palette.primary.dark,
-          color:
-            theme.palette.mode === "light"
-              ? theme.palette.primary.contrastText
-              : theme.palette.primary.contrastText,
-          boxShadow: theme.shadows[3],
+          background:
+            theme.palette.mode === "dark" ? theme.palette.grey[800] : "#f6f6f6",
+          color: textColor,
+          borderColor:
+            theme.palette.mode === "dark" ? theme.palette.grey[600] : "#111",
+          boxShadow: "0 1px 6px 0 #1111",
         },
       }}
     >

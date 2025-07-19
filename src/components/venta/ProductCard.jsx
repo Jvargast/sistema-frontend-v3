@@ -6,6 +6,7 @@ import {
   Button,
   Box,
   Chip,
+  Tooltip,
   useTheme,
 } from "@mui/material";
 import BrokenImageIcon from "@mui/icons-material/BrokenImage";
@@ -25,20 +26,21 @@ const ProductCard = ({ product, onAddToCart }) => {
     <Card
       sx={{
         borderRadius: 4,
-        boxShadow: 'none',
+        boxShadow: "none",
         border: `1px solid ${theme.palette.divider}`,
-        transition: "transform 0.25s ease, box-shadow 0.3s ease",
+        transition: "transform 0.25s, box-shadow 0.3s",
         "&:hover": {
           transform: "translateY(-4px)",
           boxShadow: 3,
         },
         width: "100%",
-        maxWidth: 260,
+        maxWidth: 300,
         position: "relative",
         overflow: "hidden",
+        minHeight: 340,
+        background: theme.palette.background.paper,
       }}
     >
-      {/* Chip tipo */}
       <Box position="absolute" top={10} left={10} zIndex={1}>
         <Chip
           label={tipoLabel}
@@ -48,7 +50,6 @@ const ProductCard = ({ product, onAddToCart }) => {
         />
       </Box>
 
-      {/* Imagen del producto o fallback si falla */}
       {imageError ? (
         <Box
           height={160}
@@ -87,46 +88,51 @@ const ProductCard = ({ product, onAddToCart }) => {
         />
       )}
 
-      <CardContent sx={{ p: 2.5 }}>
-        {/* Nombre y precio */}
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mb={1}
-        >
-          <Typography
-            variant="subtitle1"
-            fontWeight="600"
-            sx={(theme) => ({
-              color: theme.palette.text.primary,
-            })}
-            noWrap
-          >
-            {product.nombre_producto}
-          </Typography>
+      <CardContent sx={{ p: 2.4 }}>
+        <Box display="flex" flexDirection="column" alignItems="center" mb={1}>
+          <Tooltip title={product.nombre_producto} arrow>
+            <Typography
+              variant="subtitle1"
+              fontWeight={600}
+              sx={{
+                color: theme.palette.text.primary,
+                display: "-webkit-box",
+                WebkitBoxOrient: "vertical",
+                WebkitLineClamp: 2,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                fontSize: "0.92rem",
+                maxWidth: 210,
+                minHeight: "2.6em",
+              }}
+            >
+              {product.nombre_producto}
+            </Typography>
+          </Tooltip>
           <Typography
             variant="subtitle2"
             fontWeight="bold"
-            sx={(theme) => ({
+            sx={{
               color: theme.palette.success.main,
-            })}
+              fontSize: "1.04rem",
+              ml: 1,
+              flexShrink: 0,
+              textAlign: "right",
+            }}
           >
-            ${precio.toFixed(0)}
+            ${precio.toLocaleString("es-CL")}
           </Typography>
         </Box>
 
-        {/* Stock */}
         <Typography
           variant="body2"
           color={stock > 0 ? "textSecondary" : "error"}
           fontWeight={stock > 0 ? 400 : 600}
           sx={{ mb: 1 }}
         >
-          {stock > 0 ? `Stock disponible: ${stock}` : "Sin stock"}
+          {stock > 0 ? `Stock: ${stock}` : "Sin stock"}
         </Typography>
 
-        {/* Botón agregar */}
         <Button
           variant="contained"
           fullWidth
@@ -136,9 +142,10 @@ const ProductCard = ({ product, onAddToCart }) => {
             fontWeight: "bold",
             borderRadius: 2,
             py: 1,
-            backgroundColor: stock > 0 ? "#1976d2" : "#bdbdbd",
+            backgroundColor: stock > 0 ? theme.palette.primary.main : "#bdbdbd",
             "&:hover": {
-              backgroundColor: stock > 0 ? "#1565c0" : "#9e9e9e",
+              backgroundColor:
+                stock > 0 ? theme.palette.primary.dark : "#9e9e9e",
             },
           }}
         >

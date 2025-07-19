@@ -1,5 +1,5 @@
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
-import { Box, Typography, CardContent, Card, Grid2 } from "@mui/material";
+import { Box, Typography, Card, Grid2 } from "@mui/material";
 import {
   HomeOutlined,
   PointOfSaleOutlined,
@@ -31,19 +31,19 @@ const navItems = [
     text: "Ventas",
     icon: <AttachMoneyOutlinedIcon className="text-teal-500" />,
     description: "Gestión de ventas",
-    path: "/ventas",
+    path: "/admin/ventas",
   },
   {
     text: "Pedidos",
     icon: <LocalShippingOutlinedIcon className="text-amber-500" />,
     description: "Gestión de pedidos",
-    path: "/pedidos",
+    path: "/admin/pedidos",
   },
   {
     text: "Cotizaciones",
     icon: <ArticleOutlinedIcon className="text-indigo-500" />,
     description: "Gestión de cotizaciones",
-    path: "/cotizaciones",
+    path: "/admin/cotizaciones",
   },
   {
     text: "Ventas Chofer",
@@ -54,68 +54,68 @@ const navItems = [
   {
     text: "Almacén",
     icon: <Inventory2OutlinedIcon className="text-pink-500" />,
-    description: "Gestión de productos e insumos",
+    description: "Gestión de inventario",
     path: "/productos",
   },
   {
-    text: "Proveedores y Mensajes",
+    text: "Proveedores",
     icon: <PeopleAltOutlined className="text-cyan-500" />,
-    description: "Gestión de proveedores y comunicación interna",
-    path: "/proveedores-mensajes",
+    description: "Gestión de proveedores",
+    path: "/admin/proveedores",
   },
   {
-    text: "Historial Producción",
+    text: "Producción",
     icon: <HistoryEduOutlinedIcon className="text-orange-500" />,
-    description: "Revisa el historial de producciones",
-    path: "/produccion/historial",
+    description: "Historial de producciones",
+    path: "/admin/produccion",
   },
   {
     text: "Análisis",
     icon: <PieChartOutlined className="text-sky-500" />,
-    description: "Reporte diario, mensual y desglose de datos",
-    path: "/analisis",
+    description: "Reportes de datos",
+    path: "/admin/analisis",
   },
   {
     text: "Seguridad",
     icon: <SecurityOutlined className="text-red-500" />,
-    description: "Gestión de seguridad del sistema",
-    path: "/seguridad",
+    description: "Gestión de seguridad",
+    path: "/admin/seguridad",
   },
   {
-    text: "Gestión de Cajas",
+    text: "Cajas",
     icon: <PointOfSaleOutlined className="text-emerald-500" />,
     description: "Cajas de la sucursal",
-    path: "/cajas",
+    path: "/admin/cajas",
   },
   {
     text: "Viajes",
     icon: <AirportShuttleOutlinedIcon className="text-lime-400" />,
     description: "Gestión de viajes",
-    path: "/admin-viajes",
+    path: "/admin/viajes",
   },
   {
-    text: "Carga de Agendas",
+    text: "Agendas",
     icon: <CalendarMonthOutlinedIcon className="text-fuchsia-700" />,
     description: "Gestión de viajes",
-    path: "/agendas",
+    path: "/admin/agendas",
   },
   {
     text: "Usuarios",
     icon: <SupervisorAccountOutlined className="text-purple-500" />,
     description: "Administración de usuarios",
-    path: "/usuarios",
+    path: "/admin/usuarios",
   },
   {
     text: "Roles",
     icon: <AssignmentIndOutlined className="text-yellow-500" />,
     description: "Gestión de roles y Permisos",
-    path: "/roles",
+    path: "/admin/roles",
   },
   {
     text: "Empresa",
     icon: <BusinessIcon className="text-zinc-500" />,
     description: "Gestión de empresa y sucursales",
-    path: "/empresa",
+    path: "/admin/empresa",
   },
 ];
 
@@ -135,43 +135,101 @@ const Administration = () => {
       }}
     >
       <Header title="Menú Administrador" subtitle="" />
-      <Grid2 container spacing={2} justifyContent="center" wrap="wrap" mt={2}>
+      <Grid2
+        container
+        spacing={2}
+        justifyContent="center"
+        wrap="wrap"
+        sx={{
+          mt: 2,
+          mb: 4,
+          width: "100%",
+          maxWidth: 1200,
+          margin: "0 auto",
+        }}
+      >
         {navItems.map((item, index) => (
           <Grid2
             key={index}
-            xs={12}
-            sm={6}
-            md={4}
-            lg={2.4}
-            className="flex justify-center"
+            xs={6}
+            sm={4}
+            md={3}
+            lg={2}
+            display="flex"
+            justifyContent="center"
           >
             <Card
               variant="outlined"
-              className="w-[12rem] h-[12rem] flex flex-col items-center justify-center transition-transform transform hover:scale-105 hover:shadow-lg cursor-pointer bg-white"
+              sx={{
+                width: 180,
+                height: 180,
+                borderRadius: 4,
+                boxShadow: "0 4px 14px 0 #21305213",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                p: 2,
+                transition: "transform .16s, box-shadow .16s",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                  boxShadow: "0 8px 32px 0 #1a237e24",
+                },
+              }}
               onClick={() => navigate(item.path)}
             >
-              <Box className="text-5xl mb-2 hover:text-gray-700">
+              <Box
+                sx={{
+                  fontSize: 40,
+                  mb: 1.2,
+                  height: 48,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%",
+                }}
+              >
                 {item.icon}
               </Box>
-              <CardContent className="text-center">
-                <Typography
-                  variant="h6"
-                  component="div"
-                  sx={{
-                    fontWeight: "bold",
-                    color: (theme) => theme.palette.text.primary,
-                  }}
-                >
-                  {item.text}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  className="text-gray-600"
-                  sx={{ color: (theme) => theme.palette.main }}
-                >
-                  {item.description}
-                </Typography>
-              </CardContent>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: "bold",
+                  color: (theme) => theme.palette.text.primary,
+                  textAlign: "center",
+                  height: 32, // forzamos el alto para títulos de una o dos líneas
+                  lineHeight: 1.2,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  width: "100%",
+                  mb: 0.5,
+                }}
+              >
+                {item.text}
+              </Typography>
+
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  textAlign: "center",
+                  fontSize: 13.8,
+                  height: 34, 
+                  lineHeight: 1.2,
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  width: "100%",
+                }}
+              >
+                {item.description}
+              </Typography>
             </Card>
           </Grid2>
         ))}

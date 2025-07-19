@@ -77,7 +77,6 @@ const PerfilHeader = ({ nombre, apellido, email }) => {
         sx={{
           textAlign: { xs: "center", sm: "left" },
           flex: 1,
-          maxWidth: { sm: "calc(100% - 128px)" },
         }}
       >
         <Typography
@@ -456,15 +455,26 @@ const PerfilUsuario = () => {
   const inicial = getInitialRoute(rol?.nombre, permisos);
 
   return (
-    <Box p={3}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+      }}
+    >
       <Card
-        elevation={3}
+        elevation={1}
         sx={{
-          maxWidth: 800,
+          width: "100%",
           mx: "auto",
-          p: { xs: 2, sm: 4 },
-          borderRadius: 2,
-          boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)",
+          p: { xs: 1, sm: 2, md: 3 }, 
+          boxShadow: { xs: 2, md: 4 },
+          borderRadius: { xs: 2, md: 4 },
+          background: (theme) =>
+            theme.palette.mode === "dark"
+              ? theme.palette.background.paper
+              : "#FAFAFA",
         }}
       >
         <BackButton to={`${inicial}`} label="Volver" />

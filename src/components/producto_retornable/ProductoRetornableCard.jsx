@@ -7,25 +7,26 @@ import {
   Tooltip,
   Select,
   MenuItem,
+  useTheme,
 } from "@mui/material";
 import { AddCircleOutline, DeleteOutline } from "@mui/icons-material";
 import PropTypes from "prop-types";
 
 const ProductoRetornableCard = ({ grupo, onUpdate, insumos }) => {
+  const theme = useTheme();
   return (
     <Box
       sx={{
-        border: "1px solid #e0e0e0",
-        borderRadius: 3,
-        px: 3,
+        px: 2,
         py: 2,
         mb: 4,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-        backgroundColor: "#fff",
+        backgroundColor: theme.palette.background.paper,
       }}
     >
       <Typography variant="h6" fontWeight="bold" gutterBottom>
-        {grupo.nombreProducto} ({grupo.totalCantidad} unidades)
+        Producto: {grupo.nombreProducto} (
+        {grupo.items.reduce((total, item) => total + (item.cantidad || 0), 0)}{" "}
+        unidades)
       </Typography>
 
       <Divider sx={{ mb: 2 }} />
@@ -64,8 +65,8 @@ const ProductoRetornableCard = ({ grupo, onUpdate, insumos }) => {
               mb: 3,
               p: 2,
               borderRadius: 2,
-              backgroundColor: "#f9f9f9",
-              border: "1px solid #ddd",
+              border: `1px solid ${theme.palette.divider}`,
+              backgroundColor: theme.palette.background.default, 
             }}
           >
             <Typography variant="subtitle2" color="text.secondary" mb={1}>
@@ -73,16 +74,33 @@ const ProductoRetornableCard = ({ grupo, onUpdate, insumos }) => {
               — Cantidad: {item.cantidad}
             </Typography>
 
+            <Typography
+              variant="subtitle1"
+              fontWeight="bold"
+              sx={{
+                px: 2,
+                py: 1,
+                borderRadius: 1,
+                mb: 1,
+                backgroundColor: theme.palette.success.light,
+                color: theme.palette.success.dark,
+              }}
+            >
+              ♻️ Reutilizables
+            </Typography>
             <Box
               sx={{
                 display: "flex",
                 flexDirection: "column",
                 gap: 1,
+                border: "1px solid #e0e0e0",
+                borderRadius: 2,
+                p: 2,
                 mb: 2,
               }}
             >
               <TextField
-                label="Cantidad reutilizable"
+                label="¿Cuántos pueden volver a ser usados?"
                 type="number"
                 inputProps={{ min: 0, max: item.cantidad }}
                 value={item.reutilizable || ""}
@@ -117,8 +135,19 @@ const ProductoRetornableCard = ({ grupo, onUpdate, insumos }) => {
               </Select>
             </Box>
 
-            <Typography variant="subtitle2" fontWeight="medium" mb={1}>
-              Defectuosos
+            <Typography
+              variant="subtitle1"
+              fontWeight="bold"
+              sx={{
+                backgroundColor: theme.palette.warning.light, 
+                color: theme.palette.warning.dark,
+                px: 2,
+                py: 1,
+                borderRadius: 1,
+                mb: 1,
+              }}
+            >
+              ⚠️ Defectuosos
             </Typography>
 
             {(item.fallas || []).map((falla, fallaIdx) => (
@@ -149,7 +178,7 @@ const ProductoRetornableCard = ({ grupo, onUpdate, insumos }) => {
                 />
 
                 <TextField
-                  label="Tipo de defecto"
+                  label="Descripción del defecto (ej: roto, sucio, sin tapa...)"
                   value={falla.tipo_defecto}
                   onChange={(e) =>
                     handleFallaChange(fallaIdx, "tipo_defecto", e.target.value)
@@ -228,7 +257,7 @@ const ProductoRetornableCard = ({ grupo, onUpdate, insumos }) => {
 ProductoRetornableCard.propTypes = {
   grupo: PropTypes.object.isRequired,
   onUpdate: PropTypes.func.isRequired,
-  insumos: PropTypes.object.isRequired,
+  insumos: PropTypes.object,
 };
 
 export default ProductoRetornableCard;
