@@ -26,6 +26,7 @@ import PedidoCategorias from "../../components/pedido/PedidoCategorias";
 import PedidoCarrito from "../../components/pedido/PedidoCarrito";
 import { useGetCajaAsignadaQuery } from "../../store/services/cajaApi";
 import NoCajaAsignadaDialog from "../../components/chofer/NoCajaAsignadaMessage";
+import { obtenerCoordsDesdeDireccion } from "../../utils/obtenerCords";
 
 const StyledConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -83,6 +84,8 @@ const CrearPedido = () => {
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [direccionEntrega, setDireccionEntrega] = useState("");
   const [tipoDocumento, setTipoDocumento] = useState("");
+  const [coords, setCoords] = useState({ lat: null, lng: null });
+
   const [openNoCajaModal, setOpenNoCajaModal] = useState(false);
 
   const [metodoPago, setMetodoPago] = useState(null);
@@ -117,7 +120,16 @@ const CrearPedido = () => {
   useEffect(() => {
     if (selectedCliente && selectedCliente.direccion) {
       setDireccionEntrega(selectedCliente.direccion);
+
+      if (!coords.lat || !coords.lng) {
+        obtenerCoordsDesdeDireccion(selectedCliente.direccion)
+          .then((c) => {
+            if (c) setCoords(c);
+          })
+          .catch(() => {});
+      }
     }
+    // eslint-disable-next-line
   }, [selectedCliente]);
 
   const handleAddToCart = (product) => {
@@ -168,6 +180,8 @@ const CrearPedido = () => {
     const pedidoData = {
       id_cliente: selectedCliente.id_cliente,
       direccion_entrega: direccionEntrega,
+      lat: coords.lat,
+      lng: coords.lng,
       metodo_pago: metodoPago,
       productos: cart.map((item) => ({
         cantidad: item.cantidad,
@@ -246,6 +260,8 @@ const CrearPedido = () => {
             mostrarMetodoPago={tipoDocumento !== "factura"}
             tipoDocumento={tipoDocumento}
             setTipoDocumento={setTipoDocumento}
+            setCoords={setCoords}
+            coords={coords}
           />
           <Stack direction="row" justifyContent="flex-end" mt={2}>
             <Button variant="contained" onClick={nextStep}>

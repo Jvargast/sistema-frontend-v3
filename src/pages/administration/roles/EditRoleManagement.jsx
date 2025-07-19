@@ -123,7 +123,6 @@ const EditRole = () => {
         const toActivate = new Set(prev);
         const stack = [permisoBase];
 
-        // BFS directo en 'Dependencias'
         while (stack.length > 0) {
           const current = stack.pop();
           toActivate.add(current.id);
@@ -235,7 +234,7 @@ const EditRole = () => {
       <Button
         variant="outlined"
         color="inherit"
-        onClick={() => navigate("/roles")}
+        onClick={() => navigate("/admin/roles")}
         sx={{ marginBottom: 2 }}
       >
         Cancelar

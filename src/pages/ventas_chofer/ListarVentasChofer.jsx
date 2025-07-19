@@ -112,7 +112,8 @@ const ListarVentasChofer = () => {
 
   return (
     <DataTable
-      title={rol === "chofer" ? "🧾 Listado de Mis Ventas" : "🧾 Ventas Chofer"}
+      title={rol === "chofer" ? "Listado de Mis Ventas" : "Ventas Chofer"}
+      subtitle={"Gestión Ventas"}
       columns={columns}
       rows={ventas}
       totalItems={totalItems}

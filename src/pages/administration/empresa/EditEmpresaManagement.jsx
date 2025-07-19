@@ -122,7 +122,7 @@ const EditarEmpresa = () => {
           borderRadius: "12px",
         }}
       >
-        <BackButton to="/empresa" label="Volver" />
+        <BackButton to="/admin/empresa" label="Volver" />
         <Typography
           variant="h5"
           sx={{

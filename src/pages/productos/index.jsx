@@ -1,8 +1,10 @@
 import { useMemo, useState, useEffect } from "react";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { alpha, Box, Button, IconButton, useTheme } from "@mui/material";
+import { Box, Button, Pagination, Typography, useTheme } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
@@ -20,6 +22,8 @@ import AlertDialog from "../../components/common/AlertDialog";
 import DataGridCustomToolbar from "../../components/common/DataGridCustomToolBar";
 import { CustomPagination } from "../../components/common/CustomPagination";
 import { useHasPermission } from "../../utils/useHasPermission";
+import { useIsMobile } from "../../utils/useIsMobile";
+import { Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 
 const Productos = () => {
   const location = useLocation();
@@ -33,6 +37,9 @@ const Productos = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [open, setOpen] = useState(false);
   const [openAlert, setOpenAlert] = useState(false);
+  const isMobile = useIsMobile();
+
+  const pageSizeOptions = [5, 10, 25, 50];
 
   const { data, isLoading, isError, refetch } = useGetAllProductosQuery({
     estado: "Disponible - Bodega",
@@ -92,7 +99,7 @@ const Productos = () => {
         />
       ),
     },
-    { field: "nombre", headerName: "Nombre", flex: 0.3},
+    { field: "nombre", headerName: "Nombre", flex: 0.3 },
     { field: "categoria", headerName: "Categoría", flex: 0.3 },
     { field: "stock", headerName: "Stock", flex: 0.15 },
     ...(canEditProducto
@@ -103,35 +110,60 @@ const Productos = () => {
             flex: 0.2,
             sortable: false,
             renderCell: (params) => (
-              <Box display="flex" gap={1}>
-                <IconButton
-                  color="info"
-                  aria-label="Ver producto"
+              <Box display="flex" gap={1} sx={{ alignItems: "center" }}>
+                <Box
+                  sx={{
+                    width: isMobile ? 38 : 32,
+                    height: isMobile ? 38 : 32,
+                    borderRadius: "50%",
+                    background: `linear-gradient(120deg, ${theme.palette.info.light}, ${theme.palette.info.main})`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    "&:hover": {
+                      background: theme.palette.info.dark,
+                      transform: "scale(1.08)",
+                    },
+                    boxShadow: "0 2px 8px 0 #1976d222",
+                  }}
                   onClick={() =>
                     navigate(`/productos/ver/${params.row.id}`, {
                       state: { refetch: false },
                     })
                   }
-                  sx={{
-                    color: theme.palette.success.main,
-                    "&:hover": {
-                      backgroundColor: alpha(theme.palette.success.main, 0.12),
-                    },
-                  }}
+                  title="Ver producto"
                 >
-                  <VisibilityIcon />
-                </IconButton>
-
+                  <VisibilityIcon
+                    sx={{ color: "#fff", fontSize: isMobile ? 22 : 18 }}
+                  />
+                </Box>
                 {canEditProducto && (
-                  <IconButton
-                    color="primary"
-                    aria-label="Editar producto"
+                  <Box
+                    sx={{
+                      width: isMobile ? 38 : 32,
+                      height: isMobile ? 38 : 32,
+                      borderRadius: "50%",
+                      background: `linear-gradient(120deg, ${theme.palette.primary.light}, ${theme.palette.primary.main})`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      "&:hover": {
+                        background: theme.palette.primary.dark,
+                        transform: "scale(1.08)",
+                      },
+                      boxShadow: "0 2px 8px 0 #1976d222",
+                    }}
                     onClick={() =>
                       navigate(`/productos/editar/${params.row.id}`)
                     }
+                    title="Editar producto"
                   >
-                    <EditIcon />
-                  </IconButton>
+                    <EditIcon
+                      sx={{ color: "#fff", fontSize: isMobile ? 22 : 18 }}
+                    />
+                  </Box>
                 )}
               </Box>
             ),
@@ -197,12 +229,9 @@ const Productos = () => {
   return (
     <Box
       sx={{
-        padding: "2rem",
-        backgroundColor: theme.palette.background.paper,
-        borderRadius: "8px",
-        boxShadow: theme.shadows[3],
-        maxWidth: "1200px",
-        margin: "auto",
+        mt: "1.5rem",
+        mb: "1.5rem",
+        p: 2,
         overflow: "hidden",
       }}
     >
@@ -210,125 +239,350 @@ const Productos = () => {
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: isMobile ? "center" : "space-between",
           alignItems: "center",
           mb: 3,
+          gap: isMobile ? 3 : 0,
         }}
       >
-        {canDeleteProducto && (
-          <Button
-            variant="contained"
-            color="error"
-            disabled={selectedRows.length === 0 || isDeleting}
-            onClick={() => setOpenAlert(true)}
-            sx={{
-              textTransform: "none",
-              fontWeight: "bold",
-              fontSize: "1rem",
-              padding: "0.5rem 1.5rem",
-              borderRadius: "8px",
-            }}
-          >
-            {isDeleting ? "Eliminando..." : "Eliminar Seleccionados"}
-          </Button>
-        )}
-        {canCreateProducto && (
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Add />}
-            onClick={() => setOpen(true)}
-            sx={{
-              textTransform: "none",
-              fontWeight: "bold",
-              fontSize: "1rem",
-              padding: "0.5rem 1.5rem",
-              borderRadius: "8px",
-            }}
-          >
-            Nuevo Producto
-          </Button>
-        )}
-      </Box>
+        {canDeleteProducto &&
+          (isMobile ? (
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: "50%",
+                background: `linear-gradient(145deg, ${theme.palette.error.light} 60%, ${theme.palette.error.main} 100%)`,
+                boxShadow: `0 2px 12px 0 ${theme.palette.error.main}22, 0 1.5px 8px 0 #0001`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor:
+                  selectedRows.length === 0 || isDeleting
+                    ? "not-allowed"
+                    : "pointer",
+                opacity: selectedRows.length === 0 || isDeleting ? 0.6 : 1,
+                transition: "all 0.15s",
+                "&:hover": {
+                  background: `linear-gradient(120deg, ${theme.palette.error.main} 70%, ${theme.palette.error.dark} 100%)`,
+                  transform: "scale(1.08)",
+                  boxShadow: `0 4px 24px 0 ${theme.palette.error.dark}33`,
+                },
+              }}
+              onClick={() => {
+                if (selectedRows.length > 0 && !isDeleting) setOpenAlert(true);
+              }}
+              title="Eliminar seleccionados"
+            >
+              <DeleteForeverIcon sx={{ color: "#fff", fontSize: 28 }} />
+            </Box>
+          ) : (
+            <Button
+              variant="contained"
+              color="error"
+              disabled={selectedRows.length === 0 || isDeleting}
+              onClick={() => setOpenAlert(true)}
+              sx={{
+                textTransform: "none",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                padding: "0.5rem 1.5rem",
+                borderRadius: "8px",
+              }}
+            >
+              {isDeleting ? "Eliminando..." : "Eliminar Seleccionados"}
+            </Button>
+          ))}
 
-      <Box
-        sx={{
-          height: "600px",
-          "& .MuiDataGrid-root": {
-            border: "none",
-            borderRadius: "8px",
-            overflow: "hidden",
-            backgroundColor: theme.palette.background.paper,
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor:
-              theme.palette.mode === "light"
-                ? theme.palette.grey[200]
-                : theme.palette.grey[800],
-            color: theme.palette.text.primary,
-            fontWeight: "bold",
-            fontSize: "1rem",
-            borderColor: theme.palette.grey[300],
-            borderBottom: `1px solid ${theme.palette.divider}`,
-            "& > div": {
-              borderRight: `1px solid ${theme.palette.divider}`,
+        {canCreateProducto &&
+          (isMobile ? (
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: "50%",
+                background: `linear-gradient(145deg, ${theme.palette.primary.light} 60%, ${theme.palette.primary.main} 100%)`,
+                boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}22, 0 1.5px 8px 0 #0001`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "all 0.15s",
+                "&:hover": {
+                  background: `linear-gradient(120deg, ${theme.palette.primary.main} 70%, ${theme.palette.primary.dark} 100%)`,
+                  transform: "scale(1.08)",
+                  boxShadow: `0 4px 24px 0 ${theme.palette.primary.dark}33`,
+                },
+              }}
+              onClick={() => setOpen(true)}
+              title="Nuevo Producto"
+            >
+              <Add sx={{ color: "#fff", fontSize: 28 }} />
+            </Box>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Add />}
+              onClick={() => setOpen(true)}
+              sx={{
+                textTransform: "none",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                padding: "0.5rem 1.5rem",
+                borderRadius: "8px",
+              }}
+            >
+              Nuevo Producto
+            </Button>
+          ))}
+      </Box>
+      {isMobile ? (
+        <Box>
+          {rows.length === 0 ? (
+            <Box
+              sx={{
+                py: 8,
+                textAlign: "center",
+                color: theme.palette.text.secondary,
+              }}
+            >
+              No hay productos para mostrar.
+            </Box>
+          ) : (
+            <>
+              <Box
+                display="flex"
+                justifyContent="flex-end"
+                mb={1}
+                alignItems="center"
+                gap={1}
+              >
+                <FormControl size="small" sx={{ minWidth: 90 }}>
+                  <InputLabel id="mobile-page-size-label">
+                    Por página
+                  </InputLabel>
+                  <Select
+                    labelId="mobile-page-size-label"
+                    id="mobile-page-size"
+                    value={pageSize}
+                    label="Por página"
+                    onChange={(e) => {
+                      setPageSize(Number(e.target.value));
+                      setPage(0);
+                    }}
+                  >
+                    {pageSizeOptions.map((option) => (
+                      <MenuItem value={option} key={option}>
+                        {option}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+              {rows.map((row) => (
+                <Box
+                  key={row.id}
+                  sx={{
+                    mb: 2,
+                    p: 2,
+                    borderRadius: 2,
+                    boxShadow: 2,
+                    background: theme.palette.background.paper,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 2,
+                  }}
+                >
+                  <Box display="flex" alignItems="center" gap={2}>
+                    {row.image_url ? (
+                      <img
+                        src={row.image_url}
+                        alt={row.nombre}
+                        style={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: 8,
+                          objectFit: "cover",
+                        }}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src =
+                            "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg";
+                        }}
+                      />
+                    ) : (
+                      <Box
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: 8,
+                          background: theme.palette.grey[200],
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <ImageOutlinedIcon
+                          sx={{ color: theme.palette.grey[500], fontSize: 32 }}
+                        />
+                      </Box>
+                    )}
+                    <Box>
+                      <Typography fontWeight={700} fontSize={16}>
+                        {row.nombre}
+                      </Typography>
+                      <Typography fontSize={13} color="text.secondary">
+                        Stock: <b>{row.stock}</b>
+                      </Typography>
+                      <Typography fontSize={12} color="text.disabled">
+                        {row.categoria}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Box display="flex" gap={1}>
+                    <Box
+                      sx={{
+                        width: 38,
+                        height: 38,
+                        borderRadius: "50%",
+                        background: `linear-gradient(120deg, ${theme.palette.info.light}, ${theme.palette.info.main})`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        "&:hover": {
+                          background: theme.palette.info.dark,
+                          transform: "scale(1.09)",
+                        },
+                        boxShadow: "0 2px 8px 0 #1976d222",
+                      }}
+                      onClick={() => navigate(`/productos/ver/${row.id}`)}
+                      title="Ver producto"
+                    >
+                      <VisibilityIcon sx={{ color: "#fff", fontSize: 20 }} />
+                    </Box>
+                    {/* Icono Editar */}
+                    {canEditProducto && (
+                      <Box
+                        sx={{
+                          width: 38,
+                          height: 38,
+                          borderRadius: "50%",
+                          background: `linear-gradient(120deg, ${theme.palette.primary.light}, ${theme.palette.primary.main})`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          "&:hover": {
+                            background: theme.palette.primary.dark,
+                            transform: "scale(1.09)",
+                          },
+                          boxShadow: "0 2px 8px 0 #1976d222",
+                        }}
+                        onClick={() => navigate(`/productos/editar/${row.id}`)}
+                        title="Editar producto"
+                      >
+                        <EditIcon sx={{ color: "#fff", fontSize: 20 }} />
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+              ))}
+              <Box display="flex" justifyContent="center" mt={3}>
+                <Pagination
+                  count={paginacion.totalPages || 1}
+                  page={page + 1}
+                  onChange={(_, value) => setPage(value - 1)}
+                  color="primary"
+                  size="large"
+                  siblingCount={0}
+                />
+              </Box>
+            </>
+          )}
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            height: "600px",
+            "& .MuiDataGrid-root": {
+              border: "none",
+              borderRadius: "8px",
+              overflow: "hidden",
+              backgroundColor: theme.palette.background.paper,
             },
-          },
-          "& .MuiDataGrid-cell": {
-            borderBottom: `1px solid ${theme.palette.divider}`,
-            borderColor: theme.palette.grey[300],
-            color: theme.palette.text.primary,
-            "&:not(:last-child)": {
-              borderRight: `1px solid ${theme.palette.divider}`,
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor:
+                theme.palette.mode === "light"
+                  ? theme.palette.grey[200]
+                  : theme.palette.grey[800],
+              color: theme.palette.text.primary,
+              fontWeight: "bold",
+              fontSize: "1rem",
+              borderColor: theme.palette.grey[300],
+              borderBottom: `1px solid ${theme.palette.divider}`,
+              "& > div": {
+                borderRight: `1px solid ${theme.palette.divider}`,
+              },
             },
-            display: "flex",
-          },
-          "& .MuiDataGrid-footerContainer": {
-            backgroundColor:
-              theme.palette.mode === "light"
-                ? theme.palette.grey[100]
-                : theme.palette.grey[800],
-            borderTop: `1px solid ${theme.palette.divider}`,
-          },
-          "& .MuiDataGrid-toolbarContainer": {
-            padding: "0.5rem",
-          },
-          "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
-            outline: "none",
-          },
-          "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within":
-            {
+            "& .MuiDataGrid-cell": {
+              borderBottom: `1px solid ${theme.palette.divider}`,
+              borderColor: theme.palette.grey[300],
+              color: theme.palette.text.primary,
+              "&:not(:last-child)": {
+                borderRight: `1px solid ${theme.palette.divider}`,
+              },
+              display: "flex",
+            },
+            "& .MuiDataGrid-footerContainer": {
+              backgroundColor:
+                theme.palette.mode === "light"
+                  ? theme.palette.grey[100]
+                  : theme.palette.grey[800],
+              borderTop: `1px solid ${theme.palette.divider}`,
+            },
+            "& .MuiDataGrid-toolbarContainer": {
+              padding: "0.5rem",
+            },
+            "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
               outline: "none",
             },
-          "& .MuiIconButton-root:focus, & .MuiIconButton-root:focus-visible": {
-            outline: "none",
-          },
-        }}
-      >
-        <DataGrid
-          rows={rows || []}
-          columns={columns}
-          loading={isLoading}
-          getRowId={(row) => row.id}
-          pageSize={pageSize}
-          paginationMode="server"
-          rowCount={paginacion?.totalItems || rows.length}
-          paginationModel={{ page: page, pageSize: pageSize }}
-          pageSizeOptions={rowsPerPageOptions}
-          onPaginationModelChange={(model) => {
-            setPage(model.page);
-            setPageSize(model.pageSize);
+            "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within":
+              {
+                outline: "none",
+              },
+            "& .MuiIconButton-root:focus, & .MuiIconButton-root:focus-visible":
+              {
+                outline: "none",
+              },
           }}
-          checkboxSelection
-          onRowSelectionModelChange={(ids) => setSelectedRows(ids)}
-          slots={{
-            toolbar: DataGridCustomToolbar,
-            pagination: CustomPagination,
-          }}
-          slotProps={{ toolbar: { searchInput, setSearchInput, setSearch } }}
-        />
-      </Box>
-
+        >
+          <DataGrid
+            rows={rows || []}
+            columns={columns}
+            loading={isLoading}
+            getRowId={(row) => row.id}
+            pageSize={pageSize}
+            paginationMode="server"
+            rowCount={paginacion?.totalItems || rows.length}
+            paginationModel={{ page: page, pageSize: pageSize }}
+            pageSizeOptions={rowsPerPageOptions}
+            onPaginationModelChange={(model) => {
+              setPage(model.page);
+              setPageSize(model.pageSize);
+            }}
+            checkboxSelection
+            onRowSelectionModelChange={(ids) => setSelectedRows(ids)}
+            slots={{
+              toolbar: DataGridCustomToolbar,
+              pagination: CustomPagination,
+            }}
+            slotProps={{ toolbar: { searchInput, setSearchInput, setSearch } }}
+          />
+        </Box>
+      )}
       <AlertDialog
         openAlert={openAlert}
         title="¿Eliminar Producto?"

@@ -108,17 +108,35 @@ const AgendaCargaFormInputs = ({
             <MenuItem value="">
               <ListItemText primary="-- Selecciona Camión --" />
             </MenuItem>
-            {camiones?.map((camion) => (
-              <MenuItem key={camion.id_camion} value={camion.id_camion}>
-                <ListItemIcon>
-                  <DirectionsCarIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={`ID: ${camion.id_camion} - ${camion.placa}`}
-                  secondary={`Capacidad: ${camion.capacidad} espacios`}
-                />
-              </MenuItem>
-            ))}
+            {camiones?.map((camion) => {
+              const estaBloqueado = camion.tieneAgenda;
+
+              return (
+                <MenuItem
+                  key={camion.id_camion}
+                  value={camion.id_camion}
+                  disabled={false} // puedes bloquearlo si quieres
+                  sx={{
+                    color: estaBloqueado ? "error.main" : "inherit",
+                    fontWeight: estaBloqueado ? "bold" : "normal",
+                  }}
+                >
+                  <ListItemIcon>
+                    <DirectionsCarIcon
+                      sx={{ color: estaBloqueado ? "error.main" : "inherit" }}
+                    />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={`ID: ${camion.id_camion} - ${camion.placa}`}
+                    secondary={
+                      estaBloqueado
+                        ? "🚫 Ya tiene agenda asignada"
+                        : `Capacidad: ${camion.capacidad} espacios`
+                    }
+                  />
+                </MenuItem>
+              );
+            })}
           </Select>
         </FormControl>
       </Grid>

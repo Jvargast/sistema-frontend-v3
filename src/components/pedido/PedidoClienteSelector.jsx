@@ -81,7 +81,7 @@ const PedidoClienteSelector = ({
   if (isLoading) return <LoaderComponent />;
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
       <DialogTitle
         sx={{
           display: "flex",
@@ -232,6 +232,9 @@ const PedidoClienteSelector = ({
         <Button
           onClick={() => {
             onSelect(preSelectedCliente);
+            requestAnimationFrame(() => {
+              document.body.focus(); 
+            });
             onClose();
           }}
           variant="contained"

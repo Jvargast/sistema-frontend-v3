@@ -63,7 +63,7 @@ const VerAgendaCarga = () => {
 
   return (
     <Box p={{ xs: 2, md: 4 }}>
-      <BackButton to="/agendas" label="Volver" />
+      <BackButton to="/admin/agendas" label="Volver" />
       <Typography variant="h4" fontWeight="bold" gutterBottom>
         🚛 Agenda de Carga #{id_agenda_carga}
       </Typography>

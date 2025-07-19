@@ -1,6 +1,7 @@
 import { useMemo, useState, useCallback } from "react";
-import { Box, Button, Tab, Tabs } from "@mui/material";
+import { Box, Button, Tab, Tabs, useTheme } from "@mui/material";
 import { Add } from "@mui/icons-material";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -15,12 +16,13 @@ import ModalForm from "../../components/common/ModalForm";
 import GroupedInsumos from "../../components/insumos/GroupedInsumos";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import { useHasPermission } from "../../utils/useHasPermission";
+import { useIsMobile } from "../../utils/useIsMobile";
 
 const Insumos = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  //const location = useLocation();
-
+  const theme = useTheme();
+  const isMobile = useIsMobile();
   const {
     data: tiposData,
     isLoading: isLoadingTipos,
@@ -166,43 +168,115 @@ const Insumos = () => {
   return (
     <Box sx={{ padding: "2rem" }}>
       <Header title="Insumos" subtitle="Lista de Insumos" />
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        {canDeleteInsumo && (
-          <Button
-            color="error"
-            variant="contained"
-            onClick={() => setOpenAlert(true)}
-            disabled={
-              Object.values(selectedRows).flat().length === 0 || isDeleting
-            }
-            sx={{
-              textTransform: "none",
-              fontWeight: "bold",
-              fontSize: "1rem",
-              padding: "0.5rem 1.5rem",
-              borderRadius: "8px",
-            }}
-          >
-            {isDeleting ? "Eliminando..." : "Eliminar Seleccionados"}
-          </Button>
-        )}
-        {canCreateInsumo && (
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Add />}
-            onClick={() => setOpenModal(true)}
-            sx={{
-              textTransform: "none",
-              fontWeight: "bold",
-              fontSize: "1rem",
-              padding: "0.5rem 1.5rem",
-              borderRadius: "8px",
-            }}
-          >
-            Nuevo Insumo
-          </Button>
-        )}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: isMobile ? "center" : "space-between",
+          alignItems: "center",
+          mb: 2,
+          gap: isMobile ? 3 : 0,
+        }}
+      >
+        {canDeleteInsumo &&
+          (isMobile ? (
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: "50%",
+                background: `linear-gradient(145deg, ${theme.palette.error.light} 60%, ${theme.palette.error.main} 100%)`,
+                boxShadow: `0 2px 12px 0 ${theme.palette.error.main}22, 0 1.5px 8px 0 #0001`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor:
+                  Object.values(selectedRows).flat().length === 0 || isDeleting
+                    ? "not-allowed"
+                    : "pointer",
+                opacity:
+                  Object.values(selectedRows).flat().length === 0 || isDeleting
+                    ? 0.6
+                    : 1,
+                transition: "all 0.15s",
+                "&:hover": {
+                  background: `linear-gradient(120deg, ${theme.palette.error.main} 70%, ${theme.palette.error.dark} 100%)`,
+                  transform: "scale(1.08)",
+                  boxShadow: `0 4px 24px 0 ${theme.palette.error.dark}33`,
+                },
+              }}
+              onClick={() => {
+                if (
+                  Object.values(selectedRows).flat().length > 0 &&
+                  !isDeleting
+                )
+                  setOpenAlert(true);
+              }}
+              title="Eliminar Seleccionados"
+            >
+              <DeleteForeverIcon sx={{ color: "#fff", fontSize: 28 }} />
+            </Box>
+          ) : (
+            <Button
+              color="error"
+              variant="contained"
+              onClick={() => setOpenAlert(true)}
+              disabled={
+                Object.values(selectedRows).flat().length === 0 || isDeleting
+              }
+              sx={{
+                textTransform: "none",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                padding: "0.5rem 1.5rem",
+                borderRadius: "8px",
+              }}
+            >
+              {isDeleting ? "Eliminando..." : "Eliminar Seleccionados"}
+            </Button>
+          ))}
+
+        {canCreateInsumo &&
+          (isMobile ? (
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: "50%",
+                background: `linear-gradient(145deg, ${theme.palette.primary.light} 60%, ${theme.palette.primary.main} 100%)`,
+                boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}22, 0 1.5px 8px 0 #0001`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "all 0.15s",
+                "&:hover": {
+                  background: `linear-gradient(120deg, ${theme.palette.primary.main} 70%, ${theme.palette.primary.dark} 100%)`,
+                  transform: "scale(1.08)",
+                  boxShadow: `0 4px 24px 0 ${theme.palette.primary.dark}33`,
+                },
+              }}
+              onClick={() => setOpenModal(true)}
+              title="Nuevo Insumo"
+            >
+              <Add sx={{ color: "#fff", fontSize: 28 }} />
+            </Box>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Add />}
+              onClick={() => setOpenModal(true)}
+              sx={{
+                textTransform: "none",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                padding: "0.5rem 1.5rem",
+                borderRadius: "8px",
+              }}
+            >
+              Nuevo Insumo
+            </Button>
+          ))}
       </Box>
 
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
@@ -234,6 +308,7 @@ const Insumos = () => {
               setSearch={() => handleSearch(tipo)}
               handleEdit={handleEdit}
               setSelectedRows={setSelectedRows}
+              isMobile={isMobile}
             />
           )}
         </Box>

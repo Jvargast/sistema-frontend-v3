@@ -26,14 +26,17 @@ import LoaderComponent from "../../../components/common/LoaderComponent";
 import BackButton from "../../../components/common/BackButton";
 import ModalForm from "../../../components/common/ModalForm";
 import usePaginatedData from "../../../utils/usePaginateData";
+import Header from "../../../components/common/Header";
+import MobileUserManagement from "./MobileUserManagement";
+import { useIsMobile } from "../../../utils/useIsMobile";
 
 const UserManagement = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [createNewUser] = useCreateNewUserMutation();
+  const isMobile = useIsMobile();
 
-  // Custom hooks for fetching paginated data
   const {
     data: usuarios,
     isLoading: isLoadingUsuarios,
@@ -49,7 +52,6 @@ const UserManagement = () => {
     useGetAllSucursalsQuery();
   const { data: rolesData, isLoading: isLoadingRoles } = useGetAllRolesQuery();
 
-  // Transform data
   const rolesOptions =
     rolesData?.roles?.map((role) => ({
       value: role.id,
@@ -155,7 +157,7 @@ const UserManagement = () => {
     }
   };
 
-  const handleEdit = (user) => navigate(`/usuarios/editar/${user.rut}`);
+  const handleEdit = (user) => navigate(`/admin/usuarios/editar/${user.rut}`);
 
   const isAllLoading =
     isLoadingEmpresas ||
@@ -165,12 +167,29 @@ const UserManagement = () => {
 
   if (isAllLoading) return <LoaderComponent />;
 
+  if (isMobile) {
+    return (
+      <MobileUserManagement
+        usuariosMapped={usuariosMapped}
+        handleEdit={handleEdit}
+        handleAddUser={handleAddUser}
+        open={open}
+        setOpen={setOpen}
+        handleSubmit={handleSubmit}
+        fields={fields}
+        isAllLoading={isAllLoading}
+        page={page}
+        pageSize={pageSize}
+        handlePageChange={handlePageChange}
+        paginacion={paginacion}
+      />
+    );
+  }
+
   return (
     <Box sx={{ padding: 4, minHeight: "100vh" }}>
       <BackButton to="/admin" label="Volver al menú" />
-      <Typography variant="h4" sx={{ fontWeight: "bold", marginBottom: 2 }}>
-        Gestión de Usuarios
-      </Typography>
+      <Header title="Listado de Usuarios" subtitle="Gestión de Usuarios" />
       <Card
         sx={{
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",

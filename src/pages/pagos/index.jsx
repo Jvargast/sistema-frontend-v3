@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { IconButton, Chip } from "@mui/material";
-import { Visibility, Edit } from "@mui/icons-material";
+import { Visibility } from "@mui/icons-material";
 import { useGetAllPagosQuery } from "../../store/services/pagosApi";
 import DataTable from "../../components/common/DataTable";
 import EmptyState from "../../components/common/EmptyState";
@@ -104,12 +104,12 @@ const ListarPagos = () => {
           >
             <Visibility />
           </IconButton>
-          <IconButton
+          {/* <IconButton
             color="inherit"
             onClick={() => navigate(`/pagos/editar/${row.id_pago}`)}
           >
             <Edit />
-          </IconButton>
+          </IconButton> */}
         </>
       ),
     },
@@ -127,21 +127,25 @@ const ListarPagos = () => {
   }
 
   return (
-    <DataTable
-      title="💵 Listado de Pagos"
-      columns={columns}
-      rows={pagos}
-      totalItems={totalItems}
-      rowsPerPage={rowsPerPage}
-      page={page}
-      handleChangePage={(_, newPage) => setPage(newPage)}
-      handleChangeRowsPerPage={(event) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0);
-      }}
-      loading={isLoading}
-      errorMessage="No se pudieron cargar los pagos o no existen datos disponibles."
-    />
+    <>
+      <DataTable
+        title="Listado de Pagos"
+        subtitle="Gestión de Pagos"
+        columns={columns}
+        rows={pagos}
+        totalItems={totalItems}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        handleChangePage={(_, newPage) => setPage(newPage)}
+        handleChangeRowsPerPage={(event) => {
+          setRowsPerPage(parseInt(event.target.value, 10));
+          setPage(0);
+        }}
+        loading={isLoading}
+        errorMessage="No se pudieron cargar los pagos o no existen datos disponibles."
+        showBackButton={false}
+      />
+    </>
   );
 };
 

@@ -19,16 +19,14 @@ const TotalsDisplay = ({
   onProceedToPayment,
   onTaxRateChange,
   productosRetornables,
+  refButton,
 }) => {
-
-  
   return (
     <Box>
       {/* Totales */}
       <Box display="flex" justifyContent="space-between" mb={2}>
         <Typography variant="h4">Subtotal:</Typography>
-        <Typography variant="h4">{formatCLP(subtotal)}
-      </Typography>
+        <Typography variant="h4">{formatCLP(subtotal)}</Typography>
       </Box>
       <Box
         display="flex"
@@ -97,6 +95,7 @@ const TotalsDisplay = ({
       {/* Controles */}
       <Box mt={2} display="flex" justifyContent="space-between" gap={2}>
         <Button
+          ref={refButton}
           variant="contained"
           color="primary"
           fullWidth
@@ -125,6 +124,10 @@ TotalsDisplay.propTypes = {
   onTaxRateChange: PropTypes.func.isRequired,
   onProceedToPayment: PropTypes.func.isRequired,
   productosRetornables: PropTypes.array,
+  refButton: PropTypes.oneOfType([
+    PropTypes.func, 
+    PropTypes.shape({ current: PropTypes.instanceOf(Element) })
+  ]),
 };
 
 export default TotalsDisplay;

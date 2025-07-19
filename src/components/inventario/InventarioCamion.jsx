@@ -26,11 +26,27 @@ const InventarioCamion = ({
     modo === "simulacion"
       ? productosReservados.reduce((total, prod) => total + prod.cantidad, 0)
       : 0;
-  const retornablesACargarAhora =
+  /*   const retornablesACargarAhora =
     modo === "simulacion"
       ? productos
           .filter((p) => p.es_retornable)
           .reduce((acc, p) => acc + p.cantidad, 0)
+      : 0; */
+
+  const espaciosUsados =
+    reservados_retornables +
+    disponibles +
+    retorno +
+    espaciosReservadosProyectados;
+
+  const espacioRestante = Math.max(capacidad_total - espaciosUsados, 0);
+  const retornablesACargarAhoraSinLimitar = productos
+    .filter((p) => p.es_retornable)
+    .reduce((acc, p) => acc + Number(p.cantidad), 0);
+
+  const retornablesACargarAhora =
+    modo === "simulacion"
+      ? Math.min(retornablesACargarAhoraSinLimitar, espacioRestante)
       : 0;
 
   const arrayReservadosCarga =
@@ -40,7 +56,7 @@ const InventarioCamion = ({
         })
       : [];
 
-  const bloques = [
+  let bloques = [
     ...Array(reservados_retornables).fill({ tipo: "ReservadoRetornable" }),
     ...Array(reservados_no_retornables).fill({ tipo: "ReservadoNoRetornable" }),
     ...Array(retornablesACargarAhora).fill({ tipo: "ACargarAhora" }),
@@ -49,15 +65,22 @@ const InventarioCamion = ({
     ...arrayReservadosCarga,
   ];
 
+  bloques = bloques.slice(0, capacidad_total);
+
+  const faltantes = capacidad_total - bloques.length;
+  if (faltantes > 0) {
+    bloques = [...bloques, ...Array(faltantes).fill({ tipo: "Vacío" })];
+  }
+
   let espaciosCamion = bloques.slice(0, capacidad_total);
 
-  const faltantes = capacidad_total - espaciosCamion.length;
-  if (faltantes > 0) {
+  /*   const faltantes = capacidad_total - espaciosCamion.length; */
+  /*   if (faltantes > 0) {
     espaciosCamion = [
       ...espaciosCamion,
       ...Array(faltantes).fill({ tipo: "Vacío" }),
     ];
-  }
+  } */
 
   const getColor = (tipo) => {
     switch (tipo) {
@@ -90,9 +113,64 @@ const InventarioCamion = ({
         overflowX: "auto",
       }}
     >
-      <Typography variant="h6" mb={2}>
-        Inventario del Camión (Capacidad: {capacidad_total} espacios)
-      </Typography>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        flexWrap="wrap"
+        mb={3}
+        px={1}
+      >
+        <Box display="flex" alignItems="center" gap={1}>
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              backgroundColor: "primary.main",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+              fontWeight: "bold",
+              fontSize: 18,
+              boxShadow: 2,
+            }}
+          >
+            🚛
+          </Box>
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            sx={{
+              color: "text.primary",
+              fontSize: { xs: "1.05rem", sm: "1.25rem" },
+              letterSpacing: 0.5,
+            }}
+          >
+            Inventario del Camión
+          </Typography>
+        </Box>
+
+        <Typography
+          variant="body2"
+          sx={{
+            mt: { xs: 1, sm: 0 },
+            color: "text.secondary",
+            fontStyle: "italic",
+          }}
+        >
+          Capacidad total:{" "}
+          <Typography
+            component="span"
+            color="primary"
+            fontWeight="bold"
+            sx={{ fontStyle: "normal" }}
+          >
+            {capacidad_total} espacios
+          </Typography>
+        </Typography>
+      </Box>
 
       <Box
         display="grid"
@@ -153,19 +231,23 @@ const InventarioCamion = ({
         <Typography variant="body2">
           <strong style={{ color: "blue" }}>■ Retorno: {retorno}</strong>
         </Typography>
-        <Typography variant="body2">
-          <strong style={{ color: "#e57373" }}>
-            ■ A cargar (Proyectado): {espaciosReservadosProyectados}
-          </strong>
-        </Typography>
+        {modo === "simulacion" && (
+          <Typography variant="body2">
+            <strong style={{ color: "#e57373" }}>
+              ■ A cargar (Proyectado): {espaciosReservadosProyectados}
+            </strong>
+          </Typography>
+        )}
         <Typography variant="body2">
           <strong style={{ color: "lightgray" }}>■ Vacío: {vacios}</strong>
         </Typography>
-        <Typography variant="body2">
-          <strong style={{ color: "#0097a7" }}>
-            ■ Retornables a Cargar Ahora: {retornablesACargarAhora}
-          </strong>
-        </Typography>
+        {modo === "simulacion" && (
+          <Typography variant="body2">
+            <strong style={{ color: "#0097a7" }}>
+              ■ Retornables a Cargar Ahora: {retornablesACargarAhora}
+            </strong>
+          </Typography>
+        )}
       </Box>
     </Paper>
   );

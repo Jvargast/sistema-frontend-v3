@@ -29,7 +29,6 @@ const SelectorProducto = ({
       isOptionEqualToValue={(opt, val) => opt.id_producto === val.id_producto}
       size={size}
       renderOption={(optionProps, option) => {
-        // 1️⃣ extraemos la key
         const { key, ...rest } = optionProps;
 
         const stock = option?.inventario?.cantidad ?? 0;
@@ -42,9 +41,9 @@ const SelectorProducto = ({
 
         return (
           <Box
-            key={key} // 2️⃣ la pasamos explícitamente
+            key={key} 
             component="li"
-            {...rest} // 3️⃣ resto de props sin “key”
+            {...rest}
             sx={{
               display: "flex",
               justifyContent: "space-between",

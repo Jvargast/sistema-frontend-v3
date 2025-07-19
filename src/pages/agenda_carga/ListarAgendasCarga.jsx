@@ -74,7 +74,7 @@ const ListarAgendasCarga = () => {
       render: (row) => (
         <IconButton
           color="primary"
-          onClick={() => navigate(`/agendas/ver/${row.id_agenda_carga}`)}
+          onClick={() => navigate(`/admin/agendas/ver/${row.id_agenda_carga}`)}
         >
           <Visibility />
         </IconButton>
@@ -95,7 +95,8 @@ const ListarAgendasCarga = () => {
 
   return (
     <DataTable
-      title="🚚 Agendas de Carga"
+      title="Listado de Agendas de Carga"
+      subtitle="Gestión de Agendas de Carga"
       columns={columns}
       rows={agendas}
       totalItems={totalItems}

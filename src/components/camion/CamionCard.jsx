@@ -46,6 +46,7 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
     data: inventarioData,
     isLoading: isLoadingInventario,
     error: errorInventario,
+    refetch: refetchInventario,
   } = useGetEstadoInventarioCamionQuery(camion?.id_camion);
 
   const handleDesasignarChofer = async () => {
@@ -74,23 +75,67 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
   return (
     <Card
       sx={{
-        boxShadow: 2,
-        borderRadius: 3,
-        backgroundColor: theme.palette.background.paper,
-        borderLeft: `6px solid ${
-          camion.estado === "Disponible"
-            ? theme.palette.success.main
-            : camion.estado === "En Ruta"
-            ? theme.palette.info.main
-            : theme.palette.warning.main
-        }`,
-        height: "100%",
+        borderRadius: 4,
+        boxShadow: "0 4px 16px 0 #21305208",
+        p: 2,
+        minHeight: 250,
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
+        alignItems: "stretch",
+        position: "relative",
+        overflow: "visible",
+        border: "1px solid black"
       }}
     >
-      <CardContent sx={{ flexGrow: 1, pb: 2 }}>
+      <Box
+        sx={{
+          position: "static",
+          top: { sm: 18 },
+          right: { sm: 18 },
+          mb: { xs: 1.5, sm: 0 }, 
+          display: "flex",
+          justifyContent: { xs: "flex-end", sm: "unset" }, 
+          width: { xs: "100%", sm: "auto" }, 
+          zIndex: 2,
+        }}
+      >
+        <Chip
+          icon={
+            camion.estado === "Disponible" ? (
+              <LocalShipping fontSize="small" />
+            ) : camion.estado === "En Ruta" ? (
+              <Visibility fontSize="small" />
+            ) : (
+              <Edit fontSize="small" />
+            )
+          }
+          label={camion.estado}
+          sx={{
+            fontSize: 14,
+            fontWeight: 700,
+            px: 2,
+            py: 0.5,
+            borderRadius: 2,
+            color:
+              camion.estado === "Disponible"
+                ? theme.palette.success.dark
+                : camion.estado === "En Ruta"
+                ? theme.palette.warning.dark
+                : theme.palette.error.dark,
+            backgroundColor:
+              camion.estado === "Disponible"
+                ? theme.palette.success.light + "44"
+                : camion.estado === "En Ruta"
+                ? theme.palette.warning.light + "44"
+                : theme.palette.error.light + "44",
+            letterSpacing: 1,
+            textTransform: "capitalize",
+            boxShadow: "0 1px 5px #0001",
+          }}
+        />
+      </Box>
+      <CardContent sx={{ pb: 1.5, pt: 2, flex: "1 1 auto" }}>
         <Box
           sx={{
             display: "flex",
@@ -116,75 +161,48 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
               ID: {camion.id_camion}
             </Typography>
           </Box>
-          {camion.id_chofer_asignado === null ? (
-            <Button
-              variant="outlined"
-              color="primary"
-              startIcon={<PersonAdd />}
-              onClick={() => setOpenModal(true)}
-              sx={{
-                fontWeight: 700,
-                px: 2,
-                py: 0.5,
-                fontSize: 14,
-                borderRadius: 2,
-                boxShadow: "none",
-                textTransform: "none",
-                backgroundColor:
-                  theme.palette.mode === "dark"
-                    ? theme.palette.primary.dark + "08"
-                    : theme.palette.primary.light + "13",
-              }}
-            >
-              Asignar Chofer
-            </Button>
-          ) : (
+          {camion.id_chofer_asignado ? (
             <Box
               sx={{
-                background:
-                  theme.palette.mode === "dark"
-                    ? theme.palette.primary.dark + "12"
-                    : theme.palette.info.light + "22",
-                px: 2,
-                py: 1,
+                mb: 1.5,
+                px: 1.2,
+                py: 0.7,
                 borderRadius: 2,
+                bgcolor: theme.palette.info.light + "22",
+                color: theme.palette.info.dark,
                 display: "flex",
                 alignItems: "center",
-                minWidth: 150,
-                gap: 1.2,
+                gap: 1,
+                minHeight: 36,
               }}
             >
-              <Box>
-                <Typography
-                  sx={{
-                    fontWeight: 600,
-                    color: theme.palette.info.dark,
-                    fontSize: 15,
-                  }}
-                >
-                  Chofer: {camion.chofer?.nombre}
-                </Typography>
-                <Typography
-                  sx={{
-                    fontSize: 13,
-                    color: theme.palette.text.secondary,
-                  }}
-                >
-                  Rut: {camion.id_chofer_asignado}
-                </Typography>
-              </Box>
+              <PersonAdd fontSize="small" sx={{ mr: 0.5 }} />
+              <Typography fontWeight={500} fontSize={15} noWrap>
+                {camion.chofer?.nombre}
+              </Typography>
               <Tooltip title="Remover chofer">
-                <IconButton
-                  onClick={() => setOpen(true)}
-                  size="small"
-                  sx={{ ml: 1 }}
-                >
+                <IconButton size="small" onClick={() => setOpen(true)}>
                   <RemoveCircleOutlineOutlinedIcon
                     sx={{ color: theme.palette.error.main }}
                   />
                 </IconButton>
               </Tooltip>
             </Box>
+          ) : (
+            <Button
+              variant="text"
+              startIcon={<PersonAdd />}
+              onClick={() => setOpenModal(true)}
+              sx={{
+                fontWeight: 600,
+                color: theme.palette.primary.main,
+                textTransform: "none",
+                fontSize: 15,
+                my: 1,
+              }}
+            >
+              Asignar Chofer
+            </Button>
           )}
         </Box>
         <Typography
@@ -232,48 +250,10 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
             </Button>
           </Tooltip>
         </Box>
-
-        {/* Estado - Pill Color */}
-        <Box display="flex" justifyContent="center" mt={2}>
-          <Chip
-            icon={
-              camion.estado === "Disponible" ? (
-                <LocalShipping />
-              ) : camion.estado === "En Ruta" ? (
-                <Visibility />
-              ) : (
-                <Edit />
-              )
-            }
-            label={camion.estado}
-            sx={{
-              fontSize: 14,
-              fontWeight: 700,
-              px: 2,
-              py: 1,
-              borderRadius: 2,
-              color:
-                camion.estado === "Disponible"
-                  ? theme.palette.success.dark
-                  : camion.estado === "En Ruta"
-                  ? theme.palette.warning.dark
-                  : theme.palette.error.dark,
-              backgroundColor:
-                camion.estado === "Disponible"
-                  ? theme.palette.success.light + "44"
-                  : camion.estado === "En Ruta"
-                  ? theme.palette.warning.light + "44"
-                  : theme.palette.error.light + "44",
-              letterSpacing: 1,
-              textTransform: "capitalize",
-            }}
-          />
-        </Box>
       </CardContent>
 
       <Divider />
 
-      {/* Botones de Acción */}
       <CardActions
         disableSpacing
         sx={{
@@ -387,6 +367,7 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
         isLoading={isLoadingInventario}
         error={errorInventario}
         id_camion={camion.id_camion}
+        onInventarioUpdated={refetchInventario}
       />
     </Card>
   );

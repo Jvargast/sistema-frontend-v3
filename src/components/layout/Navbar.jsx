@@ -41,6 +41,7 @@ import ConfigMenu from "./ConfigMenu";
 import { setMode } from "../../store/reducers/globalSlice";
 import { useTranslation } from "react-i18next";
 import { isColorLight } from "../../utils/colorUtil";
+import useTabNavigation from "../../utils/useTabNavigation";
 
 const rolColors = {
   chofer: "#FFE082",
@@ -68,6 +69,12 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [openSections, setOpenSections] = useState({});
+
+  const openTabAndNavigate = useTabNavigation();
+  const tabInfo = {
+    label: "Mi Perfil",
+    icon: "AccountCircleOutlined",
+  };
 
   const handleLogout = async () => {
     try {
@@ -127,7 +134,6 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
       <Toolbar
         sx={{ justifyContent: "space-between", background: navbarColor }}
       >
-        {/* LADO IZQUIERDO */}
         {isTabletOrMobile ? (
           <Box
             sx={{
@@ -137,7 +143,6 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
               justifyContent: "space-between",
             }}
           >
-            {/* IZQUIERDA: Menú hamburguesa */}
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <IconButton
                 onClick={() => setMobileMenuOpen(true)}
@@ -153,7 +158,6 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
               </IconButton>
             </Box>
 
-            {/* DERECHA: Notificaciones + Configuración */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <IconButton
                 aria-label="Ver notificaciones"
@@ -239,7 +243,6 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
           </FlexBetween>
         )}
 
-        {/* LADO DERECHO */}
         {!isTabletOrMobile && (
           <Box
             sx={{
@@ -249,7 +252,6 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
               gap: "1.5rem",
             }}
           >
-            {/* Menu de notificaciones */}
             <IconButton
               aria-label="Ver notificaciones"
               onClick={handleOpenNotificationsMenu}
@@ -280,7 +282,6 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
               </Badge>
             </IconButton>
 
-            {/* Menu de configuración */}
             <ConfigMenu
               iconColor={iconNavbarColor}
               onToggleTheme={() => {
@@ -293,7 +294,6 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
               currentLang={i18n.language}
             />
 
-            {/* Perfil */}
             <Button
               onClick={handleClick}
               sx={{
@@ -332,6 +332,11 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "flex-start",
+                  lineHeight: 1.1,
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  textOverflow: "ellipsis",
+                  maxWidth: 100,
                 }}
               >
                 <Typography
@@ -339,6 +344,7 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
                   fontSize="0.7rem"
                   color={theme.palette.text.primary}
                   sx={{ lineHeight: 1.2 }}
+                  noWrap
                 >
                   {user?.nombre || ""}
                 </Typography>
@@ -346,6 +352,7 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
                   fontSize="0.65rem"
                   color={theme.palette.text.secondary}
                   sx={{ lineHeight: 1.2 }}
+                  noWrap
                 >
                   {rol ? rol.charAt(0).toUpperCase() + rol.slice(1) : ""}
                 </Typography>
@@ -356,7 +363,12 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
             </Button>
 
             <Menu anchorEl={anchorEl} open={isOpen} onClose={handleClose}>
-              <MenuItem onClick={() => navigate("/miperfil")}>
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  openTabAndNavigate("miperfil", tabInfo); // 👈
+                }}
+              >
                 Mi Perfil
               </MenuItem>
               <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>

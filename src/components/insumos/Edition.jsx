@@ -15,7 +15,8 @@ import {
   useTheme,
   Grid,
 } from "@mui/material";
-import BackButton from "../../components/common/BackButton";
+import { useIsMobile } from "../../utils/useIsMobile";
+import ImageNotSupportedOutlinedIcon from "@mui/icons-material/ImageNotSupportedOutlined";
 
 const Edition = ({
   handleSubmit,
@@ -27,8 +28,8 @@ const Edition = ({
   imagePreview,
 }) => {
   const theme = useTheme();
+  const isMobile = useIsMobile();
 
-  // Helpers para renderizar campos, siguiendo el patrón del otro ejemplo
   const renderTextField = (
     label,
     name,
@@ -74,7 +75,6 @@ const Edition = ({
     />
   );
 
-  // Switch field (¿Es para venta?)
   const renderSwitchField = (label, name) => (
     <FormControlLabel
       control={
@@ -95,7 +95,6 @@ const Edition = ({
     />
   );
 
-  // Select field
   const renderSelectField = (label, name, options) => (
     <FormControl
       fullWidth
@@ -142,7 +141,6 @@ const Edition = ({
     </FormControl>
   );
 
-  // Opciones para tipos de insumo
   const tipoOptions = tipos
     ? tipos.map((tipo) => ({
         value: tipo.id_tipo_insumo,
@@ -164,34 +162,80 @@ const Edition = ({
         gap: 4,
       }}
     >
-      {/* Imagen del Insumo */}
       <Box
         sx={{
           display: "flex",
+          flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
           backgroundColor: theme.palette.background.paper,
           boxShadow: theme.shadows[3],
           borderRadius: 2,
           height: "350px",
+          p: isMobile ? 2 : 0,
+          gap: isMobile ? 2 : 0,
         }}
       >
-        <img
-          src={imagePreview}
-          alt="Vista Previa"
-          style={{
-            maxHeight: "100%",
-            maxWidth: "100%",
-            objectFit: "contain",
-            borderRadius: "12px",
-          }}
-        />
+        {imagePreview ? (
+          <a
+            href={imagePreview}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: "block", width: "100%" }}
+            tabIndex={-1}
+          >
+            <img
+              src={imagePreview}
+              alt="Vista Previa"
+              style={{
+                maxHeight: "220px",
+                maxWidth: "100%",
+                objectFit: "contain",
+                borderRadius: "12px",
+                margin: "0 auto",
+                transition: "box-shadow 0.3s",
+                boxShadow: "0 2px 16px 0 #0001",
+                cursor: "pointer",
+                background: theme.palette.grey[isMobile ? 100 : 200],
+              }}
+              onError={(e) => {
+                e.target.src = "";
+              }}
+            />
+          </a>
+        ) : (
+          <Box
+            sx={{
+              width: 140,
+              height: 140,
+              borderRadius: 3,
+              background: `linear-gradient(135deg, ${theme.palette.grey[100]}, ${theme.palette.grey[200]})`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mb: 2,
+              boxShadow: "0 2px 12px 0 #0002",
+            }}
+          >
+            <ImageNotSupportedOutlinedIcon
+              sx={{ fontSize: 64, color: theme.palette.grey[400] }}
+            />
+          </Box>
+        )}
+        {isMobile && (
+          <TextField
+            fullWidth
+            label="URL de la Imagen"
+            name="image_url"
+            value={formData.image_url}
+            onChange={handleChange}
+            variant="outlined"
+            sx={{ mt: 2 }}
+          />
+        )}
       </Box>
 
-      {/* Formulario */}
       <Box>
-        <BackButton to="/insumos" label="Volver" />
-
         <Typography
           variant="h4"
           sx={{
@@ -265,13 +309,15 @@ const Edition = ({
             </Grid>
           </Grid>
 
-          <Typography
-            variant="h6"
-            sx={{ color: theme.palette.text.secondary, fontWeight: "bold" }}
-          >
-            Imagen del Insumo
-          </Typography>
-          {renderTextField("URL de la Imagen", "image_url")}
+          {!isMobile && (
+            <Typography
+              variant="h6"
+              sx={{ color: theme.palette.text.secondary, fontWeight: "bold" }}
+            >
+              Imagen del Insumo
+            </Typography>
+          )}
+          {!isMobile && renderTextField("URL de la Imagen", "image_url")}
 
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
             <Button

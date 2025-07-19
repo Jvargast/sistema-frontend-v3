@@ -38,6 +38,7 @@
     "@nivo/pie": "^0.87.0",
     "@react-google-maps/api": "^2.20.3",
     "@reduxjs/toolkit": "^2.3.0",
+    "@turf/turf": "^7.2.0",
     "autoprefixer": "^10.4.20",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",
@@ -64,6 +65,7 @@
     "react-select": "^5.9.0",
     "react-window": "^1.8.11",
     "recharts": "^2.15.1",
+    "resize-observer-polyfill": "^1.5.1",
     "socket.io-client": "^4.8.1",
     "swapy": "^1.0.5",
     "tailwindcss": "^3.4.17"

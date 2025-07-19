@@ -80,7 +80,7 @@ const HistorialProduccion = () => {
       render: (row) => (
         <IconButton
           color="info"
-          onClick={() => navigate(`/produccion/historial/ver/${row.id_produccion}`)}
+          onClick={() => navigate(`/admin/produccion/ver/${row.id_produccion}`)}
         >
           <Visibility />
         </IconButton>
@@ -101,7 +101,8 @@ const HistorialProduccion = () => {
 
   return (
     <DataTable
-      title="📦 Historial de Producción"
+      title="Listado de Producción"
+      subtitle="Gestión de Producción"
       columns={columns}
       rows={producciones}
       totalItems={totalItems}

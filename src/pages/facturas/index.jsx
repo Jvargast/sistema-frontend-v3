@@ -101,7 +101,8 @@ const ListarCuentasPorCobrar = () => {
 
   return (
     <DataTable
-      title="📄 Cuentas por Cobrar"
+      title="Cuentas por Cobrar"
+      subtitle={"Gestión de facturas"}
       columns={columns}
       rows={cuentas}
       totalItems={totalItems}
@@ -114,6 +115,8 @@ const ListarCuentasPorCobrar = () => {
       }}
       loading={isLoading}
       errorMessage="No se pudieron cargar las cuentas por cobrar o no existen datos disponibles."
+      showBackButton={false}
+      header={true}
     />
   );
 };

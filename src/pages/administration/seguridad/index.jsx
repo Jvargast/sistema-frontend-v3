@@ -5,7 +5,6 @@ import {
   Divider,
   Tab,
   Tabs,
-  Typography,
 } from "@mui/material";
 import usePaginatedData from "../../../utils/usePaginateData";
 import BackButton from "../../../components/common/BackButton";
@@ -18,6 +17,7 @@ import SecurityIcon from "@mui/icons-material/Security";
 import { useGetLogsQuery } from "../../../store/services/auditLogsApi";
 import { useGetAllLogsQuery } from "../../../store/services/logVentasApi";
 import { useState } from "react";
+import Header from "../../../components/common/Header";
 
 const Seguridad = () => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -56,14 +56,7 @@ const Seguridad = () => {
       <Box sx={{ width: "100%", maxWidth: "1000px" }}>
         <BackButton to="/admin" label="Volver al menú" />
 
-        <Typography
-          variant="h4"
-          fontWeight={800}
-          textAlign="center"
-          sx={{ my: 5, letterSpacing: 0.3, color: "primary.main" }}
-        >
-          Seguridad y Auditoría
-        </Typography>
+        <Header title="Seguridad" subtitle="Gestión de Seguridad" />
 
         <Card
           sx={{

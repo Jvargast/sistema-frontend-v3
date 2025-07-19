@@ -94,7 +94,7 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
       fullScreen={fullScreen}
       PaperProps={{
         sx: {
-          bgcolor: "#f5f7fa",
+          bgcolor: (theme) => theme.palette.background.paper,
         },
       }}
     >

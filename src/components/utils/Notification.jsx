@@ -23,17 +23,17 @@ const Notification = () => {
     "linear-gradient(90deg, rgba(36,198,220,0.85) 0%, rgba(81,74,157,0.88) 100%)";
 
   const pastelColors = {
-    success: "linear-gradient(90deg, #A8FFCE 0%, #F9F9D2 100%)",
-    error: "linear-gradient(90deg, #FFDEE9 0%, #B5FFFC 100%)",
-    warning: "linear-gradient(90deg, #FFF6B7 0%, #F6416C 100%)",
-    info: "linear-gradient(90deg, #43C6AC 0%, #F8FFAE 100%)",
+    success: "linear-gradient(135deg, #d8f3dc 0%, #b7e4c7 100%)",
+    error: "linear-gradient(135deg, #ffe3e3 0%, #ffbdbd 100%)",
+    warning: "linear-gradient(135deg, #fff3cd 0%, #ffe8a1 100%)",
+    info: "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)",
   };
 
   const textColors = {
-    success: "#239672",
-    error: "#b02646",
-    warning: "#ad6700",
-    info: "#237c96",
+    success: "#2d6a4f",
+    error: "#9b2226",
+    warning: "#7f5700",
+    info: "#1e3a8a",
   };
 
   return (
@@ -71,20 +71,21 @@ const Notification = () => {
         variant="filled"
         sx={{
           width: "100%",
-          borderRadius: 2.5,
-          fontWeight: "bold",
-          fontSize: isMobile ? "1.05rem" : "0.95rem",
+          borderRadius: 2,
+          fontWeight: 500,
+          fontSize: isMobile ? "1rem" : "0.95rem",
           background: isMobile
             ? pastelColors[severity] || pastelColors.info
             : undefined,
-          color: isMobile ? textColors[severity] || "#333" : undefined,
-          boxShadow: "none",
+          color: isMobile ? textColors[severity] || "#111" : undefined,
           border: isMobile
-            ? `1.5px solid ${textColors[severity] || "#e0e0e0"}`
+            ? `1px solid ${textColors[severity] || "#ccc"}40`
             : undefined,
-          letterSpacing: 0.3,
-          textShadow: isMobile ? "0 1px 6px #ffffff80" : undefined,
-          transition: "all 0.3s",
+          boxShadow: isMobile ? "0 8px 32px rgba(0, 0, 0, 0.08)" : "none",
+          backdropFilter: isMobile ? "blur(10px)" : undefined,
+          letterSpacing: 0.2,
+          textShadow: "none",
+          transition: "all 0.3s ease-in-out",
         }}
       >
         {message}

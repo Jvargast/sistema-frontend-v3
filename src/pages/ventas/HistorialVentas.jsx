@@ -14,12 +14,13 @@ import {
   useMediaQuery,
   Tooltip,
 } from "@mui/material";
-import { Visibility, Cancel, Delete } from "@mui/icons-material"; // <-- Importamos Delete
+import { Visibility, Cancel, Delete } from "@mui/icons-material"; 
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../../components/common/BackButton";
 import { useState } from "react";
 import AlertDialog from "../../components/common/AlertDialog";
+import Header from "../../components/common/Header";
 
 const HistorialVentas = ({
   ventas,
@@ -78,22 +79,7 @@ const HistorialVentas = ({
         <BackButton to="/admin" label="Volver" />
       </Box>
 
-      <Typography
-        variant="h5"
-        fontWeight="bold"
-        textAlign="center"
-        sx={{
-          background: "linear-gradient(90deg, #4A90E2 0%, #6A5ACD 100%)",
-          color: "#fff",
-          py: 2,
-          px: 3,
-          borderRadius: 2,
-          boxShadow: 1,
-          fontSize: { xs: "1.1rem", sm: "1.4rem" },
-        }}
-      >
-        🛒 Historial de Ventas
-      </Typography>
+      <Header title="Ventas" subtitle="Gestión de Ventas" />
 
       <Paper
         elevation={3}
@@ -148,16 +134,16 @@ const HistorialVentas = ({
                       fontWeight: "bold",
                       backgroundColor:
                         venta.estadoVenta?.nombre_estado === "Pagada"
-                          ? "#4CAF50" 
+                          ? "#4CAF50"
                           : venta.estadoVenta?.nombre_estado === "Rechazada"
                           ? "#E53935"
                           : venta.estadoVenta?.nombre_estado === "Cancelada"
-                          ? "#FB8C00" 
+                          ? "#FB8C00"
                           : venta.estadoVenta?.nombre_estado ===
                             "Pendiente de Pago"
-                          ? "#FFCA28" 
-                          : "#BDBDBD", 
-                      color: "#fff", 
+                          ? "#FFCA28"
+                          : "#BDBDBD",
+                      color: "#fff",
                       borderRadius: "8px",
                       px: 1.5,
                       py: 0.5,
@@ -168,7 +154,9 @@ const HistorialVentas = ({
                   <Tooltip title="Ver Detalle">
                     <IconButton
                       color="primary"
-                      onClick={() => navigate(`/ventas/ver/${venta.id_venta}`)}
+                      onClick={() =>
+                        navigate(`/admin/ventas/ver/${venta.id_venta}`)
+                      }
                     >
                       <Visibility />
                     </IconButton>
@@ -240,18 +228,18 @@ const HistorialVentas = ({
                             fontWeight: "bold",
                             backgroundColor:
                               venta.estadoVenta?.nombre_estado === "Pagada"
-                                ? "#4CAF50" 
+                                ? "#4CAF50"
                                 : venta.estadoVenta?.nombre_estado ===
                                   "Rechazada"
-                                ? "#E53935" 
+                                ? "#E53935"
                                 : venta.estadoVenta?.nombre_estado ===
                                   "Cancelada"
-                                ? "#FB8C00" 
+                                ? "#FB8C00"
                                 : venta.estadoVenta?.nombre_estado ===
                                   "Pendiente de Pago"
-                                ? "#FFCA28" 
-                                : "#BDBDBD", 
-                            color: "#fff", 
+                                ? "#FFCA28"
+                                : "#BDBDBD",
+                            color: "#fff",
                             borderRadius: "8px",
                             px: 1.5,
                             py: 0.5,
@@ -263,7 +251,7 @@ const HistorialVentas = ({
                           <IconButton
                             color="primary"
                             onClick={() =>
-                              navigate(`/ventas/ver/${venta.id_venta}`)
+                              navigate(`/admin/ventas/ver/${venta.id_venta}`)
                             }
                           >
                             <Visibility />

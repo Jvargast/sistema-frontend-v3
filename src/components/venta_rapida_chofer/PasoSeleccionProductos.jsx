@@ -103,10 +103,9 @@ const PasoSeleccionProductos = ({
                 elevation={1}
                 sx={{
                   p: 2,
-                  border: "1px solid",
-                  borderColor: "grey.200",
+                  border: "1px solid black",
                   borderRadius: 2,
-                  bgcolor: "grey.50",
+                  bgcolor: (theme) => theme.palette.background.paper,
                 }}
               >
                 <Stack
@@ -142,7 +141,8 @@ const PasoSeleccionProductos = ({
                       onClick={() => actualizarCantidad(producto, -1)}
                       sx={{
                         borderRadius: "50%",
-                        backgroundColor: "grey.100",
+                        backgroundColor: (theme) =>
+                          theme.palette.background.paper,
                         color: "error.main",
                         border: "1px solid",
                         borderColor: "grey.300",
@@ -171,7 +171,8 @@ const PasoSeleccionProductos = ({
                           borderRadius: 2,
                           px: 1,
                           py: 0.5,
-                          backgroundColor: "white",
+                          backgroundColor: (theme) =>
+                            theme.palette.background.paper,
                           fontSize: "1rem",
                         },
                       }}
@@ -183,7 +184,8 @@ const PasoSeleccionProductos = ({
                       onClick={() => actualizarCantidad(producto, 1)}
                       sx={{
                         borderRadius: "50%",
-                        backgroundColor: "grey.100",
+                        backgroundColor: (theme) =>
+                          theme.palette.background.paper,
                         color: "primary.main",
                         border: "1px solid",
                         borderColor: "grey.300",
@@ -213,7 +215,8 @@ const PasoSeleccionProductos = ({
                       width: 140,
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 2,
-                        backgroundColor: "white",
+                        backgroundColor: (theme) =>
+                          theme.palette.background.paper,
                       },
                     }}
                     variant="outlined"

@@ -168,16 +168,13 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
           Confirmar Carga del Camión
         </Typography>
 
-        {/* Aquí está el ajuste importante */}
         <Box sx={{ maxHeight: "60vh", overflowY: "auto", px: 1 }}>
           {productosAgrupados.map((producto) => {
             const key = producto.id_producto
               ? `producto_${producto.id_producto}`
               : `insumo_${producto.id_insumo}`; //
-            const yaEnCamion =
-              producto.cantidadReservada + producto.cantidadDisponible;
-            const restante = Math.max(producto.cantidadTotal - yaEnCamion, 0);
-            const deshabilitado = restante === 0;
+            const cantidadMaxima = producto.cantidadTotal;
+            const deshabilitado = cantidadMaxima === 0;
 
             return (
               <Paper
@@ -191,8 +188,8 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
                   mb: 2.5,
                   borderRadius: 2,
                   border: "1px solid",
-                  borderColor: "grey.200",
-                  backgroundColor: "grey.50",
+                  borderColor: (theme) => theme.palette.background.paper,
+                  backgroundColor: (theme) => theme.palette.background.paper,
                 }}
               >
                 <Box
@@ -216,7 +213,6 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
                     sx={{ fontWeight: "bold" }}
                   />
                 </Box>
-
                 <Grid
                   container
                   spacing={2}
@@ -224,62 +220,35 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
                     mt: 1.5,
                     px: 1,
                     py: 1,
-                    borderRadius: 2,
-                    bgcolor: "grey.100",
-                    border: "1px solid",
-                    borderColor: "grey.200",
+                    bgcolor: (theme) => theme.palette.background.paper,
+                    margin: 0, 
                   }}
                 >
                   <Grid item xs={12} sm={4}>
-                    <Typography
-                      variant="subtitle2"
-                      color="grey.800"
-                      sx={{ fontWeight: 500 }}
-                    >
+                    <Typography variant="inherit" sx={{ fontWeight: 500 }}>
                       Planificado
                     </Typography>
-                    <Typography
-                      variant="h6"
-                      fontWeight="bold"
-                      color="text.primary"
-                    >
+                    <Typography variant="inherit" fontWeight="bold">
                       {producto.cantidadTotal}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={4}>
-                    <Typography
-                      variant="subtitle2"
-                      color="grey.800"
-                      sx={{ fontWeight: 500 }}
-                    >
+                    <Typography variant="inherit" sx={{ fontWeight: 500 }}>
                       En camión (reservado)
                     </Typography>
-                    <Typography
-                      variant="h6"
-                      fontWeight="bold"
-                      color="text.primary"
-                    >
+                    <Typography variant="inherit" color="text.primary">
                       {producto.cantidadReservada}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={4}>
-                    <Typography
-                      variant="subtitle2"
-                      color="grey.800"
-                      sx={{ fontWeight: 500 }}
-                    >
+                    <Typography variant="subtitle2" sx={{ fontWeight: 500 }}>
                       Disponible
                     </Typography>
-                    <Typography
-                      variant="h6"
-                      fontWeight="bold"
-                      color="text.primary"
-                    >
+                    <Typography variant="inherit" fontWeight="bold">
                       {producto.cantidadDisponible}
                     </Typography>
                   </Grid>
                 </Grid>
-
                 <TextField
                   type="number"
                   label="Cantidad a confirmar"
@@ -294,7 +263,7 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
                   }
                   inputProps={{
                     min: 0,
-                    max: restante,
+                    max: cantidadMaxima,
                   }}
                   onChange={(e) => handleChangeCantidad(key, e.target.value)}
                 />
@@ -303,7 +272,7 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
                   color="text.secondary"
                   sx={{ mt: 0.5 }}
                 >
-                  Máximo permitido: {restante}
+                  Máximo permitido: {cantidadMaxima}
                 </Typography>
 
                 {deshabilitado && (

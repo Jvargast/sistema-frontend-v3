@@ -112,6 +112,7 @@ const CrearFormula = () => {
             <SelectorProducto
               label="Selecciona el Producto Final"
               onProductoSeleccionado={setProductoFinal}
+              productoSeleccionado={productoFinal}
             />
           </Box>
           {productoFinal && (
@@ -121,7 +122,7 @@ const CrearFormula = () => {
                 display: "flex",
                 flexDirection: "column",
                 gap: 1.5,
-                backgroundColor: "grey.100",
+                backgroundColor: (theme) => theme.palette.background.paper,
                 p: 2,
                 borderRadius: 2,
                 boxShadow: 1,

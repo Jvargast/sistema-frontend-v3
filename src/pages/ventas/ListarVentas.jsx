@@ -13,7 +13,7 @@ import {
 } from "../../store/services/ventasApi";
 import HistorialVentas from "./HistorialVentas";
 import EmptyState from "../../components/common/EmptyState";
-import { useNavigate } from "react-router";
+import { Outlet, useMatch, useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 
@@ -33,6 +33,10 @@ const ListaVentas = () => {
 
   const [deleteVenta] = useDeleteVentaMutation();
   const [rejectVenta] = useRejectVentaMutation();
+
+  const matchVer = useMatch("/admin/ventas/ver/:id");
+  const matchEditar = useMatch("/admin/ventas/editar/:id");
+  const isDetalle = !!matchVer || !!matchEditar;
 
   const handleDeleteVenta = async (venta) => {
     try {
@@ -122,16 +126,22 @@ const ListaVentas = () => {
   }
 
   return (
-    <HistorialVentas
-      ventas={ventas}
-      totalItems={totalItems}
-      rowsPerPage={rowsPerPage}
-      page={page}
-      handleChangePage={handleChangePage}
-      handleChangeRowsPerPage={handleChangeRowsPerPage}
-      onDeleteVenta={handleDeleteVenta}
-      onRejectVenta={handleRejectVenta}
-    />
+    <>
+      {!isDetalle && (
+        <HistorialVentas
+          ventas={ventas}
+          totalItems={totalItems}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          handleChangePage={handleChangePage}
+          handleChangeRowsPerPage={handleChangeRowsPerPage}
+          onDeleteVenta={handleDeleteVenta}
+          onRejectVenta={handleRejectVenta}
+        />
+      )}
+
+      <Outlet />
+    </>
   );
 };
 

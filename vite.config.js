@@ -4,7 +4,6 @@ import autoprefixer from "autoprefixer";
 import tailwindcss from "tailwindcss";
 
 export default defineConfig(({ mode }) => {
-  // Cargar variables de entorno correspondientes al modo (development, production)
   const env = loadEnv(mode, process.cwd());
 
   return {

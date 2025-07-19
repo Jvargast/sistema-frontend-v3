@@ -13,11 +13,15 @@ import {
   useTheme,
   useMediaQuery,
   Divider,
+  Pagination,
+  TextField,
+  MenuItem,
 } from "@mui/material";
 import PropTypes from "prop-types";
 import BackButton from "./BackButton";
 import { useSelector } from "react-redux";
 import { formatCLP } from "../../utils/formatUtils";
+import Header from "./Header";
 
 const DataTable = ({
   columns,
@@ -30,7 +34,9 @@ const DataTable = ({
   loading,
   errorMessage,
   title,
+  subtitle,
   headerAction,
+  showBackButton = true,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -73,8 +79,14 @@ const DataTable = ({
   }
 
   return (
-    <Box sx={{ p: 2, maxWidth: "100%", mx: "auto", mb: 3 }}>
-      <BackButton to={rol === "chofer" ? "/viajes" : "/admin"} label="Volver" />
+    <Box sx={{ p: 2, maxWidth: "100%", mx: "auto", mb: 2 }}>
+      {showBackButton && (
+        <BackButton
+          to={rol === "chofer" ? "/viajes" : "/admin"}
+          label="Volver"
+        />
+      )}
+      <Header title={title} subtitle={subtitle} />
       <Box
         sx={{
           mb: 2,
@@ -85,70 +97,91 @@ const DataTable = ({
           flexWrap: "wrap",
         }}
       >
-        <Typography
-          variant="h5"
-          fontWeight="bold"
-          align="center"
-          sx={{
-            mb: 2,
-            color: "#4A90E2",
-            fontSize: { xs: "1.2rem", sm: "1.6rem" },
-          }}
-        >
-          {title}
-        </Typography>
         {headerAction && <Box>{headerAction}</Box>}
       </Box>
 
       {isMobile ? (
-        <Box display="flex" flexDirection="column" gap={2}>
-          {rows.map((row, idx) => (
-            <Box
-              key={row.id || idx}
-              sx={{
-                p: 2,
-                borderRadius: 2,
-                boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-                backgroundColor: "#fff",
-              }}
-            >
-              {columns.map((col) => {
-                const cellValue = col.render ? col.render(row) : row[col.id];
-                const value =
-                  col.format === "currency" && typeof cellValue === "number"
-                    ? formatCLP(cellValue)
-                    : cellValue;
+        <>
+          <Box display="flex" flexDirection="column" gap={2}>
+            {rows.map((row, idx) => (
+              <Box
+                key={row.id || idx}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                  backgroundColor: `${
+                    theme.palette.mode === "light"
+                      ? theme.palette.grey[100]
+                      : theme.palette.background.paper
+                  }`,
+                }}
+              >
+                {columns.map((col) => {
+                  const cellValue = col.render ? col.render(row) : row[col.id];
+                  const value =
+                    col.format === "currency" && typeof cellValue === "number"
+                      ? formatCLP(cellValue)
+                      : cellValue;
 
-                return (
-                  <Box key={col.id} sx={{ mb: 1.2 }}>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      component="div"
-                      sx={{ mb: 0.5 }}
-                    >
-                      {col.label}
-                    </Typography>
-
-                    {/* Si el valor es un componente (como <Chip> o <Box>), lo mostramos tal cual. Si es texto, lo metemos en Typography */}
-                    {typeof value === "string" || typeof value === "number" ? (
+                  return (
+                    <Box key={col.id} sx={{ mb: 1.2 }}>
                       <Typography
-                        variant="body2"
-                        fontWeight="500"
+                        variant="caption"
+                        color="text.secondary"
                         component="div"
+                        sx={{ mb: 0.5 }}
                       >
-                        {value}
+                        {col.label}
                       </Typography>
-                    ) : (
-                      <Box>{value}</Box>
-                    )}
-                    <Divider sx={{ mt: 1 }} />
-                  </Box>
-                );
-              })}
+
+                      {typeof value === "string" ||
+                      typeof value === "number" ? (
+                        <Typography
+                          variant="body2"
+                          fontWeight="500"
+                          component="div"
+                        >
+                          {value}
+                        </Typography>
+                      ) : (
+                        <Box>{value}</Box>
+                      )}
+                      <Divider sx={{ mt: 1 }} />
+                    </Box>
+                  );
+                })}
+              </Box>
+            ))}
+          </Box>
+          {totalItems > rowsPerPage && (
+            <Box display="flex" justifyContent="center" mt={2}>
+              <Pagination
+                count={Math.ceil(totalItems / rowsPerPage)}
+                page={page + 1}
+                onChange={(_, value) => handleChangePage(null, value - 1)}
+                color="primary"
+                size="medium"
+              />
             </Box>
-          ))}
-        </Box>
+          )}
+          <Box display="flex" justifyContent="center" mt={1}>
+            <TextField
+              select
+              label="Filas"
+              size="small"
+              value={rowsPerPage}
+              onChange={handleChangeRowsPerPage}
+              sx={{ width: 90 }}
+            >
+              {[5, 10, 25].map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
+        </>
       ) : (
         <Paper elevation={3} sx={{ borderRadius: 2 }}>
           <TableContainer sx={{ maxHeight: "calc(100vh - 260px)" }}>
@@ -253,7 +286,9 @@ DataTable.propTypes = {
   loading: PropTypes.bool.isRequired,
   errorMessage: PropTypes.string,
   title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string,
   headerAction: PropTypes.node,
+  showBackButton: PropTypes.bool,
 };
 
 export default DataTable;

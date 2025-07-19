@@ -1,16 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
-  Grid,
   Typography,
-  TextField,
-  InputAdornment,
-  CircularProgress,
   Button,
-  Pagination,
-  Paper,
-  MenuItem,
-  Checkbox,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -22,8 +16,6 @@ import {
   calculateTaxes,
   updateItemPrice,
 } from "../../store/reducers/cartSlice";
-import { SearchOutlined } from "@mui/icons-material";
-
 import { useGetAvailabreProductosQuery } from "../../store/services/productoApi";
 import { useGetAllCategoriasQuery } from "../../store/services/categoriaApi";
 import { useGetAllClientesQuery } from "../../store/services/clientesApi";
@@ -31,24 +23,27 @@ import { useGetAllVendedoresQuery } from "../../store/services/usuariosApi";
 import { useCreateVentaMutation } from "../../store/services/ventasApi";
 import { useCloseCajaMutation } from "../../store/services/cajaApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
-
-import ProductCard from "../../components/venta/ProductCard";
 import LoaderComponent from "../../components/common/LoaderComponent";
-import ShoppingCartItem from "../../components/venta/ShoppingCartItem";
-import TotalsDisplay from "../../components/venta/TotalDisplay";
-import CategoryBlock from "../../components/venta/CategoryBlock";
 import AperturaCajaModal from "../../components/caja/AperturaCajaModal";
 import useVerificarCaja from "../../utils/useVerificationCaja";
 import AlertDialog from "../../components/common/AlertDialog";
-import CajaInfo from "../../components/caja/CajaInfo";
 import SelectVendedorModal from "../../components/venta/SelectedVendedorModal";
 import ProcesarPagoModal from "../../components/venta/ProcesarPagoModal";
 import SelectClienteModal from "../../components/venta/SelectedClienteModal";
 import ProductosRetornablesModal from "../../components/venta/ProductosRetornablesModal";
 import PermissionMessage from "../../components/common/PermissionMessage";
 import { getFirstRelevantError } from "../../utils/firstError";
+import BarraSuperior from "../../components/venta/punto_venta/BarraSuperior";
+import CategoriasSelector from "../../components/venta/punto_venta/CategoriasSelector";
+import ProductoSearchBar from "../../components/venta/punto_venta/ProductoSearchBar";
+import ProductosGrid from "../../components/venta/punto_venta/ProductosGrid";
+import CarritoDeCompras from "../../components/venta/punto_venta/CarritoDeCompras";
+import PuntoDeVentaMobile from "../../components/venta/punto_venta/PuntoDeVentaMobile";
 
 const PuntoDeVenta = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const botonAbrirPagoRef = useRef(null);
   const [openPagoModal, setOpenPagoModal] = useState(false);
   const [ventaData, setVentaData] = useState(null);
   const [selectedVendedor, setSelectedVendedor] = useState("");
@@ -164,6 +159,11 @@ const PuntoDeVenta = () => {
         );
         return;
       }
+      setOpenClienteModal(false);
+      setOpenModal(false);
+      setOpenRetornablesModal(false);
+      setOpenAlert(false);
+      setOpenPagoModal(true);
     }
 
     const yaConfirmados = productosRetornables.length > 0;
@@ -222,7 +222,6 @@ const PuntoDeVenta = () => {
 
     const ventaFinal = {
       ...ventaData,
-      // Solo se agregan estos campos si NO es factura
       ...(isFactura
         ? {
             id_metodo_pago: null,
@@ -252,7 +251,6 @@ const PuntoDeVenta = () => {
         })
       );
       setOpenPagoModal(false);
-      // 🔹 LIMPIEZA DE ESTADOS RELACIONADOS A LA VENTA
       setVentaData(null);
       setProductosRetornables([]);
       setTipoDocumento("boleta");
@@ -272,6 +270,13 @@ const PuntoDeVenta = () => {
         })
       );
     }
+  };
+
+  const handleClosePagoModal = () => {
+    setOpenPagoModal(false);
+    setTimeout(() => {
+      botonAbrirPagoRef.current?.focus();
+    }, 100);
   };
 
   const [category, setCategory] = useState("all");
@@ -425,7 +430,6 @@ const PuntoDeVenta = () => {
       );
       cajaId = vendedorSeleccionado?.cajasAsignadas[0]?.id_caja;
     } else {
-      // Usa la caja propia (para rol vendedor)
       cajaId = estado?.asignada?.id_caja;
     }
     if (!cajaId) {
@@ -481,7 +485,6 @@ const PuntoDeVenta = () => {
           Selecciona un vendedor con una caja válida para continuar.
         </Typography>
 
-        {/* 🔹 Botón para refrescar la página */}
         <Button
           variant="contained"
           color="primary"
@@ -537,11 +540,80 @@ const PuntoDeVenta = () => {
     return <Typography color="error">{relevantError.message}</Typography>;
   }
 
+  if (isMobile) {
+    return <PuntoDeVentaMobile />;
+  }
+
   return (
     <Box p={3} mb={3}>
-      <Typography variant="h2" mb={2} fontWeight={"600"}>
-        Punto de Venta
-      </Typography>
+      <BarraSuperior
+        selectedVendedor={selectedVendedor}
+        onSelectVendedor={() => setOpenModal(true)}
+        selectedCliente={selectedCliente}
+        onSelectCliente={() => setOpenClienteModal(true)}
+        tipoDocumento={tipoDocumento}
+        onChangeTipoDocumento={setTipoDocumento}
+        tipoEntrega={tipoEntrega}
+        onChangeTipoEntrega={setTipoEntrega}
+        direccionEntrega={direccionEntrega}
+        onChangeDireccionEntrega={setDireccionEntrega}
+        usarDireccionGuardada={usarDireccionGuardada}
+        onChangeUsarDireccionGuardada={setUsarDireccionGuardada}
+        onCerrarCaja={confirmAlert}
+        cajaAbierta={estado.cajaAbierta}
+        cajaAsignada={estado.asignada}
+        clientes={clientes}
+        isClosing={isClosing}
+        cajaCerrando={cajaCerrando}
+        theme={theme}
+      />
+      <CategoriasSelector
+        categorias={categoriasProductos}
+        categoriaSeleccionada={category}
+        onCategoriaClick={handleCategoryClick}
+      />
+      <ProductoSearchBar
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      <Box display="flex" gap={2} flexDirection={isMobile ? "column" : "row"}>
+        <ProductosGrid
+          productos={productosData?.productos}
+          loading={loadingProductos}
+          isSearching={isSearching}
+          page={page}
+          totalPages={
+            productosData?.paginacion?.totalPages ||
+            Math.ceil(productosData.paginacion.totalItems / pageSize)
+          }
+          onPageChange={(event, value) => setPage(value)}
+          onAddToCart={handleAddToCart}
+        />
+        <Box
+          width={isMobile ? "100%" : "75%"}
+          maxWidth={"100%"}
+          mt={isMobile ? 3 : 0}
+        >
+          <CarritoDeCompras
+            cart={cart}
+            subtotal={subtotal}
+            descuento={descuento}
+            impuestos={impuestos}
+            total={total}
+            discount={discount}
+            taxRate={taxRate}
+            onRemove={handleRemoveFromCart}
+            onQuantityChange={handleQuantityChange}
+            onPriceChange={handlePriceChange}
+            onTaxRateChange={handleTaxRateChange}
+            onDiscountChange={handleDiscountChange}
+            onProceedToPayment={handleProceedToPayment}
+            productosRetornables={productosRetornables}
+            refButton={botonAbrirPagoRef}
+          />
+        </Box>
+      </Box>
       <SelectVendedorModal
         open={openModal}
         onClose={() => setOpenModal(false)}
@@ -549,74 +621,6 @@ const PuntoDeVenta = () => {
         selectedVendedor={selectedVendedor}
         onSelect={handleSelectVendedor}
       />
-
-      {/* Botón para cerrar caja */}
-      {estado.cajaAbierta && (
-        <Box display="flex" justifyContent="flex-end" mb={2}>
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "#D32F2F",
-              color: "#fff",
-              "&:hover": { backgroundColor: "#B71C1C" },
-              borderWidth: 0,
-              ":focus": {
-                outline: "none",
-                boxShadow: "none",
-              },
-              ":active": {
-                outline: "none",
-                boxShadow: "none",
-              },
-              fontSize: "1rem",
-            }}
-            onClick={() => confirmAlert()}
-            disabled={cajaCerrando || isClosing}
-          >
-            {cajaCerrando || isClosing ? "Cerrando..." : "Cerrar Caja"}
-          </Button>
-        </Box>
-      )}
-      {estado?.asignada && estado?.cajaAbierta ? (
-        <CajaInfo caja={estado.asignada} />
-      ) : (
-        <Typography variant="subtitle1" color="textSecondary">
-          No hay caja abierta actualmente.
-        </Typography>
-      )}
-      <Box mb={3}>
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
-          onClick={() => setOpenClienteModal(true)}
-          sx={{
-            backgroundColor: "#007AFF",
-            color: "white",
-            fontWeight: "bold",
-            "&:hover": { backgroundColor: "#005BB5" },
-            borderWidth: 0,
-            ":focus": {
-              outline: "none",
-              boxShadow: "none",
-            },
-            ":active": {
-              outline: "none",
-              boxShadow: "none",
-            },
-            fontSize: "1rem",
-          }}
-        >
-          {selectedCliente
-            ? `Cliente: ${
-                clientes?.clientes?.find(
-                  (c) => c.id_cliente === selectedCliente
-                )?.nombre || "Desconocido"
-              }`
-            : "Seleccionar Cliente"}
-        </Button>
-      </Box>
-
       <SelectClienteModal
         open={openClienteModal}
         onClose={() => setOpenClienteModal(false)}
@@ -624,213 +628,6 @@ const PuntoDeVenta = () => {
         selectedCliente={selectedCliente}
         onSelect={setSelectedCliente}
       />
-      <Box mb={3}>
-        <Typography variant="h6">Tipo de Documento</Typography>
-        <TextField
-          select
-          fullWidth
-          value={tipoDocumento}
-          onChange={(e) => setTipoDocumento(e.target.value)}
-          variant="outlined"
-          sx={{ mt: 1 }}
-        >
-          <MenuItem value="boleta">Boleta</MenuItem>
-          <MenuItem value="factura">Factura</MenuItem>
-        </TextField>
-      </Box>
-      <Box mb={3}>
-        <Typography variant="h6">Tipo de Entrega</Typography>
-        <TextField
-          select
-          fullWidth
-          value={tipoEntrega}
-          onChange={(e) => setTipoEntrega(e.target.value)}
-          variant="outlined"
-          sx={{ mt: 1 }}
-        >
-          <MenuItem value="retiro_en_sucursal">Retiro en Sucursal</MenuItem>
-          <MenuItem value="despacho_a_domicilio">Envío a Domicilio</MenuItem>
-        </TextField>
-      </Box>
-
-      {tipoEntrega === "despacho_a_domicilio" && (
-        <Box mb={3}>
-          <Typography variant="h6">Dirección de Entrega</Typography>
-
-          <Box display="flex" alignItems="center" mb={1}>
-            <Checkbox
-              checked={usarDireccionGuardada}
-              onChange={(e) => setUsarDireccionGuardada(e.target.checked)}
-            />
-            <Typography>
-              Usar dirección guardada:{" "}
-              <strong>
-                {clientes?.clientes?.find(
-                  (c) => c.id_cliente === selectedCliente
-                )?.direccion || "No registrada"}
-              </strong>
-            </Typography>
-          </Box>
-
-          {!usarDireccionGuardada && (
-            <TextField
-              fullWidth
-              label="Ingrese otra dirección"
-              value={direccionEntrega}
-              onChange={(e) => setDireccionEntrega(e.target.value)}
-              variant="outlined"
-              sx={{ mt: 1 }}
-            />
-          )}
-        </Box>
-      )}
-      {/* Categorías */}
-      <Box mb={3}>
-        <Typography variant="h6" mb={2}>
-          Selecciona categoría
-        </Typography>
-        <Grid container spacing={2}>
-          {/* Categoría "Todo" */}
-          <Grid item>
-            <CategoryBlock
-              category="Todo"
-              isSelected={category === "all"}
-              onClick={() => handleCategoryClick("all")}
-            />
-          </Grid>
-          {/* Categorías dinámicas */}
-          {categoriasProductos?.map((categoria) => (
-            <Grid item key={categoria.id_categoria}>
-              <CategoryBlock
-                category={categoria.nombre_categoria}
-                isSelected={category === categoria.nombre_categoria}
-                onClick={() => handleCategoryClick(categoria.nombre_categoria)}
-              />
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-      {/* Filtros de búsqueda */}
-      <Box mb={3}>
-        <TextField
-          label="Buscar producto"
-          variant="outlined"
-          sx={{ fontSize: "1rem" }}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          fullWidth
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchOutlined />
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Box>
-      <Box display={"flex"} gap={2}>
-        <Box width={"100%"} maxHeight={"100%"}>
-          {/* Estado de búsqueda */}
-          {isSearching && (
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              mb={3}
-              fontSize="1rem"
-            >
-              <CircularProgress />
-              <Typography ml={2} fontSize="1rem">
-                Buscando productos...
-              </Typography>
-            </Box>
-          )}
-          {/* Productos */}
-          {!loadingProductos && productosData?.productos.length > 0 ? (
-            <>
-              <Grid container spacing={1} mb={3}>
-                {productosData?.productos?.map((product) => (
-                  <Grid
-                    item
-                    xs={12}
-                    sm={6}
-                    md={3}
-                    lg={3}
-                    key={product.id_producto}
-                  >
-                    <ProductCard
-                      product={{
-                        ...product,
-                        precio: parseFloat(product.precio || 0),
-                      }}
-                      onAddToCart={handleAddToCart}
-                    />
-                  </Grid>
-                ))}
-              </Grid>
-
-              {/* Paginación */}
-              <Box display="flex" justifyContent="center" mt={2}>
-                <Pagination
-                  count={
-                    productosData?.paginacion?.totalPages ||
-                    Math.ceil(productosData.paginacion.totalItems / pageSize)
-                  }
-                  page={page}
-                  onChange={(event, value) => setPage(value)}
-                  color="primary"
-                />
-              </Box>
-            </>
-          ) : (
-            <Typography>No se encontraron productos.</Typography>
-          )}
-        </Box>
-        <Box width={"75%"} maxWidth={"100%"}>
-          <Paper
-            elevation={3}
-            sx={{
-              borderRadius: 3,
-              p: 2,
-              boxShadow: "0px 4px 12px rgba(0,0,0,0.1)",
-            }}
-          >
-            <Typography
-              variant="h3"
-              fontWeight="bold"
-              mb={2}
-              textAlign="center"
-            >
-              🛒 Carrito de Compras
-            </Typography>
-            <Box mb={1} maxHeight="300px" overflow="auto">
-              {cart.map((item) => (
-                <ShoppingCartItem
-                  key={item.id_producto}
-                  item={item}
-                  onRemove={handleRemoveFromCart}
-                  onQuantityChange={handleQuantityChange}
-                  onPriceChange={handlePriceChange}
-                />
-              ))}
-            </Box>
-            <Box>
-              <TotalsDisplay
-                subtotal={subtotal}
-                descuento={descuento || 0}
-                impuestos={impuestos}
-                total={total}
-                discount={discount || 0}
-                taxRate={taxRate || 0}
-                onTaxRateChange={handleTaxRateChange}
-                onDiscountChange={handleDiscountChange}
-                onProceedToPayment={handleProceedToPayment}
-                productosRetornables={productosRetornables}
-              />
-            </Box>
-          </Paper>
-        </Box>
-      </Box>
       <AlertDialog
         openAlert={openAlert}
         onCloseAlert={() => setOpenAlert(false)}
@@ -846,7 +643,7 @@ const PuntoDeVenta = () => {
       />
       <ProcesarPagoModal
         open={openPagoModal}
-        onClose={() => setOpenPagoModal(false)}
+        onClose={handleClosePagoModal}
         onConfirm={handleConfirmPayment}
         total={total}
         metodosPago={[

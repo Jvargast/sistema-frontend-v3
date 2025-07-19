@@ -59,14 +59,36 @@ const CapacidadCargaCamion = ({
         boxShadow: 2,
       }}
     >
-      <Typography
-        variant="h5"
-        fontWeight="bold"
-        color="primary"
-        sx={{ mb: 2, fontSize: { xs: "1.1rem", sm: "1.3rem" } }}
-      >
-        📦 Capacidad del Camión
-      </Typography>
+      <Box display="flex" alignItems="center" gap={1.5} mb={3} px={1}>
+        <Box
+          sx={{
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            backgroundColor: "primary.main",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#fff",
+            fontSize: 22,
+            fontWeight: "bold",
+            boxShadow: 2,
+          }}
+        >
+          📦
+        </Box>
+        <Typography
+          variant="h6"
+          fontWeight={700}
+          sx={{
+            color: "text.primary",
+            fontSize: { xs: "1.15rem", sm: "1.35rem" },
+            letterSpacing: 0.5,
+          }}
+        >
+          Capacidad del Camión
+        </Typography>
+      </Box>
 
       <Box
         sx={{

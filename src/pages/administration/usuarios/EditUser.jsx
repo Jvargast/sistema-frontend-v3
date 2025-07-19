@@ -37,8 +37,6 @@ const EditUser = () => {
   const [updateUser] = useUpdateUserMutation();
   const [updateUserPassword] = useUpdateUserPasswordMutation();
 
-  // Handlers
-  // Handlers
   const handleUpdateUser = useCallback(
     async (userId, data) => {
       try {

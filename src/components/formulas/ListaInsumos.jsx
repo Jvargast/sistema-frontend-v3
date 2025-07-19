@@ -56,6 +56,8 @@ const ListaInsumos = ({ insumos, setInsumos }) => {
               <SelectorInsumo
                 label="Selecciona Insumo"
                 onInsumoSeleccionado={setInsumoSeleccionado}
+                insumoSeleccionado={insumoSeleccionado} 
+                size="medium"
               />
             </Box>
 

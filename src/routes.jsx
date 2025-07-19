@@ -62,6 +62,7 @@ import HistorialProduccion from "./pages/produccion/HistorialProduccion";
 import VerProduccion from "./pages/produccion/VerProduccion";
 import VerInsumo from "./pages/insumos/VerInsumo";
 import InspeccionRetornables from "./pages/inventario_camion";
+import WelcomePage from "./components/common/WelcomePage";
 
 // Configuración de rutas
 const router = createHashRouter([
@@ -77,447 +78,476 @@ const router = createHashRouter([
         path: "/",
         element: <Layout />,
         children: [
+          { path: "", element: <WelcomePage /> },
           {
             path: "dashboard",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.dashboard.ver">
-                <DashboardCentral />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.dashboard.ver" />
             ),
+            children: [{ path: "", element: <DashboardCentral /> }],
           },
+          // puntos
           {
             path: "punto-venta",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.puntoventa.ver">
-                <PuntoDeVenta />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.puntoventa.ver" />
             ),
-          },
-          {
-            path: "ventas",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.ventas.ver">
-                <ListarVentas />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "ventas/ver/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.ventas.ver">
-                <VerVenta />
-              </RoleBasedRoute>
-            ),
+            children: [{ path: "", element: <PuntoDeVenta /> }],
           },
           {
             path: "punto-cotizacion",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.puntocotizacion.ver">
-                <CrearCotizacion />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.puntocotizacion.ver" />
             ),
-          },
-          {
-            path: "cotizaciones",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.cotizaciones.ver">
-                <ListarCotizaciones />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "cotizaciones/ver/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.cotizaciones.ver">
-                <PreviewCotizacion />
-              </RoleBasedRoute>
-            ),
+            children: [{ path: "", element: <CrearCotizacion /> }],
           },
           {
             path: "punto-pedido",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.puntopedido.ver">
-                <CrearPedido />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.puntopedido.ver" />
             ),
+            children: [{ path: "", element: <CrearPedido /> }],
           },
+          // Gestión pedidos
           {
             path: "admin-pedidos",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.adminpedidos.ver">
-                <PedidosBoard />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.adminpedidos.ver" />
             ),
+            children: [{ path: "", element: <PedidosBoard /> }],
           },
+          // mis-pedidos
           {
             path: "mis-pedidos",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.mispedidos.ver">
-                <MisPedidos />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.mispedidos.ver" />
             ),
+            children: [
+              {
+                path: "",
+                element: <MisPedidos />,
+              },
+            ],
           },
-          {
-            path: "pedidos",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.pedidos.ver">
-                <ListarPedidos />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "pedidos/ver/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.pedidos.ver">
-                <VerPedido />
-              </RoleBasedRoute>
-            ),
-          },
+          // pagos
           {
             path: "pagos",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.pagos.ver">
-                <ListarPagos />
-              </RoleBasedRoute>
-            ),
+            element: <RoleBasedRoute requiredPermission="vistas.pagos.ver" />,
+            children: [
+              {
+                path: "",
+                element: <ListarPagos />,
+              },
+              {
+                path: "ver/:id",
+                element: <VerPago />,
+              },
+            ],
           },
-          {
-            path: "pagos/ver/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.pagos.ver">
-                <VerPago />
-              </RoleBasedRoute>
-            ),
-          },
+          // facturas
           {
             path: "facturas",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.facturas.ver">
-                <ListarCuentasPorCobrar />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.facturas.ver" />
             ),
+            children: [
+              {
+                path: "",
+                element: <ListarCuentasPorCobrar />,
+              },
+              {
+                path: "ver/:id",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.facturas.ver" />
+                ),
+                children: [
+                  {
+                    path: "",
+                    element: <VerCuentaPorCobrar />,
+                  },
+                ],
+              },
+            ],
           },
-
-          {
-            path: "facturas/ver/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.facturas.ver">
-                <VerCuentaPorCobrar />
-              </RoleBasedRoute>
-            ),
-          },
+          // clientes
           {
             path: "clientes",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.clientes.ver">
-                <Clientes />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.clientes.ver" />
             ),
+            children: [
+              {
+                path: "",
+                element: <Clientes />,
+              },
+              {
+                path: "crear",
+                element: (
+                  <RoleBasedRoute requiredPermission="ventas.cliente.crear" />
+                ),
+                children: [{ path: "", element: <CrearCliente /> }],
+              },
+              {
+                path: "ver/:id",
+                element: <VerCliente />,
+              },
+              {
+                path: "editar/:id",
+                element: (
+                  <RoleBasedRoute requiredPermission="ventas.cliente.editar" />
+                ),
+                children: [{ path: "", element: <EditarCliente /> }],
+              },
+            ],
           },
-          {
-            path: "clientes/crear",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.clientes.ver">
-                <CrearCliente />{" "}
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "clientes/ver/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="ventas.cliente.ver">
-                <VerCliente />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "clientes/editar/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="ventas.cliente.editar">
-                <EditarCliente />
-              </RoleBasedRoute>
-            ),
-          },
+          // categorias
           {
             path: "categorias",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.categorias.ver">
-                <CategoriaManagement />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.categorias.ver" />
             ),
+            children: [{ path: "", element: <CategoriaManagement /> }],
           },
+          // tipo-insumo
           {
             path: "tipo-insumo",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.tipoinsumos.ver">
-                <TipoInsumoManagement />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.tipoinsumos.ver" />
             ),
+            children: [
+              {
+                path: "",
+                element: <TipoInsumoManagement />,
+              },
+            ],
           },
+          // productos
           {
             path: "productos",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.productos.ver">
-                <Productos />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.productos.ver" />
             ),
+            children: [
+              {
+                path: "",
+                element: <Productos />,
+              },
+              {
+                path: "ver/:id",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.productos.ver" />
+                ),
+                children: [
+                  {
+                    path: "",
+                    element: <VerProducto />,
+                  },
+                ],
+              },
+              {
+                path: "editar/:id",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.productos.ver" />
+                ),
+                children: [
+                  {
+                    path: "",
+                    element: <EditarProducto />,
+                  },
+                ],
+              },
+            ],
           },
-          {
-            path: "productos/ver/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.productos.ver">
-                <VerProducto />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "productos/editar/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.productos.ver">
-                <EditarProducto />
-              </RoleBasedRoute>
-            ),
-          },
+          // produccion
           {
             path: "produccion",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.productos.ver">
-                <PanelProduccion />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.productos.ver" />
             ),
+            children: [{ path: "", element: <PanelProduccion /> }],
           },
-          {
-            path: "produccion/historial",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.productos.ver">
-                <HistorialProduccion />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "produccion/historial/ver/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.productos.ver">
-                <VerProduccion />
-              </RoleBasedRoute>
-            ),
-          },
+          // formulas
           {
             path: "formulas",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.productos.ver">
-                <ListarFormulasProductos />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.productos.ver" />
             ),
+            children: [
+              {
+                path: "",
+                element: <ListarFormulasProductos />,
+              },
+              {
+                path: "ver/:id",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.productos.ver" />
+                ),
+                children: [{ path: "", element: <VerFormula /> }],
+              },
+              {
+                path: "crear",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.productos.ver" />
+                ),
+                children: [{ path: "", element: <CrearFormula /> }],
+              },
+            ],
           },
-          {
-            path: "formulas/ver/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.productos.ver">
-                <VerFormula />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "formulas/nuevo",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.productos.ver">
-                <CrearFormula />
-              </RoleBasedRoute>
-            ),
-          },
+          // insumos
           {
             path: "insumos",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.insumos.ver">
-                <Insumos />
-              </RoleBasedRoute>
-            ),
+            element: <RoleBasedRoute requiredPermission="vistas.insumos.ver" />,
+            children: [
+              {
+                path: "",
+                element: <Insumos />,
+              },
+              {
+                path: "ver/:id",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.insumos.ver" />
+                ),
+                children: [{ path: "", element: <VerInsumo /> }],
+              },
+              {
+                path: "editar/:id",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.insumos.ver" />
+                ),
+                children: [{ path: "", element: <EditarInsumo /> }],
+              },
+            ],
           },
-          {
-            path: "insumos/ver/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.insumos.ver">
-                <VerInsumo />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "insumos/editar/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.insumos.ver">
-                <EditarInsumo />
-              </RoleBasedRoute>
-            ),
-          },
+          // camiones
           {
             path: "camiones",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.camiones.ver">
-                <CamionesManagement />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.camiones.ver" />
             ),
+            children: [{ path: "", element: <CamionesManagement /> }],
           },
+          // inventario-camion
           {
             path: "inventario-camion",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.camiones.ver">
-                <InspeccionRetornables />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.camiones.ver" />
             ),
+            children: [
+              {
+                path: "",
+                element: <InspeccionRetornables />,
+              },
+            ],
           },
+          // viajes
           {
             path: "viajes",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.viajes.ver">
-                <PanelViajeChofer />
-              </RoleBasedRoute>
-            ),
+            element: <RoleBasedRoute requiredPermission="vistas.viajes.ver" />,
+            children: [
+              {
+                path: "",
+                element: <PanelViajeChofer />,
+              },
+            ],
           },
+          // misventas
           {
             path: "misventas",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.viajes.ver">
-                <ListarMisVentas />
-              </RoleBasedRoute>
-            ),
+            element: <RoleBasedRoute requiredPermission="vistas.viajes.ver" />,
+            children: [
+              {
+                path: "",
+                element: <ListarMisVentas />,
+              },
+            ],
           },
+          // ventas-chofer
           {
             path: "ventas-chofer",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.ventas.ver">
-                <ListarVentasChofer />
-              </RoleBasedRoute>
-            ),
+            element: <RoleBasedRoute requiredPermission="vistas.ventas.ver" />,
+            children: [
+              {
+                path: "",
+                element: <ListarVentasChofer />,
+              },
+              {
+                path: "ver/:id",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.ventas.ver" />
+                ),
+                children: [
+                  {
+                    path: "",
+                    element: <VerVentaChofer />,
+                  },
+                ],
+              },
+            ],
           },
-          {
-            path: "ventas-chofer/ver/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.ventas.ver">
-                <VerVentaChofer />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "admin-viajes",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.admin.ver">
-                <AdminHistorialViajes />
-              </RoleBasedRoute>
-            ),
-          },
+          // agenda-carga
           {
             path: "agenda-carga",
             element: (
-              <RoleBasedRoute requiredPermission="vistas.agendaCarga.crear">
-                <CreateAgendaCargaForm />
-              </RoleBasedRoute>
+              <RoleBasedRoute requiredPermission="vistas.agendaCarga.crear" />
             ),
+            children: [
+              {
+                path: "",
+                element: <CreateAgendaCargaForm />,
+              },
+            ],
           },
-          {
-            path: "agendas",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.agendaCarga.ver">
-                <ListarAgendasCarga />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "agendas/ver/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.agendaCarga.ver">
-                <VerAgendaCarga />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "usuarios",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.usuarios.ver">
-                <UserManagement />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "usuarios/editar/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="auth.usuarios.crear">
-                <EditUser />{" "}
-              </RoleBasedRoute>
-            ),
-          },
+
+          // perfil
           {
             path: "miperfil",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.perfil.ver">
-                <PerfilUsuario />
-              </RoleBasedRoute>
-            ),
+            element: <RoleBasedRoute requiredPermission="vistas.perfil.ver" />,
+            children: [{ path: "", element: <PerfilUsuario /> }],
           },
+          // admin
           {
             path: "admin",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.admin.ver">
-                <Administration />
-              </RoleBasedRoute>
-            ),
+            element: <RoleBasedRoute requiredPermission="vistas.admin.ver" />,
+            children: [
+              {
+                path: "",
+                element: <Administration />,
+              },
+              {
+                path: "cajas",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.cajas.ver" />
+                ),
+                children: [{ path: "", element: <ListarCajas /> }],
+              },
+              {
+                path: "roles",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.roles.ver" />
+                ),
+                children: [
+                  { path: "", element: <RoleManagement /> },
+                  {
+                    path: "editar/:id",
+                    element: <EditRole />,
+                  },
+                ],
+              },
+              {
+                path: "seguridad",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.seguridad.ver" />
+                ),
+                children: [{ path: "", element: <Seguridad /> }],
+              },
+              {
+                path: "empresa",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.empresas.ver" />
+                ),
+                children: [
+                  { path: "", element: <Empresa /> },
+                  {
+                    path: "editar/:id",
+                    element: <EditarEmpresa />,
+                  },
+                ],
+              },
+              {
+                path: "analisis",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.analisis.ver" />
+                ),
+                children: [{ path: "", element: <Analisis /> }],
+              },
+              {
+                path: "ventas",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.ventas.ver" />
+                ),
+                children: [
+                  { path: "", element: <ListarVentas /> },
+                  {
+                    path: "ver/:id",
+                    element: <VerVenta />,
+                  },
+                ],
+              },
+              {
+                path: "cotizaciones",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.cotizaciones.ver" />
+                ),
+                children: [
+                  { path: "", element: <ListarCotizaciones /> },
+                  {
+                    path: "ver/:id",
+                    element: <PreviewCotizacion />,
+                  },
+                ],
+              },
+              {
+                path: "pedidos",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.pedidos.ver" />
+                ),
+                children: [
+                  { path: "", element: <ListarPedidos /> },
+                  {
+                    path: "ver/:id",
+                    element: <VerPedido />,
+                  },
+                ],
+              },
+              {
+                path: "usuarios",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.usuarios.ver" />
+                ),
+                children: [
+                  { path: "", element: <UserManagement /> },
+                  {
+                    path: "editar/:id",
+                    element: <EditUser />,
+                  },
+                ],
+              },
+              {
+                path: "viajes",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.admin.ver" />
+                ),
+                children: [{ path: "", element: <AdminHistorialViajes /> }],
+              },
+              {
+                path: "agendas",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.agendaCarga.ver" />
+                ),
+                children: [
+                  { path: "", element: <ListarAgendasCarga /> },
+                  {
+                    path: "ver/:id",
+                    element: <VerAgendaCarga />,
+                  },
+                ],
+              },
+              {
+                path: "produccion",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.productos.ver" />
+                ),
+                children: [
+                  { path: "", element: <HistorialProduccion /> },
+                  {
+                    path: "ver/:id",
+                    element: <VerProduccion />,
+                  },
+                ],
+              },
+            ],
           },
-          {
-            path: "cajas",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.cajas.ver">
-                <ListarCajas />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "roles",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.roles.ver">
-                <RoleManagement />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "roles/editar/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.roles.ver">
-                <EditRole />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "seguridad",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.seguridad.ver">
-                <Seguridad />{" "}
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "empresa",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.empresas.ver">
-                <Empresa />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "empresa/editar/:id",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.empresas.ver">
-                <EditarEmpresa />
-              </RoleBasedRoute>
-            ),
-          },
-          {
-            path: "analisis",
-            element: (
-              <RoleBasedRoute requiredPermission="vistas.analisis.ver">
-                <Analisis />{" "}
-              </RoleBasedRoute>
-            ),
-          },
+
           { path: "*", element: <NotFoundPage /> },
         ],
       },

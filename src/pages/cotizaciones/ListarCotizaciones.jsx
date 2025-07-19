@@ -60,7 +60,7 @@ const ListarCotizaciones = () => {
       render: (row) => (
         <IconButton
           color="primary"
-          onClick={() => navigate(`/cotizaciones/ver/${row.id_cotizacion}`)}
+          onClick={() => navigate(`/admin/cotizaciones/ver/${row.id_cotizacion}`)}
         >
           <Visibility />
         </IconButton>
@@ -81,7 +81,8 @@ const ListarCotizaciones = () => {
 
   return (
     <DataTable
-      title="📄 Cotizaciones Emitidas"
+      title="Cotizaciones Emitidas"
+      subtitle="Gestión cotizaciones"
       columns={columns}
       rows={cotizaciones}
       totalItems={totalItems}

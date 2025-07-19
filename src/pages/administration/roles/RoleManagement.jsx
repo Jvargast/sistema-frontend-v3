@@ -7,12 +7,13 @@ import {
   Typography,
   Button,
   Grid2,
+  Divider,
+  useTheme,
 } from "@mui/material";
-import { Add, Edit, Delete } from "@mui/icons-material";
+import { Add, Edit, Delete, ArrowBack } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import LoaderComponent from "../../../components/common/LoaderComponent";
-import BackButton from "../../../components/common/BackButton";
 import AlertDialog from "../../../components/common/AlertDialog";
 import { showNotification } from "../../../store/reducers/notificacionSlice";
 import {
@@ -23,6 +24,7 @@ import {
 import { useHasPermission } from "../../../utils/useHasPermission";
 
 const RoleManagement = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [createRole] = useCreateRoleMutation();
@@ -40,9 +42,6 @@ const RoleManagement = () => {
   const { data: roles, isLoading, isError, refetch } = useGetAllRolesQuery();
 
   const handleCreateRole = async () => {
-    //const newRole = { nombre: "Nuevo Rol", descripcion: "Descripción del rol" };
-    //await createRole(newRole);
-    // Aquí debería ser un modal para crear.
     dispatch(
       showNotification({
         message: "Método no implementado ",
@@ -65,6 +64,8 @@ const RoleManagement = () => {
         duration: 3000,
       })
     );
+    setOpenAlert(false);
+    refetch();
   };
 
   useEffect(() => {
@@ -90,41 +91,94 @@ const RoleManagement = () => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        justifyContent: "flex-start",
-        overflow: "auto",
-        padding: 3,
-        gap: 1,
+        minHeight: "100vh",
+        bgcolor: "background.default",
+        px: { xs: 1, md: 3 },
+        p: 2,
       }}
     >
+      {/* TÍTULO y BOTONES */}
       <Box
         sx={{
           width: "100%",
+          maxWidth: 1200,
+          mx: "auto",
           display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          alignItems: { xs: "stretch", sm: "center" },
           justifyContent: "space-between",
-          maxWidth: "1200px",
-          alignItems: "center",
-          marginBottom: 3,
+          gap: { xs: 1.5, sm: 3 },
+          mb: { xs: 2, md: 4 },
+          p: 1
         }}
       >
-        <BackButton to="/admin" label="Volver al menú" />
+        {/* Botón Volver */}
+        <Button
+          onClick={() => navigate("/admin")}
+          startIcon={<ArrowBack />}
+          variant="outlined"
+          sx={{
+            border: "1.5px solid #212121",
+            color: theme.palette.mode === "dark" ? "#fafafa" : "#212121",
+            borderRadius: 2,
+            px: 2,
+            fontWeight: 500,
+            fontSize: "1rem",
+            background: "transparent",
+            minWidth: 0,
+            boxShadow: "none",
+            transition: "all 0.19s cubic-bezier(.4,0,.2,1)",
+            "&:hover": {
+              background: theme.palette.action.hover,
+              borderColor: "#111",
+              boxShadow: theme.shadows[2],
+            },
+          }}
+        >
+          Volver
+        </Button>
+        {/* Título */}
         <Typography
-          variant="h3"
-          className="font-bold"
-          sx={{ color: (theme) => theme.palette.text.primary }}
+          variant="h4"
+          fontWeight={800}
+          sx={{
+            textAlign: { xs: "center", sm: "left" },
+            flex: 1,
+            color: theme.palette.text.primary,
+            letterSpacing: 0.2,
+            lineHeight: 1.18,
+            textShadow:
+              theme.palette.mode === "dark"
+                ? "0 2px 8px #0003"
+                : "0 1px 4px #1a237e13",
+          }}
         >
           Gestión de Roles
         </Typography>
+        {/* Botón Añadir Rol */}
         {canCreateRole && (
           <Button
             variant="contained"
-            color="primary"
             startIcon={<Add />}
             onClick={handleCreateRole}
             sx={{
-              fontSize: "0.8rem",
-              paddingX: 1,
-              paddingY: 1,
-              borderRadius: 50,
+              borderRadius: 2,
+              px: 2.5,
+              py: 1,
+              fontWeight: 700,
+              boxShadow: "0 2px 12px #1976d22a",
+              background: "linear-gradient(98deg,#4776e6,#4f99e9)",
+              color: "#fff",
+              fontSize: "1rem",
+              whiteSpace: "nowrap",
+              textTransform: "none",
+              letterSpacing: 0.15,
+              minWidth: 0,
+              transition: "all 0.19s cubic-bezier(.4,0,.2,1)",
+              "&:hover": {
+                background: "linear-gradient(96deg,#295cc8 60%,#4f99e9 100%)",
+                boxShadow: "0 4px 18px #1565c02b",
+              },
             }}
           >
             Añadir Rol
@@ -132,78 +186,151 @@ const RoleManagement = () => {
         )}
       </Box>
 
-      <Grid2
-        container
-        spacing={4}
-        className="text-lg"
-        sx={{
-          width: "100%",
-          maxWidth: "1200px",
-          margin: "0 auto",
-          flexWrap: "wrap",
-          gap: 2,
-        }}
-      >
+      {/* Tarjetas */}
+      <Grid2 container spacing={3} alignItems="stretch">
         {roles?.roles?.map((role) => (
-          <Grid2 xs={12} sm={6} md={4} lg={3} key={role.id}>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={4}
+            lg={3}
+            key={role.id}
+            sx={{
+              width: "100%",
+              height: "100%",
+              justifyContent: "center",
+              maxWidth: { xs: "100%", sm: "100%", md: 360, lg: 360 },
+              flex: {
+                xs: "1 1 100%",
+                sm: "1 1 100%",
+                md: "1 1 340px",
+                lg: "1 1 340px",
+              },
+            }}
+          >
             <Card
               sx={{
-                boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                borderRadius: 3,
+                minHeight: 230,
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                boxShadow: "0 4px 16px 0 #21305212",
+                transition: "transform 0.18s, box-shadow 0.18s",
                 "&:hover": {
-                  transform: "scale(1.02)",
-                  boxShadow: "0 6px 15px rgba(0, 0, 0, 0.2)",
+                  transform: "translateY(-2px) scale(1.025)",
+                  boxShadow: "0 8px 32px 0 #1565c020",
                 },
+                p: 1,
+                width: "100%",
+                maxWidth: { xs: "100%", sm: "unset" },
               }}
             >
-              <CardContent>
+              <CardContent
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-start",
+                  gap: 1.2,
+                  pb: 1,
+                }}
+              >
                 <Typography
-                  variant="h5"
-                  className="font-semibold capitalize"
-                  sx={{ color: (theme) => theme.palette.text.primary }}
+                  variant="h6"
+                  fontWeight={700}
+                  color="primary"
+                  sx={{
+                    textTransform: "capitalize",
+                    mb: 0.5,
+                    wordBreak: "break-word",
+                  }}
                 >
                   {role.nombre}
                 </Typography>
                 <Typography
-                  variant="body1"
-                  className="mt-2"
-                  sx={{ color: (theme) => theme.palette.grey[500] }}
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    mb: 1,
+                    minHeight: 32,
+                    wordBreak: "break-word",
+                  }}
                 >
-                  {role.descripcion}
+                  {role.descripcion || "Sin descripción"}
                 </Typography>
-                <Typography
-                  variant="subtitle1"
-                  className="font-medium mt-4"
-                  sx={{ color: (theme) => theme.palette.text.secondary }}
-                >
-                  Permisos Aprobados: {role.permissionsCount?.approved || 0}
-                </Typography>
-                <Typography
-                  variant="subtitle1"
-                  className="font-medium"
-                  sx={{ color: (theme) => theme.palette.text.secondary }}
-                >
-                  Permisos Denegados: {role.permissionsCount?.notApproved || 0}
-                </Typography>
+                <Divider sx={{ mb: 1, borderColor: "grey.200" }} />
+                <Box>
+                  <Typography
+                    variant="subtitle2"
+                    fontWeight={500}
+                    color="success.main"
+                  >
+                    Permisos Aprobados:{" "}
+                    <b>{role.permissionsCount?.approved || 0}</b>
+                  </Typography>
+                  <Typography
+                    variant="subtitle2"
+                    fontWeight={500}
+                    color="error.main"
+                  >
+                    Permisos Denegados:{" "}
+                    <b>{role.permissionsCount?.notApproved || 0}</b>
+                  </Typography>
+                </Box>
               </CardContent>
-              <CardActions className="flex justify-between">
+              <CardActions
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  px: 2,
+                  pb: 1.2,
+                  pt: 0.2,
+                  mt: "auto",
+                }}
+              >
                 {canEditRole && (
                   <Button
                     size="small"
                     color="primary"
+                    variant="outlined"
                     startIcon={<Edit />}
-                    onClick={() => navigate(`/roles/editar/${role.id}`)}
-                    className="text-lg"
+                    onClick={() => navigate(`/admin/roles/editar/${role.id}`)}
+                    sx={{
+                      borderRadius: 2,
+                      px: 2,
+                      textTransform: "none",
+                      fontWeight: 600,
+                      borderWidth: 1.3,
+                      borderColor: theme.palette.primary.main,
+                      "&:hover": {
+                        background: theme.palette.primary.light + "33",
+                        borderColor: theme.palette.primary.main,
+                      },
+                    }}
                   >
-                    Editar Permisos
+                    Editar
                   </Button>
                 )}
                 {canDeleteRole && (
                   <Button
-                    size="medium"
+                    size="small"
                     color="error"
+                    variant="outlined"
                     startIcon={<Delete />}
                     onClick={() => confirmDeleteRole(role.id)}
+                    sx={{
+                      borderRadius: 2,
+                      px: 2,
+                      textTransform: "none",
+                      fontWeight: 600,
+                      borderWidth: 1.3,
+                      borderColor: theme.palette.error.main,
+                      "&:hover": {
+                        background: theme.palette.error.light + "24",
+                        borderColor: theme.palette.error.main,
+                      },
+                    }}
                   >
                     Eliminar
                   </Button>
@@ -213,6 +340,7 @@ const RoleManagement = () => {
           </Grid2>
         ))}
       </Grid2>
+
       <AlertDialog
         openAlert={openAlert}
         onCloseAlert={() => setOpenAlert(false)}

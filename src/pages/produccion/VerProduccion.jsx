@@ -81,7 +81,7 @@ const VerProduccion = () => {
         <Button
           startIcon={<ArrowBackIcon />}
           sx={{ textTransform: "none", fontWeight: 700 }}
-          onClick={() => navigate("/produccion/historial")}
+          onClick={() => navigate("/admin/produccion")}
         >
           Volver al historial
         </Button>

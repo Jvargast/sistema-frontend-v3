@@ -1,9 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
-import { Box, Button, IconButton, Typography, useTheme } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Box,
+  Button,
+  IconButton,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {
@@ -22,6 +30,10 @@ const Clientes = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
+
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  /*   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md")); */
 
   const [openAlert, setOpenAlert] = useState(false);
   const [page, setPage] = useState(0);
@@ -48,6 +60,9 @@ const Clientes = () => {
     [data?.clientes]
   );
 
+  const apiRef = useGridApiRef();
+  const gridContainerRef = useRef(null);
+
   useEffect(() => {
     if (location.state?.refetch) {
       refetch();
@@ -56,30 +71,37 @@ const Clientes = () => {
   }, [location.state, refetch, navigate]);
 
   const columns = [
-    { field: "sequentialId", headerName: "ID", flex: 0.15, resizable: false },
-    { field: "nombre", headerName: "Nombre", flex: 0.25, resizable: false },
+    {
+      field: "sequentialId",
+      headerName: "ID",
+      flex: 0.1,
+      minWidth: 60,
+      hide: isMobile,
+      resizable: false,
+    },
+    {
+      field: "nombre",
+      headerName: "Nombre",
+      flex: 0.2,
+      minWidth: 120,
+      resizable: false,
+    },
     {
       field: "direccion",
       headerName: "Dirección",
-      flex: 0.45,
+      flex: 0.3,
+      minWidth: 150,
       resizable: false,
+      hide: isMobile,
       renderCell: (params) => (
         <Box
           sx={{
-            overflowX: "auto",
-            overflowY: "hidden",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
             whiteSpace: "nowrap",
-            "&::-webkit-scrollbar": {
-              height: "4px",
-            },
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor: theme.palette.grey[500],
-              borderRadius: "4px",
-            },
-            "&::-webkit-scrollbar-thumb:hover": {
-              backgroundColor: theme.palette.grey[700],
-            },
+            maxWidth: "100%",
           }}
+          title={params.value}
         >
           {params.value}
         </Box>
@@ -89,7 +111,8 @@ const Clientes = () => {
       field: "tipo_cliente",
       headerName: "Tipo Cliente",
       resizable: false,
-      flex: 0.2,
+      width: 120,
+      hide: isMobile,
       renderCell: (params) =>
         params.value === "empresa" ? (
           <span
@@ -117,12 +140,15 @@ const Clientes = () => {
       field: "activo",
       headerName: "Estado",
       resizable: false,
-      flex: 0.2,
+      flex: 0.1,
+      minWidth: 70,
       renderCell: (params) => (
         <Box display="flex" alignItems="center" gap={1}>
           <Box
             sx={{
               borderRadius: "50%",
+              width: 10,
+              height: 10,
               backgroundColor: params.value
                 ? theme.palette.success.main
                 : theme.palette.error.main,
@@ -137,26 +163,34 @@ const Clientes = () => {
               fontSize: "0.8rem",
             }}
           >
-            {params.value ? "Activo" : "Inactivo"}
+            {isMobile
+              ? params.value
+                ? "✔"
+                : "✖"
+              : params.value
+              ? "Activo"
+              : "Inactivo"}
           </Typography>
         </Box>
       ),
     },
     {
       field: "acciones",
-      headerName: "Acciones",
-      flex: 0.3,
+      headerName: "",
+      width: isMobile ? 80 : 120,
       sortable: false,
       renderCell: (params) => (
         <Box display="flex" gap={1}>
           <IconButton
             color="info"
+            size={isMobile ? "small" : "medium"}
             onClick={() => navigate(`/clientes/ver/${params.row.id_cliente}`)}
           >
             <VisibilityOutlinedIcon />
           </IconButton>
           <IconButton
             color="primary"
+            size={isMobile ? "small" : "medium"}
             onClick={() =>
               navigate(`/clientes/editar/${params.row.id_cliente}`)
             }
@@ -204,12 +238,20 @@ const Clientes = () => {
   return (
     <Box
       sx={{
-        m: "1.5rem 2.5rem",
+        mt: "1.5rem",
+        mb: "1.5rem",
+        p: 2,
+        width: "100%",
+        boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
+        maxWidth: "100vw",
         gap: "1.5rem",
-        height: "100vh",
+        minWidth: 0,
+        overflow: "hidden",
       }}
+      minWidth={0}
+      ref={gridContainerRef}
     >
       <Header title="Clientes" subtitle="Gestión de clientes" />
       <Box
@@ -218,46 +260,128 @@ const Clientes = () => {
           justifyContent: "space-between",
           alignItems: "center",
           gap: 2,
+          width: "100%",
         }}
       >
-        <Button
-          variant="contained"
-          color="error"
-          startIcon={<DeleteOutlineIcon />}
-          onClick={() => setOpenAlert(true)}
-          disabled={selectedRows.length === 0 || isDeleting}
-          sx={{
-            textTransform: "none",
-            fontWeight: "bold",
-            fontSize: "1rem",
-            padding: "0.5rem 1.5rem",
-            borderRadius: "8px",
-          }}
-        >
-          {isDeleting ? "Eliminando..." : "Eliminar Seleccionados"}
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => navigate("/clientes/crear")}
-          sx={{
-            textTransform: "none",
-            fontWeight: "bold",
-            fontSize: "1rem",
-            padding: "0.5rem 1.5rem",
-          }}
-        >
-          Nuevo Cliente
-        </Button>
+        {isMobile ? (
+          <>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+              }}
+            >
+              {/* Botón Eliminar */}
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: "50%",
+                  background: `linear-gradient(145deg, ${theme.palette.error.light} 60%, ${theme.palette.error.main} 100%)`,
+                  boxShadow: `0 2px 12px 0 ${theme.palette.error.main}22, 0 1.5px 8px 0 #0001`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "0.16s all cubic-bezier(.4,0,.2,1)",
+                  cursor:
+                    selectedRows.length === 0 || isDeleting
+                      ? "not-allowed"
+                      : "pointer",
+                  opacity: selectedRows.length === 0 || isDeleting ? 0.6 : 1,
+                  "&:hover": {
+                    background: `linear-gradient(120deg, ${theme.palette.error.main} 70%, ${theme.palette.error.dark} 100%)`,
+                    transform: "scale(1.08)",
+                    boxShadow: `0 4px 24px 0 ${theme.palette.error.dark}33`,
+                  },
+                  userSelect: "none",
+                }}
+                onClick={() => {
+                  if (selectedRows.length > 0 && !isDeleting)
+                    setOpenAlert(true);
+                }}
+                title="Eliminar seleccionados"
+              >
+                <DeleteOutlineIcon sx={{ color: "#fff", fontSize: 28 }} />
+              </Box>
+              {/* Botón Nuevo */}
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: "50%",
+                  background: `linear-gradient(145deg, ${theme.palette.primary.light} 60%, ${theme.palette.primary.main} 100%)`,
+                  boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}22, 0 1.5px 8px 0 #0001`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "0.16s all cubic-bezier(.4,0,.2,1)",
+                  cursor: "pointer",
+                  "&:hover": {
+                    background: `linear-gradient(120deg, ${theme.palette.primary.main} 70%, ${theme.palette.primary.dark} 100%)`,
+                    transform: "scale(1.08)",
+                    boxShadow: `0 4px 24px 0 ${theme.palette.primary.dark}33`,
+                  },
+                  userSelect: "none",
+                }}
+                onClick={() => navigate("/clientes/crear")}
+                title="Nuevo cliente"
+              >
+                <AddCircleOutlineIcon sx={{ color: "#fff", fontSize: 28 }} />
+              </Box>
+            </Box>
+          </>
+        ) : (
+          <>
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<DeleteOutlineIcon />}
+              onClick={() => setOpenAlert(true)}
+              disabled={selectedRows.length === 0 || isDeleting}
+              sx={{
+                textTransform: "none",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                padding: "0.5rem 1.5rem",
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px 0 #b71c1c22",
+              }}
+            >
+              {isDeleting ? "Eliminando..." : "Eliminar Seleccionados"}
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddCircleOutlineIcon />}
+              onClick={() => navigate("/clientes/crear")}
+              sx={{
+                textTransform: "none",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                padding: "0.5rem 1.5rem",
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px 0 #1976d222",
+              }}
+            >
+              Nuevo Cliente
+            </Button>
+          </>
+        )}
       </Box>
       <Box
         sx={{
-          flexGrow: 1,
+          width: "100%",
+          flex: 1,
           overflow: "hidden",
           boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+          maxWidth: "100%",
         }}
       >
         <DataGrid
+          apiRef={apiRef}
+          disableExtendRowFullWidth={false}
+          autoHeight={false}
           rows={rows}
           columns={columns}
           paginationMode="server"
@@ -282,6 +406,9 @@ const Clientes = () => {
           }}
           sx={{
             height: "100%",
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
             "& .MuiDataGrid-root": {
               border: "none",
               backgroundColor: theme.palette.background.paper,
@@ -302,7 +429,6 @@ const Clientes = () => {
             "& .MuiDataGrid-cell": {
               borderBottom: "1px solid",
               borderColor: theme.palette.grey[300],
-              display: "flex",
               "&:not(:last-child)": {
                 borderRight: "1px solid #d1d9e6",
               },
@@ -318,6 +444,8 @@ const Clientes = () => {
               borderTop: `1px solid ${theme.palette.divider}`,
             },
           }}
+          disableColumnResize={true}
+          disableColumnMenu={true}
         />
       </Box>
       <AlertDialog

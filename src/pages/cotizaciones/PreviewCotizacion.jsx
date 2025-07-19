@@ -152,7 +152,7 @@ const PreviewCotizacion = () => {
 
   return (
     <Box maxWidth="lg" mx="auto" py={6}>
-      <BackButton to="/cotizaciones" label="Volver a Cotizaciones" />
+      <BackButton to="/admin/cotizaciones" label="Volver a Cotizaciones" />
       <Card elevation={3} sx={{ borderRadius: 3 }}>
         <CardContent sx={{ p: 5 }}>
           <EncabezadoCotizacion id={cotizacion.id_cotizacion} />
