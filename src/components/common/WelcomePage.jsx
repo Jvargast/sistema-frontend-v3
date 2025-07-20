@@ -1,10 +1,20 @@
-import { Box, Typography, Button, Stack } from "@mui/material";
-import { HomeOutlined, TouchApp, ArrowForward } from "@mui/icons-material";
+import {
+  Box,
+  Typography,
+  Button,
+  Stack,
+/*   Modal,
+  Card,
+  CardContent, */
+} from "@mui/material";
+import { HomeOutlined, /* TouchApp, */ ArrowForward } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { openTab } from "../../store/reducers/tabSlice";
 import { getInitialRoute } from "../../utils/navigationUtils";
 import { useNavigate } from "react-router-dom";
+/* import { useState } from "react"; */
+/* import * as MuiIcons from "@mui/icons-material"; */
 
 const tabMap = {
   "/dashboard": {
@@ -28,6 +38,7 @@ const tabMap = {
     icon: "ProductionQuantityLimitsOutlined",
   },
 };
+/* const modulesList = Object.entries(tabMap); */
 
 const WelcomePage = () => {
   const dispatch = useDispatch();
@@ -36,6 +47,8 @@ const WelcomePage = () => {
 
   const initialRoute = getInitialRoute(rol, permisos);
   const tabInfo = tabMap[initialRoute] || tabMap["/dashboard"];
+
+/*   const [openModal, setOpenModal] = useState(false); */
 
   const handleGoToDashboard = () => {
     dispatch(
@@ -46,7 +59,7 @@ const WelcomePage = () => {
         path: tabInfo.key,
       })
     );
-    navigate(initialRoute); 
+    navigate(initialRoute);
   };
 
   return (
@@ -85,16 +98,95 @@ const WelcomePage = () => {
         >
           Ir a {tabInfo.label}
         </Button>
-        <Button
+{/*         <Button
           variant="outlined"
           startIcon={<TouchApp />}
-          component={motion.button}
           whileHover={{ scale: 1.08, boxShadow: "0 0 24px 0 #90caf9" }}
           whileTap={{ scale: 0.98 }}
+          onClick={() => setOpenModal(true)}
         >
           Explorar módulos
-        </Button>
+        </Button> */}
       </Stack>
+
+     {/*  <Modal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backdropFilter: "blur(1.5px)",
+          backgroundColor: "rgba(30,30,40,0.18)",
+        }}
+      >
+        <Box
+          sx={{
+            bgcolor: "background.paper",
+            p: { xs: 2.5, sm: 4 },
+            borderRadius: 4,
+            boxShadow:
+              "0 8px 36px 0 rgba(27,41,75,.17), 0 1.5px 6px 0 rgba(0,0,0,0.10)",
+            minWidth: 300,
+            maxWidth: "92vw",
+            width: 390,
+            outline: "none",
+          }}
+        >
+          <Typography variant="h5" mb={2} fontWeight="bold">
+            Selecciona un módulo
+          </Typography>
+          <Stack spacing={2}>
+            {modulesList.map(([path, info]) => {
+              const Icon = MuiIcons[info.icon];
+              return (
+                <Card
+                  key={path}
+                  onClick={() => {
+                    dispatch(
+                      openTab({
+                        key: info.key,
+                        label: info.label,
+                        icon: info.icon,
+                        path: info.key,
+                      })
+                    );
+                    navigate(path);
+                    setOpenModal(false);
+                  }}
+                  sx={{
+                    cursor: "pointer",
+                    borderRadius: 2.5,
+                    boxShadow: "0 1.5px 8px 0 rgba(27,41,75,.06)",
+                    transition: "box-shadow 0.11s, transform 0.11s",
+                    "&:hover": {
+                      boxShadow: "0 6px 18px 0 #2196f350",
+                      transform: "translateY(-2px) scale(1.015)",
+                      background: "rgba(33,150,243,0.05)",
+                    },
+                    "&:active": {
+                      transform: "scale(0.98)",
+                    },
+                  }}
+                >
+                  <CardContent
+                    sx={{ display: "flex", alignItems: "center", py: 1.3 }}
+                  >
+                    {Icon && (
+                      <Icon
+                        sx={{ mr: 2, color: "primary.main", fontSize: 26 }}
+                      />
+                    )}
+                    <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                      {info.label}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </Stack>
+        </Box>
+      </Modal> */}
     </Box>
   );
 };
