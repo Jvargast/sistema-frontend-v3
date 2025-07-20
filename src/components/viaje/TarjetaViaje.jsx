@@ -1,4 +1,6 @@
 import {
+  Box,
+  Button,
   Card,
   CardContent,
   Chip,
@@ -10,6 +12,8 @@ import {
 import PropTypes from "prop-types";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useNavigate } from "react-router";
+import { useIsMobile } from "../../utils/useIsMobile";
 
 const TarjetaViaje = ({ viaje }) => {
   const fechaInicio = viaje.fecha_inicio ? new Date(viaje.fecha_inicio) : null;
@@ -24,6 +28,9 @@ const TarjetaViaje = ({ viaje }) => {
     fechaFin && !isNaN(fechaFin)
       ? format(fechaFin, "PPPp", { locale: es })
       : "No finalizado";
+
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   return (
     <Grid item xs={12} md={6} lg={4}>
@@ -91,6 +98,30 @@ const TarjetaViaje = ({ viaje }) => {
               Nota: {viaje.notas}
             </Typography>
           )}
+
+          <Box sx={{ mt: 2, flexGrow: 1, display: "flex", alignItems: "end" }}>
+            <Button
+              variant="contained"
+              fullWidth={isMobile}
+              sx={{
+                fontWeight: 600,
+                borderRadius: 2,
+                boxShadow: "0 2px 8px rgba(81,74,157,0.07)",
+                background: "linear-gradient(90deg, #1976d2 0%, #00c6fb 100%)",
+                color: "#fff",
+                py: 1.2,
+                fontSize: "1rem",
+                transition: "background 0.3s",
+                "&:hover": {
+                  background:
+                    "linear-gradient(90deg, #115293 0%, #00a0d7 100%)",
+                },
+              }}
+              onClick={() => navigate(`/viajes/ver/${viaje.id_agenda_viaje}`)}
+            >
+              Ver Viaje
+            </Button>
+          </Box>
         </CardContent>
       </Card>
     </Grid>

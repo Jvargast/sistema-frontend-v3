@@ -25,6 +25,7 @@ const AdminHistorialViajes = () => {
   const [filtroChofer, setFiltroChofer] = useState("");
   const [filtroFecha, setFiltroFecha] = useState("");
 
+
   const viajesFiltrados = useMemo(() => {
     if (!viajes?.length) return [];
 
@@ -49,13 +50,10 @@ const AdminHistorialViajes = () => {
 
   return (
     <Box px={2} py={4}>
-      <BackButton to="/admin" label="Volver al menú"/>
+      <BackButton to="/admin" label="Volver al menú" />
       <Header title="Listado de Viajes" subtitle="Gestión de Viajes Choferes" />
 
-      <Paper
-        elevation={2}
-        sx={{ p: 3, borderRadius: 3, mb: 4 }}
-      >
+      <Paper elevation={2} sx={{ p: 3, borderRadius: 3, mb: 4 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
             <FormControl fullWidth>
