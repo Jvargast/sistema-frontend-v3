@@ -180,6 +180,7 @@ const VerViaje = () => {
             </Typography>
           ) : (
             <Stack spacing={2}>
+              {/* eslint-disable-next-line*/}
               {viaje.destinos.map((destino, idx) => {
                 const entrega = entregasPorPedido[destino.id_pedido];
                 const entregado = Boolean(entrega);
