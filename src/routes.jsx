@@ -63,6 +63,7 @@ import VerProduccion from "./pages/produccion/VerProduccion";
 import VerInsumo from "./pages/insumos/VerInsumo";
 import InspeccionRetornables from "./pages/inventario_camion";
 import WelcomePage from "./components/common/WelcomePage";
+import VerViaje from "./pages/viajes/VerViaje";
 
 // Configuración de rutas
 const router = createHashRouter([
@@ -344,10 +345,8 @@ const router = createHashRouter([
             path: "viajes",
             element: <RoleBasedRoute requiredPermission="vistas.viajes.ver" />,
             children: [
-              {
-                path: "",
-                element: <PanelViajeChofer />,
-              },
+              { path: "", element: <PanelViajeChofer /> },
+              { path: "ver/:id", element: <VerViaje /> },
             ],
           },
           // misventas
@@ -517,7 +516,10 @@ const router = createHashRouter([
                 element: (
                   <RoleBasedRoute requiredPermission="vistas.admin.ver" />
                 ),
-                children: [{ path: "", element: <AdminHistorialViajes /> }],
+                children: [
+                  { path: "", element: <AdminHistorialViajes /> },
+                  { path: "ver/:id", element: <VerViaje /> },
+                ],
               },
               {
                 path: "agendas",

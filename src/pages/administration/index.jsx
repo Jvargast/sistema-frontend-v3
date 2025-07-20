@@ -96,7 +96,7 @@ const navItems = [
   {
     text: "Agendas",
     icon: <CalendarMonthOutlinedIcon className="text-fuchsia-700" />,
-    description: "Gestión de viajes",
+    description: "Gestión de agendas",
     path: "/admin/agendas",
   },
   {

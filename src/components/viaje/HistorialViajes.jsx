@@ -28,7 +28,7 @@ const HistorialViajes = ({ usuario }) => {
   }
 
   return (
-    <Box mt={4}>
+    <Box mt={4} pb={3}>
       <Header title="Historial de Viajes" subtitle="Viajes realizados" />
 
       <Grid container spacing={3} mb={1}>

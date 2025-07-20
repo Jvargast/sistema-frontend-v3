@@ -105,7 +105,8 @@ const ListarMisVentas = () => {
 
   return (
     <DataTable
-      title="🧾 Mis Ventas"
+      title="Mis Ventas"
+      subtitle="Gestión Ventas Chofer"
       columns={columns}
       rows={ventas}
       totalItems={totalItems}

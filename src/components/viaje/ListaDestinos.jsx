@@ -59,13 +59,7 @@ const ListaDestinos = ({
 
   /*   }, [origen, JSON.stringify(destinosPendientes)]); */
 
-  const origenPendiente =
-    destinosEntregados.length > 0
-      ? {
-          lat: destinosEntregados[destinosEntregados.length - 1].lat,
-          lng: destinosEntregados[destinosEntregados.length - 1].lng,
-        }
-      : origenInicial;
+  const origenPendiente = origen;
   const rutaOptimizada = useMemo(() => {
     if (!origenPendiente) return [];
     return [
@@ -90,7 +84,6 @@ const ListaDestinos = ({
         destinos={destinosPendientes}
         ruta={rutaOptimizada}
         recorridoReal={recorridoReal}
-        origen={origen}
         origenInicial={origenInicial}
       />
 
@@ -276,7 +269,7 @@ ListaDestinos.propTypes = {
   origen: PropTypes.shape({
     lat: PropTypes.number.isRequired,
     lng: PropTypes.number.isRequired,
-  }).isRequired,
+  }),
   origenInicial: PropTypes.shape({
     lat: PropTypes.number,
     lng: PropTypes.number,

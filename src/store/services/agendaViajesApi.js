@@ -13,7 +13,11 @@ export const agendaViajesApi = createApi({
 
     // Finalizar un viaje
     finalizarViaje: builder.mutation({
-      query: ({ id_agenda_viaje, descargarAuto = true, descargarDisponibles = false }) => ({
+      query: ({
+        id_agenda_viaje,
+        descargarAuto = true,
+        descargarDisponibles = false,
+      }) => ({
         url: `/agenda-viajes/${id_agenda_viaje}/finalizar`,
         method: "POST",
         body: { descargarAuto, descargarDisponibles },
@@ -30,6 +34,17 @@ export const agendaViajesApi = createApi({
       query: () => `/agenda-viajes/historial`,
       providesTags: ["AgendaViajes"],
     }),
+    getViajeById: builder.query({
+      query: (id) => `/agenda-viajes/${id}`,
+      providesTags: (result, error, id) => [{ type: "AgendaViajes", id }],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Error al obtener la agenda viaje:", error);
+        }
+      },
+    }),
   }),
 });
 
@@ -37,5 +52,6 @@ export const {
   useGetAgendaViajeChoferQuery,
   useFinalizarViajeMutation,
   useGetHistorialViajesQuery,
-  useGetAllViajesQuery
+  useGetAllViajesQuery,
+  useGetViajeByIdQuery
 } = agendaViajesApi;

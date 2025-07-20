@@ -7,9 +7,6 @@ import {
   Box,
   IconButton,
   Dialog,
-  CircularProgress,
-  Alert,
-  Button,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { Container } from "@mui/material";
@@ -42,7 +39,6 @@ import { useErrorChecker } from "../../utils/useErrorChecker";
 import PermissionMessage from "../../components/common/PermissionMessage";
 import InventarioCamion from "../../components/inventario/InventarioCamion";
 import DialogFinalizarViaje from "../../components/viaje/DialogFinalizarViaje";
-import DialogSeleccionarOrigen from "../../components/viaje/DialogSeleccionarOrigen";
 
 const ViajeChofer = ({ viaje }) => {
   const dispatch = useDispatch();
@@ -56,44 +52,15 @@ const ViajeChofer = ({ viaje }) => {
   const [descargarAuto, setDescargarAuto] = useState(true);
   const [descargarDisponibles, setDescargarDisponibles] = useState(false);
 
-  const DEFAULT_ORIGEN = { lat: -27.0675, lng: -70.8189 };
-  const [origen, setOrigen] = useState(DEFAULT_ORIGEN);
-  const [loadingOrigen, setLoadingOrigen] = useState(true);
-  const [ubicacionError, setUbicacionError] = useState(false);
-  const [openOrigenModal, setOpenOrigenModal] = useState(false);
-
   const [origenInicial, setOrigenInicial] = useState(null);
-  const origenInicialSetRef = useRef(false);
+  const [origenActual, setOrigenActual] = useState(null);
 
   useEffect(() => {
-    setLoadingOrigen(true);
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setOrigen({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-          setLoadingOrigen(false);
-          setUbicacionError(false);
-        },
-        () => {
-          setOrigen(DEFAULT_ORIGEN);
-          setLoadingOrigen(false);
-          setUbicacionError(true);
-        }
-      );
-    } else {
-      setOrigen(DEFAULT_ORIGEN);
-      setLoadingOrigen(false);
-      setUbicacionError(true);
+    if (viaje?.origen_inicial) {
+      setOrigenInicial(viaje.origen_inicial);
+      setOrigenActual(viaje.origen_inicial);
     }
-    // eslint-disable-next-line
-  }, []);
-
-  useEffect(() => {
-    if (origen && !origenInicialSetRef.current) {
-      setOrigenInicial(origen);
-      origenInicialSetRef.current = true;
-    }
-  }, [origen]);
+  }, [viaje]);
 
   const handleAbrirDialogoFinalizar = () => {
     setConfirmDialogOpen(true);
@@ -273,7 +240,7 @@ const ViajeChofer = ({ viaje }) => {
       (d) => d.id_pedido === idPedido
     );
     if (destinoEntregado) {
-      setOrigen({ lat: destinoEntregado.lat, lng: destinoEntregado.lng });
+      setOrigenActual({ lat: destinoEntregado.lat, lng: destinoEntregado.lng });
     }
     refetchInventario();
     emitRefetchAgendaViajes();
@@ -333,34 +300,10 @@ const ViajeChofer = ({ viaje }) => {
         totalDestinos={viaje.destinos.length}
         entregasCompletadas={entregasCompletadas}
       />
-
-      {loadingOrigen ? (
-        <Box textAlign="center" mt={2}>
-          <CircularProgress size={28} />
-          <Typography variant="body2" color="text.secondary">
-            Obteniendo tu ubicación actual...
-          </Typography>
-        </Box>
-      ) : ubicacionError ? (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          No pudimos obtener tu ubicación actual. Se usará un punto de partida
-          por defecto.
-        </Alert>
-      ) : null}
-      {entregasCompletadas === 0 && (
-        <Button
-          variant="outlined"
-          color="primary"
-          sx={{ mb: 2 }}
-          onClick={() => setOpenOrigenModal(true)}
-        >
-          Cambiar punto de origen
-        </Button>
-      )}
       <ListaDestinos
         destinos={viaje.destinos}
         entregas={entregas}
-        origen={origen}
+        origen={origenActual} 
         origenInicial={origenInicial}
         onOpenEntrega={handleOpenEntrega}
         onVerDetallePedido={handleVerDetallePedido}
@@ -507,12 +450,6 @@ const ViajeChofer = ({ viaje }) => {
         setDescargarAuto={setDescargarAuto}
         descargarDisponibles={descargarDisponibles}
         setDescargarDisponibles={setDescargarDisponibles}
-      />
-      <DialogSeleccionarOrigen
-        open={openOrigenModal}
-        onClose={() => setOpenOrigenModal(false)}
-        origen={origen}
-        setOrigen={setOrigen}
       />
     </Container>
   );

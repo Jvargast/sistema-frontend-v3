@@ -16,21 +16,31 @@ body,
   overflow: auto;
 }
 
+/* ----- Scrollbar global custom ----- */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
+  height: 8px;
+  background: transparent;
 }
 
-/* Track */
+::-webkit-scrollbar-thumb {
+  background: #ccd6dd;
+  border-radius: 8px;
+  border: 2px solid #f7fafc; /* Para un borde sutil y limpio */
+  min-height: 40px;
+  transition: background 0.2s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8cb1db;
+}
+
 ::-webkit-scrollbar-track {
   background: transparent;
+  border-radius: 8px;
 }
 
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #5a8dd5;
-}
-
-/* Handle on Hover */
-::-webkit-scrollbar-track:hover {
-  background: transparent;
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #ccd6dd #f7fafc;
 }
