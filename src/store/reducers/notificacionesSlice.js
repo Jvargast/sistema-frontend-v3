@@ -4,7 +4,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const notificacionesSlice = createSlice({
   name: "notificaciones",
   initialState: {
-    items: [], 
+    items: [],
     // Podrías guardar { id_notificacion, mensaje, fecha, leida, tipo, etc. }
   },
   reducers: {
@@ -21,6 +21,12 @@ const notificacionesSlice = createSlice({
     clearNotificaciones: (state) => {
       state.items = [];
     },
+    removeNotificacionById: (state, action) => {
+      const id = action.payload;
+      state.items = state.items.filter(
+        (notif) => notif.id_notificacion !== id && notif.id !== id
+      );
+    },
   },
 });
 
@@ -28,6 +34,7 @@ export const {
   addNotificacion,
   markAllAsRead,
   clearNotificaciones,
+  removeNotificacionById,
 } = notificacionesSlice.actions;
 
 export default notificacionesSlice.reducer;

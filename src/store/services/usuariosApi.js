@@ -44,6 +44,11 @@ export const usuariosApi = createApi({
       query: () => `/usuarios/vendedores`,
       providesTags: ["User"],
     }),
+    // Obtener chofers
+    getAllUsuariosConCaja: builder.query({
+      query: () => `/usuarios/usuarios-con-caja`,
+      providesTags: ["User"],
+    }),
     // Crear un usuario
     createNewUser: builder.mutation({
       query: (newUser) => ({
@@ -157,6 +162,7 @@ export const {
   useDeleteUserMutation,
   useGetAllChoferesQuery,
   useGetAllVendedoresQuery,
+  useGetAllUsuariosConCajaQuery,
   useUpdateMyProfileMutation,
   useGetOwnProfileQuery,
   useChangePasswordMutation,

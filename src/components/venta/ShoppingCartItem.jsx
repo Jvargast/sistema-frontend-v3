@@ -25,19 +25,21 @@ const ShoppingCartItem = ({
       sx={{
         p: 2,
         mb: 2,
-        borderRadius: 2,
-        backgroundColor: "#FAFAFA",
-        border: "1px solid #E0E0E0",
-        boxShadow: "none",
+        borderRadius: 3,
+        border: `1px solid`,
+        borderColor: (theme) => theme.palette.divider,
+        boxShadow: "0 2px 8px rgba(36,198,220,0.03)",
         display: "flex",
         flexDirection: "column",
         gap: 1.5,
+        backgroundColor: (theme) => theme.palette.background.paper,
+        transition: "background .2s,border .2s,box-shadow .2s",
       }}
     >
       <Typography
         variant="subtitle1"
         fontWeight="bold"
-        sx={{ color: "#2E2E2E" }}
+        sx={{ color: (theme) => theme.palette.text.primary }}
       >
         {item.nombre}
       </Typography>
@@ -51,9 +53,14 @@ const ShoppingCartItem = ({
         <IconButton
           onClick={() => onRemove(item.id_producto, item.tipo)}
           sx={{
-            backgroundColor: "#fce4ec",
-            color: "#c62828",
-            "&:hover": { backgroundColor: "#f8bbd0" },
+            backgroundColor: (theme) =>
+              theme.palette.mode === "dark" ? "#442227" : "#fce4ec",
+            color: (theme) =>
+              theme.palette.mode === "dark" ? "#ff6f60" : "#c62828",
+            "&:hover": {
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark" ? "#6e3037" : "#f8bbd0",
+            },
             width: 36,
             height: 36,
           }}
@@ -67,8 +74,12 @@ const ShoppingCartItem = ({
           }
           disabled={item.cantidad <= 1}
           sx={{
-            backgroundColor: "#f5f5f5",
-            "&:hover": { backgroundColor: "#e0e0e0" },
+            backgroundColor: (theme) =>
+              theme.palette.mode === "dark" ? "#232323" : "#f5f5f5",
+            "&:hover": {
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark" ? "#353535" : "#e0e0e0",
+            },
             width: 36,
             height: 36,
           }}
@@ -85,9 +96,14 @@ const ShoppingCartItem = ({
             onQuantityChange(item.id_producto, item.tipo, item.cantidad + 1)
           }
           sx={{
-            backgroundColor: "#C8E6C9",
-            color: "#2E7D32",
-            "&:hover": { backgroundColor: "#A5D6A7" },
+            backgroundColor: (theme) =>
+              theme.palette.mode === "dark" ? "#164e27" : "#C8E6C9",
+            color: (theme) =>
+              theme.palette.mode === "dark" ? "#5ce692" : "#2E7D32",
+            "&:hover": {
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark" ? "#1b5e20" : "#A5D6A7",
+            },
             width: 36,
             height: 36,
           }}
@@ -137,7 +153,11 @@ const ShoppingCartItem = ({
           />
         </Typography>
 
-        <Typography variant="h6" fontWeight="bold" sx={{ color: "#000" }}>
+        <Typography
+          variant="h6"
+          fontWeight="bold"
+          sx={{ color: (theme) => theme.palette.text.primary }}
+        >
           ${total.toLocaleString("es-CL")}
         </Typography>
       </Stack>

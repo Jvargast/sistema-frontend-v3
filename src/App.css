@@ -5,18 +5,28 @@
 @import "tailwindcss/utilities";
 
 html,
-body,
-#root,
-.app {
+body {
   height: 100%;
   width: 100%;
   font-family: "Inter", sans-serif;
   margin: 0;
   padding: 0;
-  overflow: auto;
+  overflow: hidden;
 }
 
-/* ----- Scrollbar global custom ----- */
+#root,
+.app {
+  height: 100%;
+  width: 100%;
+  padding-bottom: var(
+    --safe-area-inset-bottom,
+    env(safe-area-inset-bottom, 20px)
+  );
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -26,7 +36,7 @@ body,
 ::-webkit-scrollbar-thumb {
   background: #ccd6dd;
   border-radius: 8px;
-  border: 2px solid #f7fafc; /* Para un borde sutil y limpio */
+  border: 2px solid #f7fafc;
   min-height: 40px;
   transition: background 0.2s;
 }
@@ -39,8 +49,59 @@ body,
   border-radius: 8px;
 }
 
-/* Firefox */
 * {
   scrollbar-width: thin;
   scrollbar-color: #ccd6dd #f7fafc;
+}
+
+.gm-style-iw {
+  padding: 2rem !important;
+  overflow: visible !important;
+  border-radius: 14px !important;
+  background: rgba(29, 27, 162, 0.97) !important;
+  box-shadow: 0 6px 32px rgba(32, 40, 60, 0.16) !important;
+}
+
+.gm-style-iw-c {
+  padding: 0 !important;
+  border-radius: 14px !important;
+}
+
+.gm-ui-hover-effect {
+  display: none !important;
+}
+
+.gm-style-iw-d {
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.gm-style-iw-chr {
+  display: none;
+}
+
+.gm-style .gm-style-iw-tc::after {
+  background: #ce3838;
+}
+
+.gm-style .gm-style-iw-tc::after,
+.gm-style-iw-tc::after {
+  background: #ce3838 !important;
+}
+.gm-ui-hover-effect {
+  display: none !important;
+}
+.gm-style-iw-c,
+.gm-style-iw,
+.gm-style-iw-d {
+  border-radius: 14px !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  background: #fff !important;
+}
+
+.highlight {
+  background-color: #fff59d;
+  font-weight: bold;
 }

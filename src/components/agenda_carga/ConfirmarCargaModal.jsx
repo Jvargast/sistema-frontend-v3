@@ -17,10 +17,9 @@ import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 import { useConfirmarCargaCamionMutation } from "../../store/services/agendaCargaApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
-import { MapContainer } from "react-leaflet";
-import OrigenSelectorMap from "../viaje/OrigenSelectorMap";
 import reverseGeocode from "../../utils/reverseGeocode";
 import AutocompleteDireccion from "../pedido/AutocompleteDireccion";
+import GoogleOrigenSelector from "../viaje/GoogleOrigenSelector";
 
 const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
   const dispatch = useDispatch();
@@ -28,7 +27,7 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
   const [productosCargados, setProductosCargados] = useState({});
   const [notasChofer, setNotasChofer] = useState("");
   const DEFAULT_ORIGEN = { lat: -27.0675, lng: -70.8189 };
-  const [origen, setOrigen] = useState(null);
+  const [origen, setOrigen] = useState(DEFAULT_ORIGEN);
   const [direccion, setDireccion] = useState("");
 
   const productosAgrupados = useMemo(() => {
@@ -107,24 +106,6 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
       reverseGeocode(origen).then(setDireccion);
     }
   }, [origen]);
-
-  useEffect(() => {
-    if (open && !origen) {
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) =>
-            setOrigen({
-              lat: pos.coords.latitude,
-              lng: pos.coords.longitude,
-            }),
-          () => setOrigen(DEFAULT_ORIGEN)
-        );
-      } else {
-        setOrigen(DEFAULT_ORIGEN);
-      }
-    }
-    // eslint-disable-next-line
-  }, [open]);
 
   const handleConfirmar = async () => {
     if (!origen?.lat || !origen?.lng) {
@@ -256,16 +237,16 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
               setCoords={setOrigen}
             />
             <Box
-              sx={{ height: 250, borderRadius: 2, overflow: "hidden", mb: 2 }}
+              sx={{
+                height: 250,
+                borderRadius: 2,
+                overflow: "hidden",
+                mb: 2,
+                position: "relative",
+              }}
             >
               {origen ? (
-                <MapContainer
-                  center={origen}
-                  zoom={14}
-                  style={{ height: "100%", width: "100%" }}
-                >
-                  <OrigenSelectorMap origen={origen} setOrigen={setOrigen} />
-                </MapContainer>
+                <GoogleOrigenSelector origen={origen} setOrigen={setOrigen} />
               ) : (
                 <Box
                   sx={{

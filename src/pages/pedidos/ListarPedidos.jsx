@@ -1,12 +1,19 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { IconButton, Chip, Tooltip } from "@mui/material";
-import { Visibility, Edit, Cancel, Delete, Undo } from "@mui/icons-material";
+import {
+  IconButton,
+  Chip,
+  Tooltip,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
+import { Visibility, Undo, MoreVert } from "@mui/icons-material";
 import {
   useGetAllPedidosQuery,
   useDeletePedidoMutation,
-  useRejectPedidoMutation,
-  useRevertPedidoMutation,
+  useRevertirEstadoPedidoMutation,
 } from "../../store/services/pedidosApi";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
@@ -25,37 +32,61 @@ const ListarPedidos = () => {
     limit: rowsPerPage,
   });
 
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [rowMenuTarget, setRowMenuTarget] = useState(null);
+  const [isReverting, setIsReverting] = useState(false);
+
   const [deletePedido] = useDeletePedidoMutation();
-  const [rejectPedido] = useRejectPedidoMutation();
-  const [revertPedido] = useRevertPedidoMutation();
+  const [revertirEstadoPedido] = useRevertirEstadoPedidoMutation();
   const dispatch = useDispatch();
   const [openAlert, setOpenAlert] = useState(false);
   const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
 
-  const handleRejectPedido = async (pedido) => {
-    try {
-      await rejectPedido(pedido.id_pedido).unwrap();
-      refetch();
-      dispatch(
-        showNotification({
-          message: "Pedido rechazado correctamente.",
-          severity: "success",
-        })
-      );
-    } catch (error) {
-      console.error("Error al rechazar pedido:", error);
-      dispatch(
-        showNotification({
-          message: `${error?.data?.message}`,
-          severity: "error",
-        })
-      );
-    }
+  const estados = [
+    "Pendiente",
+    "Pendiente de Confirmación",
+    "Confirmado",
+    "En Preparación",
+    "En Entrega",
+    "Completada",
+  ];
+
+  const ESTADOS_MAP = {
+    Pendiente: 1,
+    "Pendiente de Confirmación": 4,
+    Confirmado: 5,
+    "En Preparación": 7,
+    "En Entrega": 8,
+    Completada: 9,
+    Cancelada: 10,
+    Reembolsada: 11,
+    "Completada y Entregada": 13,
   };
 
-  const handleRevertPedido = async (pedido) => {
+  function getEstadosAnteriores(estadoActual) {
+    const idx = estados.indexOf(estadoActual);
+    return estados.slice(0, idx).map((nombre) => ({
+      nombre,
+      id: ESTADOS_MAP[nombre],
+    }));
+  }
+
+  const handleOpenMenu = (event, row) => {
+    setAnchorEl(event.currentTarget);
+    setRowMenuTarget(row);
+  };
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+    setRowMenuTarget(null);
+  };
+
+  const handleRevertirEstado = async (row, id_estado_destino) => {
+    setIsReverting(true);
     try {
-      await revertPedido(pedido.id_pedido).unwrap();
+      await revertirEstadoPedido({
+        id_pedido: row.id_pedido,
+        id_estado_destino,
+      }).unwrap();
       refetch();
       dispatch(
         showNotification({
@@ -64,14 +95,17 @@ const ListarPedidos = () => {
         })
       );
     } catch (error) {
-      console.error("Error al revertir pedido:", error);
       dispatch(
         showNotification({
-          message: `Error al revertir: ${error?.data?.error}`,
+          message: `Error al revertir: ${
+            error?.data?.message || error.message
+          }`,
           severity: "error",
         })
       );
     }
+    setIsReverting(false);
+    handleCloseMenu();
   };
 
   const handleDeletePedidoConfirmado = async () => {
@@ -96,11 +130,6 @@ const ListarPedidos = () => {
     }
     setOpenAlert(false);
     setPedidoSeleccionado(null);
-  };
-
-  const handleConfirmDelete = (pedido) => {
-    setPedidoSeleccionado(pedido);
-    setOpenAlert(true);
   };
 
   const handleCloseAlert = () => {
@@ -181,8 +210,8 @@ const ListarPedidos = () => {
       label: "Acciones",
       render: (row) => {
         const estado = row.EstadoPedido?.nombre_estado;
-        const puedeEliminar = estado === "Rechazado";
-        const puedeRevertir = estado === "Rechazado";
+        const estadosDisponibles = getEstadosAnteriores(estado);
+
         return (
           <>
             <Tooltip title="Ver Detalle">
@@ -193,32 +222,36 @@ const ListarPedidos = () => {
                 <Visibility />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Editar">
-              <IconButton color="inherit">
-                <Edit />
+            <Tooltip title="Más acciones">
+              <IconButton onClick={(e) => handleOpenMenu(e, row)}>
+                <MoreVert />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Rechazar Pedido">
-              <IconButton
-                color="warning"
-                onClick={() => handleRejectPedido(row)}
+            {rowMenuTarget?.id_pedido === row.id_pedido && (
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleCloseMenu}
+                elevation={3}
+                sx={{ zIndex: 2000 }}
               >
-                <Cancel />
-              </IconButton>
-            </Tooltip>
-            {puedeRevertir && (
-              <Tooltip title="Revertir Pedido">
-                <IconButton color="info" onClick={() => handleRevertPedido(row)}>
-                  <Undo />
-                </IconButton>
-              </Tooltip>
-            )}
-            {puedeEliminar && (
-              <Tooltip title="Eliminar Pedido">
-                <IconButton color="error" onClick={() => handleConfirmDelete(row)}>
-                  <Delete />
-                </IconButton>
-              </Tooltip>
+                <MenuItem disabled>Revertir a estado...</MenuItem>
+                {estadosDisponibles.length === 0 && (
+                  <MenuItem disabled>No hay estados disponibles</MenuItem>
+                )}
+                {estadosDisponibles.map(({ nombre, id }) => (
+                  <MenuItem
+                    key={nombre}
+                    disabled={isReverting}
+                    onClick={() => handleRevertirEstado(row, id)}
+                  >
+                    <ListItemIcon>
+                      <Undo fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary={nombre} />
+                  </MenuItem>
+                ))}
+              </Menu>
             )}
           </>
         );

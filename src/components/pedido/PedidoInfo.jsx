@@ -11,6 +11,7 @@ import dayjs from "dayjs";
 import { formatCLP } from "../../utils/formatUtils";
 
 const InfoPedido = ({ pedido }) => {
+  console.log(pedido);
   const theme = useTheme();
   const estado = pedido.EstadoPedido?.nombre_estado || "Desconocido";
   const colorEstado =
@@ -46,12 +47,66 @@ const InfoPedido = ({ pedido }) => {
       <Divider sx={{ mb: 2 }} />
 
       <Box display="flex" flexDirection="column" gap={2}>
-        <Box display="flex" alignItems="center" gap={1.5}>
-          <Person sx={{ color: theme.palette.primary.main }} />
-          <Typography variant="body1">
-            <strong>Cliente:</strong> {pedido.Cliente?.nombre || "N/A"}
-          </Typography>
-        </Box>
+        {pedido.Cliente ? (
+          <Box
+            display="flex"
+            flexDirection="column"
+            gap={0.3}
+            sx={{ mb: 1, pl: 0 }}
+          >
+            <Box display="flex" alignItems="center" gap={1.5}>
+              <Person sx={{ color: theme.palette.primary.main }} />
+              <Typography variant="body1" fontWeight="bold" whiteSpace="nowrap">
+                Cliente:
+              </Typography>
+              <Typography
+                variant="body1"
+                fontWeight="normal"
+                sx={{ flexShrink: 1 }}
+              >
+                {pedido.Cliente.razon_social || pedido.Cliente.nombre || "N/A"}
+              </Typography>
+            </Box>
+
+            {pedido.Cliente.tipo_cliente && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ textTransform: "uppercase", ml: 5, mt: 0.2 }}
+              >
+                {pedido.Cliente.tipo_cliente}
+              </Typography>
+            )}
+
+            {pedido.Cliente.rut && (
+              <Typography variant="body2" color="text.secondary" sx={{ ml: 5 }}>
+                RUT: {pedido.Cliente.rut}
+              </Typography>
+            )}
+
+            {pedido.Cliente.direccion && (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ ml: 5, wordBreak: "break-word" }}
+              >
+                Dirección: {pedido.Cliente.direccion}
+              </Typography>
+            )}
+
+            {pedido.Cliente.email && (
+              <Typography variant="body2" color="text.secondary" sx={{ ml: 5 }}>
+                Email: {pedido.Cliente.email}
+              </Typography>
+            )}
+          </Box>
+        ) : (
+          <Box display="flex" alignItems="center" gap={1.5}>
+            <Person sx={{ color: theme.palette.primary.main }} />
+            <Typography variant="body1">Cliente: N/A</Typography>
+          </Box>
+        )}
+
         <Box display="flex" alignItems="center" gap={1.5}>
           <Event sx={{ color: theme.palette.info.main }} />
           <Typography variant="body1">

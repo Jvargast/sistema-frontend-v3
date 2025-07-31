@@ -6,11 +6,15 @@ import {
   ListItemIcon,
   Divider,
   Box,
+  IconButton,
 } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
+import ClearIcon from "@mui/icons-material/Clear";
+import { clearNotificaciones, removeNotificacionById } from "../../store/reducers/notificacionesSlice";
+import { useDispatch } from "react-redux";
 
 /**
- * 
+ *
  *
  * @param {HTMLElement} anchorEl - El elemento HTML que ancla el menú.
  * @param {boolean} open - Indica si el menú está abierto.
@@ -23,9 +27,10 @@ const NotificationsMenu = ({
   anchorEl,
   open,
   onClose,
-  notifications = [], 
+  notifications = [],
   onSelectNotification,
 }) => {
+  const dispatch = useDispatch();
   return (
     <Menu
       anchorEl={anchorEl}
@@ -55,7 +60,7 @@ const NotificationsMenu = ({
             <MenuItem
               onClick={() => {
                 if (onSelectNotification) onSelectNotification(notif);
-                onClose(); 
+                onClose();
               }}
               sx={{
                 display: "flex",
@@ -76,7 +81,13 @@ const NotificationsMenu = ({
               <Box display="flex" flexDirection="column" width="100%">
                 <Typography
                   variant="body2"
-                  sx={{ fontWeight: 500, color: "#333" }}
+                  sx={{
+                    fontWeight: 500,
+                    color: "#333",
+                    wordBreak: "break-word",
+                    whiteSpace: "normal",
+                    maxWidth: "230px",
+                  }}
                 >
                   {notif.mensaje}
                 </Typography>
@@ -89,10 +100,47 @@ const NotificationsMenu = ({
                   </Typography>
                 )}
               </Box>
+
+              <IconButton
+                size="small"
+                edge="end"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  dispatch(
+                    removeNotificacionById(notif.id_notificacion || notif.id)
+                  );
+                }}
+                sx={{
+                  ml: "auto",
+                  color: "#9e9e9e",
+                  "&:hover": {
+                    color: "#f44336",
+                  },
+                }}
+              >
+                <ClearIcon fontSize="small" />
+              </IconButton>
             </MenuItem>
             <Divider sx={{ margin: 0 }} />
           </Box>
         ))
+      )}
+      {notifications.length > 0 && (
+        <>
+          <MenuItem
+            onClick={() => {
+              dispatch(clearNotificaciones());
+              onClose();
+            }}
+            sx={{
+              justifyContent: "center",
+              color: "error.main",
+              fontWeight: "bold",
+            }}
+          >
+            Borrar todas
+          </MenuItem>
+        </>
       )}
     </Menu>
   );

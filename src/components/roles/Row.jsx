@@ -1,8 +1,16 @@
 import PropTypes from "prop-types";
 import { Box, Switch, Typography, Tooltip, IconButton } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
+import Highlighter from "react-highlight-words";
 
-const Row = ({ index, style, group, selectedPermisos, onTogglePermiso }) => {
+const Row = ({
+  index,
+  style,
+  group,
+  selectedPermisos,
+  onTogglePermiso,
+  searchTerm,
+}) => {
   const permiso = group[index];
 
   if (!permiso) return null;
@@ -40,14 +48,24 @@ const Row = ({ index, style, group, selectedPermisos, onTogglePermiso }) => {
               mb: 0.5,
             }}
           >
-            {permiso.nombre}
+            <Highlighter
+              highlightClassName="highlight"
+              searchWords={[searchTerm]}
+              textToHighlight={permiso.nombre}
+              autoEscape
+            />
           </Typography>
           <Typography
             variant="body2"
             color="text.secondary"
             sx={{ overflowWrap: "break-word", lineHeight: "1.2" }}
           >
-            {permiso.descripcion}
+            <Highlighter
+              highlightClassName="highlight"
+              searchWords={[searchTerm]}
+              textToHighlight={permiso.descripcion}
+              autoEscape
+            />
           </Typography>
         </Box>
 
@@ -94,6 +112,7 @@ Row.propTypes = {
   group: PropTypes.array.isRequired,
   selectedPermisos: PropTypes.arrayOf(PropTypes.number).isRequired,
   onTogglePermiso: PropTypes.func.isRequired,
+  searchTerm: PropTypes.string,
 };
 
 export default Row;

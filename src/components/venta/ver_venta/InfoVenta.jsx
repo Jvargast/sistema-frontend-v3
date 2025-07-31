@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import PropTypes from "prop-types";
 
 const InfoVenta = ({ venta }) => {
+  console.log(venta);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -64,6 +65,59 @@ const InfoVenta = ({ venta }) => {
       </Typography>
 
       <Divider sx={{ mb: 2 }} />
+
+      {venta.cliente ? (
+        <Box
+          mb={3}
+          p={2}
+          sx={{
+            border: "1px solid",
+            borderColor: "primary.main",
+            borderRadius: 2,
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            gap: 2,
+            alignItems: isMobile ? "flex-start" : "center",
+          }}
+        >
+          <Person sx={{ color: "#007AFF", fontSize: 30 }} />
+          <Box>
+            <Typography fontWeight="bold" variant="body1" color="primary">
+              Cliente
+            </Typography>
+            <Typography>
+              {venta.cliente.razon_social ||
+                venta.cliente.nombre ||
+                "Sin nombre"}
+            </Typography>
+            {venta.cliente.tipo_cliente && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ textTransform: "uppercase", fontWeight: "medium" }}
+              >
+                {venta.cliente.tipo_cliente}
+              </Typography>
+            )}
+
+            {venta.cliente.rut && (
+              <Typography variant="body2" color="text.secondary">
+                RUT: {venta.cliente.rut}
+              </Typography>
+            )}
+            {venta.cliente.direccion && (
+              <Typography variant="body2" color="text.secondary">
+                Dirección: {venta.cliente.direccion}
+              </Typography>
+            )}
+            {venta.cliente.email && (
+              <Typography variant="body2" color="text.secondary">
+                Email: {venta.cliente.email}
+              </Typography>
+            )}
+          </Box>
+        </Box>
+      ) : null}
 
       <Box display="flex" flexDirection="column" gap={isMobile ? 1.5 : 2}>
         {infoItems.map(({ icon, label, value, highlight }, idx) => (
@@ -114,6 +168,14 @@ InfoVenta.propTypes = {
       estado: PropTypes.string.isRequired,
     }).isRequired,
     total: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    cliente: PropTypes.shape({
+      razon_social: PropTypes.string,
+      tipo_cliente: PropTypes.string,
+      nombre: PropTypes.string,
+      rut: PropTypes.string,
+      direccion: PropTypes.string,
+      email: PropTypes.string,
+    }),
   }).isRequired,
 };
 

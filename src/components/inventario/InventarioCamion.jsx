@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, useMediaQuery } from "@mui/material";
+import { Box, Typography, Paper, useMediaQuery, Tooltip } from "@mui/material";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
 const MotionBox = motion.create(Box);
@@ -18,7 +18,10 @@ const InventarioCamion = ({
     reservados_no_retornables,
     retorno,
     vacios,
+    lista,
   } = inventarioData;
+
+  console.log(inventarioData);
 
   const columnas = isTablet ? 6 : 10;
 
@@ -26,12 +29,6 @@ const InventarioCamion = ({
     modo === "simulacion"
       ? productosReservados.reduce((total, prod) => total + prod.cantidad, 0)
       : 0;
-  /*   const retornablesACargarAhora =
-    modo === "simulacion"
-      ? productos
-          .filter((p) => p.es_retornable)
-          .reduce((acc, p) => acc + p.cantidad, 0)
-      : 0; */
 
   const espaciosUsados =
     reservados_retornables +
@@ -56,14 +53,31 @@ const InventarioCamion = ({
         })
       : [];
 
-  let bloques = [
+  /*   let bloques = [
     ...Array(reservados_retornables).fill({ tipo: "ReservadoRetornable" }),
     ...Array(reservados_no_retornables).fill({ tipo: "ReservadoNoRetornable" }),
     ...Array(retornablesACargarAhora).fill({ tipo: "ACargarAhora" }),
     ...Array(disponibles).fill({ tipo: "Disponible" }),
     ...Array(retorno).fill({ tipo: "Retorno" }),
     ...arrayReservadosCarga,
-  ];
+  ]; */
+
+  let bloques = [];
+
+  if (modo === "visual" && Array.isArray(inventarioData.lista)) {
+    bloques = [...inventarioData.lista];
+  } else {
+    bloques = [
+      ...Array(reservados_retornables).fill({ tipo: "ReservadoRetornable" }),
+      ...Array(reservados_no_retornables).fill({
+        tipo: "ReservadoNoRetornable",
+      }),
+      ...Array(retornablesACargarAhora).fill({ tipo: "ACargarAhora" }),
+      ...Array(disponibles).fill({ tipo: "Disponible" }),
+      ...Array(retorno).fill({ tipo: "Retorno" }),
+      ...arrayReservadosCarga,
+    ];
+  }
 
   bloques = bloques.slice(0, capacidad_total);
 
@@ -72,7 +86,41 @@ const InventarioCamion = ({
     bloques = [...bloques, ...Array(faltantes).fill({ tipo: "Vacío" })];
   }
 
-  let espaciosCamion = bloques.slice(0, capacidad_total);
+  /*   let espaciosCamion =
+    modo === "visual" && Array.isArray(inventarioData.lista)
+      ? inventarioData.lista
+      : bloques.slice(0, capacidad_total); */
+
+  let espaciosCamion = [];
+
+  if (modo === "visual" && Array.isArray(lista)) {
+    const bloquesExpandibles = lista.flatMap((item) =>
+      Array.from({ length: item.cantidad }, (_, i) => ({
+        tipo: item.tipo,
+        nombre_producto: item.nombre_producto,
+        orden: i + 1,
+      }))
+    );
+
+    const usados = bloquesExpandibles.length;
+    const faltantes = Math.max(capacidad_total - usados, 0);
+    espaciosCamion = [
+      ...bloquesExpandibles,
+      ...Array(faltantes).fill({ tipo: "Vacío" }),
+    ];
+  } else {
+    const bloquesExpandibles = bloques.flatMap((item, i) =>
+      item.tipo === "ReservadoParaCarga" || item.tipo === "ACargarAhora"
+        ? [{ ...item, orden: i + 1 }]
+        : [item]
+    );
+    const usados = bloquesExpandibles.length;
+    const faltantes = Math.max(capacidad_total - usados, 0);
+    espaciosCamion = [
+      ...bloquesExpandibles,
+      ...Array(faltantes).fill({ tipo: "Vacío" }),
+    ];
+  }
 
   /*   const faltantes = capacidad_total - espaciosCamion.length; */
   /*   if (faltantes > 0) {
@@ -179,30 +227,37 @@ const InventarioCamion = ({
         justifyContent="center"
       >
         {espaciosCamion.map((item, index) => (
-          <MotionBox
-            key={index}
-            width={40}
-            height={40}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            bgcolor={getColor(item.tipo)}
-            borderRadius={1}
-            fontSize="12px"
-            fontWeight="bold"
-            animate={
-              item.tipo === "ReservadoParaCarga" || item.tipo === "ACargarAhora"
-                ? { scale: [0.9, 1.1, 0.9], opacity: [0.8, 1, 0.8] }
-                : {}
-            }
-            transition={
-              item.tipo === "ReservadoParaCarga" || item.tipo === "ACargarAhora"
-                ? { repeat: Infinity, duration: 2 }
-                : {}
-            }
-          >
-            {item.tipo === "ACargarAhora" ? "D" : item.tipo.charAt(0)}
-          </MotionBox>
+          <Tooltip key={index} title={item.nombre_producto || item.tipo}>
+            <MotionBox
+              width={40}
+              height={40}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              bgcolor={getColor(item.tipo)}
+              borderRadius={1}
+              fontSize="0.7rem"
+              fontWeight="bold"
+              animate={
+                item.tipo === "ReservadoParaCarga" ||
+                item.tipo === "ACargarAhora"
+                  ? { scale: [0.9, 1.1, 0.9], opacity: [0.8, 1, 0.8] }
+                  : {}
+              }
+              transition={
+                item.tipo === "ReservadoParaCarga" ||
+                item.tipo === "ACargarAhora"
+                  ? { repeat: Infinity, duration: 2 }
+                  : {}
+              }
+            >
+              {item.tipo === "Vacío"
+                ? ""
+                : `${(
+                    item.nombre_producto?.slice(0, 2) || item.tipo.charAt(0)
+                  ).toUpperCase()}${item.orden || ""}`}
+            </MotionBox>
+          </Tooltip>
         ))}
       </Box>
 

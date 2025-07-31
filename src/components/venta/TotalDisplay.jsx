@@ -23,7 +23,6 @@ const TotalsDisplay = ({
 }) => {
   return (
     <Box>
-      {/* Totales */}
       <Box display="flex" justifyContent="space-between" mb={2}>
         <Typography variant="h4">Subtotal:</Typography>
         <Typography variant="h4">{formatCLP(subtotal)}</Typography>
@@ -34,7 +33,6 @@ const TotalsDisplay = ({
         mb={2}
         alignItems={"center"}
       >
-        {/* <Typography variant="h6">Descuento ({discount}%):</Typography> */}
         <TextField
           label="Descuento (%)"
           type="number"
@@ -67,12 +65,12 @@ const TotalsDisplay = ({
       </Box>
 
       {productosRetornables && productosRetornables.length > 0 && (
-        <Box mt={3} p={2} borderRadius={2} sx={{ backgroundColor: "#F3F4F6" }}>
+        <Box mt={3} p={2} borderRadius={2}>
           <Typography variant="h6" fontWeight="bold" mb={1}>
             Productos Retornables
           </Typography>
           {productosRetornables
-            .filter((producto) => producto.cantidad > 0) // 🔹 Solo mostrar si cantidad > 0
+            .filter((producto) => producto.cantidad > 0) 
             .map((producto, index) => (
               <Box
                 key={index}
@@ -92,7 +90,6 @@ const TotalsDisplay = ({
         </Box>
       )}
 
-      {/* Controles */}
       <Box mt={2} display="flex" justifyContent="space-between" gap={2}>
         <Button
           ref={refButton}
@@ -102,7 +99,6 @@ const TotalsDisplay = ({
           onClick={onProceedToPayment}
           sx={{
             backgroundColor: "#4CAF50",
-            color: "#fff",
             fontWeight: "bold",
             "&:hover": { backgroundColor: "#388E3C" },
           }}
@@ -125,8 +121,8 @@ TotalsDisplay.propTypes = {
   onProceedToPayment: PropTypes.func.isRequired,
   productosRetornables: PropTypes.array,
   refButton: PropTypes.oneOfType([
-    PropTypes.func, 
-    PropTypes.shape({ current: PropTypes.instanceOf(Element) })
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
   ]),
 };
 

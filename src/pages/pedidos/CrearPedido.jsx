@@ -10,6 +10,8 @@ import {
   Stack,
   useTheme,
   Divider,
+  TextField,
+  MenuItem,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import StepConnector, {
@@ -27,6 +29,7 @@ import PedidoCarrito from "../../components/pedido/PedidoCarrito";
 import { useGetCajaAsignadaQuery } from "../../store/services/cajaApi";
 import NoCajaAsignadaDialog from "../../components/chofer/NoCajaAsignadaMessage";
 import { obtenerCoordsDesdeDireccion } from "../../utils/obtenerCords";
+import MiniCartSummary from "../../components/pedido/MiniCartSummary";
 
 const StyledConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -80,17 +83,19 @@ StepIconComponent.propTypes = {
   icon: PropTypes.node,
 };
 
+const initialFormState = {
+  selectedCliente: null,
+  direccionEntrega: "",
+  tipoDocumento: "",
+  metodoPago: null,
+  notas: "",
+  coords: { lat: null, lng: null },
+  prioridad: "normal",
+};
+
 const CrearPedido = () => {
-  const [selectedCliente, setSelectedCliente] = useState(null);
-  const [direccionEntrega, setDireccionEntrega] = useState("");
-  const [tipoDocumento, setTipoDocumento] = useState("");
-  const [coords, setCoords] = useState({ lat: null, lng: null });
-
+  const [formState, setFormState] = useState(initialFormState);
   const [openNoCajaModal, setOpenNoCajaModal] = useState(false);
-
-  const [metodoPago, setMetodoPago] = useState(null);
-  const [notas, setNotas] = useState("");
-
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart.items);
   const total = useSelector((state) => state.cart.total);
@@ -118,19 +123,33 @@ const CrearPedido = () => {
   }, [loadingCaja, cajaAsignada]);
 
   useEffect(() => {
-    if (selectedCliente && selectedCliente.direccion) {
-      setDireccionEntrega(selectedCliente.direccion);
+    const cliente = formState.selectedCliente;
+    if (!cliente?.direccion) return;
 
-      if (!coords.lat || !coords.lng) {
-        obtenerCoordsDesdeDireccion(selectedCliente.direccion)
-          .then((c) => {
-            if (c) setCoords(c);
-          })
-          .catch(() => {});
-      }
+    const mismaDireccion = cliente.direccion === formState.direccionEntrega;
+    const sinCoords = !formState.coords.lat || !formState.coords.lng;
+
+    if (!mismaDireccion) {
+      setFormState((prev) => ({
+        ...prev,
+        direccionEntrega: cliente.direccion,
+      }));
     }
-    // eslint-disable-next-line
-  }, [selectedCliente]);
+
+    if (sinCoords) {
+      obtenerCoordsDesdeDireccion(cliente.direccion)
+        .then((coords) => {
+          if (coords) {
+            setFormState((prev) => ({
+              ...prev,
+              coords,
+            }));
+          }
+        })
+        .catch(() => {});
+    }
+    //eslint-disable-next-line
+  }, [formState.selectedCliente]);
 
   const handleAddToCart = (product) => {
     const isInsumo = product.tipo === "insumo";
@@ -154,6 +173,8 @@ const CrearPedido = () => {
   };
 
   const handleCreatePedido = async () => {
+    const { selectedCliente, tipoDocumento } = formState;
+
     if (!selectedCliente) {
       dispatch(
         showNotification({
@@ -178,11 +199,14 @@ const CrearPedido = () => {
     }
 
     const pedidoData = {
-      id_cliente: selectedCliente.id_cliente,
-      direccion_entrega: direccionEntrega,
-      lat: coords.lat,
-      lng: coords.lng,
-      metodo_pago: metodoPago,
+      id_cliente: formState.selectedCliente?.id_cliente,
+      direccion_entrega: formState.direccionEntrega,
+      lat: formState.coords.lat,
+      lng: formState.coords.lng,
+      metodo_pago: formState.metodoPago,
+      notas: formState.notas,
+      tipo_documento: formState.tipoDocumento,
+      prioridad: formState.prioridad,
       productos: cart.map((item) => ({
         cantidad: item.cantidad,
         tipo: item.tipo,
@@ -191,17 +215,13 @@ const CrearPedido = () => {
           ? { id_insumo: item.id_insumo }
           : { id_producto: item.id_producto }),
       })),
-      notas,
-      tipo_documento: tipoDocumento,
     };
 
     try {
       await createPedido(pedidoData).unwrap();
       dispatch(clearCart());
-      setSelectedCliente(null);
-      setDireccionEntrega("");
-      setMetodoPago(null);
-      setNotas("");
+      setFormState(initialFormState);
+      setActiveStep(0);
       dispatch(
         showNotification({
           message: "Éxito al crear pedido",
@@ -249,20 +269,37 @@ const CrearPedido = () => {
       {activeStep === 0 && (
         <Box>
           <PedidoForm
-            selectedCliente={selectedCliente}
-            setSelectedCliente={setSelectedCliente}
-            direccionEntrega={direccionEntrega}
-            setDireccionEntrega={setDireccionEntrega}
-            metodoPago={metodoPago}
-            setMetodoPago={setMetodoPago}
-            notas={notas}
-            setNotas={setNotas}
-            mostrarMetodoPago={tipoDocumento !== "factura"}
-            tipoDocumento={tipoDocumento}
-            setTipoDocumento={setTipoDocumento}
-            setCoords={setCoords}
-            coords={coords}
+            formState={formState}
+            setFormState={setFormState}
+            mostrarMetodoPago={formState.tipoDocumento !== "factura"}
+            extraFields={
+              <TextField
+                select
+                fullWidth
+                label="Prioridad del Pedido"
+                value={formState.prioridad}
+                onChange={(e) =>
+                  setFormState((prev) => ({
+                    ...prev,
+                    prioridad: e.target.value,
+                  }))
+                }
+                variant="outlined"
+                sx={{
+                  mt: 3,
+                  backgroundColor: theme.palette.background.default,
+                  borderRadius: 1,
+                  input: { color: theme.palette.text.primary },
+                  label: { color: theme.palette.text.secondary },
+                }}
+              >
+                <MenuItem value="alta">Alta</MenuItem>
+                <MenuItem value="normal">Media</MenuItem>
+                <MenuItem value="baja">Baja</MenuItem>
+              </TextField>
+            }
           />
+
           <Stack direction="row" justifyContent="flex-end" mt={2}>
             <Button variant="contained" onClick={nextStep}>
               Siguiente
@@ -287,6 +324,7 @@ const CrearPedido = () => {
             selectedCategory={category}
             onAddToCart={handleAddToCart}
           />
+          <MiniCartSummary onOpenCart={() => setActiveStep(2)} />
           <Stack direction="row" justifyContent="space-between" mt={2}>
             <Button variant="outlined" onClick={prevStep}>
               Atrás

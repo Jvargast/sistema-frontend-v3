@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Box,
   MobileStepper,
@@ -18,6 +18,7 @@ import BarraSuperior from "./BarraSuperior";
 import AperturaCajaModal from "../../caja/AperturaCajaModal";
 import SelectVendedorModal from "../SelectedVendedorModal";
 import TituloStepper from "./TituloStepper";
+import MiniCartSummary from "../../pedido/MiniCartSummary";
 
 const steps = ["Selecciona productos", "Revisa tu carrito", "Venta realizada"];
 
@@ -27,6 +28,8 @@ export default function PuntoDeVentaMobile() {
   const logic = usePuntoDeVentaLogic();
 
   const [modal, setModal] = useState(null);
+
+  const botonRef = useRef(null);
 
   const {
     productosData,
@@ -73,7 +76,7 @@ export default function PuntoDeVentaMobile() {
       logic.dispatch(
         logic.showNotification({
           message: "Agrega al menos un producto al carrito.",
-          severity: "warning", 
+          severity: "warning",
         })
       );
       return;
@@ -166,10 +169,13 @@ export default function PuntoDeVentaMobile() {
   };
 
   const handleProcederAlPago = async () => {
-    const hayRetornables = cart.some((item) => item.es_retornable);
+    const productosRetornablesEnCarrito = cart.filter(
+      (item) => item.es_retornable
+    );
     const isFactura = logic.tipoDocumento === "factura";
 
-    if (hayRetornables) {
+    if (productosRetornablesEnCarrito.length > 0) {
+      logic.setProductosRetornables(productosRetornablesEnCarrito);
       setModal("retornables");
       return;
     }
@@ -308,6 +314,10 @@ export default function PuntoDeVentaMobile() {
         }}
       />
 
+      {activeStep === 0 && (
+        <MiniCartSummary onOpenCart={() => setActiveStep(1)} />
+      )}
+
       <SelectClienteModal
         open={openClienteModal}
         onClose={() => setOpenClienteModal(false)}
@@ -318,7 +328,12 @@ export default function PuntoDeVentaMobile() {
 
       <ProductosRetornablesModal
         open={modal === "retornables"}
-        onClose={() => setModal(null)}
+        onClose={() => {
+          setModal(null);
+          setTimeout(() => {
+            botonRef.current?.focus();
+          }, 100);
+        }}
         productos={productosRetornables}
         onConfirm={onConfirmRetornables}
       />
