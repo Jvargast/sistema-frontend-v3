@@ -60,7 +60,7 @@ const VerPedido = () => {
         width: "100%",
       }}
     >
-      <BackButton to="/pedidos" label="Volver a Pedidos" />
+      <BackButton to="/admin/pedidos" label="Volver a Pedidos" />
 
       <Paper
         elevation={4}

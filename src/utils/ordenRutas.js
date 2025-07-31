@@ -1,38 +1,53 @@
-import { featureCollection, nearestPoint, point } from "@turf/turf";
-
-
-export function ordenarDestinosPorCercania(destinos, inicio = null) {
-  if (!destinos.length) return [];
-  let restantes = [...destinos];
-  let ruta = [];
-
-  let actual;
-  if (Array.isArray(inicio)) {
-    actual = { lat: inicio[1], lng: inicio[0] };
-  } else if (inicio && inicio.lat && inicio.lng) {
-    actual = { lat: inicio.lat, lng: inicio.lng }; 
-  } else {
-    actual = restantes[0];
+export async function ordenarDestinosConGoogle(destinos, origen) {
+  if (!destinos?.length || !origen || !window?.google?.maps) {
+    return { ordenados: destinos, directions: null };
   }
-  ruta.push(actual);
-  restantes = restantes.filter(
-    (d) => !(d.lat === actual.lat && d.lng === actual.lng)
+
+  const destinosValidos = destinos.filter(
+    (d) =>
+      typeof d.lat === "number" &&
+      isFinite(d.lat) &&
+      typeof d.lng === "number" &&
+      isFinite(d.lng)
   );
-
-  while (restantes.length > 0) {
-    const from = point([actual.lng, actual.lat]);
-    const toFeatures = featureCollection(
-      restantes.map((d) => point([d.lng, d.lat], d))
-    );
-    const closest = nearestPoint(from, toFeatures);
-    const destinoMasCercano = restantes.find(
-      (d) =>
-        d.lat === closest.geometry.coordinates[1] &&
-        d.lng === closest.geometry.coordinates[0]
-    );
-    ruta.push(destinoMasCercano);
-    restantes = restantes.filter((d) => d !== destinoMasCercano);
-    actual = destinoMasCercano;
+  if (!destinosValidos.length) {
+    return { ordenados: destinos, directions: null };
   }
-  return ruta;
+
+  const directionsService = new window.google.maps.DirectionsService();
+
+  const destination = destinos[destinos.length - 1];
+  const waypoints = destinos.slice(0, -1).map((d) => ({
+    location: new window.google.maps.LatLng(d.lat, d.lng),
+    stopover: true,
+  }));
+
+  const result = await new Promise((resolve, reject) => {
+    directionsService.route(
+      {
+        origin: new window.google.maps.LatLng(origen.lat, origen.lng),
+        destination: new window.google.maps.LatLng(
+          destination.lat,
+          destination.lng
+        ),
+        waypoints,
+        optimizeWaypoints: true,
+        travelMode: window.google.maps.TravelMode.DRIVING,
+      },
+      (response, status) => {
+        if (status === "OK") resolve(response);
+        else reject(new Error("Error en Directions API: " + status));
+      }
+    );
+  });
+
+  if (!result.routes[0].waypoint_order) {
+    return { ordenados: destinos, directions: result };
+  }
+
+  const order = result.routes[0].waypoint_order;
+  const reordenados = order.map((i) => destinos[i]);
+  reordenados.push(destination);
+
+  return { ordenados: reordenados, directions: result };
 }

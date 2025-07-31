@@ -12,12 +12,11 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useCreateClienteMutation } from "../../store/services/clientesApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
-/* import GooglePlacesInput from "../../components/google/GooglePlacesInput"; */
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import { useIsMobile } from "../../utils/useIsMobile";
 import AutocompleteDireccion from "../../components/pedido/AutocompleteDireccion";
-import MapSelector from "../../components/maps/MapSelector";
+import MapSelectorGoogle from "../../components/maps/MapSelector";
 
 const CrearCliente = () => {
   const theme = useTheme();
@@ -100,6 +99,7 @@ const CrearCliente = () => {
         <Box display="flex" flexDirection="column" gap={3}>
           <TextField
             fullWidth
+            id="nombre"
             label="Nombre"
             name="nombre"
             value={formData.nombre}
@@ -112,7 +112,7 @@ const CrearCliente = () => {
             setDireccion={handleDireccionChange}
             setCoords={handleCoordsChange}
           />
-          <MapSelector
+          <MapSelectorGoogle
             coords={{ lat: formData.lat, lng: formData.lng }}
             setCoords={handleCoordsChange}
             direccion={formData.direccion}
@@ -120,6 +120,7 @@ const CrearCliente = () => {
           />
           <TextField
             fullWidth
+            id="telefono"
             label="Teléfono"
             name="telefono"
             value={formData.telefono}
@@ -129,6 +130,7 @@ const CrearCliente = () => {
           />
         </Box>
         <TextField
+          id="tipo_cliente"
           select
           fullWidth
           label="Tipo de Cliente"
@@ -149,6 +151,7 @@ const CrearCliente = () => {
               value={formData.razon_social}
               onChange={handleInputChange}
               variant="outlined"
+              id="razon_social"
             />
             <TextField
               fullWidth
@@ -158,6 +161,7 @@ const CrearCliente = () => {
               value={formData.email}
               onChange={handleInputChange}
               variant="outlined"
+              id="email"
             />
           </Box>
         )}

@@ -33,6 +33,7 @@ const PedidoCard = ({
   confirmado = false,
   isConfirming,
   onConfirmar,
+  onRechazar,
 }) => {
   const theme = useTheme();
   const estado = pedido?.EstadoPedido?.nombre_estado || "Desconocido";
@@ -110,6 +111,52 @@ const PedidoCard = ({
           >
             Pedido #{pedido.id_pedido}
           </Typography>
+          {pedido?.prioridad && (
+            <Chip
+              label={`🎯 Prioridad: ${pedido.prioridad}`}
+              color={
+                pedido.prioridad === "alta"
+                  ? "error"
+                  : pedido.prioridad === "media"
+                  ? "warning"
+                  : "default"
+              }
+              size="small"
+              sx={{
+                mb: 1,
+                fontWeight: "bold",
+                textTransform: "capitalize",
+                bgcolor:
+                  pedido.prioridad === "alta"
+                    ? "#d32f2f"
+                    : pedido.prioridad === "media"
+                    ? "#f9a825"
+                    : "#9e9e9e",
+                color: "#fff",
+              }}
+            />
+          )}
+
+          {pedido?.notas && (
+            <Tooltip title={pedido.notas}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  fontStyle: "italic",
+                  mt: 0.5,
+                  maxHeight: 40,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  width: "100%",
+                }}
+              >
+                📝 {pedido.notas}
+              </Typography>
+            </Tooltip>
+          )}
+
           <Box
             sx={{
               display: "flex",
@@ -198,25 +245,50 @@ const PedidoCard = ({
               />
             </Box>
           ) : (
-            <Button
-              variant="contained"
-              color="success"
-              fullWidth
-              sx={{
-                mt: 2,
-                fontSize: "1rem",
-                py: 1.1,
-                borderRadius: 2,
-                fontWeight: "bold",
-                textTransform: "none",
-                boxShadow: theme.shadows[2],
-                transition: "background 0.15s",
-              }}
-              onClick={() => onConfirmar(pedido.id_pedido)}
-              disabled={isConfirming}
+            <Box
+              mt={2}
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              gap={1}
             >
-              {isConfirming ? "Confirmando..." : "✔ Confirmar Pedido"}
-            </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                fullWidth
+                sx={{
+                  fontSize: "1rem",
+                  py: 1.1,
+                  borderRadius: 2,
+                  fontWeight: "bold",
+                  textTransform: "none",
+                  borderWidth: 2,
+                }}
+                onClick={() => onRechazar(pedido.id_pedido)}
+                disabled={isConfirming}
+              >
+                ✖ Rechazar
+              </Button>
+
+              <Button
+                variant="contained"
+                color="success"
+                fullWidth
+                sx={{
+                  fontSize: "1rem",
+                  py: 1.1,
+                  borderRadius: 2,
+                  fontWeight: "bold",
+                  textTransform: "none",
+                  boxShadow: theme.shadows[2],
+                  transition: "background 0.15s",
+                }}
+                onClick={() => onConfirmar(pedido.id_pedido)}
+                disabled={isConfirming}
+              >
+                {isConfirming ? "Confirmando..." : "✔ Confirmar"}
+              </Button>
+            </Box>
           )}
         </Paper>
       </Badge>
@@ -229,6 +301,7 @@ PedidoCard.propTypes = {
   confirmado: PropTypes.bool,
   isConfirming: PropTypes.bool.isRequired,
   onConfirmar: PropTypes.func.isRequired,
+  onRechazar: PropTypes.func.isRequired,
 };
 
 export default PedidoCard;

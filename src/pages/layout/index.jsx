@@ -13,7 +13,6 @@ import WelcomePage from "../../components/common/WelcomePage";
 import { openTab } from "../../store/reducers/tabSlice";
 import { getTabKey } from "../../utils/tabUtil";
 
-
 const Layout = () => {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [isSidebarOpen, setIsSidebarOpen] = useState(isDesktop);
@@ -223,6 +222,7 @@ const Layout = () => {
         );
       }
     }
+    // eslint-disable-next-line
   }, [isDesktop, tabKey, shouldUseRouter, openTabs.length, dispatch, pathname]);
 
   useEffect(() => {
@@ -256,8 +256,15 @@ const Layout = () => {
   ); */
 
   return (
-    <LayoutContext.Provider value={{ drawerWidth, isSidebarOpen, resizeCount, }}>
-      <Box display="flex" height="100%" width="100%" ref={layoutContainerRef}>
+    <LayoutContext.Provider value={{ drawerWidth, isSidebarOpen, resizeCount }}>
+      <Box
+        display="flex"
+        flexDirection="row"
+        height="100dvh"
+        width="100%"
+        ref={layoutContainerRef}
+        sx={{ overflow: "hidden" }}
+      >
         <Sidebar
           user={user}
           rol={rol}
@@ -270,8 +277,8 @@ const Layout = () => {
           display="flex"
           flexDirection="column"
           flexGrow={1}
-          minHeight="100vh"
           minWidth={0}
+          overflow="hidden"
         >
           <Navbar
             user={user}
@@ -284,7 +291,17 @@ const Layout = () => {
             <DynamicTabsBar isDesktop={isDesktop} />
           )}
 
-          <Box flexGrow={1} minWidth={0}>
+          <Box
+            flexGrow={1}
+            minWidth={0}
+            sx={{
+              overflowY: "auto",
+              pb: {
+                xs: "calc(56px + env(safe-area-inset-bottom, 0px))",
+                md: 0,
+              },
+            }}
+          >
             {isDesktop ? (
               isWelcome || !activeTab ? (
                 <WelcomePage />

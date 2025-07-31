@@ -15,40 +15,44 @@ import CloseIcon from "@mui/icons-material/Close";
 import PedidoClienteSelector from "./PedidoClienteSelector";
 import PropTypes from "prop-types";
 import AutocompleteDireccion from "./AutocompleteDireccion";
-import MapSelector from "../maps/MapSelector";
+import MapSelectorGoogle from "../maps/MapSelector";
 
 const PedidoForm = ({
-  selectedCliente,
-  setSelectedCliente,
-  direccionEntrega,
-  setDireccionEntrega,
-  metodoPago,
-  setMetodoPago,
+  formState,
+  setFormState,
   mostrarMetodoPago = true,
   mostrarTipoDocumento = true,
-  notas,
-  setNotas,
-  tipoDocumento,
-  setTipoDocumento,
   extraFields,
-  setCoords,
-  coords,
 }) => {
   const theme = useTheme();
   const [openClienteModal, setOpenClienteModal] = useState(false);
   const [useClientAddress, setUseClientAddress] = useState(true);
 
-  const isEmpresa = selectedCliente?.tipo_cliente === "empresa";
+  const {
+    selectedCliente,
+    direccionEntrega,
+    metodoPago,
+    notas,
+    tipoDocumento,
+    coords,
+  } = formState;
 
+  const isEmpresa = selectedCliente?.tipo_cliente === "empresa";
   useEffect(() => {
     if (useClientAddress) {
       if (selectedCliente) {
-        setDireccionEntrega(selectedCliente.direccion || "");
+        setFormState((prev) => ({
+          ...prev,
+          direccionEntrega: selectedCliente.direccion || "",
+        }));
       } else {
-        setDireccionEntrega("");
+        setFormState((prev) => ({
+          ...prev,
+          direccionEntrega: "",
+        }));
       }
     }
-  }, [useClientAddress, selectedCliente]);
+  }, [useClientAddress, selectedCliente, setFormState]);
 
   useEffect(() => {
     if (
@@ -56,11 +60,15 @@ const PedidoForm = ({
       selectedCliente?.rut &&
       selectedCliente?.razon_social
     ) {
-      if (tipoDocumento !== "factura") setTipoDocumento("factura");
+      if (tipoDocumento !== "factura") {
+        setFormState((prev) => ({ ...prev, tipoDocumento: "factura" }));
+      }
     } else {
-      if (tipoDocumento !== "boleta") setTipoDocumento("boleta");
+      if (tipoDocumento !== "boleta") {
+        setFormState((prev) => ({ ...prev, tipoDocumento: "boleta" }));
+      }
     }
-  }, [selectedCliente, tipoDocumento, setTipoDocumento]);
+  }, [selectedCliente, tipoDocumento, setFormState]);
 
   return (
     <Box
@@ -68,10 +76,6 @@ const PedidoForm = ({
         p: 4,
         borderRadius: 2,
         mb: 3,
-        /*         backgroundColor:
-          theme.palette.mode === "dark"
-            ? theme.palette.grey[900]
-            : theme.palette.background.paper, */
         backgroundColor: theme.palette.background.default,
         border: `1px solid ${theme.palette.divider}`,
       }}
@@ -95,9 +99,12 @@ const PedidoForm = ({
         {selectedCliente && (
           <IconButton
             onClick={() => {
-              setSelectedCliente(null);
-              setDireccionEntrega("");
-              setTipoDocumento?.("boleta");
+              setFormState((prev) => ({
+                ...prev,
+                selectedCliente: null,
+                direccionEntrega: "",
+                tipoDocumento: "boleta",
+              }));
             }}
             color="error"
             size="small"
@@ -106,20 +113,21 @@ const PedidoForm = ({
           </IconButton>
         )}
       </Box>
+
       <PedidoClienteSelector
         open={openClienteModal}
         onClose={() => setOpenClienteModal(false)}
         onSelect={(cliente) => {
-          setSelectedCliente(cliente);
-          if (
-            cliente?.tipo_cliente === "empresa" &&
-            cliente?.rut &&
-            cliente?.razon_social
-          ) {
-            setTipoDocumento?.("factura");
-          } else {
-            setTipoDocumento?.("boleta");
-          }
+          setFormState((prev) => ({
+            ...prev,
+            selectedCliente: cliente,
+            tipoDocumento:
+              cliente?.tipo_cliente === "empresa" &&
+              cliente?.rut &&
+              cliente?.razon_social
+                ? "factura"
+                : "boleta",
+          }));
         }}
       />
 
@@ -129,6 +137,7 @@ const PedidoForm = ({
             checked={useClientAddress}
             onChange={(e) => setUseClientAddress(e.target.checked)}
             color="primary"
+            disabled={!selectedCliente}
           />
         }
         label="Usar dirección del cliente"
@@ -152,14 +161,21 @@ const PedidoForm = ({
         <>
           <AutocompleteDireccion
             direccion={direccionEntrega}
-            setDireccion={setDireccionEntrega}
-            setCoords={setCoords}
+            setDireccion={(dir) =>
+              setFormState((prev) => ({ ...prev, direccionEntrega: dir }))
+            }
+            setCoords={(coords) =>
+              setFormState((prev) => ({ ...prev, coords }))
+            }
           />
-          <MapSelector
+          <MapSelectorGoogle
             coords={coords}
-            setCoords={setCoords}
-            direccion={direccionEntrega}
-            setDireccion={setDireccionEntrega}
+            setCoords={(coords) =>
+              setFormState((prev) => ({ ...prev, coords }))
+            }
+            setDireccion={(dir) =>
+              setFormState((prev) => ({ ...prev, direccionEntrega: dir }))
+            }
           />
         </>
       )}
@@ -172,7 +188,12 @@ const PedidoForm = ({
           name="tipoDocumento"
           label="Tipo de Documento"
           value={tipoDocumento || ""}
-          onChange={(e) => setTipoDocumento?.(e.target.value)}
+          onChange={(e) =>
+            setFormState((prev) => ({
+              ...prev,
+              tipoDocumento: e.target.value,
+            }))
+          }
           variant="outlined"
           sx={{
             mb: 3,
@@ -199,7 +220,12 @@ const PedidoForm = ({
           fullWidth
           label="Método de Pago"
           value={metodoPago || ""}
-          onChange={(e) => setMetodoPago(Number(e.target.value))}
+          onChange={(e) =>
+            setFormState((prev) => ({
+              ...prev,
+              metodoPago: Number(e.target.value),
+            }))
+          }
           variant="outlined"
           sx={{
             mb: 3,
@@ -220,7 +246,9 @@ const PedidoForm = ({
         fullWidth
         label="Notas"
         value={notas}
-        onChange={(e) => setNotas(e.target.value)}
+        onChange={(e) =>
+          setFormState((prev) => ({ ...prev, notas: e.target.value }))
+        }
         variant="outlined"
         multiline
         rows={3}
@@ -232,27 +260,18 @@ const PedidoForm = ({
           label: { color: theme.palette.text.secondary },
         }}
       />
-      {extraFields && <Box mt={2}>{extraFields}</Box>}
+
+      {extraFields && <Box mt={1}>{extraFields}</Box>}
     </Box>
   );
 };
 
 PedidoForm.propTypes = {
-  selectedCliente: PropTypes.object,
-  setSelectedCliente: PropTypes.func,
-  direccionEntrega: PropTypes.string,
-  setDireccionEntrega: PropTypes.func.isRequired,
-  metodoPago: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  formState: PropTypes.object.isRequired,
+  setFormState: PropTypes.func.isRequired,
   mostrarMetodoPago: PropTypes.bool,
-  setMetodoPago: PropTypes.func.isRequired,
-  notas: PropTypes.string,
-  setNotas: PropTypes.func.isRequired,
-  tipoDocumento: PropTypes.string,
   mostrarTipoDocumento: PropTypes.bool,
-  setTipoDocumento: PropTypes.func,
   extraFields: PropTypes.node,
-  setCoords: PropTypes.func,
-  coords: PropTypes.object,
 };
 
 export default PedidoForm;

@@ -4,15 +4,14 @@ import { baseQueryWithReauthEnhanced } from "./fettchQuery";
 export const pedidosApi = createApi({
   reducerPath: "pedidosApi",
   baseQuery: baseQueryWithReauthEnhanced,
-  tagTypes: ["Pedidos"], // Identificador para invalidar cache
+  tagTypes: ["Pedidos"],
   endpoints: (builder) => ({
-    // Obtener todas las ventas
     getAllPedidos: builder.query({
       query: (params) => ({ url: `/pedidos/`, params }),
-      providesTags: ["Pedidos"], // Para invalidar cache
+      providesTags: ["Pedidos"],
       transformResponse: (response) => ({
-        pedidos: response.data, // Datos de ventas
-        paginacion: response.total, // Datos de paginación
+        pedidos: response.data,
+        paginacion: response.total,
       }),
       async onQueryStarted(args, { queryFulfilled }) {
         try {
@@ -23,7 +22,6 @@ export const pedidosApi = createApi({
       },
     }),
 
-    // Obtener un venta por ID
     getPedidoById: builder.query({
       query: (id_pedido) => `/pedidos/${id_pedido}`,
       providesTags: ["Pedidos"],
@@ -36,17 +34,15 @@ export const pedidosApi = createApi({
       },
     }),
 
-    //Obtener pedidos del chofer
     getPedidosAsignados: builder.query({
       query: (id_chofer) => `/pedidos/asignados/${id_chofer}`,
       providesTags: ["Pedidos"],
       transformResponse: (response) => ({
-        pedidos: response.data, // Datos de ventas
-        paginacion: response.total, // Datos de paginación
+        pedidos: response.data,
+        paginacion: response.total,
       }),
     }),
 
-    // Obtener pedidos sin asignar
     getPedidosSinAsignar: builder.query({
       query: () => `/pedidos/sin-asignar`,
       providesTags: ["Pedidos"],
@@ -58,25 +54,20 @@ export const pedidosApi = createApi({
         params: { page, limit, fecha },
       }),
       providesTags: ["Pedidos"],
-      /* transformResponse: (response) => ({
-        pedidos: response.data, // Asegura que `pedidos` siempre exista
-        paginacion: response.paginacion || { totalPages: 1, currentPage: 1 }, // Evita `undefined`
-      }), */
     }),
 
     getHistorialPedidos: builder.query({
       query: ({ fecha, page = 1, limit = 10 }) => ({
         url: `/pedidos/historial`,
-        params: { fecha, page, limit }, // Enviar fecha y paginación como query params
+        params: { fecha, page, limit },
       }),
       providesTags: ["Pedidos"],
       transformResponse: (response) => ({
-        pedidos: response.data, // Datos de pedidos filtrados
-        paginacion: response.pagination, // Datos de paginación
+        pedidos: response.data,
+        paginacion: response.pagination,
       }),
     }),
 
-    // Obtener pedidos confirmados del chofer
     getPedidosConfirmados: builder.query({
       query: (id_chofer) => `/pedidos/confirmados/${id_chofer}`,
       providesTags: ["Pedidos"],
@@ -114,7 +105,6 @@ export const pedidosApi = createApi({
         }
       },
     }),
-    // Confirmar un pedido por el chofer
     confirmarPedido: builder.mutation({
       query: ({ id_pedido }) => ({
         url: `/pedidos/${id_pedido}/confirmacion`,
@@ -139,7 +129,6 @@ export const pedidosApi = createApi({
       },
     }),
 
-    // Rechazar un pedido
     rejectPedido: builder.mutation({
       query: (id_pedido) => ({
         url: `/pedidos/${id_pedido}/rechazar`,
@@ -155,7 +144,6 @@ export const pedidosApi = createApi({
       },
     }),
 
-    // Revertir un pedido rechazado
     revertPedido: builder.mutation({
       query: (id_pedido) => ({
         url: `/pedidos/${id_pedido}/revertir`,
@@ -171,7 +159,6 @@ export const pedidosApi = createApi({
       },
     }),
 
-    // Eliminar un pedido
     deletePedido: builder.mutation({
       query: (id_pedido) => ({
         url: `/pedidos/${id_pedido}`,
@@ -206,6 +193,21 @@ export const pedidosApi = createApi({
         }
       },
     }),
+    revertirEstadoPedido: builder.mutation({
+      query: ({ id_pedido, id_estado_destino }) => ({
+        url: `/pedidos/${id_pedido}/revertir-estado`,
+        method: "POST",
+        body: { id_estado_destino },
+      }),
+      invalidatesTags: ["Pedidos"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Error al revertir el estado del pedido:", error);
+        }
+      },
+    }),
   }),
 });
 
@@ -226,5 +228,6 @@ export const {
   useRejectPedidoMutation,
   useRevertPedidoMutation,
   useGetDetalleConTotalQuery,
-  useRegistrarDesdePedidoMutation
+  useRegistrarDesdePedidoMutation,
+  useRevertirEstadoPedidoMutation
 } = pedidosApi;

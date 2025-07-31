@@ -17,10 +17,11 @@ export const agendaViajesApi = createApi({
         id_agenda_viaje,
         descargarAuto = true,
         descargarDisponibles = false,
+        dejaRetornables,
       }) => ({
         url: `/agenda-viajes/${id_agenda_viaje}/finalizar`,
         method: "POST",
-        body: { descargarAuto, descargarDisponibles },
+        body: { descargarAuto, descargarDisponibles, dejaRetornables },
       }),
       invalidatesTags: ["AgendaViajes"],
     }),
@@ -53,5 +54,5 @@ export const {
   useFinalizarViajeMutation,
   useGetHistorialViajesQuery,
   useGetAllViajesQuery,
-  useGetViajeByIdQuery
+  useGetViajeByIdQuery,
 } = agendaViajesApi;

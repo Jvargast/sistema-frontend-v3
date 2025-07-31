@@ -21,6 +21,7 @@ import {
 } from "@mui/icons-material";
 import {
   useConfirmarPedidoMutation,
+  useRejectPedidoMutation,
   useGetMisPedidosQuery,
 } from "../../store/services/pedidosApi";
 import PedidoCard from "../../components/pedido/PedidoCard";
@@ -105,6 +106,8 @@ const MisPedidos = () => {
   const [confirmado, setConfirmado] = useState({});
   const [openHistorial, setOpenHistorial] = useState(false);
 
+  const [rejectPedido, { isLoading: isRejecting }] = useRejectPedidoMutation();
+
   const cambiarFecha = (dias) => {
     const nuevaFecha = new Date(fechaSeleccionada);
     nuevaFecha.setDate(nuevaFecha.getDate() + dias);
@@ -133,6 +136,30 @@ const MisPedidos = () => {
       dispatch(
         showNotification({
           message: `Error al confirmar pedido: ${error.data.error}`,
+          severity: "error",
+        })
+      );
+    }
+  };
+
+  const handleRechazar = async (idPedido) => {
+    try {
+      await rejectPedido(idPedido).unwrap();
+      dispatch(
+        showNotification({
+          message: "El pedido fue rechazado y devuelto a estado 'Pendiente'.",
+          severity: "info",
+        })
+      );
+      setConfirmado((prev) => ({ ...prev, [idPedido]: false }));
+      refetch();
+    } catch (error) {
+      console.error("Error al rechazar pedido:", error);
+      dispatch(
+        showNotification({
+          message: `Error al rechazar pedido: ${
+            error.data?.error || error.message
+          }`,
           severity: "error",
         })
       );
@@ -219,8 +246,9 @@ const MisPedidos = () => {
               key={pedido.id_pedido}
               pedido={pedido}
               confirmado={confirmado[pedido.id_pedido] ?? false}
-              isConfirming={isConfirming}
+              isConfirming={isConfirming || isRejecting}
               onConfirmar={handleConfirmar}
+              onRechazar={handleRechazar}
             />
           ))
         ) : (
@@ -257,9 +285,9 @@ const MisPedidos = () => {
               sx={{
                 p: { xs: 2, sm: 4 },
                 borderRadius: 4,
-                maxWidth: 740, 
-                maxHeight: "85vh", 
-                overflowY: "auto", 
+                maxWidth: 740,
+                maxHeight: "85vh",
+                overflowY: "auto",
                 backgroundColor: (theme) =>
                   theme.palette.mode === "dark"
                     ? theme.palette.background.default

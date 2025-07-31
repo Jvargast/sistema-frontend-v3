@@ -11,7 +11,6 @@ import Administration from "./pages/administration";
 import RoleManagement from "./pages/administration/roles/RoleManagement";
 import EditRole from "./pages/administration/roles/EditRoleManagement";
 import Empresa from "./pages/administration/empresa";
-import EditarEmpresa from "./pages/administration/empresa/EditEmpresaManagement";
 import UserManagement from "./pages/administration/usuarios";
 import EditUser from "./pages/administration/usuarios/EditUser";
 /* import Seguridad from "./pages/administration/seguridad"; */
@@ -444,13 +443,7 @@ const router = createHashRouter([
                 element: (
                   <RoleBasedRoute requiredPermission="vistas.empresas.ver" />
                 ),
-                children: [
-                  { path: "", element: <Empresa /> },
-                  {
-                    path: "editar/:id",
-                    element: <EditarEmpresa />,
-                  },
-                ],
+                children: [{ path: "", element: <Empresa /> }],
               },
               {
                 path: "analisis",

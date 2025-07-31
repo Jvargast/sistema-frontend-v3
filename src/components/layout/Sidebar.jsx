@@ -34,7 +34,11 @@ import { modulesData } from "../../utils/modulesData";
 import { resetCacheAndLogout } from "../../store/reducers/authSlice";
 import { useLogoutMutation } from "../../store/services/authApi";
 import { getInitialRoute } from "../../utils/navigationUtils";
-import { maximizeTab, openTab, setActiveTab } from "../../store/reducers/tabSlice";
+import {
+  maximizeTab,
+  openTab,
+  setActiveTab,
+} from "../../store/reducers/tabSlice";
 import { getTabKey } from "../../utils/tabUtil";
 
 const Sidebar = ({
@@ -256,7 +260,7 @@ const Sidebar = ({
         <Drawer
           open={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
-          variant="persistent"
+          variant={isDesktop ? "persistent" : "temporary"}
           anchor="left"
           sx={{
             width: drawerWidth,
@@ -416,6 +420,8 @@ const Sidebar = ({
             boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.2)",
             borderTop: "1px solid rgba(255, 255, 255, 0.1)",
             zIndex: 999,
+            pb: "env(safe-area-inset-bottom, 20px)",
+            height: "56px",
           }}
         >
           <BottomNavigationAction
@@ -452,11 +458,11 @@ const Sidebar = ({
           {rol !== "chofer" && rol !== "vendedor" && (
             <BottomNavigationAction
               label="Pedidos"
-              value="pedidos"
+              value="punto-pedido"
               icon={<ShoppingCartOutlined />}
               sx={{
                 color:
-                  pathname.substring(1) === "pedidos"
+                  pathname.substring(1) === "punto-pedido"
                     ? "#FFFFFF"
                     : "rgba(255, 255, 255, 0.6)",
                 "& .MuiSvgIcon-root": {

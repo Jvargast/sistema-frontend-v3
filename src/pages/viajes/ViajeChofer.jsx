@@ -39,6 +39,8 @@ import { useErrorChecker } from "../../utils/useErrorChecker";
 import PermissionMessage from "../../components/common/PermissionMessage";
 import InventarioCamion from "../../components/inventario/InventarioCamion";
 import DialogFinalizarViaje from "../../components/viaje/DialogFinalizarViaje";
+import { useChoferTracking } from "../../hooks/useChoferTracking";
+import { useSelector } from "react-redux";
 
 const ViajeChofer = ({ viaje }) => {
   const dispatch = useDispatch();
@@ -54,6 +56,13 @@ const ViajeChofer = ({ viaje }) => {
 
   const [origenInicial, setOrigenInicial] = useState(null);
   const [origenActual, setOrigenActual] = useState(null);
+
+  const user = useSelector((state) => state.auth.user);
+
+  useChoferTracking({
+    viajeActivo: viaje?.estado === "En Tránsito",
+    rut: user?.id,
+  });
 
   useEffect(() => {
     if (viaje?.origen_inicial) {
@@ -204,6 +213,12 @@ const ViajeChofer = ({ viaje }) => {
       const entregasMap = {};
       if (!errorEntregas && entregasData?.data?.length > 0) {
         entregasData.data.forEach((entrega) => {
+          if (
+            entrega?.estado_entrega &&
+            entrega.estado_entrega.toLowerCase() === "anulada"
+          ) {
+            return;
+          }
           const idPedido = entrega?.pedido?.id_pedido;
           if (idPedido) {
             entregasMap[idPedido] = {
@@ -248,11 +263,17 @@ const ViajeChofer = ({ viaje }) => {
 
   const handleFinalizarViaje = async () => {
     try {
+      console.log({
+        id_agenda_viaje: viaje.id_agenda_viaje,
+        descargarAuto,
+        descargarDisponibles,
+        dejaRetornables,
+      });
       await finalizarViaje({
         id_agenda_viaje: viaje.id_agenda_viaje,
         descargarAuto,
         descargarDisponibles,
-        dejaRetornablesEnPlanta: dejaRetornables,
+        dejaRetornables,
       }).unwrap();
       dispatch(
         showNotification({
@@ -303,7 +324,7 @@ const ViajeChofer = ({ viaje }) => {
       <ListaDestinos
         destinos={viaje.destinos}
         entregas={entregas}
-        origen={origenActual} 
+        origen={origenActual}
         origenInicial={origenInicial}
         onOpenEntrega={handleOpenEntrega}
         onVerDetallePedido={handleVerDetallePedido}

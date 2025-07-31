@@ -34,7 +34,10 @@ import { useLogoutMutation } from "../../store/services/authApi";
 import { resetCacheAndLogout } from "../../store/reducers/authSlice";
 import FlexBetween from "./FlexBetween";
 import { modulesData } from "../../utils/modulesData";
-import { markAllAsRead } from "../../store/reducers/notificacionesSlice";
+import {
+  markAllAsRead,
+  removeNotificacionById,
+} from "../../store/reducers/notificacionesSlice";
 import NotificationsMenu from "./NotificationMenu";
 import SearchBar from "./SearchBar";
 import ConfigMenu from "./ConfigMenu";
@@ -116,10 +119,40 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
     dispatch(markAllAsRead());
   };
   const handleSelectNotification = (notif) => {
-    console.log("Notificación clickeada:", notif);
-    if (notif.tipo === "pedido_asignado") {
-      navigate("/pedidos");
+    console.log("🔔 Notificación clickeada:", notif);
+
+    switch (notif.tipo) {
+      case "pedido_asignado":
+        navigate("/mis-pedidos");
+        break;
+      case "pedido_confirmado":
+        navigate("/admin/pedidos");
+        break;
+      case "pedido_revertido":
+        if (user?.rol === "administrador") {
+          navigate("/admin/pedidos");
+        } else {
+          navigate("/mis-pedidos");
+        }
+        break;
+      case "entrega_realizada":
+        navigate("/entregas");
+        break;
+      case "viaje_finalizado":
+        if (notif?.datos_adicionales?.id_agenda_viaje) {
+          navigate(`/admin/viajes/ver/${notif.datos_adicionales.id_agenda_viaje}`);
+        } else {
+          navigate("/admin/viajes");
+        }
+        break;
+
+      default:
+        console.warn("🔔 Tipo de notificación no manejado:", notif.tipo);
+        break;
     }
+
+    dispatch(removeNotificacionById(notif.id_notificacion || notif.id));
+
     handleCloseNoti();
   };
 

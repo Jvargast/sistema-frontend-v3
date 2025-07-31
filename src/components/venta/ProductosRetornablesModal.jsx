@@ -31,7 +31,7 @@ const ProductosRetornablesModal = ({ open, onClose, productos, onConfirm }) => {
           : productos.map((prod) => ({
               id_producto: prod.id_producto,
               nombre_producto: prod.nombre_producto || prod.nombre,
-              cantidad: clienteTraeRetornable ? 1 : 0, 
+              cantidad: clienteTraeRetornable ? 1 : 0,
               estado: "reutilizable",
               tipo_defecto: "",
             }))
@@ -53,17 +53,17 @@ const ProductosRetornablesModal = ({ open, onClose, productos, onConfirm }) => {
 
   const handleChange = (index, field, value) => {
     const nuevosProductos = [...productosRetornables];
-    
+
     if (field === "cantidad" && !clienteTraeRetornable) {
       nuevosProductos[index][field] = 0;
     } else {
       nuevosProductos[index][field] = value;
     }
-  
+
     if (field === "estado" && value === "reutilizable") {
       nuevosProductos[index]["tipo_defecto"] = "";
     }
-  
+
     setProductosRetornables(nuevosProductos);
   };
 
@@ -80,11 +80,10 @@ const ProductosRetornablesModal = ({ open, onClose, productos, onConfirm }) => {
       sx={{
         "& .MuiDialog-paper": {
           borderRadius: "12px",
-          padding: "20px",
-          backgroundColor: "#F9FAFB",
           boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
         },
       }}
+
     >
       <DialogTitle
         sx={{
@@ -121,13 +120,18 @@ const ProductosRetornablesModal = ({ open, onClose, productos, onConfirm }) => {
               alignItems="center"
               mb={2}
               sx={{
-                backgroundColor: "#fff",
-                padding: "12px",
-                borderRadius: "8px",
-                boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.1)",
+                padding: "10px 8px",
+                borderRadius: "16px",
+                boxShadow: "0 1px 4px 0 rgba(36,198,220,0.06)",
+                border: "1px solid #E5E7EB",
+                minHeight: 60,
+                transition: "box-shadow .15s",
+                flexWrap: "wrap",
+                flexDirection: { xs: "column", sm: "row" }, 
+                alignItems: { xs: "stretch", sm: "center" },
+                gap: { xs: 1.5, sm: 2 },
               }}
             >
-              {/* Select de Productos */}
               <Select
                 fullWidth
                 value={producto.id_producto || ""}
@@ -136,10 +140,11 @@ const ProductosRetornablesModal = ({ open, onClose, productos, onConfirm }) => {
                 }
                 displayEmpty
                 sx={{
-                  fontSize: "1.1rem",
+                  fontSize: "1rem",
                   fontWeight: "bold",
-                  backgroundColor: "#F3F4F6",
                   borderRadius: "8px",
+                  minWidth: { xs: "100%", sm: 180 },
+                  flex: 1,
                 }}
               >
                 <MenuItem value="" disabled>
@@ -152,7 +157,6 @@ const ProductosRetornablesModal = ({ open, onClose, productos, onConfirm }) => {
                 ))}
               </Select>
 
-              {/* Cantidad */}
               <TextField
                 type="number"
                 label="Cantidad"
@@ -160,20 +164,28 @@ const ProductosRetornablesModal = ({ open, onClose, productos, onConfirm }) => {
                 onChange={(e) =>
                   handleChange(index, "cantidad", parseInt(e.target.value))
                 }
-                sx={{ width: "100px", textAlign: "center" }}
+                sx={{
+                  minWidth: 90,
+                  width: { xs: "100%", sm: 90 },
+                  textAlign: "center",
+                }}
               />
 
               {/* Estado */}
               <Select
                 value={producto.estado}
                 onChange={(e) => handleChange(index, "estado", e.target.value)}
-                sx={{ width: "180px", fontSize: "1rem", fontWeight: "bold" }}
+                sx={{
+                  minWidth: { xs: "100%", sm: 140 },
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  borderRadius: "8px",
+                }}
               >
                 <MenuItem value="reutilizable">♻️ Reutilizable</MenuItem>
                 <MenuItem value="defectuoso">⚠️ Defectuoso</MenuItem>
               </Select>
 
-              {/* Tipo de defecto (solo si es defectuoso) */}
               {producto.estado === "defectuoso" && (
                 <TextField
                   label="Tipo de defecto"
@@ -181,17 +193,19 @@ const ProductosRetornablesModal = ({ open, onClose, productos, onConfirm }) => {
                   onChange={(e) =>
                     handleChange(index, "tipo_defecto", e.target.value)
                   }
-                  sx={{ width: "200px" }}
+                  sx={{
+                    minWidth: { xs: "100%", sm: 160 },
+                    width: { xs: "100%", sm: 160 },
+                  }}
                 />
               )}
 
-              {/* Botón de eliminación */}
               <IconButton
                 onClick={() => handleEliminarProducto(index)}
                 color="error"
                 sx={{
-                  backgroundColor: "#FDECEC",
                   borderRadius: "8px",
+                  alignSelf: { xs: "flex-end", sm: "center" },
                   "&:hover": { backgroundColor: "#FCC0C0" },
                 }}
               >
@@ -200,7 +214,6 @@ const ProductosRetornablesModal = ({ open, onClose, productos, onConfirm }) => {
             </Box>
           ))}
 
-        {/* Botón para agregar nuevo producto */}
         <Button
           onClick={handleAgregarProducto}
           variant="contained"

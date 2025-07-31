@@ -14,9 +14,9 @@ import {
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PropTypes from "prop-types";
-import { useMemo } from "react";
-import DestinosMap from "./DestinosMap";
-import { ordenarDestinosPorCercania } from "../../utils/ordenRutas";
+import { useEffect, useRef, useState } from "react";
+import { ordenarDestinosConGoogle } from "../../utils/ordenRutas";
+import DestinosMapGoogle from "./DestinosMapGoogle";
 
 const ListaDestinos = ({
   destinos,
@@ -26,9 +26,11 @@ const ListaDestinos = ({
   onOpenEntrega,
   onVerDetallePedido,
 }) => {
-  /* const destinosPendientes = destinos.filter(
-    (d) => d.lat && d.lng && !entregas[d.id_pedido]?.entregado
-  ); */
+  const prioridadRank = {
+    alta: 1,
+    normal: 2,
+    baja: 3,
+  };
 
   const destinosEntregados = destinos
     .filter((d) => entregas[d.id_pedido]?.entregado)
@@ -42,6 +44,15 @@ const ListaDestinos = ({
     (d) => d.lat && d.lng && !entregas[d.id_pedido]?.entregado
   );
 
+  const destinosPendientesOrdenados = destinosPendientes
+    .slice()
+    .sort(
+      (a, b) =>
+        (prioridadRank[a.prioridad] || 99) -
+          (prioridadRank[b.prioridad] || 99) ||
+        new Date(a.fecha_creacion) - new Date(b.fecha_creacion)
+    );
+
   const recorridoReal = [
     origenInicial,
     ...destinosEntregados.map((d) => ({
@@ -53,38 +64,110 @@ const ListaDestinos = ({
     })),
   ];
 
-  /*   const rutaOptimizada = useMemo(() => {
-    if (!origen) return [];
-    return ordenarDestinosPorCercania(destinosPendientes, origen); */
+  /**
+   * Nuevo
+   */
 
-  /*   }, [origen, JSON.stringify(destinosPendientes)]); */
+  const [usarGeolocalizacion, setUsarGeolocalizacion] = useState(false);
+  const [rutaOptimizada, setRutaOptimizada] = useState([]);
+  const [directionsResult, setDirectionsResult] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
 
-  const origenPendiente = origen;
-  const rutaOptimizada = useMemo(() => {
-    if (!origenPendiente) return [];
-    return [
-      origenPendiente,
-      ...ordenarDestinosPorCercania(destinosPendientes, origenPendiente),
-    ];
-
-    // eslint-disable-next-line
-  }, [JSON.stringify(destinosPendientes), JSON.stringify(origenPendiente)]);
-
-  const ordenPorId = {};
-
-  rutaOptimizada.slice(1).forEach((d, i) => {
-    if (d && d.id_pedido !== undefined) {
-      ordenPorId[d.id_pedido] = i;
+  const solicitarGeolocalizacion = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLocation({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
+          setUsarGeolocalizacion(true);
+        },
+        (err) => {
+          alert("No se pudo obtener la ubicación: " + err.message);
+        }
+      );
+    } else {
+      alert("Tu navegador no soporta geolocalización.");
     }
-  });
+  };
+
+  const origenPendiente =
+    (usarGeolocalizacion && userLocation) ||
+    recorridoReal[recorridoReal.length - 1] ||
+    origen;
+
+  const pendientesKey = destinosPendientes
+    .map((d) => `${d.id_pedido}-${d.lat}-${d.lng}`)
+    .join("|");
+  const lastParamsRef = useRef({ origen: null, pendientesKey: "" });
+
+  useEffect(() => {
+    if (!origenPendiente || !destinosPendientesOrdenados.length) {
+      if (rutaOptimizada.length > 0) setRutaOptimizada([]);
+      if (directionsResult) setDirectionsResult(null);
+      return;
+    }
+    if (
+      lastParamsRef.current.origen &&
+      lastParamsRef.current.origen.lat === origenPendiente.lat &&
+      lastParamsRef.current.origen.lng === origenPendiente.lng &&
+      lastParamsRef.current.pendientesKey === pendientesKey
+    ) {
+      return;
+    }
+    lastParamsRef.current = {
+      origen: { ...origenPendiente },
+      pendientesKey,
+    };
+
+    let cancelado = false;
+
+    ordenarDestinosConGoogle(destinosPendientesOrdenados, origenPendiente)
+      .then(({ ordenados, directions }) => {
+        if (cancelado) return;
+        setRutaOptimizada([origenPendiente, ...ordenados]);
+        setDirectionsResult(directions || null);
+        // ...el resto igual, si necesitas
+      })
+      .catch(
+        (e) =>
+          !cancelado &&
+          console.warn("Error al calcular ruta optimizada con Google:", e)
+      );
+
+    return () => {
+      cancelado = true;
+    };
+    //eslint-disable-next-line
+  }, [origenPendiente, pendientesKey]);
 
   return (
     <>
-      <DestinosMap
-        destinos={destinosPendientes}
+      <Box sx={{ mb: 2 }}>
+        <Button
+          variant={usarGeolocalizacion ? "contained" : "outlined"}
+          color="primary"
+          onClick={() => {
+            if (usarGeolocalizacion) {
+              setUsarGeolocalizacion(false);
+            } else {
+              solicitarGeolocalizacion();
+            }
+          }}
+        >
+          {usarGeolocalizacion
+            ? "Usar origen de la ruta logística"
+            : "Recalcular desde mi ubicación"}
+        </Button>
+      </Box>
+
+      <DestinosMapGoogle
+        destinos={rutaOptimizada.slice(1)}
         ruta={rutaOptimizada}
         recorridoReal={recorridoReal}
         origenInicial={origenInicial}
+        directions={directionsResult}
       />
 
       <Card elevation={3} sx={{ mb: 4 }}>
@@ -92,126 +175,100 @@ const ListaDestinos = ({
           <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
             📍 Destinos de Entrega
           </Typography>
-
           <List disablePadding>
-            {destinos.map((destino, index) => (
-              <Box key={destino.id_pedido}>
-                <ListItem sx={{ px: 0, py: 2 }}>
-                  <Paper
-                    variant="outlined"
-                    sx={{
-                      width: "100%",
-                      p: 2,
-                      borderRadius: 2,
-                      backgroundColor: (theme) =>
-                        entregas[destino.id_pedido]?.entregado
-                          ? theme.palette.success.light
-                          : theme.palette.background.paper,
-                      color: (theme) =>
-                        entregas[destino.id_pedido]?.entregado
-                          ? theme.palette.getContrastText(
-                              theme.palette.success.light
-                            )
-                          : "inherit",
-                      transition: "all 0.3s",
-                      boxShadow: (theme) =>
-                        entregas[destino.id_pedido]?.entregado
-                          ? theme.shadows[2]
-                          : "none",
-                      border: (theme) => `1.5px solid ${theme.palette.divider}`,
-                    }}
-                  >
-                    <Stack
-                      direction={{ xs: "column", sm: "row" }}
-                      justifyContent="space-between"
-                      alignItems={{ xs: "stretch", sm: "center" }}
-                      spacing={2}
-                      sx={{ width: "100%" }}
-                    >
-                      <Box>
-                        {destino.id_pedido && ordenPorId[destino.id_pedido] && (
-                          <Chip
-                            label={`#${ordenPorId[destino.id_pedido]}`}
-                            size="small"
-                            sx={{
-                              fontWeight: 700,
-                              mr: 1,
-                              mb: 0.5,
-                              fontSize: "1rem",
-                              color: "#334155",
-                              background:
-                                "linear-gradient(90deg, #a8ffce 0%, #f9f9d2 100%)",
-                              border: "1.5px solid #a8dadc",
-                              boxShadow: "0 2px 8px 0 #22223b11",
-                              letterSpacing: 1,
-                            }}
-                          />
-                        )}
-                        <Typography variant="body2">
-                          Pedido: {destino.id_pedido}
-                        </Typography>
-                        <Typography
-                          variant="subtitle1"
-                          fontWeight={600}
-                          gutterBottom
-                        >
-                          {destino?.nombre_cliente}
-                        </Typography>
-                        <Typography variant="body2">
-                          Dirección: {destino.direccion}
-                        </Typography>
-                        {destino.notas && (
-                          <Typography variant="body2" sx={{ mt: 0.5 }}>
-                            Notas: {destino.notas}
-                          </Typography>
-                        )}
-                      </Box>
-                      <Box
+            {/* --- PENDIENTES --- */}
+            {destinosPendientesOrdenados.length > 0 && (
+              <>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ mt: 2, mb: 1, color: "#2d72d9", fontWeight: 700 }}
+                >
+                  Pendientes ({destinosPendientesOrdenados.length})
+                </Typography>
+                {destinosPendientesOrdenados.map((destino, index) => (
+                  <Box key={destino.id_pedido}>
+                    <ListItem sx={{ px: 0, py: 2 }}>
+                      <Paper
+                        variant="outlined"
                         sx={{
-                          display: "flex",
-                          flexDirection: "row",
-                          gap: 2,
-                          alignItems: "center",
-                          justifyContent: { xs: "flex-start", sm: "flex-end" },
-                          mt: { xs: 2, sm: 0 },
+                          width: "100%",
+                          p: 2,
+                          borderRadius: 2,
+                          backgroundColor: "#fffde7",
+                          border: "1.5px solid #2d72d911",
+                          boxShadow: "0 2px 8px 0 #22223b11",
                         }}
                       >
-                        {entregas[destino.id_pedido]?.entregado ? (
-                          <>
+                        <Stack
+                          direction={{ xs: "column", sm: "row" }}
+                          justifyContent="space-between"
+                          alignItems={{ xs: "stretch", sm: "center" }}
+                          spacing={2}
+                          sx={{ width: "100%" }}
+                        >
+                          <Box>
+                            {/* Badge de prioridad */}
                             <Chip
-                              icon={<CheckCircleOutlineIcon />}
-                              label="Entregado"
-                              color="success"
+                              label={`Prioridad: ${
+                                destino.prioridad?.toUpperCase() || "N/A"
+                              }`}
+                              size="small"
+                              color={
+                                destino.prioridad === "alta"
+                                  ? "error"
+                                  : destino.prioridad === "baja"
+                                  ? "default"
+                                  : "warning"
+                              }
                               sx={{
-                                fontWeight: 500,
+                                fontWeight: 600,
                                 mr: 1,
-                                px: 1.5,
-                                py: 0.5,
-                                fontSize: "0.875rem",
-                                height: 32,
+                                mb: 0.5,
+                                fontSize: "0.85rem",
+                                letterSpacing: 1,
                               }}
                             />
-                            <Button
-                              size="medium"
-                              variant="contained"
-                              sx={{
-                                textTransform: "none",
-                                fontWeight: 500,
-                                ml: 1,
-                                color: "inherit",
-                                borderColor: "success.main",
-                                "&:hover": {
-                                  borderColor: "success.dark",
-                                  backgroundColor: "rgba(46, 125, 50, 0.08)",
-                                },
-                              }}
-                              onClick={() => onVerDetallePedido(destino)}
+                            <Typography variant="body2">
+                              Pedido: {destino.id_pedido}
+                            </Typography>
+                            <Typography
+                              variant="subtitle1"
+                              fontWeight={600}
+                              gutterBottom
                             >
-                              Ver Detalle
-                            </Button>
-                          </>
-                        ) : (
-                          <>
+                              {destino?.nombre_cliente}
+                            </Typography>
+                            <Typography variant="body2">
+                              Dirección: {destino.direccion}
+                            </Typography>
+                            {destino.notas && (
+                              <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                Notas: {destino.notas}
+                              </Typography>
+                            )}
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#777" }}
+                            >
+                              Creado:{" "}
+                              {new Date(destino.fecha_creacion).toLocaleString(
+                                "es-CL"
+                              )}
+                            </Typography>
+                          </Box>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "row",
+                              gap: 2,
+                              alignItems: "center",
+                              justifyContent: {
+                                xs: "flex-start",
+                                sm: "flex-end",
+                              },
+                              mt: { xs: 2, sm: 0 },
+                            }}
+                          >
                             <Button
                               size="small"
                               variant="contained"
@@ -235,15 +292,135 @@ const ListaDestinos = ({
                             >
                               Ver Detalle
                             </Button>
-                          </>
-                        )}
-                      </Box>
-                    </Stack>
-                  </Paper>
-                </ListItem>
-                {index < destinos.length - 1 && <Divider />}
-              </Box>
-            ))}
+                          </Box>
+                        </Stack>
+                      </Paper>
+                    </ListItem>
+                    {index < destinosPendientesOrdenados.length - 1 && (
+                      <Divider />
+                    )}
+                  </Box>
+                ))}
+              </>
+            )}
+
+            {/* --- ENTREGADOS --- */}
+            {destinosEntregados.length > 0 && (
+              <>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ mt: 3, mb: 1, color: "#3bb273", fontWeight: 700 }}
+                >
+                  Entregados ({destinosEntregados.length})
+                </Typography>
+                {destinosEntregados.map((destino, index) => (
+                  <Box key={destino.id_pedido}>
+                    <ListItem sx={{ px: 0, py: 2 }}>
+                      <Paper
+                        variant="outlined"
+                        sx={{
+                          width: "100%",
+                          p: 2,
+                          borderRadius: 2,
+                          backgroundColor: (theme) =>
+                            theme.palette.success.light,
+                          color: (theme) =>
+                            theme.palette.getContrastText(
+                              theme.palette.success.light
+                            ),
+                          border: (theme) =>
+                            `1.5px solid ${theme.palette.divider}`,
+                        }}
+                      >
+                        <Stack
+                          direction={{ xs: "column", sm: "row" }}
+                          justifyContent="space-between"
+                          alignItems={{ xs: "stretch", sm: "center" }}
+                          spacing={2}
+                          sx={{ width: "100%" }}
+                        >
+                          <Box>
+                            <Chip
+                              icon={<CheckCircleOutlineIcon />}
+                              label="Entregado"
+                              color="success"
+                              sx={{
+                                fontWeight: 500,
+                                mr: 1,
+                                px: 1.5,
+                                py: 0.5,
+                                fontSize: "0.875rem",
+                                height: 32,
+                              }}
+                            />
+                            <Typography variant="body2">
+                              Pedido: {destino.id_pedido}
+                            </Typography>
+                            <Typography
+                              variant="subtitle1"
+                              fontWeight={600}
+                              gutterBottom
+                            >
+                              {destino?.nombre_cliente}
+                            </Typography>
+                            <Typography variant="body2">
+                              Dirección: {destino.direccion}
+                            </Typography>
+                            {destino.notas && (
+                              <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                Notas: {destino.notas}
+                              </Typography>
+                            )}
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#777" }}
+                            >
+                              Entregado:{" "}
+                              {destino.hora
+                                ? new Date(destino.hora).toLocaleString("es-CL")
+                                : "-"}
+                            </Typography>
+                          </Box>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "row",
+                              gap: 2,
+                              alignItems: "center",
+                              justifyContent: {
+                                xs: "flex-start",
+                                sm: "flex-end",
+                              },
+                              mt: { xs: 2, sm: 0 },
+                            }}
+                          >
+                            <Button
+                              size="medium"
+                              variant="contained"
+                              sx={{
+                                textTransform: "none",
+                                fontWeight: 500,
+                                ml: 1,
+                                color: "inherit",
+                                borderColor: "success.main",
+                                "&:hover": {
+                                  borderColor: "success.dark",
+                                  backgroundColor: "rgba(46, 125, 50, 0.08)",
+                                },
+                              }}
+                              onClick={() => onVerDetallePedido(destino)}
+                            >
+                              Ver Detalle
+                            </Button>
+                          </Box>
+                        </Stack>
+                      </Paper>
+                    </ListItem>
+                    {index < destinosEntregados.length - 1 && <Divider />}
+                  </Box>
+                ))}
+              </>
+            )}
           </List>
         </CardContent>
       </Card>

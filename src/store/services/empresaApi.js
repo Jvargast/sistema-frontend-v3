@@ -19,18 +19,6 @@ export const empresaApi = createApi({
       },
     }),
 
-    // Logs inicio de sesión
-    getAllSucursals: builder.query({
-      query: () => "/sucursales/",
-      providesTags: ["Empresa"],
-      async onQueryStarted(args, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-        } catch (error) {
-          console.log("Error al obtener sucursales:", error);
-        }
-      },
-    }),
     // Obtener empresa por ID
     getEmpresaById: builder.query({
       query: (id) => `/empresas/${id}`,
@@ -47,13 +35,44 @@ export const empresaApi = createApi({
       invalidatesTags: (result, error, { id }) => [{ type: "Empresa", id }],
     }),
 
+    // Logs inicio de sesión
+    getAllSucursals: builder.query({
+      query: () => "/sucursales/",
+      providesTags: ["Empresa"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("Error al obtener sucursales:", error);
+        }
+      },
+    }),
+
     // Obtener sucursal por ID
     getSucursalById: builder.query({
       query: (id) => `/sucursales/${id}`,
       providesTags: (result, error, id) => [{ type: "Sucursal", id }],
     }),
 
-    // Actualizar sucursal
+    createSucursal: builder.mutation({
+      query: (body) => ({
+        url: "/sucursales/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Sucursal"],
+    }),
+
+    // Borrar sucursal
+    deleteSucursal: builder.mutation({
+      query: (id) => ({
+        url: `/sucursales/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Sucursal"],
+    }),
+
+    // Editar sucursal (ya tienes updateSucursal, solo asegúrate de invalidar bien)
     updateSucursal: builder.mutation({
       query: ({ id, ...body }) => ({
         url: `/sucursales/${id}`,
@@ -72,4 +91,6 @@ export const {
   useGetSucursalByIdQuery,
   useUpdateEmpresaMutation,
   useUpdateSucursalMutation,
+  useCreateSucursalMutation,
+  useDeleteSucursalMutation,
 } = empresaApi;

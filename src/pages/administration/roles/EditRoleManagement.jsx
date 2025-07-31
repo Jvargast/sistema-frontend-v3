@@ -1,5 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { Box, Typography, Card, CardContent, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Button,
+  TextField,
+} from "@mui/material";
 import { VariableSizeList as VirtualizedList } from "react-window";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -28,13 +35,14 @@ const EditRole = () => {
   const [selectedPermisos, setSelectedPermisos] = useState([]);
   const [groupedPermisos, setGroupedPermisos] = useState({});
 
+  const [searchPermiso, setSearchPermiso] = useState("");
+
   const { data: permisosData, isFetching } = useGetAllpermisosQuery({
     page: 1,
     limit: 9999,
   });
 
   const canEditPermisos = useHasPermission("auth.permisos.editar");
-  
 
   useEffect(() => {
     if (permisosData?.permisos) {
@@ -44,29 +52,26 @@ const EditRole = () => {
 
   useEffect(() => {
     if (role?.rolesPermisos) {
-      setSelectedPermisos(role.rolesPermisos.map(p => p.permisoId));
+      setSelectedPermisos(role.rolesPermisos.map((p) => p.permisoId));
     }
   }, [role]);
-
-  
 
   const listRef = useRef();
 
   const getItemSize = (index, group) => {
     const permiso = group[index];
-  
-    const nombreLines = Math.ceil(permiso.nombre.length / 25); 
-    const descripcionLines = Math.ceil(permiso.descripcion.length / 40); 
-  
-    const lineHeight = 20; 
-    const verticalPadding = 30; 
-  
+
+    const nombreLines = Math.ceil(permiso.nombre.length / 25);
+    const descripcionLines = Math.ceil(permiso.descripcion.length / 40);
+
+    const lineHeight = 20;
+    const verticalPadding = 30;
+
     const calculatedHeight =
       verticalPadding + (nombreLines + descripcionLines) * lineHeight;
-  
+
     return Math.max(calculatedHeight, 70);
   };
-  
 
   useEffect(() => {
     if (listRef.current) {
@@ -75,14 +80,19 @@ const EditRole = () => {
   }, [groupedPermisos]);
 
   useEffect(() => {
-    const grouped = allPermisos.reduce((acc, permiso) => {
+    const permisosFiltrados = allPermisos.filter((permiso) => {
+      const texto =
+        `${permiso.nombre} ${permiso.descripcion} ${permiso.categoria}`.toLowerCase();
+      return texto.includes(searchPermiso.toLowerCase());
+    });
+    const grouped = permisosFiltrados.reduce((acc, permiso) => {
       const category = permiso.categoria || "Sin Categoría";
       if (!acc[category]) acc[category] = [];
       acc[category].push(permiso);
       return acc;
     }, {});
     setGroupedPermisos(grouped);
-  }, [allPermisos]);
+  }, [allPermisos, searchPermiso]);
 
   const handleSave = async () => {
     try {
@@ -99,7 +109,8 @@ const EditRole = () => {
           severity: "success",
         })
       );
-      navigate("/roles", { state: { refetch: true } });
+      navigate("../..", { relative: "path" });
+
     } catch (error) {
       dispatch(
         showNotification({
@@ -156,8 +167,7 @@ const EditRole = () => {
         }
 
         return Array.from(toActivate);
-      }
-      else {
+      } else {
         const permisoBase = allPermisos.find((p) => p.id === permisoId);
         if (!permisoBase) return prev;
 
@@ -244,6 +254,16 @@ const EditRole = () => {
           <Typography variant="h5" sx={{ fontWeight: "bold", marginBottom: 2 }}>
             Permisos Asociados
           </Typography>
+          <TextField
+            label="Buscar permiso"
+            variant="outlined"
+            fullWidth
+            sx={{ mb: 3 }}
+            value={searchPermiso}
+            onChange={(e) => setSearchPermiso(e.target.value)}
+            placeholder="Ej: vista.pedidos.ver o editar"
+          />
+
           {Object.entries(groupedPermisos).map(([category, group]) => (
             <Box key={category} sx={{ marginBottom: 3 }}>
               <Typography
@@ -276,6 +296,7 @@ const EditRole = () => {
                     group={group}
                     selectedPermisos={selectedPermisos}
                     onTogglePermiso={handleTogglePermiso}
+                    searchTerm={searchPermiso}
                   />
                 )}
               </VirtualizedList>

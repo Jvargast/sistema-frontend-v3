@@ -142,8 +142,10 @@ const Clientes = () => {
       resizable: false,
       flex: 0.1,
       minWidth: 70,
+      align: "center",
+      headerAlign: "center",
       renderCell: (params) => (
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box display="flex" alignItems="center" gap={1} justifyContent="center">
           <Box
             sx={{
               borderRadius: "50%",
@@ -425,6 +427,18 @@ const Clientes = () => {
               "& > div": {
                 borderRight: "1px solid #d1d9e6",
               },
+            },
+            '& .MuiDataGrid-cell[data-field="activo"]': {
+              justifyContent: "center",
+              display: "flex",
+              alignItems: "center",
+              textAlign: "center",
+            },
+            '& .MuiDataGrid-columnHeader[data-field="activo"]': {
+              justifyContent: "center",
+              display: "flex",
+              alignItems: "center",
+              textAlign: "center",
             },
             "& .MuiDataGrid-cell": {
               borderBottom: "1px solid",
