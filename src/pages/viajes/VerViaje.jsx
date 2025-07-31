@@ -19,6 +19,7 @@ import { useGetEntregasByAgendaIdQuery } from "../../store/services/entregasApi"
 import DestinosWithGoogle from "../../components/viaje/DestinosWithGoogle";
 import { useUbicacionChoferTiempoReal } from "../../hooks/useUbicacionChoferSocket";
 import BackButton from "../../components/common/BackButton";
+import { useSelector } from "react-redux";
 
 const VerViaje = () => {
   const { id } = useParams();
@@ -35,6 +36,8 @@ const VerViaje = () => {
   const [recorridoReal, setRecorridoReal] = useState(null);
   const [dataListos, setDataListos] = useState(false);
   const [entregas, setEntregas] = useState({});
+
+  const rol = useSelector((state) => state?.auth?.rol);
 
   useEffect(() => {
     if (!viaje || !entregasData?.data) return;
@@ -156,7 +159,10 @@ const VerViaje = () => {
 
   return (
     <Box maxWidth="lg" mx="auto" px={{ xs: 1, md: 3 }} py={3}>
-      <BackButton to="/admin/viajes" label="Volver" />
+      <BackButton
+        to={rol === "administrador" ? "/admin/viajes" : "/viajes"}
+        label="Volver"
+      />
       <Typography variant="h4" fontWeight={700} mb={1}>
         Recorrido del Viaje #{viaje.id_agenda_viaje}
       </Typography>
