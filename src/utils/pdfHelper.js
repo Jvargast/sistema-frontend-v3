@@ -6,7 +6,7 @@ export const fetchCuentaPorCobrarPdf = async (id_cxc) => {
         method: "GET",
         credentials: "include",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`, // Si usas bearer token
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`, 
         },
       }
     );

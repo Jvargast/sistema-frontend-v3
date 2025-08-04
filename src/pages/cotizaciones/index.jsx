@@ -13,7 +13,9 @@ import {
   Divider,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import StepConnector, { stepConnectorClasses } from "@mui/material/StepConnector";
+import StepConnector, {
+  stepConnectorClasses,
+} from "@mui/material/StepConnector";
 import { useSelector, useDispatch } from "react-redux";
 import { useCreateCotizacionMutation } from "../../store/services/cotizacionesApi";
 import { addItem, clearCart } from "../../store/reducers/cartSlice";
@@ -93,7 +95,13 @@ const calcularFechaVencimiento = (dias) => {
     .hour(12)
     .minute(0)
     .second(0)
-    .format(); 
+    .format();
+};
+
+const initialFormState = {
+  selectedCliente: null,
+  direccionEntrega: "",
+  notas: "",
 };
 
 const CrearCotizacion = () => {
@@ -102,18 +110,20 @@ const CrearCotizacion = () => {
   const cart = useSelector((state) => state.cart.items);
   const total = useSelector((state) => state.cart.total);
   const user = useSelector((state) => state.auth.user);
+  const [formState, setFormState] = useState(initialFormState);
   const [impuesto, setImpuesto] = useState(0.19);
   const [descuentoPorcentaje, setDescuentoPorcentaje] = useState(0);
 
-  const [selectedCliente, setSelectedCliente] = useState(null);
-  const [direccionEntrega, setDireccionEntrega] = useState("");
+  /* const [selectedCliente, setSelectedCliente] = useState(null);
+  const [direccionEntrega, setDireccionEntrega] = useState(""); */
   const [fechaVencimiento, setFechaVencimiento] = useState("");
-  const [notas, setNotas] = useState("");
+  /* const [notas, setNotas] = useState(""); */
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("all");
 
   const steps = ["Datos", "Productos", "Carrito", "Resumen"];
   const [activeStep, setActiveStep] = useState(0);
-  const nextStep = () => setActiveStep((s) => Math.min(s + 1, steps.length - 1));
+  const nextStep = () =>
+    setActiveStep((s) => Math.min(s + 1, steps.length - 1));
   const prevStep = () => setActiveStep((s) => Math.max(s - 1, 0));
 
   const theme = useTheme();
@@ -122,10 +132,13 @@ const CrearCotizacion = () => {
     useCreateCotizacionMutation();
 
   useEffect(() => {
-    if (selectedCliente && selectedCliente.direccion) {
-      setDireccionEntrega(selectedCliente.direccion);
+    if (formState.selectedCliente && formState.selectedCliente.direccion) {
+      setFormState((prev) => ({
+        ...prev,
+        direccionEntrega: formState.selectedCliente.direccion,
+      }));
     }
-  }, [selectedCliente]);
+  }, [formState.selectedCliente]);
 
   const handleAddToCart = (product) => {
     dispatch(
@@ -140,7 +153,7 @@ const CrearCotizacion = () => {
   };
 
   const handleCreateAndRedirect = async () => {
-    if (!selectedCliente || cart.length === 0 || !fechaVencimiento) {
+    if (!formState.selectedCliente || cart.length === 0 || !fechaVencimiento) {
       dispatch(
         showNotification({
           message:
@@ -152,7 +165,7 @@ const CrearCotizacion = () => {
     }
 
     const cotizacionData = {
-      id_cliente: selectedCliente.id_cliente,
+      id_cliente: formState.selectedCliente.id_cliente,
       id_sucursal: user?.id_sucursal,
       fecha_vencimiento: dayjs(fechaVencimiento)
         .tz(ZONA_HORARIA)
@@ -179,19 +192,16 @@ const CrearCotizacion = () => {
           descuento_porcentaje: 0,
         };
       }),
-
-      notas,
-      impuesto,
-      descuento_total_porcentaje: descuentoPorcentaje,
+      notas: formState.notas, // antes: notas
+      impuesto, // se mantiene igual, porque no está en formState
+      descuento_total_porcentaje: descuentoPorcentaje, // igual
     };
 
-    //Cambiar
     try {
       const result = await createCotizacion(cotizacionData).unwrap();
       dispatch(clearCart());
       navigate(`/admin/cotizaciones/ver/${result.cotizacion.id_cotizacion}`);
-      setSelectedCliente(null);
-      setDireccionEntrega("");
+      setFormState(initialFormState);
     } catch (err) {
       dispatch(
         showNotification({
@@ -231,18 +241,14 @@ const CrearCotizacion = () => {
       {activeStep === 0 && (
         <Box>
           <PedidoForm
-            selectedCliente={selectedCliente}
-            setSelectedCliente={setSelectedCliente}
-            direccionEntrega={direccionEntrega}
-            setDireccionEntrega={setDireccionEntrega}
+            formState={formState}
+            setFormState={setFormState}
             metodoPago={""}
             setMetodoPago={() => {}}
-            notas={notas}
             mostrarMetodoPago={false}
             mostrarTipoDocumento={false}
             tipoDocumento={""}
             setTipoDocumento={() => {}}
-            setNotas={setNotas}
             extraFields={
               <>
                 <Typography sx={{ fontWeight: "bold", mt: 2 }}>
