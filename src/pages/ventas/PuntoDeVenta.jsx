@@ -19,7 +19,7 @@ import {
 import { useGetAvailabreProductosQuery } from "../../store/services/productoApi";
 import { useGetAllCategoriasQuery } from "../../store/services/categoriaApi";
 import { useGetAllClientesQuery } from "../../store/services/clientesApi";
-import { useGetAllVendedoresQuery } from "../../store/services/usuariosApi";
+import { useGetAllUsuariosConCajaQuery } from "../../store/services/usuariosApi";
 import { useCreateVentaMutation } from "../../store/services/ventasApi";
 import { useCloseCajaMutation } from "../../store/services/cajaApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
@@ -55,7 +55,7 @@ const PuntoDeVenta = () => {
     data: vendedores,
     isLoading: loadingVendedores,
     error: errorVendedores,
-  } = useGetAllVendedoresQuery();
+  } = useGetAllUsuariosConCajaQuery();
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [openClienteModal, setOpenClienteModal] = useState(false);
   const { data: clientes, isLoading: loadingClientes } =
@@ -620,6 +620,7 @@ const PuntoDeVenta = () => {
         vendedores={vendedores || []}
         selectedVendedor={selectedVendedor}
         onSelect={handleSelectVendedor}
+        esAdministrador={usuario?.rol === "administrador"}
       />
       <SelectClienteModal
         open={openClienteModal}

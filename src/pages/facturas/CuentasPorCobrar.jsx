@@ -111,8 +111,8 @@ const CuentaPorCobrarDetalle = ({ cuenta }) => {
           p: 3,
           borderRadius: 2,
           background: modoEdicion
-            ? "linear-gradient(135deg, #d32f2f, #ef5350)" // rojo si edita
-            : "linear-gradient(135deg, #1e88e5, #64b5f6)", // azul normal
+            ? "linear-gradient(135deg, #d32f2f, #ef5350)" 
+            : "linear-gradient(135deg, #1e88e5, #64b5f6)", 
           color: "#fff",
           mb: 3,
           transition: "background 0.3s",
