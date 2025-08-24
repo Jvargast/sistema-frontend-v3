@@ -40,6 +40,11 @@ import {
   setActiveTab,
 } from "../../store/reducers/tabSlice";
 import { getTabKey } from "../../utils/tabUtil";
+import {
+  mainTabPaths,
+  routeToTabInfo,
+  shouldUseRouterPath,
+} from "../../utils/tabsConfig";
 
 const Sidebar = ({
   user,
@@ -61,115 +66,6 @@ const Sidebar = ({
   const currentPath = pathname.replace(/^\//, "");
 
   const { openTabs } = useSelector((state) => state.tabs);
-
-  const routerOnlyPaths = [
-    "clientes/crear",
-    "clientes/ver",
-    "clientes/editar",
-    "productos/ver",
-    "productos/editar",
-    "usuarios/editar",
-    "roles/editar",
-    "empresa/editar",
-    "insumos/ver",
-    "insumos/editar",
-    "ventas/ver",
-    "pagos/ver",
-    "facturas/ver",
-    "pedidos/ver",
-    "cotizaciones/ver",
-    "formulas/ver",
-    "formulas/nuevo",
-    "produccion/historial/ver",
-    "agendas/ver",
-    "ventas-chofer/ver",
-    "produccion/historial",
-  ];
-  const tabEnabledPaths = [
-    "dashboard",
-    "punto-venta",
-    "ventas",
-    "punto-cotizacion",
-    "cotizaciones",
-    "punto-pedido",
-    "admin-pedidos",
-    "mis-pedidos",
-    "pedidos",
-    "pagos",
-    "facturas",
-    "clientes",
-    "categorias",
-    "tipo-insumo",
-    "productos",
-    "produccion",
-    "formulas",
-    "insumos",
-    "camiones",
-    "inventario-camion",
-    "viajes",
-    "misventas",
-    "ventas-chofer",
-    "admin-viajes",
-    "agenda-carga",
-    "agendas",
-    "usuarios",
-    "miperfil",
-    "admin",
-    "cajas",
-    "roles",
-    "seguridad",
-    "empresa",
-    "analisis",
-  ];
-  const routeToTabInfo = {
-    dashboard: { label: "Dashboard", icon: "HomeOutlined" },
-    "punto-venta": { label: "Punto de Venta", icon: "ShoppingCartOutlined" },
-    ventas: { label: "Ventas", icon: "AttachMoneyOutlined" },
-    "punto-cotizacion": {
-      label: "Punto Cotización",
-      icon: "RequestQuoteOutlined",
-    },
-    cotizaciones: { label: "Cotizaciones", icon: "RequestQuoteOutlined" },
-    "punto-pedido": { label: "Punto Pedido", icon: "ShoppingCartOutlined" },
-    "admin-pedidos": {
-      label: "Admin Pedidos",
-      icon: "AdminPanelSettingsOutlined",
-    },
-    "mis-pedidos": { label: "Mis Pedidos", icon: "PersonOutlined" },
-    pedidos: { label: "Pedidos", icon: "ShoppingCartOutlined" },
-    pagos: { label: "Pagos", icon: "PaymentOutlined" },
-    facturas: { label: "Facturas", icon: "ReceiptOutlined" },
-    clientes: { label: "Clientes", icon: "PeopleOutlined" },
-    categorias: { label: "Categorías", icon: "CategoryOutlined" },
-    "tipo-insumo": { label: "Tipo Insumo", icon: "InventoryOutlined" },
-    productos: { label: "Productos", icon: "Inventory2Outlined" },
-    produccion: { label: "Producción", icon: "PrecisionManufacturingOutlined" },
-    formulas: { label: "Fórmulas", icon: "ScienceOutlined" },
-    insumos: { label: "Insumos", icon: "InventoryOutlined" },
-    camiones: { label: "Camiones", icon: "LocalShippingOutlined" },
-    "inventario-camion": {
-      label: "Gestión de Retorno",
-      icon: "InventoryOutlined",
-    },
-    viajes: { label: "Viajes", icon: "TripOriginOutlined" },
-    misventas: { label: "Mis Ventas", icon: "PersonOutlined" },
-    "ventas-chofer": { label: "Ventas Chofer", icon: "LocalShippingOutlined" },
-    "admin-viajes": {
-      label: "Admin Viajes",
-      icon: "AdminPanelSettingsOutlined",
-    },
-    "agenda-carga": { label: "Agenda Carga", icon: "EventOutlined" },
-    agendas: { label: "Agendas", icon: "CalendarTodayOutlined" },
-    usuarios: { label: "Usuarios", icon: "PeopleOutlined" },
-    miperfil: { label: "Mi Perfil", icon: "AccountCircleOutlined" },
-    admin: { label: "Administración", icon: "AdminPanelSettingsOutlined" },
-    cajas: { label: "Cajas", icon: "AccountBalanceOutlined" },
-    roles: { label: "Roles", icon: "SecurityOutlined" },
-    seguridad: { label: "Seguridad", icon: "SecurityOutlined" },
-    empresa: { label: "Empresa", icon: "BusinessOutlined" },
-    analisis: { label: "Análisis", icon: "AnalyticsOutlined" },
-  };
-
   const getActiveModule = () =>
     modulesData.find((m) => currentPath.startsWith(m.path))?.path || null;
   const activeModulePath = getActiveModule();
@@ -197,34 +93,30 @@ const Sidebar = ({
     }
   };
 
-  const shouldUseRouter = (path) => {
-    return routerOnlyPaths.some(
-      (routerPath) =>
-        path.startsWith(routerPath) ||
-        path.includes("/ver/") ||
-        path.includes("/editar/") ||
-        path.includes("/crear")
-    );
-  };
-
-  const canUseTab = (path) => {
+  /* const canUseTab = (path) => {
     return (
       isDesktop && tabEnabledPaths.includes(path) && !shouldUseRouter(path)
     );
-  };
+  }; */
+
+  const canUseTab = (keyOrPath) =>
+    isDesktop &&
+    mainTabPaths.includes(keyOrPath) &&
+    !shouldUseRouterPath(keyOrPath);
 
   const handleNavigation = (item) => {
-    const path = item.path;
-    const key = getTabKey(path);
+    const raw = item.path.startsWith("/") ? item.path.slice(1) : item.path;
+    const key = getTabKey(raw);
+    const path = key;
 
     if (!isDesktop) {
-      navigate(`/${path}`);
+      navigate("/" + raw);
       setActive(path);
       return;
     }
 
     if (canUseTab(key)) {
-      const tabInfo = routeToTabInfo[path] || {
+      const tabInfo = routeToTabInfo[key] || {
         label: item.text || item.name,
         icon: item.icon?.type?.displayName || null,
       };
@@ -244,10 +136,11 @@ const Sidebar = ({
             path,
           })
         );
+         dispatch(setActiveTab(key));
       }
-      navigate(`/${path}`);
+      navigate("/" + path);
     } else {
-      navigate(`/${path}`);
+      navigate("/" + raw);
     }
   };
 

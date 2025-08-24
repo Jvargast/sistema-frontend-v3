@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import ResizeObserver from "resize-observer-polyfill";
 import { Box, useMediaQuery } from "@mui/material";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import Sidebar from "../../components/layout/Sidebar";
@@ -10,14 +10,16 @@ import { LayoutContext } from "../../context/LayoutContext";
 import Footer from "../../components/common/Footer";
 import DynamicTabsBar from "../../components/layout/DynamicTabsBar";
 import WelcomePage from "../../components/common/WelcomePage";
-import { openTab } from "../../store/reducers/tabSlice";
-import { getTabKey } from "../../utils/tabUtil";
+/* import { openTab, setActiveTab } from "../../store/reducers/tabSlice"; */
+/* import { getTabKey } from "../../utils/tabUtil"; */
+import {
+  shouldUseRouterPath,
+} from "../../utils/tabsConfig";
 
 const Layout = () => {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [isSidebarOpen, setIsSidebarOpen] = useState(isDesktop);
   const drawerWidth = 250;
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const layoutContainerRef = useRef();
@@ -29,9 +31,9 @@ const Layout = () => {
   const { pathname } = useLocation();
   const currentPath = pathname.replace(/^\//, "");
 
-  const tabKey = getTabKey(currentPath);
+  /* const tabKey = getTabKey(currentPath); */
 
-  const routerOnlyPaths = [
+  /*   const routerOnlyPaths = [
     "clientes/crear",
     "clientes/ver",
     "clientes/editar",
@@ -145,60 +147,33 @@ const Layout = () => {
     "admin/ventas",
     "admin/cotizaciones",
     "admin/pedidos",
-  ];
+  ]; */
 
-  const shouldUseRouter =
-    routerOnlyPaths.some((path) => currentPath.startsWith(path)) ||
-    /\/ver\/\d+/.test(currentPath) ||
-    /\/editar\/\d+/.test(currentPath) ||
-    /\/crear/.test(currentPath) ||
-    currentPath.split("/").length > (tabKey.includes("/") ? 2 : 1);
+  const justClosedLastTabRef = useRef(false);
+  const prevTabsLenRef = useRef(openTabs.length);
+  const isRouterOnly = shouldUseRouterPath(currentPath);
+
+  useEffect(() => {
+    if (prevTabsLenRef.current === 1 && openTabs.length === 0) {
+      justClosedLastTabRef.current = true;
+    }
+    prevTabsLenRef.current = openTabs.length;
+  }, [openTabs.length]);
 
   useEffect(() => {
     if (!layoutContainerRef.current) return;
-    const observer = new ResizeObserver(() => {
-      setResizeCount((prev) => prev + 1);
-    });
+    const observer = new ResizeObserver(() => setResizeCount((p) => p + 1));
     observer.observe(layoutContainerRef.current);
     return () => observer.disconnect();
   }, []);
 
-   useEffect(() => {
-   if (!isDesktop) return;
-   const active = openTabs.find((t) => t.key === activeTab);
-   if (active) {
-     const desired = "/" + active.path;
-     if (pathname !== desired) {
-       navigate(desired, { replace: true });
-     }
-   } else {
-     //
-   }
- }, [isDesktop, activeTab, openTabs, pathname, navigate]);
-
   useEffect(() => {
-    if (
-      isDesktop &&
-      tabKey &&
-      mainTabPaths.includes(tabKey) &&
-      !shouldUseRouter &&
-      pathname !== "/" &&
-      openTabs.length === 0
-    ) {
-      const tabInfo = routeToTabInfo[tabKey];
-      if (tabInfo) {
-        dispatch(
-          openTab({
-            key: tabKey,
-            label: tabInfo.label,
-            icon: tabInfo.icon,
-            path: tabKey,
-          })
-        );
-      }
+    if (!isDesktop) return;
+    if (isRouterOnly) return; 
+    if (openTabs.length === 0 && pathname !== "/" && pathname !== "/#") {
+      navigate("/");
     }
-    // eslint-disable-next-line
-  }, [isDesktop, tabKey, shouldUseRouter, openTabs.length, dispatch, pathname]);
+  }, [isDesktop, isRouterOnly, openTabs.length, pathname, navigate]);
 
   useEffect(() => {
     if (
@@ -210,6 +185,12 @@ const Layout = () => {
       navigate("/");
     }
   }, [isDesktop, openTabs.length, pathname, navigate]);
+
+  useEffect(() => {
+    if (pathname === "/" || openTabs.length > 0) {
+      justClosedLastTabRef.current = false;
+    }
+  }, [pathname, openTabs.length]);
 
   const cleanPath = pathname.replace(/^\/+|\/+$/g, "");
   const isWelcome =

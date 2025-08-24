@@ -1,12 +1,11 @@
-export const getTabKey = (currentPath) => {
-  const cleanPath = currentPath.split("?")[0];
-  if (cleanPath.startsWith("admin/")) {
-    const adminPath = cleanPath.replace(/\/(ver|editar|crear)\/.*$/, "");
-    return adminPath;
+export const getTabKey = (currentPath = "") => {
+  const raw = currentPath.split("?")[0].replace(/^\/+/, "");
+  const base = raw.replace(/\/(ver|editar|crear)(\/.*)?$/, "");
+  const parts = base.split("/").filter(Boolean);
+
+  if (parts[0] === "admin") {
+    return parts.length >= 2 ? `admin/${parts[1]}` : "admin";
   }
-  const mainPath = cleanPath.replace(/\/(ver|editar|crear)\/.*$/, "");
-  if (!mainPath.includes("/")) {
-    return mainPath;
-  }
-  return mainPath;
+
+  return parts[0] || "";
 };

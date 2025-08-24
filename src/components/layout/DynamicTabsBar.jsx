@@ -178,6 +178,7 @@ export default function DynamicTabsBar({ isDesktop }) {
                             onClick={(e) => {
                               e.stopPropagation();
                               const isClosingActive = activeTab === tab.key;
+
                               const idx = visibleTabs.findIndex(
                                 (t) => t.key === tab.key
                               );
@@ -187,12 +188,24 @@ export default function DynamicTabsBar({ isDesktop }) {
                               const nextVisible = isClosingActive
                                 ? remaining[idx] || remaining[idx - 1] || null
                                 : null;
+                              const hasOnlyMinimizedAfterClose =
+                                isClosingActive &&
+                                !nextVisible &&
+                                minimizedTabs.length > 0;
                               dispatch(closeTab(tab.key));
 
                               if (isClosingActive) {
                                 if (nextVisible) {
                                   dispatch(setActiveTab(nextVisible.key));
                                   navigate("/" + nextVisible.path, {
+                                    replace: true,
+                                  });
+                                } else if (hasOnlyMinimizedAfterClose) {
+                                  const toRestore =
+                                    minimizedTabs[minimizedTabs.length - 1];
+                                  dispatch(maximizeTab(toRestore.key));
+                                  dispatch(setActiveTab(toRestore.key));
+                                  navigate("/" + toRestore.path, {
                                     replace: true,
                                   });
                                 } else {

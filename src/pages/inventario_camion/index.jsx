@@ -21,6 +21,7 @@ import Header from "../../components/common/Header";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import SucursalPickerHeader from "../../components/common/SucursalPickerHeader";
+import { InfoOutlined, StorefrontOutlined } from "@mui/icons-material";
 
 const InspeccionRetornables = () => {
   const dispatch = useDispatch();
@@ -211,9 +212,12 @@ const InspeccionRetornables = () => {
         return;
       }
 
-      console.log({ id_sucursal_inspeccion: idSucursal, items })
+      console.log({ id_sucursal_inspeccion: idSucursal, items });
 
-      await inspeccionar({ id_sucursal_inspeccion: idSucursal, items }).unwrap();
+      await inspeccionar({
+        id_sucursal_inspeccion: idSucursal,
+        items,
+      }).unwrap();
 
       dispatch(
         showNotification({
@@ -275,10 +279,47 @@ const InspeccionRetornables = () => {
 
   if (!idSucursal && !canChooseSucursal) {
     return (
-      <Box p={3}>
-        <Typography color="text.secondary">
-          No hay sucursal activa seleccionada.
-        </Typography>
+      <Box sx={{ p: 3 }}>
+        <Box
+          component="div"
+          sx={{
+            p: 3,
+            border: "1px dashed",
+            borderColor: "divider",
+            borderRadius: 2,
+            textAlign: "center",
+            bgcolor: "background.paper",
+          }}
+        >
+          <StorefrontOutlined
+            sx={{ fontSize: 42, color: "action.disabled", mb: 1 }}
+          />
+          <Typography
+            variant="subtitle2"
+            color="text.primary"
+            sx={{ fontWeight: 600 }}
+          >
+            Sin sucursal activa
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            Tu sesión no tiene una sucursal asignada actualmente.
+          </Typography>
+
+          <Box
+            sx={{
+              mt: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
+            }}
+          >
+            <InfoOutlined sx={{ fontSize: 16, color: "text.secondary" }} />
+            <Typography variant="caption" color="text.secondary">
+              Contacta a un administrador para que te asigne una sucursal.
+            </Typography>
+          </Box>
+        </Box>
       </Box>
     );
   }
