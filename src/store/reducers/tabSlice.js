@@ -50,13 +50,14 @@ const tabSlice = createSlice({
         state.openTabs.splice(tabIndex, 1);
 
         if (wasActive) {
-          if (state.openTabs.length === 0) {
-            state.activeTab = null;
-          } else if (state.openTabs[tabIndex]) {
-            state.activeTab = state.openTabs[tabIndex].key;
-          } else {
-            state.activeTab = state.openTabs[state.openTabs.length - 1].key;
-          }
+          const right = state.openTabs
+            .slice(tabIndex)
+            .find((t) => !t.minimized);
+          const left = [...state.openTabs.slice(0, tabIndex)]
+            .reverse()
+            .find((t) => !t.minimized);
+          const next = right || left || null;
+          state.activeTab = next ? next.key : null;
         }
       }
     },

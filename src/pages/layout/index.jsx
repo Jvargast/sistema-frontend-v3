@@ -163,6 +163,19 @@ const Layout = () => {
     return () => observer.disconnect();
   }, []);
 
+   useEffect(() => {
+   if (!isDesktop) return;
+   const active = openTabs.find((t) => t.key === activeTab);
+   if (active) {
+     const desired = "/" + active.path;
+     if (pathname !== desired) {
+       navigate(desired, { replace: true });
+     }
+   } else {
+     //
+   }
+ }, [isDesktop, activeTab, openTabs, pathname, navigate]);
+
   useEffect(() => {
     if (
       isDesktop &&

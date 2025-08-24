@@ -12,7 +12,7 @@ import {
 import {
   Close,
   Remove,
-/*   CropSquare, */
+  /*   CropSquare, */
   ViewQuilt,
   ClearAll,
 } from "@mui/icons-material";
@@ -177,7 +177,28 @@ export default function DynamicTabsBar({ isDesktop }) {
                             size="small"
                             onClick={(e) => {
                               e.stopPropagation();
+                              const isClosingActive = activeTab === tab.key;
+                              const idx = visibleTabs.findIndex(
+                                (t) => t.key === tab.key
+                              );
+                              const remaining = visibleTabs.filter(
+                                (t) => t.key !== tab.key
+                              );
+                              const nextVisible = isClosingActive
+                                ? remaining[idx] || remaining[idx - 1] || null
+                                : null;
                               dispatch(closeTab(tab.key));
+
+                              if (isClosingActive) {
+                                if (nextVisible) {
+                                  dispatch(setActiveTab(nextVisible.key));
+                                  navigate("/" + nextVisible.path, {
+                                    replace: true,
+                                  });
+                                } else {
+                                  navigate("/", { replace: true });
+                                }
+                              }
                             }}
                             title="Cerrar"
                             sx={{
