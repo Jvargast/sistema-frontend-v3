@@ -32,7 +32,7 @@ import { onRefetchMisPedidos } from "../../utils/eventBus";
 
 const MisPedidos = () => {
   const dispatch = useDispatch();
-  // 🔹 Función para formatear la fecha manualmente en YYYY-MM-DD sin UTC
+
   const formatFecha = (date) => {
     return (
       date.getFullYear() +
@@ -43,7 +43,6 @@ const MisPedidos = () => {
     );
   };
 
-  // 🔹 Definir hoy y ayer en un solo estado
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);

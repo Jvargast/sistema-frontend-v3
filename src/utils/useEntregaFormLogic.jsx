@@ -38,15 +38,18 @@ function useEntregaFormLogic({
   useEffect(() => {
     if (open) {
       reset();
-      if (destino?.tipo_documento === "factura") {
-        setPaso(2);
-      } else {
-        setPaso(detallePedido?.pagado ? 2 : 1);
-      }
+      if (destino?.tipo_documento === "factura") setPaso(2);
+      else setPaso(detallePedido?.pagado ? 2 : 1);
+
       setClienteTrae(true);
-      setProductosSeleccionados([]);
+      // precargar filas con cantidad 0
+      const base = (detallePedido?.detalle || [])
+        .filter((d) => d.es_retornable)
+        .map((d) => ({ id_producto: d.id_producto, cantidad: 0 }));
+
+      setProductosSeleccionados(base);
     }
-  }, [open, detallePedido?.pagado]);
+  }, [open, detallePedido?.pagado, reset, destino?.tipo_documento, setPaso]);
 
   const enviarEntrega = useCallback(
     async (formData, retornables) => {
@@ -69,7 +72,7 @@ function useEntregaFormLogic({
           }
         });
 
-        const botellonesRetorno =
+        /*         const botellonesRetorno =
           retornables.length > 0
             ? {
                 pasados: true,
@@ -80,6 +83,18 @@ function useEntregaFormLogic({
                   tipo_defecto: item.tipo_defecto,
                 })),
               }
+            : { pasados: false, items: [] }; */
+
+        const itemsRecibidos = (retornables || [])
+          .filter((i) => Number(i.cantidad) > 0)
+          .map((i) => ({
+            id_producto: i.id_producto,
+            cantidad: Number(i.cantidad),
+          }));
+
+        const botellonesRetorno =
+          clienteTrae && itemsRecibidos.length > 0
+            ? { pasados: true, items: itemsRecibidos }
             : { pasados: false, items: [] };
 
         const isFactura = destino?.tipo_documento === "factura";
@@ -96,7 +111,7 @@ function useEntregaFormLogic({
             destino?.tipo_documento === "factura"
               ? null
               : formData.id_metodo_pago || null,
-          referencia:
+          payment_reference:
             destino?.tipo_documento === "factura"
               ? null
               : formData.payment_reference || null,

@@ -84,3 +84,7 @@ button:focus-visible {
 .custom-tabs-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #757575;
 }
+
+.pac-container {
+  z-index: 2000 !important;
+}

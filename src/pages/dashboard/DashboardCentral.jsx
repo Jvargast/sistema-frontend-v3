@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { createSwapy } from "swapy";
 import {
@@ -19,24 +19,76 @@ import { getKpiConfig } from "../../utils/kpiUtils";
 import { useGetKpiPedidosPorFechaQuery } from "../../store/services/pedidosEstadisticasApi";
 import { formatCLP } from "../../utils/formatUtils";
 import { useGetKpiProductoPorFechaQuery } from "../../store/services/productosEstadisticasApi";
+import { useSelector } from "react-redux";
+import useSucursalActiva from "../../hooks/useSucursalActiva";
 
-const chartsData = [
-  { id: "chart1", component: <SalesChart /> },
-  { id: "chart2", component: <OrdersPieChart /> },
-  {
-    id: "chart3",
-    component: <RevenueTrendChart />,
-  },
-  {
-    id: "chart4",
-    component: <BestSellingProductsChart />,
-  },
-];
 
 const DashboardCentral = () => {
-  const { data: ventas } = useGetKpiVentasPorFechaQuery();
-  const { data: pedidos } = useGetKpiPedidosPorFechaQuery();
-  const { data: producto } = useGetKpiProductoPorFechaQuery();
+  const { mode, activeSucursalId } = useSelector((s) => s.scope || {});
+  const sucursalActiva = useSucursalActiva();
+  const resolvedSucursalId =
+    activeSucursalId ??
+    sucursalActiva?.id_sucursal ??
+    sucursalActiva?.id ??
+    null;
+
+  const kpiArgs = useMemo(
+    () =>
+      mode === "global"
+        ? {}
+        : resolvedSucursalId
+        ? { id_sucursal: resolvedSucursalId }
+        : {},
+    [mode, resolvedSucursalId]
+  );
+
+  const { data: ventas } = useGetKpiVentasPorFechaQuery(kpiArgs, {
+    refetchOnMountOrArgChange: true,
+  });
+  const { data: pedidos } = useGetKpiPedidosPorFechaQuery(kpiArgs, {
+    refetchOnMountOrArgChange: true,
+  });
+  const { data: producto } = useGetKpiProductoPorFechaQuery(kpiArgs, {
+    refetchOnMountOrArgChange: true,
+  });
+
+  const chartsData = useMemo(
+    () => [
+      {
+        id: "chart1",
+        component: (
+          <SalesChart
+            idSucursal={mode === "global" ? null : resolvedSucursalId}
+          />
+        ),
+      },
+      {
+        id: "chart2",
+        component: (
+          <OrdersPieChart
+            idSucursal={mode === "global" ? null : resolvedSucursalId}
+          />
+        ),
+      },
+      {
+        id: "chart3",
+        component: (
+          <RevenueTrendChart
+            idSucursal={mode === "global" ? null : resolvedSucursalId}
+          />
+        ),
+      },
+      {
+        id: "chart4",
+        component: (
+          <BestSellingProductsChart
+            idSucursal={mode === "global" ? null : resolvedSucursalId}
+          />
+        ),
+      },
+    ],
+    [mode, resolvedSucursalId]
+  );
 
   const { t } = useTranslation();
 

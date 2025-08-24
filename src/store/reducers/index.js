@@ -5,6 +5,8 @@ import notificacionReducer from "./notificacionSlice";
 import notificacionesReducer from "./notificacionesSlice";
 import agendaViajeReducer from "./agendaViajesSlice";
 import tabReducer from "./tabSlice";
+import sucursalReducer from "./sucursalSlice";
+import scopeReducer from "./scopeSlice"; 
 
 const reducers = {
   global: globalReducer,
@@ -14,6 +16,8 @@ const reducers = {
   notificaciones: notificacionesReducer,
   agenda: agendaViajeReducer,
   tabs: tabReducer,
+  sucursal: sucursalReducer,
+  scope: scopeReducer,
 };
 
 export default reducers;

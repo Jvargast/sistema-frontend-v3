@@ -346,7 +346,7 @@ const CuentaPorCobrarDetalle = ({ cuenta }) => {
                 variant="outlined"
                 size="small"
                 color="primary"
-                onClick={() => navigate(`/ventas/ver/${id_venta}`)}
+                onClick={() => navigate(`/admin/ventas/ver/${id_venta}`)}
                 sx={{
                   ml: 2,
                   textTransform: "none",

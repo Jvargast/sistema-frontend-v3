@@ -22,6 +22,7 @@ import PasoSeleccionProductos from "./PasoSeleccionProductos";
 import PasoRetornables from "./PasoRetornables";
 import PasoPago from "./PasoPago";
 import PasoResumenFinal from "./PagoResumenFinal";
+import { useState } from "react";
 
 const pasos = [
   "Seleccionar Cliente",
@@ -34,6 +35,17 @@ const pasos = [
 const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const usuario = useSelector((state) => state.auth.user);
+
+  const sucursalId =
+    viaje?.id_sucursal_origen ??
+    viaje?.id_sucursal ??
+    viaje?.origen_inicial?.id_sucursal ??
+    usuario?.id_sucursal ??
+    null;
+
+  const [ventaSinCliente, setVentaSinCliente] = useState(false);
 
   const {
     activeStep,
@@ -54,7 +66,6 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
     isStepValid,
   } = useVentaRapidaFormLogic();
 
-  const usuario = useSelector((state) => state.auth.user);
   const [ventaRapida, { isLoading }] = useRealizarVentaRapidaMutation();
 
   const handleCerrar = () => {
@@ -66,7 +77,8 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
     try {
       const payload = {
         id_chofer: usuario.id,
-        id_cliente: clienteSeleccionado?.id_cliente,
+        id_cliente: clienteSeleccionado?.id_cliente ?? null,
+        id_sucursal: sucursalId,
         id_metodo_pago: metodoPago,
         productos: productosSeleccionados.map((p) => ({
           id_producto: p.id_producto,
@@ -150,6 +162,11 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
             <PasoSeleccionCliente
               clienteSeleccionado={clienteSeleccionado}
               setClienteSeleccionado={setClienteSeleccionado}
+              idChofer={usuario?.id}
+              idSucursal={sucursalId}
+              allowSinCliente
+              ventaSinCliente={ventaSinCliente}
+              setVentaSinCliente={setVentaSinCliente}
             />
           )}
           {activeStep === 1 && (
@@ -219,7 +236,11 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
               fullWidth={fullScreen}
               onClick={handleNext}
               variant="contained"
-              disabled={!isStepValid()}
+              disabled={
+                activeStep === 0
+                  ? !(ventaSinCliente || clienteSeleccionado)
+                  : !isStepValid()
+              }
               sx={{
                 backgroundColor: "#1976d2",
                 fontWeight: 600,

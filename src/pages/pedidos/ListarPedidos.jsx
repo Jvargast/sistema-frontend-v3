@@ -8,6 +8,8 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  /*   Box,
+  TextField, */
 } from "@mui/material";
 import { Visibility, Undo, MoreVert } from "@mui/icons-material";
 import {
@@ -15,19 +17,86 @@ import {
   useDeletePedidoMutation,
   useRevertirEstadoPedidoMutation,
 } from "../../store/services/pedidosApi";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import AlertDialog from "../../components/common/AlertDialog";
 import DataTable from "../../components/common/DataTable";
 import EmptyState from "../../components/common/EmptyState";
 
+const getVentaSucursalId = (v) =>
+  Number(
+    v?.id_sucursal ??
+      v?.Sucursal?.id_sucursal ??
+      v?.sucursal?.id_sucursal ??
+      NaN
+  );
+
+const ESTADOS_ORDEN = [
+  "Pendiente",
+  "Pendiente de Confirmación",
+  "Confirmado",
+  "En Preparación",
+  "En Entrega",
+  "Completada",
+];
+
+const ESTADOS_MAP = {
+  Pendiente: 1,
+  "Pendiente de Confirmación": 4,
+  Confirmado: 5,
+  "En Preparación": 7,
+  "En Entrega": 8,
+  Completada: 9,
+  Cancelada: 10,
+  Reembolsada: 11,
+  "Completada y Entregada": 13,
+};
+
+function getEstadosAnteriores(estadoActual) {
+  const idx = ESTADOS_ORDEN.indexOf(estadoActual);
+  return ESTADOS_ORDEN.slice(0, idx).map((nombre) => ({
+    nombre,
+    id: ESTADOS_MAP[nombre],
+  }));
+}
+
+const estadoColores = {
+  Pendiente: "default",
+  "Pendiente de Pago": "warning",
+  Pagada: "success",
+  "Pendiente de Confirmación": "info",
+  Confirmado: "primary",
+  Rechazado: "error",
+  "En Preparación": "secondary",
+  "En Entrega": "info",
+  Completada: "success",
+  Cancelada: "error",
+  Reembolsada: "default",
+  Rechazada: "error",
+  "Completada y Entregada": "success",
+};
+
+const getPedidoSucursalId = (p) =>
+  Number(
+    p?.id_sucursal ??
+      p?.Sucursal?.id_sucursal ??
+      p?.sucursal?.id_sucursal ??
+      NaN
+  );
+
 const ListarPedidos = () => {
+  const {
+    mode,
+    activeSucursalId,
+    sucursales = [],
+  } = useSelector((s) => s.scope);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const { data, isLoading, refetch } = useGetAllPedidosQuery({
+  const { data, isLoading, refetch, isError } = useGetAllPedidosQuery({
     page: page + 1,
     limit: rowsPerPage,
   });
@@ -35,41 +104,40 @@ const ListarPedidos = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [rowMenuTarget, setRowMenuTarget] = useState(null);
   const [isReverting, setIsReverting] = useState(false);
-
-  const [deletePedido] = useDeletePedidoMutation();
-  const [revertirEstadoPedido] = useRevertirEstadoPedidoMutation();
-  const dispatch = useDispatch();
   const [openAlert, setOpenAlert] = useState(false);
   const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
 
-  const estados = [
-    "Pendiente",
-    "Pendiente de Confirmación",
-    "Confirmado",
-    "En Preparación",
-    "En Entrega",
-    "Completada",
-  ];
+  const [deletePedido] = useDeletePedidoMutation();
+  const [revertirEstadoPedido] = useRevertirEstadoPedidoMutation();
 
-  const ESTADOS_MAP = {
-    Pendiente: 1,
-    "Pendiente de Confirmación": 4,
-    Confirmado: 5,
-    "En Preparación": 7,
-    "En Entrega": 8,
-    Completada: 9,
-    Cancelada: 10,
-    Reembolsada: 11,
-    "Completada y Entregada": 13,
-  };
+  const [sucursalFiltro, setSucursalFiltro] = useState("");
 
-  function getEstadosAnteriores(estadoActual) {
-    const idx = estados.indexOf(estadoActual);
-    return estados.slice(0, idx).map((nombre) => ({
-      nombre,
-      id: ESTADOS_MAP[nombre],
-    }));
-  }
+  useEffect(() => {
+    if (mode === "global") {
+      setSucursalFiltro("");
+    } else {
+      setSucursalFiltro(String(activeSucursalId ?? ""));
+    }
+  }, [mode, activeSucursalId]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [mode, activeSucursalId, sucursalFiltro]);
+
+  const pedidos = useMemo(() => data?.pedidos || [], [data]);
+  const totalItems = useMemo(() => data?.paginacion.totalItems || 0, [data]);
+
+  const pedidosFiltrados = pedidos.filter((pedido) => {
+    const vSuc = getVentaSucursalId(pedido);
+    if (mode === "global") {
+      if (sucursalFiltro && Number(vSuc) !== Number(sucursalFiltro))
+        return false;
+    } else {
+      if (activeSucursalId && Number(vSuc) !== Number(activeSucursalId))
+        return false;
+    }
+    return true;
+  });
 
   const handleOpenMenu = (event, row) => {
     setAnchorEl(event.currentTarget);
@@ -120,7 +188,6 @@ const ListarPedidos = () => {
         })
       );
     } catch (error) {
-      console.error("Error al eliminar pedido:", error);
       dispatch(
         showNotification({
           message: `Error al eliminar: ${error?.data?.error}`,
@@ -137,34 +204,24 @@ const ListarPedidos = () => {
     setPedidoSeleccionado(null);
   };
 
-  useEffect(() => {
-    refetch();
-  }, [page, rowsPerPage, refetch]);
-
-  const pedidos = useMemo(() => data?.pedidos || [], [data]);
-  const totalItems = useMemo(() => data?.paginacion?.totalItems || 0, [data]);
-
-  const estadoColores = {
-    Pendiente: "default",
-    "Pendiente de Pago": "warning",
-    Pagada: "success",
-    "Pendiente de Confirmación": "info",
-    Confirmado: "primary",
-    Rechazado: "error",
-    "En Preparación": "secondary",
-    "En Entrega": "info",
-    Completada: "success",
-    Cancelada: "error",
-    Reembolsada: "default",
-    Rechazada: "error",
-    "Completada y Entregada": "success",
-  };
-
   const columns = [
     {
       id: "id_pedido",
       label: "ID",
       render: (row) => Number(row.id_pedido),
+    },
+    {
+      id: "sucursal",
+      label: "Sucursal",
+      render: (row) => {
+        const nombre =
+          row?.Sucursal?.nombre ||
+          (sucursales.find(
+            (s) => Number(s.id_sucursal) === Number(getPedidoSucursalId(row))
+          )?.nombre ??
+            (row?.id_sucursal ? `Sucursal ${row.id_sucursal}` : "—"));
+        return <Chip label={nombre} size="small" sx={{ fontWeight: "bold" }} />;
+      },
     },
     {
       id: "cliente",
@@ -204,7 +261,6 @@ const ListarPedidos = () => {
         />
       ),
     },
-
     {
       id: "acciones",
       label: "Acciones",
@@ -258,7 +314,7 @@ const ListarPedidos = () => {
       },
     },
   ];
-  if (!isLoading && pedidos.length === 0) {
+  if (!isLoading && totalItems === 0) {
     return (
       <EmptyState
         title="Aún no tienes pedidos"
@@ -275,7 +331,7 @@ const ListarPedidos = () => {
         title="Listado de Pedidos"
         subtitle="Gestión de Pedidos"
         columns={columns}
-        rows={pedidos}
+        rows={pedidosFiltrados}
         totalItems={totalItems}
         rowsPerPage={rowsPerPage}
         page={page}
@@ -285,8 +341,11 @@ const ListarPedidos = () => {
           setPage(0);
         }}
         loading={isLoading}
-        errorMessage="No se pudieron cargar los pedidos o no existen datos disponibles."
+        errorMessage={
+          isError ? "No se pudieron cargar los pedidos." : undefined
+        }
       />
+
       <AlertDialog
         openAlert={openAlert}
         onCloseAlert={handleCloseAlert}

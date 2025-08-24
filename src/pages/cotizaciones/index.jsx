@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import {
   Box,
@@ -29,6 +29,10 @@ import { useNavigate } from "react-router";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
+import { getStockForSucursal } from "../../utils/inventoryUtils";
+import SucursalPickerHeader from "../../components/common/SucursalPickerHeader";
+import MiniCartSummary from "../../components/pedido/MiniCartSummary";
 
 const StyledConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -102,6 +106,7 @@ const initialFormState = {
   selectedCliente: null,
   direccionEntrega: "",
   notas: "",
+  id_sucursal: null,
 };
 
 const CrearCotizacion = () => {
@@ -109,15 +114,16 @@ const CrearCotizacion = () => {
   const navigate = useNavigate();
   const cart = useSelector((state) => state.cart.items);
   const total = useSelector((state) => state.cart.total);
-  const user = useSelector((state) => state.auth.user);
   const [formState, setFormState] = useState(initialFormState);
+
+  const { mode, activeSucursalId } = useSelector((s) => s.scope);
+  const isSucursalScope = mode !== "global" && Number(activeSucursalId);
+  const { data: sucursales } = useGetAllSucursalsQuery();
+
   const [impuesto, setImpuesto] = useState(0.19);
   const [descuentoPorcentaje, setDescuentoPorcentaje] = useState(0);
 
-  /* const [selectedCliente, setSelectedCliente] = useState(null);
-  const [direccionEntrega, setDireccionEntrega] = useState(""); */
   const [fechaVencimiento, setFechaVencimiento] = useState("");
-  /* const [notas, setNotas] = useState(""); */
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("all");
 
   const steps = ["Datos", "Productos", "Carrito", "Resumen"];
@@ -127,6 +133,15 @@ const CrearCotizacion = () => {
   const prevStep = () => setActiveStep((s) => Math.max(s - 1, 0));
 
   const theme = useTheme();
+  const canChooseSucursal = !isSucursalScope;
+  const sucursalActual = useMemo(() => {
+    const id = formState.id_sucursal;
+    if (!id) return null;
+    return (
+      (sucursales || []).find((s) => Number(s.id_sucursal) === Number(id)) ||
+      null
+    );
+  }, [formState.id_sucursal, sucursales]);
 
   const [createCotizacion, { isLoading, error }] =
     useCreateCotizacionMutation();
@@ -140,7 +155,41 @@ const CrearCotizacion = () => {
     }
   }, [formState.selectedCliente]);
 
-  const handleAddToCart = (product) => {
+  useEffect(() => {
+    if (isSucursalScope) {
+      setFormState((prev) =>
+        prev.id_sucursal === Number(activeSucursalId)
+          ? prev
+          : { ...prev, id_sucursal: Number(activeSucursalId) }
+      );
+    } else {
+      setFormState((prev) => ({
+        ...prev,
+        id_sucursal: prev.id_sucursal ?? null,
+      }));
+    }
+  }, [isSucursalScope, activeSucursalId, mode]);
+
+  useEffect(() => {
+    if (!formState.id_sucursal) return;
+    const otraSucursal = cart.some(
+      (i) =>
+        i.id_sucursal_origen &&
+        Number(i.id_sucursal_origen) !== Number(formState.id_sucursal)
+    );
+    if (otraSucursal) {
+      dispatch(clearCart());
+      dispatch(
+        showNotification({
+          message:
+            "La sucursal cambió. Se vació el carrito para evitar mezclar.",
+          severity: "info",
+        })
+      );
+    }
+  }, [formState.id_sucursal, cart, dispatch]);
+
+  /*   const handleAddToCart = (product) => {
     dispatch(
       addItem({
         id_producto: product.id_producto,
@@ -148,6 +197,59 @@ const CrearCotizacion = () => {
         precio_unitario: parseFloat(product.precio),
         cantidad: 1,
         tipo: product.tipo || "producto",
+      })
+    );
+  }; */
+  const handleAddToCart = (product) => {
+    const idSucursal = Number(formState.id_sucursal);
+    if (!idSucursal) {
+      dispatch(
+        showNotification({
+          message: "Selecciona una sucursal para agregar productos.",
+          severity: "info",
+        })
+      );
+      return;
+    }
+
+    const stockDisponible = getStockForSucursal(product.inventario, idSucursal);
+
+    const qtyEnCarrito = cart
+      .filter(
+        (i) =>
+          i.id_producto === product.id_producto &&
+          Number(i.id_sucursal_origen) === idSucursal
+      )
+      .reduce((s, i) => s + i.cantidad, 0);
+
+    if (qtyEnCarrito + 1 > stockDisponible) {
+      dispatch(
+        showNotification({
+          message: "No hay stock suficiente en la sucursal seleccionada.",
+          severity: "warning",
+        })
+      );
+      return;
+    }
+
+    const isInsumo = product.tipo === "insumo";
+    const idInsumo = isInsumo
+      ? parseInt(
+          typeof product.id_producto === "string"
+            ? product.id_producto.replace("insumo_", "")
+            : product.id_producto
+        )
+      : undefined;
+
+    dispatch(
+      addItem({
+        id_producto: product.id_producto,
+        nombre: product.nombre_producto,
+        precio_unitario: parseFloat(product.precio),
+        cantidad: 1,
+        tipo: product.tipo || "producto",
+        ...(isInsumo && { id_insumo: idInsumo }),
+        id_sucursal_origen: idSucursal,
       })
     );
   };
@@ -163,10 +265,19 @@ const CrearCotizacion = () => {
       );
       return;
     }
+    if (!formState.id_sucursal) {
+      dispatch(
+        showNotification({
+          message: "Debes seleccionar una sucursal para la cotización.",
+          severity: "warning",
+        })
+      );
+      return;
+    }
 
     const cotizacionData = {
       id_cliente: formState.selectedCliente.id_cliente,
-      id_sucursal: user?.id_sucursal,
+      id_sucursal: Number(formState.id_sucursal),
       fecha_vencimiento: dayjs(fechaVencimiento)
         .tz(ZONA_HORARIA)
         .hour(12)
@@ -192,9 +303,9 @@ const CrearCotizacion = () => {
           descuento_porcentaje: 0,
         };
       }),
-      notas: formState.notas, // antes: notas
-      impuesto, // se mantiene igual, porque no está en formState
-      descuento_total_porcentaje: descuentoPorcentaje, // igual
+      notas: formState.notas,
+      impuesto,
+      descuento_total_porcentaje: descuentoPorcentaje,
     };
 
     try {
@@ -219,6 +330,13 @@ const CrearCotizacion = () => {
       <Typography variant="h4" fontWeight={700} textAlign="center" mb={3}>
         Crear Cotización
       </Typography>
+      <SucursalPickerHeader
+        sucursales={sucursales || []}
+        idSucursal={formState.id_sucursal}
+        canChoose={canChooseSucursal}
+        onChange={(id) => setFormState((p) => ({ ...p, id_sucursal: id }))}
+        nombreSucursal={sucursalActual?.nombre}
+      />
       <Stepper
         activeStep={activeStep}
         alternativeLabel
@@ -237,7 +355,6 @@ const CrearCotizacion = () => {
           </Step>
         ))}
       </Stepper>
-
       {activeStep === 0 && (
         <Box>
           <PedidoForm
@@ -249,6 +366,7 @@ const CrearCotizacion = () => {
             mostrarTipoDocumento={false}
             tipoDocumento={""}
             setTipoDocumento={() => {}}
+            idSucursalFiltro={formState.id_sucursal}
             extraFields={
               <>
                 <Typography sx={{ fontWeight: "bold", mt: 2 }}>
@@ -318,13 +436,16 @@ const CrearCotizacion = () => {
             }
           />
           <Stack direction="row" justifyContent="flex-end" mt={2}>
-            <Button variant="contained" onClick={nextStep}>
+            <Button
+              variant="contained"
+              onClick={nextStep}
+              disabled={mode === "global" && !formState.id_sucursal}
+            >
               Siguiente
             </Button>
           </Stack>
         </Box>
       )}
-
       {activeStep === 1 && (
         <Box>
           <Typography
@@ -340,7 +461,9 @@ const CrearCotizacion = () => {
           <PedidoProductos
             selectedCategory={categoriaSeleccionada}
             onAddToCart={handleAddToCart}
+            sucursalId={formState.id_sucursal}
           />
+          <MiniCartSummary onOpenCart={() => setActiveStep(2)} />
           <Stack direction="row" justifyContent="space-between" mt={2}>
             <Button variant="outlined" onClick={prevStep}>
               Atrás
@@ -351,7 +474,6 @@ const CrearCotizacion = () => {
           </Stack>
         </Box>
       )}
-
       {activeStep === 2 && (
         <Box>
           <PedidoCarrito />
@@ -369,7 +491,6 @@ const CrearCotizacion = () => {
           </Stack>
         </Box>
       )}
-
       {activeStep === 3 && (
         <Box>
           <PedidoResumen

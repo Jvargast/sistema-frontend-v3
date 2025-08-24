@@ -6,6 +6,7 @@ import {
   Box,
   useMediaQuery,
   useTheme,
+  Button,
 } from "@mui/material";
 import {
   Description,
@@ -15,25 +16,62 @@ import {
 } from "@mui/icons-material";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router";
 
-const DocumentosVenta = ({ documentos }) => {
+const DocumentosVenta = ({ documentos, id_factura }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const navigate = useNavigate();
   return (
     <Box>
-      <Typography
-        variant="subtitle1"
-        fontWeight="bold"
-        color="primary"
-        gutterBottom
-        sx={{
-          fontSize: isMobile ? "1rem" : "1.2rem",
-          textAlign: isMobile ? "left" : "inherit",
-        }}
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        mb={2}
       >
-        📄 Documentos Asociados
-      </Typography>
+        <Typography
+          variant="subtitle1"
+          fontWeight="bold"
+          color="primary"
+          gutterBottom
+          sx={{
+            fontSize: isMobile ? "1rem" : "1.2rem",
+            textAlign: isMobile ? "left" : "inherit",
+          }}
+        >
+          📄 Documentos Asociados
+        </Typography>
+        {id_factura ? (
+          <Box
+            sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}
+          >
+            <Typography variant="subtitle2" color="text.secondary">
+              ID Factura:
+            </Typography>
+            <Typography fontStyle="italic"> #{id_factura}</Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              color="primary"
+              onClick={() => navigate(`/facturas/ver/${id_factura}`)}
+              sx={{
+                ml: 2,
+                textTransform: "none",
+                fontWeight: "bold",
+                borderColor: "#1e88e5",
+                color: "#1e88e5",
+                "&:hover": {
+                  backgroundColor: "#e3f2fd",
+                  borderColor: "#1e88e5",
+                },
+              }}
+            >
+              Ver Factura
+            </Button>
+          </Box>
+        ) : null}
+      </Box>
 
       <Divider sx={{ mb: 2 }} />
 
@@ -125,6 +163,7 @@ DocumentosVenta.propTypes = {
       fecha_emision: PropTypes.string.isRequired,
     })
   ).isRequired,
+  id_factura: PropTypes.number,
 };
 
 export default DocumentosVenta;

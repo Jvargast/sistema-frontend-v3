@@ -45,6 +45,7 @@ import { setMode } from "../../store/reducers/globalSlice";
 import { useTranslation } from "react-i18next";
 import { isColorLight } from "../../utils/colorUtil";
 import useTabNavigation from "../../utils/useTabNavigation";
+import ScopeSwitcher from "./ScopeSwitcher";
 
 const rolColors = {
   chofer: "#FFE082",
@@ -60,7 +61,11 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const isTabletOrMobile = useMediaQuery("(max-width:1023px)");
   const { i18n } = useTranslation();
-  const navbarColor = rolColors[rol?.toLowerCase()] || rolColors.default;
+  const roleName = (
+    typeof rol === "string" ? rol : rol?.nombre || ""
+  ).toLowerCase();
+  const isAdmin = roleName === "administrador";
+  const navbarColor = rolColors[roleName] || rolColors.default;
   const iconNavbarColor = isColorLight(navbarColor) ? "#2c3e50" : "#fff";
 
   const navigate = useNavigate();
@@ -140,7 +145,9 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
         break;
       case "viaje_finalizado":
         if (notif?.datos_adicionales?.id_agenda_viaje) {
-          navigate(`/admin/viajes/ver/${notif.datos_adicionales.id_agenda_viaje}`);
+          navigate(
+            `/admin/viajes/ver/${notif.datos_adicionales.id_agenda_viaje}`
+          );
         } else {
           navigate("/admin/viajes");
         }
@@ -285,6 +292,7 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
               gap: "1.5rem",
             }}
           >
+            {isAdmin && <ScopeSwitcher />}
             <IconButton
               aria-label="Ver notificaciones"
               onClick={handleOpenNotificationsMenu}
@@ -436,6 +444,11 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
             Menú
           </Typography>
           <Divider />
+          {isAdmin && (
+            <Box sx={{ p: 1.5 }}>
+              <ScopeSwitcher />
+            </Box>
+          )}
           <List>
             {modulesData
               .slice(1)

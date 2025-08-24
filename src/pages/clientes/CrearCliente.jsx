@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
   Box,
   Typography,
@@ -17,6 +18,9 @@ import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import { useIsMobile } from "../../utils/useIsMobile";
 import AutocompleteDireccion from "../../components/pedido/AutocompleteDireccion";
 import MapSelectorGoogle from "../../components/maps/MapSelector";
+import useSucursalActiva from "../../hooks/useSucursalActiva";
+import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
+import SucursalPickerHeader from "../../components/common/SucursalPickerHeader";
 
 const CrearCliente = () => {
   const theme = useTheme();
@@ -37,6 +41,44 @@ const CrearCliente = () => {
     lng: null,
   });
 
+  const usuario = useSelector((s) => s.auth);
+  const { mode, activeSucursalId } = useSelector((s) => s.scope);
+
+  const sucursalActiva = useSucursalActiva();
+  const { data: sucursales = [] } = useGetAllSucursalsQuery();
+
+  const isAdmin = usuario?.rol === "administrador";
+
+  const [idSucursal, setIdSucursal] = useState(
+    mode === "global"
+      ? null
+      : sucursalActiva?.id_sucursal ||
+          usuario?.id_sucursal ||
+          Number(activeSucursalId) ||
+          null
+  );
+
+  const nombreSucursal = useMemo(() => {
+    const s = (sucursales || []).find(
+      (x) => Number(x.id_sucursal) === Number(idSucursal)
+    );
+    return s?.nombre || "";
+  }, [sucursales, idSucursal]);
+
+  useEffect(() => {
+    if (mode !== "global") {
+      const enforced =
+        Number(activeSucursalId) ||
+        Number(sucursalActiva?.id_sucursal) ||
+        Number(usuario?.id_sucursal) ||
+        null;
+      setIdSucursal(enforced);
+    } else {
+      setIdSucursal((prev) => prev ?? null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, activeSucursalId, sucursalActiva?.id_sucursal]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -47,7 +89,19 @@ const CrearCliente = () => {
 
   const handleSubmit = async () => {
     try {
-      await createCliente(formData).unwrap();
+      if (!idSucursal) {
+        dispatch(
+          showNotification({
+            message: "Selecciona una sucursal para el nuevo cliente.",
+            severity: "warning",
+          })
+        );
+        return;
+      }
+      await createCliente({
+        ...formData,
+        id_sucursal: Number(idSucursal),
+      }).unwrap();
       dispatch(
         showNotification({
           message: "Cliente creado exitosamente.",
@@ -83,6 +137,13 @@ const CrearCliente = () => {
       <Typography variant="h4" gutterBottom fontWeight="bold">
         Crear Cliente
       </Typography>
+      <SucursalPickerHeader
+        sucursales={sucursales || []}
+        idSucursal={idSucursal}
+        canChoose={!!isAdmin}
+        onChange={(id) => setIdSucursal(id)}
+        nombreSucursal={nombreSucursal}
+      />
       <Divider sx={{ my: 2 }} />
       <Box
         sx={{

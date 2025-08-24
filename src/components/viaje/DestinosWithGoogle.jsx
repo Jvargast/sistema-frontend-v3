@@ -5,7 +5,7 @@ import {
 } from "@react-google-maps/api";
 import { Box, Typography } from "@mui/material";
 import PropTypes from "prop-types";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 /* import { convertirFechaLocal } from "../../utils/fechaUtils"; */
 import { useDirections } from "../../hooks/useDirections";
 import AdvancedMarker from "./AdvancedMarker";
@@ -73,6 +73,27 @@ export default function DestinosWithGoogle({
     return { lat: -33.45, lng: -70.65 };
   }, [ruta, recorridoReal]);
 
+  const lastEntregaAt = useMemo(() => {
+    const t = recorridoReal.slice(1).reduce((max, d) => {
+      const ts = new Date(d.hora || 0).getTime();
+      return Number.isFinite(ts) ? Math.max(max, ts) : max;
+    }, 0);
+    return t || 0;
+  }, [recorridoReal]);
+
+  useEffect(() => {
+    if (!mapInstance || !window.google?.maps?.LatLngBounds) return;
+    const bounds = new window.google.maps.LatLngBounds();
+    [...ruta, ...recorridoReal].forEach((p) => {
+      if (p && Number.isFinite(+p.lat) && Number.isFinite(+p.lng)) {
+        bounds.extend({ lat: Number(p.lat), lng: Number(p.lng) });
+      }
+    });
+    if (!bounds.isEmpty?.() && typeof mapInstance.fitBounds === "function") {
+      mapInstance.fitBounds(bounds, 64);
+    }
+  }, [mapInstance, ruta, recorridoReal]);
+
   return (
     <>
       {/* Leyenda */}
@@ -91,6 +112,7 @@ export default function DestinosWithGoogle({
         </Box>
       </Box>
       <GoogleMap
+        key={`map-${lastEntregaAt}`}
         mapContainerStyle={{
           height: 320,
           width: "100%",
@@ -108,6 +130,7 @@ export default function DestinosWithGoogle({
         {/* Polyline de entregados */}
         {recorridoReal?.length > 1 && (
           <Polyline
+            key={`path-${lastEntregaAt}`}
             path={recorridoReal.map((p) => ({
               lat: Number(p.lat),
               lng: Number(p.lng),

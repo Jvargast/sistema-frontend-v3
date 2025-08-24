@@ -1,12 +1,7 @@
-import {
-  Box,
-  Typography,
-
-  CircularProgress,
-  Pagination,
-} from "@mui/material";
+import { Box, Typography, CircularProgress, Pagination } from "@mui/material";
 import PropTypes from "prop-types";
 import ProductCard from "../ProductCard";
+import { getStockForSucursal } from "../../../utils/inventoryUtils";
 
 const ProductosGrid = ({
   productos,
@@ -16,6 +11,7 @@ const ProductosGrid = ({
   totalPages,
   onPageChange,
   onAddToCart,
+  sucursalId,
 }) => (
   <Box width="100%" maxHeight="100%">
     {isSearching && (
@@ -41,25 +37,26 @@ const ProductosGrid = ({
             flexDirection: { xs: "column", md: "unset" },
             alignItems: { xs: "center", md: "unset" },
             gap: 2,
-            gridTemplateColumns: { md: "repeat(4, 1fr)" }, 
+            gridTemplateColumns: { md: "repeat(4, 1fr)" },
             width: "100%",
             mb: 3,
           }}
         >
-          {productos.map((product) => (
-            <ProductCard
-              key={product.id_producto}
-              product={{
-                ...product,
-                precio: parseFloat(product.precio || 0),
-              }}
-              onAddToCart={onAddToCart}
-              sx={{
-                width: { xs: "90%", md: "100%" },
-                maxWidth: 320,
-              }}
-            />
-          ))}
+          {productos.map((product) => {
+            const stock = getStockForSucursal(product.inventario, sucursalId);
+            return (
+              <ProductCard
+                key={product.id_producto}
+                product={{
+                  ...product,
+                  precio: parseFloat(product.precio || 0),
+                }}
+                stock={stock} 
+                onAddToCart={onAddToCart}
+                sx={{ width: { xs: "90%", md: "100%" }, maxWidth: 320 }}
+              />
+            );
+          })}
         </Box>
         <Box display="flex" justifyContent="center" mt={2}>
           <Pagination
@@ -84,6 +81,7 @@ ProductosGrid.propTypes = {
   totalPages: PropTypes.number,
   onPageChange: PropTypes.func.isRequired,
   onAddToCart: PropTypes.func.isRequired,
+  sucursalId: PropTypes.number
 };
 
 export default ProductosGrid;

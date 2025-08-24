@@ -32,6 +32,7 @@ import { busquedaApi } from "./busquedaApi";
 import { formulaProductoApi } from "./FormulaProductoApi";
 import { produccionApi } from "./produccionApi";
 import { productoRetornableApi } from "./productoRetornableApi";
+import { inventarioApi } from "./inventarioApi";
 
 export const apiMiddleware = [
   authApi.middleware,
@@ -67,7 +68,8 @@ export const apiMiddleware = [
   productosEstadisticasApi.middleware,
   busquedaApi.middleware,
   produccionApi.middleware,
-  productoRetornableApi.middleware
+  productoRetornableApi.middleware,
+  inventarioApi.middleware,
 ];
 
 export const apiReducers = {
@@ -105,6 +107,7 @@ export const apiReducers = {
   [busquedaApi.reducerPath]: busquedaApi.reducer,
   [produccionApi.reducerPath]: produccionApi.reducer,
   [productoRetornableApi.reducerPath]: productoRetornableApi.reducer,
+  [inventarioApi.reducerPath]: inventarioApi.reducer,
 };
 
 const apiServices = {
@@ -141,7 +144,8 @@ const apiServices = {
   productosEstadisticasApi,
   busquedaApi,
   produccionApi,
-  productoRetornableApi
+  productoRetornableApi,
+  inventarioApi,
 };
 
 export default apiServices;

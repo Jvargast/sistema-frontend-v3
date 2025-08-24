@@ -9,6 +9,7 @@ import {
 import { agendaViajesApi } from "../../store/services/agendaViajesApi";
 import { playNotificationSound } from "../../utils/playNotificationSound";
 import { vibrateNotification } from "../../utils/vibrateNotification";
+import { entregasApi } from "../../store/services/entregasApi";
 
 function NotificationListener() {
   const dispatch = useDispatch();
@@ -26,6 +27,39 @@ function NotificationListener() {
     socket.emit("subscribe", user.id);
 
     socket.on("nueva_notificacion", (data) => {
+      if (data?.tipo === "pedido_entregado") {
+        const idAgenda = data?.datos_adicionales?.id_agenda_viaje;
+        if (idAgenda) {
+          dispatch(
+            entregasApi.util.invalidateTags([
+              { type: "Entrega", id: "LIST" },
+              { type: "Entrega", id: `AGENDA-${idAgenda}` },
+            ])
+          );
+          dispatch(
+            agendaViajesApi.util.invalidateTags([
+              { type: "AgendaViajes", id: idAgenda },
+            ])
+          );
+        } else {
+          dispatch(entregasApi.util.invalidateTags(["Entrega"]));
+          dispatch(agendaViajesApi.util.invalidateTags(["AgendaViajes"]));
+        }
+      }
+      if (data?.tipo === "pedido_confirmado") {
+        if (data?.datos_adicionales?.id_agenda_viaje) {
+          dispatch(
+            agendaViajesApi.util.invalidateTags([
+              {
+                type: "AgendaViajes",
+                id: data.datos_adicionales.id_agenda_viaje,
+              },
+            ])
+          );
+        } else {
+          dispatch(agendaViajesApi.util.invalidateTags(["AgendaViajes"]));
+        }
+      }
       console.log("📡 WS: Recibido evento", data);
       dispatch(addNotificacion(data));
       playNotificationSound();
@@ -72,11 +106,12 @@ function NotificationListener() {
 
     socket.on("entrega_registrada", (data) => {
       dispatch(
-        agendaViajesApi.util.invalidateTags([
-          "Entregas",
-          "AgendaViajes",
+        entregasApi.util.invalidateTags([
+          { type: "Entrega", id: "LIST" },
+          { type: "Entrega", id: `AGENDA-${data?.id_agenda_viaje}` },
         ])
       );
+      dispatch(agendaViajesApi.util.invalidateTags(["AgendaViajes"]));
       dispatch(
         addNotificacion({
           ...data,

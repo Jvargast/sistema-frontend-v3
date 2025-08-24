@@ -1,37 +1,57 @@
-import { FixedSizeList } from "react-window";
 import * as React from "react";
 import PropTypes from "prop-types";
+import { FixedSizeList } from "react-window";
 
-const LISTBOX_PADDING = 8; 
+const LISTBOX_PADDING = 8;
 
-const renderRow = (props) => {
-  const { data, index, style } = props;
-  return React.cloneElement(data[index], {
+const OuterElementContext = React.createContext({});
+const OuterElementType = React.forwardRef(function OuterElementType(
+  props,
+  ref
+) {
+  const outerProps = React.useContext(OuterElementContext);
+  return <div ref={ref} {...props} {...outerProps} />;
+});
+
+function renderRow({ data, index, style }) {
+  const item = data[index];
+  return React.cloneElement(item, {
     style: {
       ...style,
       top: style.top + LISTBOX_PADDING,
     },
   });
-};
+}
+
 export const ListboxComponent = React.forwardRef(function ListboxComponent(
   props,
   ref
 ) {
   const { children, ...other } = props;
-  const itemCount = Array.isArray(children) ? children.length : 0;
+
+  const items = React.Children.toArray(children);
+  const itemCount = items.length;
+
+  const ITEM_SIZE = 48;
+
+  const height = Math.min(8, itemCount) * ITEM_SIZE + 2 * LISTBOX_PADDING;
 
   return (
-    <div ref={ref} {...other}>
-      <FixedSizeList
-        height={220}
-        width="100%"
-        itemSize={54}
-        itemCount={itemCount}
-        overscanCount={5}
-        itemData={children}
-      >
-        {renderRow}
-      </FixedSizeList>
+    <div ref={ref}>
+      <OuterElementContext.Provider value={other}>
+        <FixedSizeList
+          height={height}
+          width="100%"
+          itemSize={ITEM_SIZE}
+          itemCount={itemCount}
+          overscanCount={5}
+          itemData={items}
+          outerElementType={OuterElementType}
+          innerElementType="ul" 
+        >
+          {renderRow}
+        </FixedSizeList>
+      </OuterElementContext.Provider>
     </div>
   );
 });

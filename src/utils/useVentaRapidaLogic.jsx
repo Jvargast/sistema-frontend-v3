@@ -33,7 +33,7 @@ const useVentaRapidaFormLogic = () => {
       case 1:
         return productosSeleccionados.length > 0;
       case 2:
-        return true; // retornables son opcionales
+        return true; 
       case 3:
         return metodoPago !== null && getTotal() > 0;
       default:

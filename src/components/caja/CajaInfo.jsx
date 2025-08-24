@@ -68,7 +68,7 @@ const CajaInfo = ({ caja }) => {
             Sucursal:
           </Typography>
           <Typography variant="h5">
-            {caja.sucursal?.nombre || "No asignada"}
+            {caja.sucursal?.nombre + ` - ID:` + caja.sucursal?.id_sucursal|| "No asignada"}
           </Typography>
         </Box>
       </Box>

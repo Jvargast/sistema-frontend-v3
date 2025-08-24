@@ -26,8 +26,14 @@ export const formulaProductoApi = createApi({
     }),
 
     getFormulaById: builder.query({
-      query: (id) => `/formulas/${id}`,
-      providesTags: ["FormulaProducto"],
+      query: ({ id, id_sucursal }) => {
+        const params = {};
+        if (id_sucursal != null) params.id_sucursal = id_sucursal;
+        return { url: `/formulas/${id}`, params };
+      },
+      providesTags: (res, err, { id, id_sucursal }) => [
+        { type: "FormulaProducto", id: `${id}-${id_sucursal ?? "all"}` },
+      ],
     }),
 
     createFormula: builder.mutation({
@@ -40,7 +46,7 @@ export const formulaProductoApi = createApi({
     }),
 
     updateFormula: builder.mutation({
-      query: ({ id, ...body}) => ({
+      query: ({ id, ...body }) => ({
         url: `/formulas/${id}`,
         method: "PUT",
         body,
@@ -81,4 +87,5 @@ export const {
   useUpdateFormulaMutation,
   useDeleteFormulaMutation,
   useDeleteFormulasMutation,
+  useLazyGetFormulaByIdQuery,
 } = formulaProductoApi;

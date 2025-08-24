@@ -4,7 +4,7 @@ import { baseQueryWithReauthEnhanced } from "./fettchQuery";
 export const cajaApi = createApi({
   reducerPath: "cajaApi",
   baseQuery: baseQueryWithReauthEnhanced,
-  tagTypes: ["Caja"], // Para manejar la invalidación de caché
+  tagTypes: ["Caja"],
   endpoints: (builder) => ({
     // Obtener todas las cajas
     getAllCajas: builder.query({

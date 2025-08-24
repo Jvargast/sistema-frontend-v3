@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -20,51 +20,87 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useGetAllClientesQuery } from "../../store/services/clientesApi";
 import LoaderComponent from "../common/LoaderComponent";
 
-const SelectClienteModal = ({ open, onClose, selectedCliente, onSelect }) => {
+function useDebounce(value, delay = 300) {
+  const [v, setV] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setV(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return v;
+}
+
+const SelectClienteModal = ({
+  open,
+  onClose,
+  selectedCliente,
+  onSelect,
+  idSucursal,
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [clientes, setClientes] = useState([]);
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
+  const [clientes, setClientes] = useState([]); 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const { data, isLoading, isFetching, refetch } = useGetAllClientesQuery({
-    page,
-    search: searchTerm,
+  const params = useMemo(() => {
+    const p = { page, limit: 10, activo: true };
+    if (debouncedSearch.trim()) p.search = debouncedSearch.trim();
+    const n = Number(idSucursal);
+    if (!Number.isNaN(n) && n) p.id_sucursal = n; // en global NO se envía
+    return p;
+  }, [page, debouncedSearch, idSucursal]);
+
+  const { data, isLoading, isFetching } = useGetAllClientesQuery(params, {
+    skip: !open, 
+    keepUnusedDataFor: 30,
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
   });
+
+  useEffect(() => {
+    if (!data) return;
+    const raw = Array.isArray(data?.clientes)
+      ? data.clientes
+      : Array.isArray(data)
+      ? data
+      : [];
+    if (page === 1) setClientes(raw);
+    else setClientes((prev) => [...prev, ...raw]);
+
+    const totalPages = Number(data?.paginacion?.totalPages) || 1;
+    setHasMore(page < totalPages && raw.length > 0);
+  }, [data, page]);
+
+  useEffect(() => {
+    if (!open) return;
+    setPage(1);
+  }, [debouncedSearch, idSucursal, open]);
+
+  useEffect(() => {
+    if (!open) return;
+    setSearchTerm("");
+  }, [open]);
 
   const observer = useRef();
   const lastClienteRef = useCallback(
     (node) => {
       if (isFetching || !hasMore) return;
       if (observer.current) observer.current.disconnect();
-
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
-          setPage((prev) => prev + 1);
-        }
+        if (entries[0].isIntersecting) setPage((prev) => prev + 1);
       });
-
       if (node) observer.current.observe(node);
     },
     [isFetching, hasMore]
   );
 
-  useEffect(() => {
-    if (data?.clientes) {
-      if (page === 1) {
-        setClientes(data.clientes);
-      } else {
-        setClientes((prev) => [...prev, ...data.clientes]);
-      }
-      setHasMore(data?.paginacion?.totalPages > page);
-    }
-  }, [data, page]);
+  if (open && isLoading && page === 1) return <LoaderComponent />;
 
-  useEffect(() => {
-    setPage(1);
-    refetch();
-  }, [searchTerm, refetch]);
-
-  if (isLoading) return <LoaderComponent />;
+  const selectedName =
+    clientes.find((c) => c.id_cliente === selectedCliente)?.nombre ||
+    "Desconocido";
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -116,8 +152,7 @@ const SelectClienteModal = ({ open, onClose, selectedCliente, onSelect }) => {
             <Box>
               <Typography fontWeight="bold">Cliente Seleccionado</Typography>
               <Typography fontSize="0.9rem" color="textSecondary">
-                {clientes.find((c) => c.id_cliente === selectedCliente)
-                  ?.nombre || "Desconocido"}
+                {selectedName}
               </Typography>
             </Box>
             <IconButton onClick={() => onSelect(null)} color="error">
@@ -181,6 +216,12 @@ const SelectClienteModal = ({ open, onClose, selectedCliente, onSelect }) => {
               <CircularProgress size={30} />
             </Box>
           )}
+
+          {open && !isFetching && clientes.length === 0 && (
+            <Box p={2} textAlign="center" color="text.secondary">
+              Sin resultados.
+            </Box>
+          )}
         </Box>
       </DialogContent>
 
@@ -221,6 +262,7 @@ SelectClienteModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   selectedCliente: PropTypes.number,
   onSelect: PropTypes.func.isRequired,
+  idSucursal: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 };
 
 export default SelectClienteModal;

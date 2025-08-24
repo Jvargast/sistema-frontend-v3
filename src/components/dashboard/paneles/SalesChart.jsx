@@ -13,6 +13,8 @@ import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import "dayjs/locale/es";
 import "dayjs/locale/en";
+import { useMemo } from "react";
+import PropTypes from "prop-types";
 
 const CLPFormatter = new Intl.NumberFormat("es-CL", {
   style: "currency",
@@ -20,10 +22,17 @@ const CLPFormatter = new Intl.NumberFormat("es-CL", {
   minimumFractionDigits: 0,
 });
 
-const SalesChart = () => {
+const SalesChart = ({ idSucursal }) => {
   const { t, i18n } = useTranslation();
   dayjs.locale(i18n.language);
-  const { data, isLoading, isError } = useGetVentasResumenSemanalQuery();
+
+  const args = useMemo(
+    () => (idSucursal ? { id_sucursal: idSucursal } : {}),
+    [idSucursal]
+  );
+  const { data, isLoading, isError } = useGetVentasResumenSemanalQuery(args, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const formateado =
     data?.map((d) => ({
@@ -89,5 +98,5 @@ const SalesChart = () => {
     </Box>
   );
 };
-
+SalesChart.propTypes = { idSucursal: PropTypes.number };
 export default SalesChart;

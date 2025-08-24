@@ -24,7 +24,12 @@ import { useSelector } from "react-redux";
 const VerViaje = () => {
   const { id } = useParams();
 
-  const { data: viaje, isLoading, error } = useGetViajeByIdQuery(id);
+  const {
+    data: viaje,
+    isLoading,
+    error,
+    refetch: refetchViaje,
+  } = useGetViajeByIdQuery(id);
   const {
     data: entregasData,
     refetch: refetchEntregas,
@@ -133,6 +138,27 @@ const VerViaje = () => {
     socket.on("entrega_registrada", onEntregaRegistrada);
     return () => socket.off("entrega_registrada", onEntregaRegistrada);
   }, [id, refetchEntregas]);
+
+  useEffect(() => {
+    const onNoti = (evt) => {
+      if (evt?.tipo === "pedido_confirmado") {
+        if (
+          !evt?.datos_adicionales?.id_agenda_viaje ||
+          `${evt.datos_adicionales.id_agenda_viaje}` === `${id}`
+        ) {
+          refetchViaje?.();
+        }
+      }
+      if (
+        evt?.tipo === "pedido_entregado" &&
+        `${evt?.datos_adicionales?.id_agenda_viaje}` === `${id}`
+      ) {
+        refetchEntregas?.();
+      }
+    };
+    socket.on("nueva_notificacion", onNoti);
+    return () => socket.off("nueva_notificacion", onNoti);
+  }, [id, refetchViaje, refetchEntregas]);
 
   const rutChofer = viaje?.id_chofer || viaje?.chofer?.rut;
 

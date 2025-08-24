@@ -10,14 +10,18 @@ import { Box, Typography, CircularProgress, useTheme } from "@mui/material";
 import { useGetResumenVentasPorTipoEntregaQuery } from "../../../store/services/ventasEstadisticasApi";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
+import PropTypes from "prop-types";
 
 const COLORS = ["#A3C4F3", "#BFD8AF", "#FCD5CE", "#FFE5B4", "#D5AAFF"];
 
-const OrdersPieChart = () => {
+const OrdersPieChart = ({ idSucursal }) => {
   const theme = useTheme();
   const hoy = dayjs().format("YYYY-MM-DD");
-  const { data, isLoading, isError } =
-    useGetResumenVentasPorTipoEntregaQuery(hoy);
+
+  const { data, isLoading, isError } = useGetResumenVentasPorTipoEntregaQuery({
+    fecha: hoy,
+    ...(idSucursal != null ? { id_sucursal: idSucursal } : {}),
+  });
   const { t } = useTranslation();
 
   const chartData = Array.isArray(data)
@@ -31,7 +35,7 @@ const OrdersPieChart = () => {
         px: 3,
         py: 3,
         borderRadius: 3,
-        
+
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
@@ -167,5 +171,7 @@ const OrdersPieChart = () => {
     </Box>
   );
 };
+
+OrdersPieChart.propTypes = { idSucursal: PropTypes.number };
 
 export default OrdersPieChart;

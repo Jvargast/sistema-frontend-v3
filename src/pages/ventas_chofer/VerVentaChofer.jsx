@@ -42,6 +42,8 @@ const VerVentaChofer = () => {
 
   const venta = data?.data;
 
+  console.log(venta);
+
   return (
     <Box p={{ xs: 2, md: 4 }}>
       <BackButton
@@ -66,7 +68,7 @@ const VerVentaChofer = () => {
                 <PersonIcon fontSize="small" sx={{ mr: 1 }} /> Cliente
               </Typography>
               <Typography variant="body1" fontWeight={500}>
-                {venta?.cliente?.nombre || "-"}
+                {venta?.cliente?.nombre || "Sin Cliente"}
               </Typography>
               <Divider sx={{ my: 2 }} />
               <Typography variant="subtitle2" gutterBottom>
@@ -75,12 +77,50 @@ const VerVentaChofer = () => {
               <Typography variant="body1" fontWeight={500}>
                 {venta?.camion?.placa || "-"}
               </Typography>
+              <Divider sx={{ my: 2 }} />
+
+              <Typography variant="subtitle2" gutterBottom>
+                <PersonIcon fontSize="small" sx={{ mr: 1 }} /> Vendedor / Chofer
+              </Typography>
+
+              <Box display="flex" alignItems="center" gap={2}>
+                {/* <Avatar
+                  sx={{
+                    bgcolor: "primary.main",
+                    color: "primary.contrastText",
+                  }}
+                  src={venta?.usuario?.avatar_url || undefined}
+                  alt={`${venta?.usuario?.nombre ?? ""} ${
+                    venta?.usuario?.apellido ?? ""
+                  }`}
+                >
+                  {`${(venta?.usuario?.nombre?.[0] ?? "").toUpperCase()}${(
+                    venta?.usuario?.apellido?.[0] ?? ""
+                  ).toUpperCase()}`}
+                </Avatar> */}
+
+                <Box>
+                  <Typography variant="body1" fontWeight={600}>
+                    {venta?.usuario
+                      ? `${venta?.usuario?.nombre ?? ""} ${
+                          venta?.usuario?.apellido ?? ""
+                        }`.trim()
+                      : "-"}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    RUT: {venta?.usuario?.rut || "-"}
+                  </Typography>
+                </Box>
+              </Box>
             </CardContent>
           </Card>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Card sx={{ borderRadius: 2, borderColor: "#dcdcdc" }} variant="outlined">
+          <Card
+            sx={{ borderRadius: 2, borderColor: "#dcdcdc" }}
+            variant="outlined"
+          >
             <CardContent>
               <Typography variant="subtitle2" gutterBottom>
                 <PaidIcon fontSize="small" sx={{ mr: 1 }} /> Método de Pago
@@ -105,6 +145,42 @@ const VerVentaChofer = () => {
           </Card>
         </Grid>
       </Grid>
+
+      {/* <Grid item xs={12} md={6}>
+        <Card
+          variant="outlined"
+          sx={{ borderRadius: 2, borderColor: "#dcdcdc" }}
+        >
+          <CardContent>
+            <Typography variant="subtitle2" gutterBottom>
+              <PersonIcon fontSize="small" sx={{ mr: 1 }} /> Vendedor / Chofer
+            </Typography>
+
+            <Box display="flex" alignItems="center" gap={2}>
+              <Avatar
+                sx={{ bgcolor: "primary.main", color: "primary.contrastText" }}
+              >
+                {`${(venta?.usuario?.nombre?.[0] ?? "").toUpperCase()}${(
+                  venta?.usuario?.apellido?.[0] ?? ""
+                ).toUpperCase()}`}
+              </Avatar>
+
+              <Box>
+                <Typography variant="body1" fontWeight={600}>
+                  {venta?.usuario
+                    ? `${venta?.usuario?.nombre ?? ""} ${
+                        venta?.usuario?.apellido ?? ""
+                      }`.trim()
+                    : "-"}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  RUT: {venta?.usuario?.rut || "-"}
+                </Typography>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+      </Grid> */}
 
       <Typography variant="h6" mt={5} mb={2}>
         <ShoppingCartIcon fontSize="small" sx={{ mr: 1 }} /> Productos Vendidos

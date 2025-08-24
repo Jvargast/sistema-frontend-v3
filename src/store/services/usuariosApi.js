@@ -6,10 +6,9 @@ export const usuariosApi = createApi({
   baseQuery: baseQueryWithReauthEnhanced,
   tagTypes: ["User"],
   endpoints: (builder) => ({
-    // Obtener usuario por RUT
     findByRut: builder.query({
       query: (rut) => `/usuarios/${rut}`,
-      providesTags: ["User"], // Cache de usuarios
+      providesTags: ["User"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -18,13 +17,12 @@ export const usuariosApi = createApi({
         }
       },
     }),
-    // Obtener todos los usuarios
     getAllUsers: builder.query({
       query: (params) => ({ url: `/usuarios/`, params }),
-      providesTags: ["User"], // Cache para invalidar al crear o actualizar usuarios
+      providesTags: ["User"],
       transformResponse: (response) => ({
-        usuarios: response.data, // El array de usuarios
-        paginacion: response.total, // Datos de paginación
+        usuarios: response.data,
+        paginacion: response.total,
       }),
       async onQueryStarted(args, { queryFulfilled }) {
         try {
@@ -36,7 +34,7 @@ export const usuariosApi = createApi({
     }),
     // Obtener chofers
     getAllChoferes: builder.query({
-      query: () => `/usuarios/choferes`,
+      query: (params) => ({ url: `/usuarios/choferes`, params }),
       providesTags: ["User"],
     }),
     // Obtener chofers

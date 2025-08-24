@@ -1,18 +1,30 @@
-export const getInitialRoute = (rol, permissions) => {
-  if (rol === "administrador" && permissions.includes("vistas.dashboard.ver")) {
+export const getInitialRoute = (rolLike, permisosLike) => {
+
+  const rol = (
+    typeof rolLike === "string" ? rolLike : rolLike?.nombre || ""
+  ).toLowerCase();
+
+  const toPermName = (p) => {
+    if (!p) return null;
+    if (typeof p === "string") return p;
+    // soporta { nombre }, { permiso: { nombre } }, { permiso: "..." }
+    if (typeof p.nombre === "string") return p.nombre;
+    if (typeof p.permiso === "string") return p.permiso;
+    if (typeof p.permiso?.nombre === "string") return p.permiso.nombre;
+    return null;
+  };
+
+  const perms = Array.isArray(permisosLike)
+    ? permisosLike.map(toPermName).filter(Boolean)
+    : [];
+
+  const has = (perm) => perms.includes(perm);
+
+  if (rol === "administrador" && has("vistas.dashboard.ver"))
     return "/dashboard";
-  } else if (
-    rol === "vendedor" &&
-    permissions.includes("vistas.puntoventa.ver")
-  ) {
-    return "/punto-venta";
-  } else if (rol === "chofer" && permissions.includes("vistas.viajes.ver")) {
-    return "/viajes";
-  } else if (
-    rol === "operario" &&
-    permissions.includes("vistas.productos.ver")
-  ) {
-    return "/produccion";
-  }
+  if (rol === "vendedor" && has("vistas.puntoventa.ver")) return "/punto-venta";
+  if (rol === "chofer" && has("vistas.viajes.ver")) return "/viajes";
+  if (rol === "operario" && has("vistas.productos.ver")) return "/produccion";
+
   return "/unauthorized";
 };

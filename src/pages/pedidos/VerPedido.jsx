@@ -17,6 +17,9 @@ import { useState } from "react";
 import ModalPagoPedido from "../../components/pedido/ModalPago";
 import { useGetVentaByIdQuery } from "../../store/services/ventasApi";
 import { useGetCuentaPorCobrarByVentaIdQuery } from "../../store/services/cuentasPorCobrarApi";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+
+import { PointOfSale, ReceiptLong, OpenInNew } from "@mui/icons-material";
 
 const VerPedido = () => {
   const { id } = useParams();
@@ -38,6 +41,21 @@ const VerPedido = () => {
       skip: !data?.id_venta || tipoDocumento !== "factura",
     }
   );
+
+  const hasVenta = Boolean(data?.id_venta);
+  const ventaResumen = hasVenta
+    ? {
+        id: data.id_venta,
+        numeroDoc: ventaData?.documentos?.[0]?.numero ?? null,
+        fecha: ventaData?.venta?.fecha
+          ? new Date(ventaData.venta.fecha).toLocaleString()
+          : null,
+        total:
+          ventaData?.venta?.total != null
+            ? Number(ventaData.venta.total)
+            : null,
+      }
+    : null;
 
   if (isLoading) return <LoaderComponent />;
 
@@ -62,6 +80,95 @@ const VerPedido = () => {
     >
       <BackButton to="/admin/pedidos" label="Volver a Pedidos" />
 
+      {hasVenta && (
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 2, md: 2.5 },
+            mb: 2.5,
+            borderRadius: 2,
+            border: `1px dashed ${theme.palette.primary.main}`,
+            background:
+              theme.palette.mode === "dark"
+                ? "linear-gradient(135deg, rgba(25,118,210,0.15), rgba(25,118,210,0.05))"
+                : "linear-gradient(135deg, #F0F7FF, #FFFFFF)",
+          }}
+        >
+          <Box
+            display="flex"
+            alignItems={{ xs: "flex-start", sm: "center" }}
+            flexDirection={{ xs: "column", sm: "row" }}
+            gap={1.25}
+            justifyContent="space-between"
+          >
+            <Box display="flex" alignItems="center" gap={1.25} flexWrap="wrap">
+              <Chip
+                icon={<PointOfSale />}
+                label={`Venta asociada #${ventaResumen?.id}`}
+                color="primary"
+                variant="filled"
+                sx={{ fontWeight: 700 }}
+              />
+              {ventaResumen?.numeroDoc && (
+                <Chip
+                  icon={<ReceiptLong />}
+                  label={ventaResumen.numeroDoc}
+                  variant="outlined"
+                  sx={{ fontWeight: 600 }}
+                />
+              )}
+              {ventaResumen?.fecha && (
+                <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                  {ventaResumen.fecha}
+                </Typography>
+              )}
+              {ventaResumen?.total != null && (
+                <Typography variant="body2" fontWeight={700} color="primary">
+                  Total: ${ventaResumen.total.toLocaleString()}
+                </Typography>
+              )}
+
+              {tipoDocumento === "factura" &&
+                facturaData?.estado === "pendiente" && (
+                  <Chip
+                    label="Factura pendiente"
+                    color="warning"
+                    sx={{ fontWeight: 700 }}
+                  />
+                )}
+            </Box>
+
+            <Box display="flex" gap={1}>
+              {tipoDocumento === "factura" &&
+                facturaData?.estado === "pendiente" && (
+                  <Button
+                    variant="contained"
+                    endIcon={<OpenInNew />}
+                    onClick={() =>
+                      navigate(`/facturas/ver/${facturaData.id_cxc}`)
+                    }
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 700,
+                      borderRadius: 2,
+                    }}
+                  >
+                    Ir a factura
+                  </Button>
+                )}
+              <Button
+                variant="outlined"
+                endIcon={<OpenInNew />}
+                onClick={() => navigate(`/admin/ventas/ver/${ventaResumen.id}`)}
+                sx={{ textTransform: "none", fontWeight: 700, borderRadius: 2 }}
+              >
+                Ver venta
+              </Button>
+            </Box>
+          </Box>
+        </Paper>
+      )}
+
       <Paper
         elevation={4}
         sx={{
@@ -70,9 +177,13 @@ const VerPedido = () => {
           mb: 3,
           background:
             theme.palette.mode === "dark"
-              ? `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`
-              : `linear-gradient(135deg, ${theme.palette.primary.light} 70%, ${theme.palette.primary.main})`,
-          color: theme.palette.getContrastText(theme.palette.primary.main),
+              ? "linear-gradient(135deg, #0b1020 0%, #111827 100%)"
+              : "linear-gradient(135deg, #f6f9fc 0%, #eef5ff 100%)",
+          color:
+            theme.palette.mode === "dark"
+              ? theme.palette.grey[100]
+              : theme.palette.text.primary,
+
           boxShadow: theme.shadows[5],
         }}
       >
@@ -93,72 +204,40 @@ const VerPedido = () => {
           }}
         />
 
-        <Typography
-          variant="h5"
-          textAlign="center"
-          fontWeight="bold"
-          mb={2}
-          sx={{ color: "inherit" }}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 1.25,
+            mb: 2,
+          }}
         >
-          📦 Detalles del Pedido #{data.id_pedido}
-        </Typography>
-        {tipoDocumento === "factura" && facturaData?.estado === "pendiente" && (
           <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            gap={2}
-            mb={2}
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: 1.5,
+              display: "grid",
+              placeItems: "center",
+              bgcolor: "rgba(45, 32, 32, 0.009)",
+              border: "1px solid rgba(255,255,255,0.25)",
+              backdropFilter: "blur(2px)",
+            }}
           >
-            <Typography
-              fontWeight="bold"
-              sx={{
-                bgcolor:
-                  theme.palette.mode === "dark"
-                    ? theme.palette.warning.dark
-                    : theme.palette.warning.light,
-                color:
-                  theme.palette.mode === "dark"
-                    ? theme.palette.warning.contrastText
-                    : theme.palette.warning.dark,
-                p: 2,
-                borderRadius: 2,
-                textAlign: "center",
-                maxWidth: 600,
-              }}
-            >
-              ⚠️ Este pedido está asociado a una factura pendiente. El pago debe
-              realizarse desde la vista de facturas.
-            </Typography>
-            <Button
-              variant="contained"
-              sx={{
-                bgcolor:
-                  theme.palette.mode === "dark"
-                    ? theme.palette.background.paper
-                    : "#ffffff",
-                color: theme.palette.primary.main,
-                fontWeight: "bold",
-                border: `1px solid ${
-                  theme.palette.mode === "dark"
-                    ? theme.palette.primary.main
-                    : "#ffffff"
-                }`,
-                "&:hover": {
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? theme.palette.background.default
-                      : theme.palette.primary.light,
-                  color: theme.palette.primary.dark,
-                },
-                cursor: "pointer",
-              }}
-              onClick={() => navigate(`/facturas/ver/${facturaData.id_cxc}`)}
-            >
-              IR A FACTURA
-            </Button>
+            <LocalShippingIcon fontSize="small" />
           </Box>
-        )}
+
+          <Typography
+            variant="h5"
+            sx={{ fontWeight: 800, letterSpacing: 0.2, color: "inherit" }}
+          >
+            Pedido{" "}
+            <Box component="span" sx={{ fontWeight: 900 }}>
+              #{data.id_pedido}
+            </Box>
+          </Typography>
+        </Box>
 
         {mostrarBotonPago && (
           <Box display="flex" justifyContent="center" mb={1}>

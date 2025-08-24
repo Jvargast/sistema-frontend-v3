@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Box, Typography, Paper, Button, Divider } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  Divider,
+  Autocomplete,
+  Chip,
+  TextField,
+} from "@mui/material";
 import { useDispatch } from "react-redux";
 import {
   useGetClienteByIdQuery,
@@ -9,6 +18,17 @@ import {
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import InfoFieldGroup from "../../components/common/InfoFieldGroup";
+import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
+
+const CHIP_COLOR_KEYS = ["primary", "secondary", "success", "warning", "info"];
+const hashStr = (s) =>
+  Array.from(String(s)).reduce((a, c) => a + c.charCodeAt(0), 0);
+
+const getChipColorKey = (sucursal) => {
+  const base = sucursal?.nombre ?? sucursal?.id_sucursal ?? "";
+  const h = hashStr(base);
+  return CHIP_COLOR_KEYS[h % CHIP_COLOR_KEYS.length];
+};
 
 const EditarCliente = () => {
   const navigate = useNavigate();
@@ -23,6 +43,9 @@ const EditarCliente = () => {
     refetch,
   } = useGetClienteByIdQuery(id);
   const [updateCliente, { isLoading: isUpdating }] = useUpdateClienteMutation();
+
+  const { data: sucursales = [] } = useGetAllSucursalsQuery();
+  const [sucursalesSel, setSucursalesSel] = useState([]);
 
   const [formData, setFormData] = useState({
     rut: "",
@@ -49,6 +72,7 @@ const EditarCliente = () => {
         email: clienteData?.email || "",
         activo: clienteData?.activo,
       });
+      setSucursalesSel(clienteData?.Sucursales ?? []);
     }
   }, [clienteData]);
 
@@ -71,7 +95,11 @@ const EditarCliente = () => {
 
   const handleSubmit = async () => {
     try {
-      await updateCliente({ id, formData }).unwrap();
+      const payload = {
+        ...formData,
+        sucursalesIds: (sucursalesSel || []).map((s) => Number(s.id_sucursal)),
+      };
+      await updateCliente({ id, formData: payload }).unwrap();
       dispatch(
         showNotification({
           message: "Cliente actualizado exitosamente.",
@@ -234,6 +262,94 @@ const EditarCliente = () => {
                 : []),
             ]}
           />
+          <Box sx={{ gridColumn: "1 / -1" }}>
+            <Autocomplete
+              multiple
+              options={sucursales}
+              value={sucursalesSel}
+              onChange={(_, val) => setSucursalesSel(val)}
+              isOptionEqualToValue={(opt, val) =>
+                Number(opt.id_sucursal) === Number(val.id_sucursal)
+              }
+              getOptionLabel={(opt) =>
+                opt?.nombre ?? `Sucursal ${opt?.id_sucursal}`
+              }
+              filterSelectedOptions
+              disableCloseOnSelect
+              clearOnBlur={false}
+              handleHomeEndKeys
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  bgcolor: (t) => t.palette.background.paper,
+                },
+                "& .MuiInputLabel-root": {
+                  fontWeight: 600,
+                },
+                "& .MuiAutocomplete-endAdornment .MuiButtonBase-root": {
+                  color: "text.secondary",
+                },
+              }}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => {
+                  const colorKey = getChipColorKey(option);
+                  return (
+                    <Chip
+                      {...getTagProps({ index })}
+                      key={option.id_sucursal}
+                      label={option.nombre ?? `Sucursal ${option.id_sucursal}`}
+                      size="small"
+                      color={colorKey}
+                      variant="filled"
+                      sx={{ fontWeight: 700 }}
+                    />
+                  );
+                })
+              }
+              renderOption={(props, option) => {
+                const colorKey = getChipColorKey(option);
+                // eslint-disable-next-line react/prop-types
+                const { key, ...liProps } = props;
+                return (
+                  <li key={key} {...liProps}>
+                    <Box
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        bgcolor: (t) => t.palette[colorKey].main,
+                        mr: 1,
+                        flex: "0 0 auto",
+                      }}
+                    />
+                    {option.nombre ?? `Sucursal ${option.id_sucursal}`}
+                  </li>
+                );
+              }}
+              slotProps={{
+                paper: {
+                  elevation: 6,
+                  sx: { borderRadius: 2, overflow: "hidden" },
+                },
+                listbox: {
+                  sx: {
+                    "& li": { py: 1 },
+                  },
+                },
+                popper: {
+                  sx: { zIndex: (t) => t.zIndex.modal + 1 },
+                },
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Sucursales"
+                  placeholder="Agregar sucursal..."
+                  size="small"
+                />
+              )}
+            />
+          </Box>
         </Box>
         <Box
           sx={{

@@ -5,6 +5,7 @@ import { Visibility } from "@mui/icons-material";
 import { useGetMisVentasChoferQuery } from "../../store/services/ventasChoferApi";
 import EmptyState from "../../components/common/EmptyState";
 import DataTable from "../../components/common/DataTable";
+import { useHasPermission } from "../../utils/useHasPermission";
 
 const estadoColores = {
   pendiente: "warning",
@@ -28,6 +29,8 @@ const ListarMisVentas = () => {
     limit: rowsPerPage,
   });
 
+  const canSeeSale = useHasPermission("vistas.dashboard.ver");
+
   useEffect(() => {
     refetch();
   }, [page, rowsPerPage, refetch]);
@@ -35,62 +38,67 @@ const ListarMisVentas = () => {
   const ventas = useMemo(() => data?.data || [], [data]);
   const totalItems = useMemo(() => data?.total?.totalItems || 0, [data]);
 
-  const columns = [
-    {
-      id: "id_venta_chofer",
-      label: "ID",
-      render: (row) => row.id_venta_chofer,
-    },
-    {
-      id: "fechaHoraVenta",
-      label: "Fecha",
-      render: (row) =>
-        row.fechaHoraVenta
-          ? new Date(row.fechaHoraVenta).toLocaleString()
-          : "Sin fecha",
-    },
-    {
-      id: "cliente",
-      label: "Cliente",
-      render: (row) => row.cliente?.nombre || "-",
-    },
-    {
-      id: "total_venta",
-      label: "Total",
-      render: (row) => formatCLP(row.total_venta),
-    },
-    {
-      id: "metodo_pago",
-      label: "Método",
-      render: (row) => row.metodoPago?.nombre || "-",
-    },
-    {
-      id: "estadoPago",
-      label: "Estado",
-      render: (row) => {
-        const color = estadoColores[row.estadoPago] || "default";
-        return (
+  const columns = useMemo(() => {
+    const cols = [
+      {
+        id: "id_venta_chofer",
+        label: "ID",
+        render: (row) => row.id_venta_chofer,
+      },
+      {
+        id: "fechaHoraVenta",
+        label: "Fecha",
+        render: (row) =>
+          row.fechaHoraVenta
+            ? new Date(row.fechaHoraVenta).toLocaleString()
+            : "Sin fecha",
+      },
+      {
+        id: "cliente",
+        label: "Cliente",
+        render: (row) => row.cliente?.nombre || "-",
+      },
+      {
+        id: "total_venta",
+        label: "Total",
+        render: (row) => formatCLP(row.total_venta),
+      },
+      {
+        id: "metodo_pago",
+        label: "Método",
+        render: (row) => row.metodoPago?.nombre || "-",
+      },
+      {
+        id: "estadoPago",
+        label: "Estado",
+        render: (row) => (
           <Chip
             label={row.estadoPago}
-            color={color}
+            color={estadoColores[row.estadoPago] || "default"}
             sx={{ fontWeight: "bold", minWidth: 100 }}
           />
-        );
+        ),
       },
-    },
-    {
-      id: "acciones",
-      label: "Acciones",
-      render: (row) => (
-        <IconButton
-          color="primary"
-          onClick={() => navigate(`/ventas-chofer/ver/${row.id_venta_chofer}`)}
-        >
-          <Visibility />
-        </IconButton>
-      ),
-    },
-  ];
+    ];
+
+    if (canSeeSale) {
+      cols.push({
+        id: "acciones",
+        label: "Acciones",
+        render: (row) => (
+          <IconButton
+            color="primary"
+            onClick={() =>
+              navigate(`/ventas-chofer/ver/${row.id_venta_chofer}`)
+            }
+          >
+            <Visibility />
+          </IconButton>
+        ),
+      });
+    }
+    return cols;
+  }, [canSeeSale, navigate]);
 
   if (!isLoading && ventas.length === 0) {
     return (

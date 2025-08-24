@@ -3,18 +3,14 @@ import {
   Typography,
   FormControlLabel,
   Switch,
-  Select,
-  MenuItem,
-  TextField,
-  IconButton,
   Grid,
-  Button,
   Paper,
   Divider,
+  IconButton,
 } from "@mui/material";
-import { AddCircleOutline, DeleteOutline } from "@mui/icons-material";
+import { Add, Remove } from "@mui/icons-material";
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const EntregaBotellonesStep = ({
   productos,
@@ -23,61 +19,62 @@ const EntregaBotellonesStep = ({
   setClienteTrae,
   detallePedido,
 }) => {
+  const esperadoPorProducto = useMemo(() => {
+    const m = new Map();
+    (detallePedido?.detalle || [])
+      .filter((d) => d.es_retornable)
+      .forEach((d) => m.set(d.id_producto, Number(d.cantidad) || 0));
+    return m;
+  }, [detallePedido]);
+
   const [items, setItems] = useState([]);
 
   useEffect(() => {
+    if (!productos) return;
     if (clienteTrae) {
-      if (items.length === 0) {
-        const inicial = productos.map((p) => ({
-          id_producto: p.id_producto,
-          nombre_producto: p.nombre_producto || p.nombre,
-          cantidad: 1,
-          estado: "reutilizable",
-          tipo_defecto: "",
-        }));
-        setItems(inicial);
-        onChange(inicial);
-      }
-    } else if (items.length > 0) {
+      const base = productos.map((p) => ({
+        id_producto: p.id_producto,
+        nombre: p.nombre_producto || p.nombre,
+        cantidad: 0,
+      }));
+      setItems(base);
+      onChange(
+        base.map(({ id_producto, cantidad }) => ({ id_producto, cantidad }))
+      );
+    } else {
       setItems([]);
       onChange([]);
     }
-  }, [clienteTrae, productos]);
+  }, [clienteTrae, productos, onChange]);
 
-  const actualizarItem = (index, campo, valor) => {
-    const copia = [...items];
-    copia[index][campo] = valor;
+  const actualizarCantidad = (id_producto, valor) => {
+    const max = esperadoPorProducto.get(id_producto) ?? Infinity;
+    const cantidad = Math.max(0, Math.min(Number(valor) || 0, max));
 
-    if (campo === "estado" && valor === "reutilizable") {
-      copia[index]["tipo_defecto"] = "";
-    }
-
-    setItems(copia);
-    onChange(copia);
+    const nueva = items.map((it) =>
+      it.id_producto === id_producto ? { ...it, cantidad } : it
+    );
+    setItems(nueva);
+    onChange(
+      nueva.map(({ id_producto, cantidad }) => ({ id_producto, cantidad }))
+    );
   };
 
-  const agregarProducto = () => {
-    setItems([
-      ...items,
-      {
-        id_producto: "",
-        cantidad: 1,
-        estado: "reutilizable",
-        tipo_defecto: "",
-      },
-    ]);
+  const stepCantidad = (id_producto, delta) => {
+    const actual =
+      items.find((it) => it.id_producto === id_producto)?.cantidad || 0;
+    actualizarCantidad(id_producto, actual + delta);
   };
 
-  const eliminarProducto = (index) => {
-    const nuevaLista = items.filter((_, i) => i !== index);
-    setItems(nuevaLista);
-    onChange(nuevaLista);
-  };
+  const totalRecibidos = items.reduce(
+    (s, it) => s + (Number(it.cantidad) || 0),
+    0
+  );
 
   return (
     <Box display="flex" flexDirection="column" gap={3}>
       <Typography variant="h6" fontWeight="bold">
-        Productos Retornables
+        Retornables (se registran como <em>pendiente de inspección</em>)
       </Typography>
 
       <FormControlLabel
@@ -90,163 +87,114 @@ const EntregaBotellonesStep = ({
         label="¿Cliente entrega productos retornables?"
       />
 
-      {clienteTrae && detallePedido?.detalle && (
-        <Paper
-          elevation={2}
-          sx={{
-            p: 2,
-            borderRadius: 2,
-            mb: 1,
-          }}
-        >
-          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-            Comparación de Retornables Esperados vs Recibidos
-          </Typography>
-          <Divider sx={{ mb: 1 }} />
-          {productos.map((prod) => {
-            const esperado =
-              detallePedido.detalle.find(
-                (d) => d.id_producto === prod.id_producto
-              )?.cantidad || 0;
-
-            const recibido =
-              items.find((i) => i.id_producto === prod.id_producto)?.cantidad ||
-              0;
-
-            return (
-              <Typography
-                key={prod.id_producto}
-                fontSize="0.95rem"
-                sx={{ mb: 0.5 }}
-              >
-                <strong>{prod.nombre_producto || prod.nombre}</strong> —
-                Esperado: <span style={{ color: "#1565c0" }}>{esperado}</span> |
-                Recibido:{" "}
-                <span
-                  style={{
-                    color: recibido < esperado ? "#e65100" : "#2e7d32",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {recibido}
-                </span>
-              </Typography>
-            );
-          })}
-        </Paper>
-      )}
-
-      {clienteTrae &&
-        items.map((item, index) => (
-          <Grid
-            container
-            spacing={2}
-            key={index}
-            alignItems="center"
-            sx={{
-              p: 2,
-              borderRadius: 2,
-            }}
-          >
-            <Grid item xs={12} sm={4}>
-              <Select
-                fullWidth
-                value={item.id_producto}
-                onChange={(e) => {
-                  actualizarItem(index, "id_producto", e.target.value);
-                }}
-                displayEmpty
-              >
-                <MenuItem value="" disabled>
-                  Seleccione producto
-                </MenuItem>
-                {productos.map((prod) => (
-                  <MenuItem key={prod.id_producto} value={prod.id_producto}>
-                    {prod.nombre_producto || prod.nombre}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box display="flex" alignItems="center" gap={1}>
-                <Box flex={1}>
-                  <TextField
-                    type="number"
-                    label="Cantidad"
-                    value={item.cantidad}
-                    inputMode="numeric"
-                    variant="outlined"
-                    inputProps={{
-                      min: 0,
-                      max:
-                        detallePedido?.detalle.find(
-                          (d) => d.id_producto === item.id_producto
-                        )?.cantidad || 1,
-                      pattern: "[0-9]*",
-                    }}
-                    onChange={(e) => {
-                      const cantidad = parseInt(e.target.value) || 0;
-                      const maxCantidad =
-                        detallePedido?.detalle.find(
-                          (d) => d.id_producto === item.id_producto
-                        )?.cantidad || Infinity;
-                      actualizarItem(
-                        index,
-                        "cantidad",
-                        Math.min(cantidad, maxCantidad)
-                      );
-                    }}
-                    fullWidth
-                  />
-                </Box>
-
-                <Box width="120px">
-                  <Select
-                    value={item.estado}
-                    onChange={(e) =>
-                      actualizarItem(index, "estado", e.target.value)
-                    }
-                    variant="outlined"
-                    fullWidth
-                    displayEmpty
-                    inputProps={{
-                      style: {
-                        height: "56px", // igual al TextField por defecto
-                      },
-                    }}
-                  >
-                    <MenuItem value="reutilizable">♻️ Reutilizable</MenuItem>
-                    <MenuItem value="defectuoso">⚠️ Defectuoso</MenuItem>
-                  </Select>
-                </Box>
-
-                <Box>
-                  <IconButton
-                    onClick={() => eliminarProducto(index)}
-                    color="error"
-                    sx={{
-                      border: "1px solid #e0e0e0",
-                      borderRadius: 1,
-                      height: "56px",
-                      width: "56px",
-                    }}
-                  >
-                    <DeleteOutline />
-                  </IconButton>
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
-        ))}
-
       {clienteTrae && (
-        <Button
-          onClick={agregarProducto}
-          variant="outlined"
-          startIcon={<AddCircleOutline />}
-        >
-          Agregar otro producto
-        </Button>
+        <>
+          <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+              Esperado vs Recibido
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+
+            {items.length === 0 && (
+              <Typography variant="body2" color="text.secondary">
+                No hay retornables en este pedido.
+              </Typography>
+            )}
+
+            {items.map((item) => {
+              const esperado = esperadoPorProducto.get(item.id_producto) || 0;
+              const minusDisabled = item.cantidad <= 0;
+              const plusDisabled = item.cantidad >= esperado;
+
+              return (
+                <Grid
+                  key={item.id_producto}
+                  container
+                  spacing={2}
+                  alignItems="center"
+                  sx={{ mb: 1 }}
+                >
+                  <Grid item xs={12} sm={6}>
+                    <Typography sx={{ fontWeight: 600 }} noWrap>
+                      {item.nombre || `Producto ${item.id_producto}`}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Esperado: {esperado}
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="flex-end"
+                      gap={1.5}
+                    >
+                      <IconButton
+                        aria-label={`Disminuir recibidos de ${item.nombre}`}
+                        size="large"
+                        onClick={() => stepCantidad(item.id_producto, -1)}
+                        disabled={minusDisabled}
+                        sx={{
+                          border: "1px solid",
+                          borderColor: "divider",
+                          width: 56,
+                          height: 56,
+                        }}
+                      >
+                        <Remove />
+                      </IconButton>
+
+                      <Paper
+                        variant="outlined"
+                        sx={{
+                          px: 2.5,
+                          py: 1.2,
+                          minWidth: 72,
+                          textAlign: "center",
+                          fontWeight: 800,
+                          fontSize: "1.1rem",
+                        }}
+                      >
+                        {item.cantidad}
+                      </Paper>
+
+                      <IconButton
+                        aria-label={`Aumentar recibidos de ${item.nombre}`}
+                        size="large"
+                        onClick={() => stepCantidad(item.id_producto, +1)}
+                        disabled={plusDisabled}
+                        sx={{
+                          border: "1px solid",
+                          borderColor: "divider",
+                          width: 56,
+                          height: 56,
+                        }}
+                      >
+                        <Add />
+                      </IconButton>
+                    </Box>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        display: "block",
+                        textAlign: "right",
+                        mt: 0.5,
+                        opacity: 0.7,
+                      }}
+                    >
+                      Recibido
+                    </Typography>
+                  </Grid>
+                </Grid>
+              );
+            })}
+          </Paper>
+
+          <Typography variant="subtitle2" sx={{ textAlign: "right" }}>
+            Total recibidos: <strong>{totalRecibidos}</strong>
+          </Typography>
+        </>
       )}
     </Box>
   );

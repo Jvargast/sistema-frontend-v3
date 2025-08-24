@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import PropTypes from "prop-types";
 import { ListboxComponent } from "./ListboxComponent";
-
+import { useMemo } from "react";
 
 const SelectVendedorModal = ({
   open,
@@ -19,15 +19,18 @@ const SelectVendedorModal = ({
   vendedores,
   selectedVendedor,
   onSelect,
-  esAdministrador,
 }) => {
-  console.log(vendedores);
+  const selectedOption = useMemo(
+    () => vendedores.find((v) => v.rut === selectedVendedor) || null,
+    [vendedores, selectedVendedor]
+  );
   return (
     <Dialog
       open={open}
-      onClose={() => {
-        if (selectedVendedor || esAdministrador) onClose();
+      onClose={(_, reason) => {
+        if (reason === "backdropClick" || reason === "escapeKeyDown") return;
       }}
+      disableEscapeKeyDown
       maxWidth="sm"
       fullWidth
       sx={{
@@ -70,55 +73,68 @@ const SelectVendedorModal = ({
             borderRadius: "8px",
           }}
         >
-          <Autocomplete
-            options={vendedores || []}
-            getOptionLabel={(option) => `${option.nombre} ${option.apellido}`}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Buscar vendedor"
-                variant="outlined"
-                fullWidth
-              />
-            )}
-            onChange={(event, value) => {
-              if (value) onSelect(value.rut);
-            }}
-            isOptionEqualToValue={(option, value) => option.rut === value.rut}
-            sx={{
-              mt: 1,
-              borderRadius: "8px",
-            }}
-            ListboxComponent={ListboxComponent}
-            renderOption={(props, option) => {
-              // eslint-disable-next-line
-              const { key, ...rest } = props;
-              return (
-                <Box
-                  key={key}
-                  component="li"
-                  {...rest}
-                  sx={{
-                    px: 2,
-                    py: 1.2,
-                    borderBottom: "1px solid #eaeaea",
-                    transition: "background-color 0.2s ease-in-out",
-                  }}
-                >
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <Box>
-                      <Typography fontWeight="500" fontSize="0.95rem">
-                        {option.nombre} {option.apellido}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Rol: {option?.rol?.nombre || "Sin rol"}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Box>
-              );
-            }}
-          />
+          {vendedores.length === 0 ? (
+            <Typography align="center" color="text.secondary" fontSize={16}>
+              No hay vendedores/usuarios con caja disponibles en esta sucursal.
+            </Typography>
+          ) : (
+            <Autocomplete
+              value={selectedOption}
+              disableClearable
+              options={vendedores}
+              getOptionLabel={(option) =>
+                option?.nombre && option?.apellido
+                  ? `${option.nombre} ${option.apellido}`
+                  : option?.nombre || option?.apellido || ""
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Buscar vendedor"
+                  variant="outlined"
+                  fullWidth
+                />
+              )}
+              onChange={(_, value) => {
+                if (!value) return;
+                onSelect?.(value.rut);
+                onClose?.();
+              }}
+              isOptionEqualToValue={(option, value) => option.rut === value.rut}
+              sx={{
+                mt: 1,
+                borderRadius: "8px",
+              }}
+              ListboxComponent={ListboxComponent}
+              renderOption={(props, option) => {
+                //eslint-disable-next-line
+                const { key, ...rest } = props;
+                return (
+                  <Box
+                    key={key}
+                    component="li"
+                    {...rest}
+                    sx={{
+                      px: 2,
+                      py: 1,
+                      borderBottom: "1px solid #eee",
+                    }}
+                  >
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Box>
+                        <Typography fontWeight={500} fontSize="0.95rem">
+                          {option.nombre} {option.apellido}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Rol: {option?.rol?.nombre || option.rol || "Sin rol"}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </Box>
+                );
+              }}
+            />
+          )}
         </Box>
       </DialogContent>
 

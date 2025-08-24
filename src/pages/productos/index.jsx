@@ -1,6 +1,16 @@
 import { useMemo, useState, useEffect } from "react";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Box, Button, Pagination, Typography, useTheme } from "@mui/material";
+import {
+  Box,
+  Button,
+  Pagination,
+  Typography,
+  useTheme,
+  Tabs,
+  Tab,
+  Chip,
+} from "@mui/material";
+import { getImageUrl } from "../../store/services/apiBase";
 import { Add } from "@mui/icons-material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -14,6 +24,7 @@ import {
   useGetAllProductosQuery,
 } from "../../store/services/productoApi";
 import { useGetAllCategoriasQuery } from "../../store/services/categoriaApi";
+
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import Header from "../../components/common/Header";
@@ -24,6 +35,13 @@ import { CustomPagination } from "../../components/common/CustomPagination";
 import { useHasPermission } from "../../utils/useHasPermission";
 import { useIsMobile } from "../../utils/useIsMobile";
 import { Select, MenuItem, InputLabel, FormControl } from "@mui/material";
+import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
+import InventarioMatriz from "../../components/productos/InventarioMatriz";
+import InventarioTabsPorSucursal from "../../components/productos/InventarioTabsPorSucursal";
+import InventarioAccordionPorProducto from "../../components/productos/InventarioAccordionPorProducto";
+import useSucursalActiva from "../../hooks/useSucursalActiva";
+import { useSelector } from "react-redux";
+import ImageCell from "../../components/common/ImageCell";
 
 const Productos = () => {
   const location = useLocation();
@@ -39,14 +57,39 @@ const Productos = () => {
   const [openAlert, setOpenAlert] = useState(false);
   const isMobile = useIsMobile();
 
+  const sucursalActiva = useSucursalActiva();
+  const { rol } = useSelector((state) => state.auth);
+
   const pageSizeOptions = [5, 10, 25, 50];
 
-  const { data, isLoading, isError, refetch } = useGetAllProductosQuery({
-    estado: "Disponible - Bodega",
-    search,
-    page: page + 1,
-    limit: pageSize,
-  });
+  const [vista, setVista] = useState(0);
+  const shouldFetchAll = vista === 1 || vista === 2 || vista === 3;
+
+  const { data, isLoading, isError, refetch } = useGetAllProductosQuery(
+    {
+      estado: "Disponible - Bodega",
+      search,
+      page: page + 1,
+      limit: pageSize,
+    },
+    { refetchOnFocus: true, refetchOnReconnect: true }
+  );
+
+  const {
+    data: dataTodosProductos,
+    isLoading: isLoadingTodos,
+    isError: isErrorTodos,
+  } = useGetAllProductosQuery(
+    { estado: "Disponible - Bodega", limit: 1000 },
+    { skip: !shouldFetchAll }
+  );
+
+  const handleTabChange = (_, value) => {
+    setVista(value);
+  };
+
+  const { data: sucursales, isLoading: loadingSucursales } =
+    useGetAllSucursalsQuery();
 
   const canCreateProducto = useHasPermission("inventario.producto.crear");
   const canDeleteProducto = useHasPermission("inventario.producto.eliminar");
@@ -56,24 +99,48 @@ const Productos = () => {
 
   const { data: categorias } = useGetAllCategoriasQuery();
 
-  const [createProducto] = useCreateProductoMutation();
+  const [createProducto, { isLoading: isCreating }] =
+    useCreateProductoMutation();
   const [deleteProductos, { isLoading: isDeleting }] =
     useDeleteProductosMutation();
 
   const rows =
-    data?.productos?.map((row) => ({
-      id: row.id_producto,
-      nombre: row.nombre_producto,
-      marca: row.marca || "",
-      codigo_barra: row.codigo_barra || "",
-      precio: row.precio,
-      descripcion: row.descripcion || "",
-      stock: row.inventario?.cantidad || "Sin inventario",
-      categoria: row.categoria?.nombre_categoria || "Sin categoría",
-      estado: row.estado?.nombre_estado || "Sin estado",
-      es_para_venta: Boolean(row.es_para_venta),
-      image_url: row.image_url,
-    })) || [];
+    data?.productos?.map((row) => {
+      const stockTotal = Array.isArray(row.inventario)
+        ? rol !== "administrador" && sucursalActiva?.id_sucursal
+          ? row.inventario.find(
+              (inv) => inv.id_sucursal === sucursalActiva.id_sucursal
+            )?.cantidad || 0
+          : row.inventario.reduce((acc, inv) => acc + (inv.cantidad || 0), 0)
+        : 0;
+
+      return {
+        id: row.id_producto,
+        nombre: row.nombre_producto,
+        marca: row.marca || "",
+        codigo_barra: row.codigo_barra || "",
+        precio: row.precio,
+        descripcion: row.descripcion || "",
+        stock: stockTotal,
+        categoria: row.categoria?.nombre_categoria || "Sin categoría",
+        estado: row.estado?.nombre_estado || "Sin estado",
+        es_para_venta: Boolean(row.es_para_venta),
+        image_url: row.image_url,
+      };
+    }) || [];
+
+  const productosFiltradosPorSucursal = useMemo(() => {
+    if (rol === "administrador" || !sucursalActiva?.id_sucursal) {
+      return dataTodosProductos?.productos || [];
+    }
+
+    return (dataTodosProductos?.productos || []).map((prod) => ({
+      ...prod,
+      inventario: prod.inventario?.filter(
+        (inv) => inv.id_sucursal === sucursalActiva.id_sucursal
+      ),
+    }));
+  }, [dataTodosProductos?.productos, rol, sucursalActiva]);
 
   useEffect(() => {
     if (location.state?.refetch) {
@@ -88,20 +155,37 @@ const Productos = () => {
       field: "image_url",
       headerName: "Imagen",
       flex: 0.2,
-      renderCell: (params) => (
-        <img
-          src={
-            params.value ||
-            "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg"
-          }
-          alt="Producto"
-          style={{ width: "50px", height: "50px", borderRadius: "8px" }}
-        />
-      ),
+      renderCell: (params) => <ImageCell url={getImageUrl(params.value)} />,
     },
     { field: "nombre", headerName: "Nombre", flex: 0.3 },
     { field: "categoria", headerName: "Categoría", flex: 0.3 },
-    { field: "stock", headerName: "Stock", flex: 0.15 },
+    {
+      field: "stock",
+      headerName: "Stock Total",
+      flex: 0.15,
+      renderCell: (params) => {
+        const stock = params.value;
+        return stock === 0 ? (
+          <Chip
+            label="Sin stock"
+            color="error"
+            size="small"
+            sx={{ fontWeight: 700, fontSize: 13 }}
+          />
+        ) : stock < 10 ? (
+          <Chip
+            label={stock}
+            color="warning"
+            size="small"
+            sx={{ fontWeight: 700, fontSize: 13 }}
+          />
+        ) : (
+          <Typography fontWeight={700} fontSize={15}>
+            {stock}
+          </Typography>
+        );
+      },
+    },
     ...(canEditProducto
       ? [
           {
@@ -111,33 +195,35 @@ const Productos = () => {
             sortable: false,
             renderCell: (params) => (
               <Box display="flex" gap={1} sx={{ alignItems: "center" }}>
-                <Box
-                  sx={{
-                    width: isMobile ? 38 : 32,
-                    height: isMobile ? 38 : 32,
-                    borderRadius: "50%",
-                    background: `linear-gradient(120deg, ${theme.palette.info.light}, ${theme.palette.info.main})`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    "&:hover": {
-                      background: theme.palette.info.dark,
-                      transform: "scale(1.08)",
-                    },
-                    boxShadow: "0 2px 8px 0 #1976d222",
-                  }}
-                  onClick={() =>
-                    navigate(`/productos/ver/${params.row.id}`, {
-                      state: { refetch: false },
-                    })
-                  }
-                  title="Ver producto"
-                >
-                  <VisibilityIcon
-                    sx={{ color: "#fff", fontSize: isMobile ? 22 : 18 }}
-                  />
-                </Box>
+                {canEditProducto && (
+                  <Box
+                    sx={{
+                      width: isMobile ? 38 : 32,
+                      height: isMobile ? 38 : 32,
+                      borderRadius: "50%",
+                      background: `linear-gradient(120deg, ${theme.palette.info.light}, ${theme.palette.info.main})`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      "&:hover": {
+                        background: theme.palette.info.dark,
+                        transform: "scale(1.08)",
+                      },
+                      boxShadow: "0 2px 8px 0 #1976d222",
+                    }}
+                    onClick={() =>
+                      navigate(`/productos/ver/${params.row.id}`, {
+                        state: { refetch: false },
+                      })
+                    }
+                    title="Ver producto"
+                  >
+                    <VisibilityIcon
+                      sx={{ color: "#fff", fontSize: isMobile ? 22 : 18 }}
+                    />
+                  </Box>
+                )}
                 {canEditProducto && (
                   <Box
                     sx={{
@@ -217,7 +303,7 @@ const Productos = () => {
 
   if (isLoading) return <LoaderComponent />;
 
-  if (isError) {
+  if (isError || isErrorTodos) {
     dispatch(
       showNotification({
         message: `Error al cargar productos ${isError}`,
@@ -337,252 +423,327 @@ const Productos = () => {
             </Button>
           ))}
       </Box>
-      {isMobile ? (
-        <Box>
-          {rows.length === 0 ? (
-            <Box
-              sx={{
-                py: 8,
-                textAlign: "center",
-                color: theme.palette.text.secondary,
-              }}
-            >
-              No hay productos para mostrar.
-            </Box>
-          ) : (
-            <>
-              <Box
-                display="flex"
-                justifyContent="flex-end"
-                mb={1}
-                alignItems="center"
-                gap={1}
-              >
-                <FormControl size="small" sx={{ minWidth: 90 }}>
-                  <InputLabel id="mobile-page-size-label">
-                    Por página
-                  </InputLabel>
-                  <Select
-                    labelId="mobile-page-size-label"
-                    id="mobile-page-size"
-                    value={pageSize}
-                    label="Por página"
-                    onChange={(e) => {
-                      setPageSize(Number(e.target.value));
-                      setPage(0);
-                    }}
-                  >
-                    {pageSizeOptions.map((option) => (
-                      <MenuItem value={option} key={option}>
-                        {option}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-              {rows.map((row) => (
+
+      <Box sx={{ mb: 3 }}>
+        <Tabs
+          value={vista}
+          onChange={handleTabChange}
+          variant="scrollable"
+          allowScrollButtonsMobile
+          sx={{ mb: 2 }}
+        >
+          <Tab label="Listado" />
+          <Tab label="Matriz Global" />
+          <Tab label="Por Sucursal" />
+          <Tab label="Por Producto" />
+        </Tabs>
+
+        {vista === 0 &&
+          (isMobile ? (
+            <Box>
+              {rows.length === 0 ? (
                 <Box
-                  key={row.id}
                   sx={{
-                    mb: 2,
-                    p: 2,
-                    borderRadius: 2,
-                    boxShadow: 2,
-                    background: theme.palette.background.paper,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 2,
+                    py: 8,
+                    textAlign: "center",
+                    color: theme.palette.text.secondary,
                   }}
                 >
-                  <Box display="flex" alignItems="center" gap={2}>
-                    {row.image_url ? (
-                      <img
-                        src={row.image_url}
-                        alt={row.nombre}
-                        style={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: 8,
-                          objectFit: "cover",
-                        }}
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src =
-                            "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg";
-                        }}
-                      />
-                    ) : (
-                      <Box
-                        sx={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: 8,
-                          background: theme.palette.grey[200],
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
+                  No hay productos para mostrar.
+                </Box>
+              ) : (
+                <>
+                  <Box
+                    display="flex"
+                    justifyContent="flex-end"
+                    mb={1}
+                    alignItems="center"
+                    gap={1}
+                  >
+                    <FormControl size="small" sx={{ minWidth: 90 }}>
+                      <InputLabel id="mobile-page-size-label">
+                        Por página
+                      </InputLabel>
+                      <Select
+                        labelId="mobile-page-size-label"
+                        id="mobile-page-size"
+                        value={pageSize}
+                        label="Por página"
+                        onChange={(e) => {
+                          setPageSize(Number(e.target.value));
+                          setPage(0);
                         }}
                       >
-                        <ImageOutlinedIcon
-                          sx={{ color: theme.palette.grey[500], fontSize: 32 }}
-                        />
-                      </Box>
-                    )}
-                    <Box>
-                      <Typography fontWeight={700} fontSize={16}>
-                        {row.nombre}
-                      </Typography>
-                      <Typography fontSize={13} color="text.secondary">
-                        Stock: <b>{row.stock}</b>
-                      </Typography>
-                      <Typography fontSize={12} color="text.disabled">
-                        {row.categoria}
-                      </Typography>
-                    </Box>
+                        {pageSizeOptions.map((option) => (
+                          <MenuItem value={option} key={option}>
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </Box>
-                  <Box display="flex" gap={1}>
+                  {rows.map((row) => (
                     <Box
+                      key={row.id}
                       sx={{
-                        width: 38,
-                        height: 38,
-                        borderRadius: "50%",
-                        background: `linear-gradient(120deg, ${theme.palette.info.light}, ${theme.palette.info.main})`,
+                        mb: 2,
+                        p: 2,
+                        borderRadius: 2,
+                        boxShadow: 2,
+                        background: theme.palette.background.paper,
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        "&:hover": {
-                          background: theme.palette.info.dark,
-                          transform: "scale(1.09)",
-                        },
-                        boxShadow: "0 2px 8px 0 #1976d222",
+                        justifyContent: "space-between",
+                        gap: 2,
                       }}
-                      onClick={() => navigate(`/productos/ver/${row.id}`)}
-                      title="Ver producto"
                     >
-                      <VisibilityIcon sx={{ color: "#fff", fontSize: 20 }} />
-                    </Box>
-                    {/* Icono Editar */}
-                    {canEditProducto && (
-                      <Box
-                        sx={{
-                          width: 38,
-                          height: 38,
-                          borderRadius: "50%",
-                          background: `linear-gradient(120deg, ${theme.palette.primary.light}, ${theme.palette.primary.main})`,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          "&:hover": {
-                            background: theme.palette.primary.dark,
-                            transform: "scale(1.09)",
-                          },
-                          boxShadow: "0 2px 8px 0 #1976d222",
-                        }}
-                        onClick={() => navigate(`/productos/editar/${row.id}`)}
-                        title="Editar producto"
-                      >
-                        <EditIcon sx={{ color: "#fff", fontSize: 20 }} />
+                      <Box display="flex" alignItems="center" gap={2}>
+                        {row.image_url ? (
+                          <img
+                            src={getImageUrl(row.image_url)}
+                            alt={row.nombre}
+                            style={{
+                              width: 48,
+                              height: 48,
+                              borderRadius: 8,
+                              objectFit: "cover",
+                            }}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src =
+                                "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg";
+                            }}
+                          />
+                        ) : (
+                          <Box
+                            sx={{
+                              width: 48,
+                              height: 48,
+                              borderRadius: 8,
+                              background: theme.palette.grey[200],
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <ImageOutlinedIcon
+                              sx={{
+                                color: theme.palette.grey[500],
+                                fontSize: 32,
+                              }}
+                            />
+                          </Box>
+                        )}
+                        <Box>
+                          <Typography fontWeight={700} fontSize={16}>
+                            {row.nombre}
+                          </Typography>
+                          <Typography fontSize={13} color="text.secondary">
+                            Stock: <b>{row.stock}</b>
+                          </Typography>
+                          <Typography fontSize={12} color="text.disabled">
+                            {row.categoria}
+                          </Typography>
+                        </Box>
                       </Box>
-                    )}
+                      <Box display="flex" gap={1}>
+                        {canEditProducto && (
+                          <Box
+                            sx={{
+                              width: 38,
+                              height: 38,
+                              borderRadius: "50%",
+                              background: `linear-gradient(120deg, ${theme.palette.info.light}, ${theme.palette.info.main})`,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: "pointer",
+                              "&:hover": {
+                                background: theme.palette.info.dark,
+                                transform: "scale(1.09)",
+                              },
+                              boxShadow: "0 2px 8px 0 #1976d222",
+                            }}
+                            onClick={() => navigate(`/productos/ver/${row.id}`)}
+                            title="Ver producto"
+                          >
+                            <VisibilityIcon
+                              sx={{ color: "#fff", fontSize: 20 }}
+                            />
+                          </Box>
+                        )}
+                        {canEditProducto && (
+                          <Box
+                            sx={{
+                              width: 38,
+                              height: 38,
+                              borderRadius: "50%",
+                              background: `linear-gradient(120deg, ${theme.palette.primary.light}, ${theme.palette.primary.main})`,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: "pointer",
+                              "&:hover": {
+                                background: theme.palette.primary.dark,
+                                transform: "scale(1.09)",
+                              },
+                              boxShadow: "0 2px 8px 0 #1976d222",
+                            }}
+                            onClick={() =>
+                              navigate(`/productos/editar/${row.id}`)
+                            }
+                            title="Editar producto"
+                          >
+                            <EditIcon sx={{ color: "#fff", fontSize: 20 }} />
+                          </Box>
+                        )}
+                      </Box>
+                    </Box>
+                  ))}
+                  <Box display="flex" justifyContent="center" mt={3}>
+                    <Pagination
+                      count={paginacion.totalPages || 1}
+                      page={page + 1}
+                      onChange={(_, value) => setPage(value - 1)}
+                      color="primary"
+                      size="large"
+                      siblingCount={0}
+                    />
                   </Box>
-                </Box>
-              ))}
-              <Box display="flex" justifyContent="center" mt={3}>
-                <Pagination
-                  count={paginacion.totalPages || 1}
-                  page={page + 1}
-                  onChange={(_, value) => setPage(value - 1)}
-                  color="primary"
-                  size="large"
-                  siblingCount={0}
-                />
-              </Box>
-            </>
-          )}
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            height: "600px",
-            "& .MuiDataGrid-root": {
-              border: "none",
-              borderRadius: "8px",
-              overflow: "hidden",
-              backgroundColor: theme.palette.background.paper,
-            },
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor:
-                theme.palette.mode === "light"
-                  ? theme.palette.grey[200]
-                  : theme.palette.grey[800],
-              color: theme.palette.text.primary,
-              fontWeight: "bold",
-              fontSize: "1rem",
-              borderColor: theme.palette.grey[300],
-              borderBottom: `1px solid ${theme.palette.divider}`,
-              "& > div": {
-                borderRight: `1px solid ${theme.palette.divider}`,
-              },
-            },
-            "& .MuiDataGrid-cell": {
-              borderBottom: `1px solid ${theme.palette.divider}`,
-              borderColor: theme.palette.grey[300],
-              color: theme.palette.text.primary,
-              "&:not(:last-child)": {
-                borderRight: `1px solid ${theme.palette.divider}`,
-              },
-              display: "flex",
-            },
-            "& .MuiDataGrid-footerContainer": {
-              backgroundColor:
-                theme.palette.mode === "light"
-                  ? theme.palette.grey[100]
-                  : theme.palette.grey[800],
-              borderTop: `1px solid ${theme.palette.divider}`,
-            },
-            "& .MuiDataGrid-toolbarContainer": {
-              padding: "0.5rem",
-            },
-            "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within":
-              {
-                outline: "none",
-              },
-            "& .MuiIconButton-root:focus, & .MuiIconButton-root:focus-visible":
-              {
-                outline: "none",
-              },
-          }}
-        >
-          <DataGrid
-            rows={rows || []}
-            columns={columns}
-            loading={isLoading}
-            getRowId={(row) => row.id}
-            pageSize={pageSize}
-            paginationMode="server"
-            rowCount={paginacion?.totalItems || rows.length}
-            paginationModel={{ page: page, pageSize: pageSize }}
-            pageSizeOptions={rowsPerPageOptions}
-            onPaginationModelChange={(model) => {
-              setPage(model.page);
-              setPageSize(model.pageSize);
-            }}
-            checkboxSelection
-            onRowSelectionModelChange={(ids) => setSelectedRows(ids)}
-            slots={{
-              toolbar: DataGridCustomToolbar,
-              pagination: CustomPagination,
-            }}
-            slotProps={{ toolbar: { searchInput, setSearchInput, setSearch } }}
-          />
-        </Box>
-      )}
+                </>
+              )}
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                height: "600px",
+                "& .MuiDataGrid-root": {
+                  border: "none",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  backgroundColor: theme.palette.background.paper,
+                },
+                "& .MuiDataGrid-columnHeaders": {
+                  backgroundColor:
+                    theme.palette.mode === "light"
+                      ? theme.palette.grey[200]
+                      : theme.palette.grey[800],
+                  color: theme.palette.text.primary,
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                  borderColor: theme.palette.grey[300],
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  "& > div": {
+                    borderRight: `1px solid ${theme.palette.divider}`,
+                  },
+                },
+                "& .MuiDataGrid-cell": {
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  borderColor: theme.palette.grey[300],
+                  color: theme.palette.text.primary,
+                  "&:not(:last-child)": {
+                    borderRight: `1px solid ${theme.palette.divider}`,
+                  },
+                  display: "flex",
+                },
+                "& .MuiDataGrid-footerContainer": {
+                  backgroundColor:
+                    theme.palette.mode === "light"
+                      ? theme.palette.grey[100]
+                      : theme.palette.grey[800],
+                  borderTop: `1px solid ${theme.palette.divider}`,
+                },
+                "& .MuiDataGrid-toolbarContainer": {
+                  padding: "0.5rem",
+                },
+                "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
+                  outline: "none",
+                },
+                "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within":
+                  {
+                    outline: "none",
+                  },
+                "& .MuiIconButton-root:focus, & .MuiIconButton-root:focus-visible":
+                  {
+                    outline: "none",
+                  },
+              }}
+            >
+              <DataGrid
+                rows={rows || []}
+                columns={columns}
+                loading={isLoading}
+                getRowId={(row) => row.id}
+                pageSize={pageSize}
+                paginationMode="server"
+                rowCount={paginacion?.totalItems || rows.length}
+                paginationModel={{ page: page, pageSize: pageSize }}
+                pageSizeOptions={rowsPerPageOptions}
+                onPaginationModelChange={(model) => {
+                  setPage(model.page);
+                  setPageSize(model.pageSize);
+                }}
+                checkboxSelection
+                onRowSelectionModelChange={(ids) => setSelectedRows(ids)}
+                slots={{
+                  toolbar: DataGridCustomToolbar,
+                  pagination: CustomPagination,
+                }}
+                slotProps={{
+                  toolbar: { searchInput, setSearchInput, setSearch },
+                }}
+              />
+            </Box>
+          ))}
+        {vista === 1 &&
+          (isLoadingTodos ? (
+            <LoaderComponent />
+          ) : (
+            <InventarioMatriz
+              productos={productosFiltradosPorSucursal}
+              sucursales={
+                rol === "administrador"
+                  ? sucursales || []
+                  : sucursales?.filter(
+                      (s) => s.id_sucursal === sucursalActiva.id_sucursal
+                    ) || []
+              }
+            />
+          ))}
+
+        {vista === 2 &&
+          (isLoadingTodos ? (
+            <LoaderComponent />
+          ) : (
+            <InventarioTabsPorSucursal
+              productos={productosFiltradosPorSucursal}
+              sucursales={
+                rol === "administrador"
+                  ? sucursales || []
+                  : sucursales?.filter(
+                      (s) => s.id_sucursal === sucursalActiva.id_sucursal
+                    ) || []
+              }
+            />
+          ))}
+
+        {vista === 3 &&
+          (isLoadingTodos ? (
+            <LoaderComponent />
+          ) : (
+            <InventarioAccordionPorProducto
+              productos={productosFiltradosPorSucursal}
+              sucursales={
+                rol === "administrador"
+                  ? sucursales || []
+                  : sucursales?.filter(
+                      (s) => s.id_sucursal === sucursalActiva.id_sucursal
+                    ) || []
+              }
+            />
+          ))}
+      </Box>
+
       <AlertDialog
         openAlert={openAlert}
         title="¿Eliminar Producto?"
@@ -604,7 +765,6 @@ const Productos = () => {
           { name: "marca", label: "Marca", type: "text" },
           { name: "codigo_barra", label: "Código de Barra", type: "text" },
           { name: "precio", label: "Precio", type: "number" },
-          { name: "cantidad_inicial", label: "Cantidad", type: "number" },
           { name: "descripcion", label: "Descripción", type: "text" },
           {
             name: "id_categoria",
@@ -616,9 +776,22 @@ const Productos = () => {
                 label: c.nombre_categoria,
               })) || [],
           },
+          /*  {
+            name: "id_sucursal",
+            label: "Sucursal",
+            type: "select",
+            required: true,
+            options: sucursales
+              ? sucursales.map((s) => ({
+                  value: s.id_sucursal,
+                  label: s.nombre,
+                }))
+              : [],
+          }, */
           { name: "es_para_venta", label: "¿Para Venta?", type: "checkbox" },
         ]}
         title="Añadir Nuevo Producto"
+        isLoading={loadingSucursales || isCreating}
       />
     </Box>
   );

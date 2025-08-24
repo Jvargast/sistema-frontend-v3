@@ -5,30 +5,125 @@ import {
   Divider,
   IconButton,
   Tooltip,
-  Select,
-  MenuItem,
   useTheme,
+  Chip,
+  Alert,
+  Button,
 } from "@mui/material";
-import { AddCircleOutline, DeleteOutline } from "@mui/icons-material";
+import {
+  AddCircleOutline,
+  DeleteOutline,
+  InfoOutlined,
+  Add,
+  Remove,
+} from "@mui/icons-material";
 import PropTypes from "prop-types";
 
-const ProductoRetornableCard = ({ grupo, onUpdate, insumos }) => {
+const ProductoRetornableCard = ({ grupo, onUpdate }) => {
   const theme = useTheme();
+  const fechaHeader = (() => {
+    if (!grupo.items?.length) return null;
+    const maxMillis = Math.max(
+      ...grupo.items.map((it) => new Date(it.fecha_retorno).getTime())
+    );
+    return new Date(maxMillis).toLocaleDateString();
+  })();
+  const QuantityStepper = ({
+    value = 0,
+    min = 0,
+    max = Infinity,
+    onChange,
+    disabled,
+    ariaLabel,
+  }) => {
+    const v = Number.isFinite(value) ? value : 0;
+    const dec = () => onChange(Math.max(min, v - 1));
+    const inc = () => onChange(Math.min(max, v + 1));
+    const handleInput = (e) => {
+      const n = parseInt(e.target.value || 0, 10);
+      if (Number.isNaN(n)) return onChange(min);
+      onChange(Math.max(min, Math.min(max, n)));
+    };
+    return (
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        <IconButton
+          onClick={dec}
+          disabled={disabled || v <= min}
+          size="large"
+          sx={{
+            width: { xs: 48, md: 56 },
+            height: { xs: 48, md: 56 },
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 2,
+          }}
+          aria-label={`${ariaLabel} disminuir`}
+        >
+          <Remove />
+        </IconButton>
+        <TextField
+          value={v}
+          onChange={handleInput}
+          size="medium"
+          inputProps={{
+            inputMode: "numeric",
+            pattern: "[0-9]*",
+            style: { textAlign: "center", fontWeight: 700 },
+          }}
+          sx={{ width: 96 }}
+        />
+        <IconButton
+          onClick={inc}
+          disabled={disabled || v >= max}
+          size="large"
+          sx={{
+            width: 48,
+            height: 48,
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 2,
+          }}
+          aria-label={`${ariaLabel} aumentar`}
+        >
+          <Add />
+        </IconButton>
+      </Box>
+    );
+  };
   return (
     <Box
       sx={{
-        px: 2,
-        py: 2,
+        px: 2.5,
+        py: 2.5,
         mb: 4,
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: theme.palette.action.hover,
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: 2,
+        boxShadow: theme.palette.mode === "dark" ? "none" : "0 2px 10px rgba(0,0,0,0.04)",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      <Typography variant="h6" fontWeight="bold" gutterBottom>
-        Producto: {grupo.nombreProducto} (
-        {grupo.items.reduce((total, item) => total + (item.cantidad || 0), 0)}{" "}
-        unidades)
-      </Typography>
-
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 2,
+        }}
+      >
+        <Typography variant="h6" fontWeight={800}>
+          Producto: {grupo.nombreProducto} (
+          {grupo.items.reduce((total, item) => total + (item.cantidad || 0), 0)}{" "}
+          unidades)
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ whiteSpace: "nowrap" }}
+        >
+          {fechaHeader ? `Fecha: ${fechaHeader}` : "—"}
+        </Typography>
+      </Box>
       <Divider sx={{ mb: 2 }} />
 
       {grupo.items.map((item, idx) => {
@@ -64,27 +159,39 @@ const ProductoRetornableCard = ({ grupo, onUpdate, insumos }) => {
             sx={{
               mb: 3,
               p: 2,
-              borderRadius: 2,
-              border: `1px solid ${theme.palette.divider}`,
-              backgroundColor: theme.palette.background.default, 
             }}
           >
-            <Typography variant="subtitle2" color="text.secondary" mb={1}>
-              Fecha retorno: {new Date(item.fecha_retorno).toLocaleDateString()}{" "}
-              — Cantidad: {item.cantidad}
-            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <Box
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 1,
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 999,
+                  border: "1px dashed",
+                  borderColor: "divider",
+                  bgcolor: "background.paper",
+                }}
+              >
+                <Typography
+                  variant="overline"
+                  color="text.secondary"
+                  sx={{ lineHeight: 1.2 }}
+                >
+                  Cantidad total
+                </Typography>
+                <Typography variant="subtitle1" fontWeight={800}>
+                  {item.cantidad}
+                </Typography>
+              </Box>
+            </Box>
 
             <Typography
               variant="subtitle1"
-              fontWeight="bold"
-              sx={{
-                px: 2,
-                py: 1,
-                borderRadius: 1,
-                mb: 1,
-                backgroundColor: theme.palette.success.light,
-                color: theme.palette.success.dark,
-              }}
+              fontWeight={800}
+              sx={{ mb: 1, letterSpacing: 0.2 }}
             >
               ♻️ Reutilizables
             </Typography>
@@ -92,60 +199,56 @@ const ProductoRetornableCard = ({ grupo, onUpdate, insumos }) => {
               sx={{
                 display: "flex",
                 flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: 96,
                 gap: 1,
-                border: "1px solid #e0e0e0",
+                border: `1px solid ${theme.palette.divider}`,
                 borderRadius: 2,
                 p: 2,
                 mb: 2,
               }}
             >
-              <TextField
-                label="¿Cuántos pueden volver a ser usados?"
-                type="number"
-                inputProps={{ min: 0, max: item.cantidad }}
-                value={item.reutilizable || ""}
-                onChange={(e) =>
-                  onUpdate(
-                    grupo.id,
-                    idx,
-                    "reutilizable",
-                    parseInt(e.target.value || 0, 10)
-                  )
+              <QuantityStepper
+                ariaLabel="Reutilizables"
+                value={item.reutilizable || 0}
+                min={0}
+                max={
+                  item.cantidad -
+                  (item.fallas || []).reduce((s, f) => s + (f.cantidad || 0), 0)
                 }
-                size="small"
-                fullWidth
+                disabled={!item._insumoDestinoFijo}
+                onChange={(val) => onUpdate(grupo.id, idx, "reutilizable", val)}
               />
-              <Select
-                fullWidth
-                size="small"
-                value={item.id_insumo_destino || ""}
-                onChange={(e) =>
-                  onUpdate(grupo.id, idx, "id_insumo_destino", e.target.value)
-                }
-                displayEmpty
-              >
-                <MenuItem value="" disabled>
-                  Seleccionar insumo de destino
-                </MenuItem>
-                {Object.values(insumos?.items || {}).map((insumo) => (
-                  <MenuItem key={insumo?.id_insumo} value={insumo?.id_insumo}>
-                    {insumo?.nombre_insumo}
-                  </MenuItem>
-                ))}
-              </Select>
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                {item._insumoDestinoFijo ? (
+                  <Chip
+                    size="small"
+                    color="default"
+                    label={
+                      item._insumoDestinoNombre
+                        ? `Destino: ${item._insumoDestinoNombre}`
+                        : `Destino ID: ${item.id_insumo_destino}`
+                    }
+                    sx={{ alignSelf: "flex-start" }}
+                  />
+                ) : (
+                  <Alert
+                    icon={<InfoOutlined fontSize="inherit" />}
+                    severity="info"
+                    sx={{ py: 0.5 }}
+                  >
+                    Configura <strong>id_insumo_retorno</strong> en el producto
+                    para habilitar reutilizables.
+                  </Alert>
+                )}
+              </Box>
             </Box>
 
             <Typography
               variant="subtitle1"
-              fontWeight="bold"
-              sx={{
-                backgroundColor: theme.palette.warning.light, 
-                color: theme.palette.warning.dark,
-                px: 2,
-                py: 1,
-                borderRadius: 1,
-                mb: 1,
-              }}
+              fontWeight={800}
+              sx={{ mb: 1, letterSpacing: 0.2 }}
             >
               ⚠️ Defectuosos
             </Typography>
@@ -155,26 +258,27 @@ const ProductoRetornableCard = ({ grupo, onUpdate, insumos }) => {
                 key={fallaIdx}
                 sx={{
                   display: "flex",
-                  gap: 2,
+                  gap: 1.5,
                   flexWrap: "wrap",
                   alignItems: "center",
                   mb: 1,
                 }}
               >
-                <TextField
-                  label="Cantidad"
-                  type="number"
-                  inputProps={{ min: 0, max: item.cantidad }}
-                  value={falla.cantidad}
-                  onChange={(e) =>
-                    handleFallaChange(
-                      fallaIdx,
-                      "cantidad",
-                      parseInt(e.target.value || 0, 10)
+                <QuantityStepper
+                  ariaLabel="Defectuosos"
+                  value={falla.cantidad || 0}
+                  min={0}
+                  max={
+                    item.cantidad -
+                    (item.reutilizable || 0) -
+                    (item.fallas || []).reduce(
+                      (s, f, i) => s + (i === fallaIdx ? 0 : f.cantidad || 0),
+                      0
                     )
                   }
-                  size="small"
-                  sx={{ width: { xs: "100%", sm: "140px" } }}
+                  onChange={(val) =>
+                    handleFallaChange(fallaIdx, "cantidad", val)
+                  }
                 />
 
                 <TextField
@@ -204,24 +308,30 @@ const ProductoRetornableCard = ({ grupo, onUpdate, insumos }) => {
               mt={1}
               sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Tooltip title="Agregar nuevo tipo de defecto">
-                  <IconButton
-                    onClick={handleAgregarFalla}
-                    color="primary"
-                    size="small"
-                  >
-                    <AddCircleOutline fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                <Typography variant="body2" color="text.secondary">
-                  Restante:{" "}
-                  <strong
-                    style={{ color: restante < 0 ? "#d32f2f" : "#2e7d32" }}
-                  >
-                    {restante}
-                  </strong>
-                </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 2,
+                  mb: 1,
+                }}
+              >
+                <Button
+                  onClick={handleAgregarFalla}
+                  size="small"
+                  variant="outlined"
+                  startIcon={<AddCircleOutline />}
+                >
+                  Agregar defecto
+                </Button>
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  label={`Restante: ${restante}`}
+                  sx={{ fontWeight: 600 }}
+                  color={restante < 0 ? "error" : "default"}
+                />
               </Box>
 
               <Box
@@ -257,7 +367,6 @@ const ProductoRetornableCard = ({ grupo, onUpdate, insumos }) => {
 ProductoRetornableCard.propTypes = {
   grupo: PropTypes.object.isRequired,
   onUpdate: PropTypes.func.isRequired,
-  insumos: PropTypes.object,
 };
 
 export default ProductoRetornableCard;

@@ -1,6 +1,5 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { TextField } from "@mui/material";
-import { Autocomplete as GoogleAutocomplete } from "@react-google-maps/api";
 import PropTypes from "prop-types";
 
 export default function AutocompleteDireccion({
@@ -8,41 +7,79 @@ export default function AutocompleteDireccion({
   setDireccion,
   setCoords,
 }) {
-  const autocompleteRef = useRef(null);
+  const inputRef = useRef(null);
+  const acRef = useRef(null);
 
-  const handlePlaceChanged = () => {
-    const autocomplete = autocompleteRef.current;
-    if (!autocomplete) return;
-    const place = autocomplete.getPlace();
-    if (place && place.formatted_address && place.geometry) {
-      setDireccion(place.formatted_address);
-      setCoords({
-        lat: place.geometry.location.lat(),
-        lng: place.geometry.location.lng(),
-      });
+  useEffect(() => {
+    if (!window.google?.maps?.places || !inputRef.current) return;
+
+    acRef.current = new window.google.maps.places.Autocomplete(
+      inputRef.current,
+      {
+        fields: [
+          "formatted_address",
+          "geometry",
+          "address_components",
+          "place_id",
+        ],
+        componentRestrictions: { country: ["cl"] },
+        types: ["geocode"],
+      }
+    );
+
+    const listener = acRef.current.addListener("place_changed", () => {
+      const place = acRef.current.getPlace();
+      if (!place) return;
+
+      if (place.formatted_address) setDireccion(place.formatted_address);
+      if (place.geometry?.location) {
+        setCoords({
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+        });
+      }
+    });
+
+    return () => {
+      if (listener) window.google.maps.event.removeListener(listener);
+    };
+  }, []);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && window.google?.maps?.Geocoder) {
+      e.preventDefault();
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder
+        .geocode({
+          address: direccion,
+          componentRestrictions: { country: "CL" },
+        })
+        .then(({ results }) => {
+          const r = results?.[0];
+          if (r?.geometry?.location) {
+            setDireccion(r.formatted_address || direccion);
+            setCoords({
+              lat: r.geometry.location.lat(),
+              lng: r.geometry.location.lng(),
+            });
+          }
+        })
+        .catch(() => {});
     }
   };
 
   return (
-    <GoogleAutocomplete
-      onLoad={(ac) => (autocompleteRef.current = ac)}
-      onPlaceChanged={handlePlaceChanged}
-      fields={["formatted_address", "geometry", "address_components"]}
-    >
-      <TextField
-        fullWidth
-        label="Dirección de Entrega"
-        value={direccion}
-        onChange={(e) => setDireccion(e.target.value)}
-        variant="outlined"
-        sx={{
-          mb: 3,
-          backgroundColor: (theme) => theme.palette.background.default,
-          borderRadius: 1,
-        }}
-        autoComplete="off"
-      />
-    </GoogleAutocomplete>
+    <TextField
+      inputRef={inputRef}
+      fullWidth
+      label="Dirección de Origen"
+      value={direccion}
+      onChange={(e) => setDireccion(e.target.value)}
+      onKeyDown={handleKeyDown}
+      variant="outlined"
+      sx={{ mb: 3, borderRadius: 1 }}
+      autoComplete="off"
+    />
   );
 }
 

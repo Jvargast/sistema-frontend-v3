@@ -37,6 +37,10 @@ const MobilePedidosBoard = ({
   desasignarPedido,
   allPedidosLoading,
   choferesLoading,
+  mode,
+  sucursales = [],
+  sucursalFiltro = "",
+  onChangeSucursal = () => {},
 }) => {
   const [open, setOpen] = useState(false);
   const [selectedPedido, setSelectedPedido] = useState(null);
@@ -112,177 +116,210 @@ const MobilePedidosBoard = ({
 
   return (
     <Box p={1} sx={{ background: (theme) => theme.palette.background.default }}>
-      <SectionHeader>Pedidos sin asignar</SectionHeader>
-
-      <Fade in>
-        <Box sx={{ maxHeight: 400, overflowY: "auto", mt: 1}}>
-          <Stack spacing={2}>
-            {columnsState.sinAsignar.length === 0 && (
-              <Typography
-                align="center"
-                color="text.secondary"
-                fontStyle="italic"
-              >
-                No hay pedidos sin asignar.
-              </Typography>
-            )}
-            {columnsState.sinAsignar.map((pedido) => (
-              <Card
-                key={pedido.id_pedido}
-                sx={{
-                  borderRadius: 3,
-                  boxShadow: 3,
-                  bgcolor: "background.paper",
-                  mb: 1,
-                  border: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
-                <CardContent sx={{ p: 2 }}>
-                  <Stack direction="row" alignItems="center" gap={2}>
-                    <Avatar sx={{ bgcolor: "info.main", mr: 1 }}>
-                      <AssignmentIndIcon />
-                    </Avatar>
-                    <Box flex={1}>
-                      <Typography fontWeight={600}>
-                        #{pedido.id_pedido} —{" "}
-                        {pedido.Cliente?.nombre || "Cliente"}
-                      </Typography>
-                      <Typography fontSize={14} color="text.secondary" noWrap>
-                        {pedido.EstadoPedido?.nombre_estado}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </CardContent>
-                <CardActions sx={{ justifyContent: "flex-end", pt: 0 }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{
-                      borderRadius: 2,
-                      fontWeight: "bold",
-                      letterSpacing: 0.5,
-                      boxShadow: 2,
-                    }}
-                    startIcon={<PersonIcon />}
-                    onClick={() => handleOpen(pedido)}
-                  >
-                    Asignar Chofer
-                  </Button>
-                </CardActions>
-              </Card>
+      {mode === "global" && (
+        <Box sx={{ mb: 2 }}>
+          <Select
+            fullWidth
+            value={sucursalFiltro}
+            displayEmpty
+            onChange={(e) => onChangeSucursal(e.target.value)}
+            sx={{ borderRadius: 2 }}
+          >
+            <MenuItem value="">Selecciona una sucursal…</MenuItem>
+            {sucursales.map((s) => (
+              <MenuItem key={s.id_sucursal} value={String(s.id_sucursal)}>
+                {s.nombre}
+              </MenuItem>
             ))}
-          </Stack>
+          </Select>
+          {!sucursalFiltro && (
+            <Typography color="text.secondary" mt={1} fontSize={13}>
+              Selecciona una sucursal para ver y asignar pedidos.
+            </Typography>
+          )}
         </Box>
-      </Fade>
+      )}
 
-      <Divider sx={{ my: 3 }} />
+      {mode === "global" && !sucursalFiltro ? null : (
+        <>
+          <SectionHeader>Pedidos sin asignar</SectionHeader>
 
-      <SectionHeader>Pedidos por chofer</SectionHeader>
-
-      <Stack
-        spacing={3}
-        sx={{
-          background: (theme) =>
-            theme.palette.mode === "light"
-              ? "linear-gradient(90deg, #f7fafc 0%, #f1f5f9 100%)"
-              : "linear-gradient(90deg, #222 0%, #333 100%)",
-          border: "1.5px solid",
-          borderBottom: "none",
-          borderTop: "none",
-          borderColor: "divider",
-          p: 2,
-          borderRadius: "0 0 16px 16px",
-        }}
-      >
-        {choferes.map((chofer) => (
-          <Box key={chofer.rut} mb={2}>
-            <Stack direction="row" alignItems="center" mb={2} gap={1}>
-              <Avatar sx={{ bgcolor: "success.main" }}>
-                <LocalShippingIcon />
-              </Avatar>
-              <Typography fontWeight="bold" fontSize={16}>
-                {chofer.nombre}
-              </Typography>
-              <Typography color="text.secondary" fontSize={13}>
-                ({chofer.rut})
-              </Typography>
-            </Stack>
-            <Box
-              sx={{
-                maxHeight: 260,
-                overflowY: "auto",
-                pr: 1,
-              }}
-            >
-              <Stack spacing={1}>
-                {(columnsState[chofer.rut] || []).length === 0 ? (
+          <Fade in>
+            <Box sx={{ maxHeight: 400, overflowY: "auto", mt: 1 }}>
+              <Stack spacing={2}>
+                {columnsState.sinAsignar.length === 0 && (
                   <Typography
                     align="center"
                     color="text.secondary"
-                    fontSize={13}
                     fontStyle="italic"
                   >
-                    Sin pedidos asignados
+                    No hay pedidos sin asignar.
                   </Typography>
-                ) : (
-                  (columnsState[chofer.rut] || []).map((pedido) => (
-                    <Card
-                      key={pedido.id_pedido}
-                      sx={{
-                        borderRadius: 2,
-                        boxShadow: 1,
-                        bgcolor: "grey.50",
-                        borderLeft: "5px solid",
-                        borderColor: "success.light",
-                        mb: 2
-                      }}
-                    >
-                      <CardContent sx={{ p: 2 }}>
-                        <Stack direction="row" alignItems="center" gap={2}>
-                          <Avatar sx={{ bgcolor: "primary.light" }}>
-                            <AssignmentTurnedInIcon />
-                          </Avatar>
-                          <Box flex={1}>
-                            <Typography fontWeight={600}>
-                              #{pedido.id_pedido} —{" "}
-                              {pedido.Cliente?.nombre || "Cliente"}
-                            </Typography>
-                            <Typography
-                              fontSize={13}
-                              color="text.secondary"
-                              noWrap
-                            >
-                              {pedido.EstadoPedido?.nombre_estado}
-                            </Typography>
-                          </Box>
-                        </Stack>
-                      </CardContent>
-                      <CardActions sx={{ justifyContent: "flex-end", pt: 0 }}>
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          fullWidth
-                          sx={{
-                            borderRadius: 2,
-                            fontWeight: "bold",
-                            letterSpacing: 0.5,
-                          }}
-                          onClick={() => handleDesasignar(pedido)}
-                        >
-                          Desasignar
-                        </Button>
-                      </CardActions>
-                    </Card>
-                  ))
                 )}
+                {columnsState.sinAsignar.map((pedido) => (
+                  <Card
+                    key={pedido.id_pedido}
+                    sx={{
+                      borderRadius: 3,
+                      boxShadow: 3,
+                      bgcolor: "background.paper",
+                      mb: 1,
+                      border: "1px solid",
+                      borderColor: "divider",
+                    }}
+                  >
+                    <CardContent sx={{ p: 2 }}>
+                      <Stack direction="row" alignItems="center" gap={2}>
+                        <Avatar sx={{ bgcolor: "info.main", mr: 1 }}>
+                          <AssignmentIndIcon />
+                        </Avatar>
+                        <Box flex={1}>
+                          <Typography fontWeight={600}>
+                            #{pedido.id_pedido} —{" "}
+                            {pedido.Cliente?.nombre || "Cliente"}
+                          </Typography>
+                          <Typography
+                            fontSize={14}
+                            color="text.secondary"
+                            noWrap
+                          >
+                            {pedido.EstadoPedido?.nombre_estado}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </CardContent>
+                    <CardActions sx={{ justifyContent: "flex-end", pt: 0 }}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        sx={{
+                          borderRadius: 2,
+                          fontWeight: "bold",
+                          letterSpacing: 0.5,
+                          boxShadow: 2,
+                        }}
+                        startIcon={<PersonIcon />}
+                        onClick={() => handleOpen(pedido)}
+                      >
+                        Asignar Chofer
+                      </Button>
+                    </CardActions>
+                  </Card>
+                ))}
               </Stack>
             </Box>
-          </Box>
-        ))}
-      </Stack>
+          </Fade>
 
+          <Divider sx={{ my: 3 }} />
+
+          <SectionHeader>Pedidos por chofer</SectionHeader>
+
+          <Stack
+            spacing={3}
+            sx={{
+              background: (theme) =>
+                theme.palette.mode === "light"
+                  ? "linear-gradient(90deg, #f7fafc 0%, #f1f5f9 100%)"
+                  : "linear-gradient(90deg, #222 0%, #333 100%)",
+              border: "1.5px solid",
+              borderBottom: "none",
+              borderTop: "none",
+              borderColor: "divider",
+              p: 2,
+              borderRadius: "0 0 16px 16px",
+            }}
+          >
+            {choferes.map((chofer) => (
+              <Box key={chofer.rut} mb={2}>
+                <Stack direction="row" alignItems="center" mb={2} gap={1}>
+                  <Avatar sx={{ bgcolor: "success.main" }}>
+                    <LocalShippingIcon />
+                  </Avatar>
+                  <Typography fontWeight="bold" fontSize={16}>
+                    {chofer.nombre}
+                  </Typography>
+                  <Typography color="text.secondary" fontSize={13}>
+                    ({chofer.rut})
+                  </Typography>
+                </Stack>
+                <Box
+                  sx={{
+                    maxHeight: 260,
+                    overflowY: "auto",
+                    pr: 1,
+                  }}
+                >
+                  <Stack spacing={1}>
+                    {(columnsState[chofer.rut] || []).length === 0 ? (
+                      <Typography
+                        align="center"
+                        color="text.secondary"
+                        fontSize={13}
+                        fontStyle="italic"
+                      >
+                        Sin pedidos asignados
+                      </Typography>
+                    ) : (
+                      (columnsState[chofer.rut] || []).map((pedido) => (
+                        <Card
+                          key={pedido.id_pedido}
+                          sx={{
+                            borderRadius: 2,
+                            boxShadow: 1,
+                            bgcolor: "grey.50",
+                            borderLeft: "5px solid",
+                            borderColor: "success.light",
+                            mb: 2,
+                          }}
+                        >
+                          <CardContent sx={{ p: 2 }}>
+                            <Stack direction="row" alignItems="center" gap={2}>
+                              <Avatar sx={{ bgcolor: "primary.light" }}>
+                                <AssignmentTurnedInIcon />
+                              </Avatar>
+                              <Box flex={1}>
+                                <Typography fontWeight={600}>
+                                  #{pedido.id_pedido} —{" "}
+                                  {pedido.Cliente?.nombre || "Cliente"}
+                                </Typography>
+                                <Typography
+                                  fontSize={13}
+                                  color="text.secondary"
+                                  noWrap
+                                >
+                                  {pedido.EstadoPedido?.nombre_estado}
+                                </Typography>
+                              </Box>
+                            </Stack>
+                          </CardContent>
+                          <CardActions
+                            sx={{ justifyContent: "flex-end", pt: 0 }}
+                          >
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              fullWidth
+                              sx={{
+                                borderRadius: 2,
+                                fontWeight: "bold",
+                                letterSpacing: 0.5,
+                              }}
+                              onClick={() => handleDesasignar(pedido)}
+                            >
+                              Desasignar
+                            </Button>
+                          </CardActions>
+                        </Card>
+                      ))
+                    )}
+                  </Stack>
+                </Box>
+              </Box>
+            ))}
+          </Stack>
+        </>
+      )}
       <Dialog
         open={open}
         onClose={handleClose}
@@ -344,6 +381,10 @@ MobilePedidosBoard.propTypes = {
   desasignarPedido: PropTypes.func.isRequired,
   allPedidosLoading: PropTypes.bool.isRequired,
   choferesLoading: PropTypes.bool.isRequired,
+  mode: PropTypes.string.isRequired,
+  sucursales: PropTypes.array,
+  sucursalFiltro: PropTypes.string,
+  onChangeSucursal: PropTypes.func
 };
 
 export default MobilePedidosBoard;

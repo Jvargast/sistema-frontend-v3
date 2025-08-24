@@ -17,6 +17,7 @@ import { useGetClienteByIdQuery } from "../../store/services/clientesApi";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import BackButton from "../../components/common/BackButton";
+import { useSelector } from "react-redux";
 
 const VerCliente = () => {
   const theme = useTheme();
@@ -25,12 +26,20 @@ const VerCliente = () => {
   const dispatch = useDispatch();
   const location = useLocation();
 
+  const { mode, activeSucursalId } = useSelector((s) => s.scope);
+
   const {
     data: clienteData,
     isLoading,
     isError,
     refetch,
-  } = useGetClienteByIdQuery(id);
+  } = useGetClienteByIdQuery({
+    id,
+    id_sucursal:
+      mode !== "global" && Number(activeSucursalId)
+        ? Number(activeSucursalId)
+        : undefined,
+  });
 
   const formData = clienteData
     ? {
@@ -45,6 +54,7 @@ const VerCliente = () => {
         email: clienteData?.email || "No especificado",
         fecha_registro: clienteData?.fecha_registro || null,
         activo: clienteData?.activo,
+        sucursales: clienteData?.Sucursales ?? [],
       }
     : {};
 
@@ -55,7 +65,7 @@ const VerCliente = () => {
     } else {
       refetch();
     }
-  }, [location.state, refetch, navigate, id]);
+  }, [location.state, refetch, navigate, id, mode, activeSucursalId]);
 
   if (isLoading) return <LoaderComponent />;
 
@@ -239,6 +249,31 @@ const VerCliente = () => {
                     })
                   : "No especificado"}
               </Typography>
+            </Box>
+            <Box mb={2}>
+              <Typography
+                variant="overline"
+                fontWeight="bold"
+                color="text.secondary"
+              >
+                Sucursales
+              </Typography>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 0.5 }}>
+                {formData.sucursales?.length ? (
+                  formData.sucursales.map((s) => (
+                    <Chip
+                      key={s.id_sucursal}
+                      label={s.nombre ?? `Sucursal ${s.id_sucursal}`}
+                      size="small"
+                      sx={{ fontWeight: 600 }}
+                    />
+                  ))
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    Sin sucursales asociadas
+                  </Typography>
+                )}
+              </Box>
             </Box>
           </Grid>
         </Grid>

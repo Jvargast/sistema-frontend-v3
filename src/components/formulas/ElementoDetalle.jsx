@@ -1,4 +1,3 @@
-// ElementoDetalle.jsx
 import {
   Typography,
   Paper,
@@ -21,6 +20,7 @@ const ElementoDetalle = ({
   objetoSeleccionado = null,
   onChange = () => {},
   onDelete,
+  idSucursal,
 }) => {
   const theme = useTheme();
   const isProducto = tipo.toLowerCase() === "producto";
@@ -108,6 +108,7 @@ const ElementoDetalle = ({
           {isProducto ? (
             <SelectorProducto
               label="Producto"
+              idSucursal={idSucursal}
               onProductoSeleccionado={(obj) =>
                 onChange({
                   nombre: obj?.nombre_producto || "",
@@ -121,6 +122,7 @@ const ElementoDetalle = ({
             <SelectorInsumo
               label="Insumo"
               size="small"
+              idSucursal={idSucursal}
               insumoSeleccionado={objetoSeleccionado}
               onInsumoSeleccionado={(obj) =>
                 onChange({
@@ -167,6 +169,7 @@ ElementoDetalle.propTypes = {
   objetoSeleccionado: PropTypes.object,
   onChange: PropTypes.func,
   onDelete: PropTypes.func,
+  idSucursal: PropTypes.number,
 };
 
 export default ElementoDetalle;

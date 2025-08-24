@@ -15,6 +15,8 @@ const FormulaDisplay = ({
   onInsumoChange = () => {},
   onInsumoDelete = () => {},
   onProductoChange = () => {},
+  idSucursal,
+  onInsumoAdd = () => {},
 }) => {
   const theme = useTheme();
 
@@ -99,6 +101,39 @@ const FormulaDisplay = ({
             ))}
           </Stack>
         )}
+        {editable && (
+          <Box
+            onClick={onInsumoAdd}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) =>
+              (e.key === "Enter" || e.key === " ") && onInsumoAdd()
+            }
+            sx={{
+              mt: 1.5,
+              mx: "auto",
+              width: { xs: "95%", md: 250 },
+              borderRadius: 3,
+              border: "2px dashed",
+              borderColor: theme.palette.divider,
+              bgcolor: theme.palette.mode === "dark" ? "grey.800" : "grey.50",
+              color: theme.palette.text.secondary,
+              py: 1.5,
+              textAlign: "center",
+              cursor: "pointer",
+              transition: "all .15s",
+              "&:hover": {
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
+                bgcolor:
+                  theme.palette.mode === "dark" ? "grey.900" : "primary.50",
+              },
+            }}
+          >
+            <AddIcon sx={{ verticalAlign: "middle", mr: 0.5 }} />
+            Agregar insumo
+          </Box>
+        )}
       </Box>
 
       <Divider
@@ -164,6 +199,7 @@ const FormulaDisplay = ({
             width: { xs: "95%", md: 270 },
             mx: "auto",
           }}
+          idSucursal={idSucursal}
         />
       </Box>
     </Box>
@@ -189,6 +225,8 @@ FormulaDisplay.propTypes = {
   onInsumoChange: PropTypes.func,
   onInsumoDelete: PropTypes.func,
   onProductoChange: PropTypes.func,
+  idSucursal: PropTypes.number,
+  onInsumoAdd: PropTypes.func,
 };
 
 export default FormulaDisplay;

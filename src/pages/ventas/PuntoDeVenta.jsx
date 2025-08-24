@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -38,45 +38,55 @@ import CategoriasSelector from "../../components/venta/punto_venta/CategoriasSel
 import ProductoSearchBar from "../../components/venta/punto_venta/ProductoSearchBar";
 import ProductosGrid from "../../components/venta/punto_venta/ProductosGrid";
 import CarritoDeCompras from "../../components/venta/punto_venta/CarritoDeCompras";
-import PuntoDeVentaMobile from "../../components/venta/punto_venta/PuntoDeVentaMobile";
+import useSucursalActiva from "../../hooks/useSucursalActiva";
+import { getStockForSucursal } from "../../utils/inventoryUtils";
+import SelectCajaModal from "../../components/venta/SelectCajaModal";
+
+const getRolName = (rol) =>
+  typeof rol === "string" ? rol.toLowerCase() : rol?.nombre?.toLowerCase();
+
+const isOperadorPOS = (user) => {
+  const r = getRolName(user?.rol);
+  return r === "vendedor" || r === "administrador";
+};
+
+function useDebouncedValue(value, delay = 400) {
+  const [v, setV] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setV(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return v;
+}
 
 const PuntoDeVenta = () => {
+  const { mode, activeSucursalId, sucursales } = useSelector((s) => s.scope);
+  const dispatch = useDispatch();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const botonAbrirPagoRef = useRef(null);
+
   const [openPagoModal, setOpenPagoModal] = useState(false);
   const [ventaData, setVentaData] = useState(null);
   const [selectedVendedor, setSelectedVendedor] = useState("");
-  const [openModal, setOpenModal] = useState(false);
-  const [openRetornablesModal, setOpenRetornablesModal] = useState(false);
-  const [productosRetornables, setProductosRetornables] = useState([]);
-
-  const {
-    data: vendedores,
-    isLoading: loadingVendedores,
-    error: errorVendedores,
-  } = useGetAllUsuariosConCajaQuery();
   const [selectedCliente, setSelectedCliente] = useState(null);
+  const [retornablesConfirmados, setRetornablesConfirmados] = useState(false);
+
+  const [openModal, setOpenModal] = useState(false);
   const [openClienteModal, setOpenClienteModal] = useState(false);
-  const { data: clientes, isLoading: loadingClientes } =
-    useGetAllClientesQuery();
-
-  const [createVenta, { isLoading: isCreating }] = useCreateVentaMutation();
-
-  const { estado, isLoading, error } = useVerificarCaja(selectedVendedor);
-  const usuario = useSelector((state) => state.auth);
+  const [openCajaModal, setOpenCajaModal] = useState(false);
+  const [abrirCajaModal, setAbrirCajaModal] = useState(false);
+  const [cajaParaApertura, setCajaParaApertura] = useState(null);
+  const [openRetornablesModal, setOpenRetornablesModal] = useState(false);
   const [cajaCerrando, setCajaCerrando] = useState(false);
   const [openAlert, setOpenAlert] = useState(false);
+  const [pendingOpenCaja, setPendingOpenCaja] = useState(false);
 
-  const [taxRate, setTaxRate] = useState(0);
+  const [productosRetornables, setProductosRetornables] = useState([]);
 
-  const [tipoDocumento, setTipoDocumento] = useState("boleta");
-  const [tipoEntrega, setTipoEntrega] = useState("retiro_en_sucursal");
-  const [direccionEntrega, setDireccionEntrega] = useState("");
-  const [usarDireccionGuardada, setUsarDireccionGuardada] = useState(true);
-
-  const dispatch = useDispatch();
-
+  const { estado, seleccionarCaja, isLoading, error } =
+    useVerificarCaja(selectedVendedor);
+  const usuario = useSelector((state) => state.auth);
   const {
     items: cart,
     subtotal,
@@ -84,16 +94,72 @@ const PuntoDeVenta = () => {
     descuento,
     total,
   } = useSelector((state) => state.cart);
+  const sucursalActiva = useSucursalActiva();
 
+  const {
+    data: vendedores,
+    isLoading: loadingVendedores,
+    error: errorVendedores,
+  } = useGetAllUsuariosConCajaQuery();
+
+  const [createVenta, { isLoading: isCreating }] = useCreateVentaMutation();
   const [closeCaja, { isLoading: isClosing }] = useCloseCajaMutation();
+
+  const [taxRate, setTaxRate] = useState(0);
+  const [tipoDocumento, setTipoDocumento] = useState("boleta");
+  const [tipoEntrega, setTipoEntrega] = useState("retiro_en_sucursal");
+  const [direccionEntrega, setDireccionEntrega] = useState("");
+  const [usarDireccionGuardada, setUsarDireccionGuardada] = useState(true);
+
+  const rol = getRolName(usuario?.rol);
+  const cajaSeleccionada = estado?.cajaSeleccionada;
+  const vendedorRut = cajaSeleccionada?.usuario_asignado
+    ? cajaSeleccionada?.usuario_asignado
+    : cajaSeleccionada?._vendedor?.rut || null;
+
+  const sucursalOrigenId = useMemo(() => {
+    if (cajaSeleccionada?.id_sucursal) return cajaSeleccionada.id_sucursal;
+    if (rol === "administrador") return sucursalActiva?.id_sucursal || null;
+    return usuario?.user?.id_sucursal || null;
+  }, [
+    cajaSeleccionada?.id_sucursal,
+    rol,
+    sucursalActiva?.id_sucursal,
+    usuario?.user?.id_sucursal,
+  ]);
+
+  const clientesParams = useMemo(() => {
+    const base = { page: 1, limit: 200, activo: true };
+    if (mode !== "global" && sucursalOrigenId) {
+      base.id_sucursal = Number(sucursalOrigenId);
+    }
+    return base;
+  }, [mode, sucursalOrigenId]);
+
+  const { data: clientes, isLoading: loadingClientes } = useGetAllClientesQuery(
+    clientesParams,
+    {
+      skip: mode !== "global" && !sucursalOrigenId,
+      keepUnusedDataFor: 60,
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    }
+  );
+
+  const sucursalById = useMemo(() => {
+    const m = new Map();
+    (sucursales || []).forEach((s) => m.set(Number(s.id_sucursal), s.nombre));
+    return m;
+  }, [sucursales]);
 
   const armarVentaData = (productosRetornablesSeleccionados = null) => {
     const isFactura = tipoDocumento === "factura";
     const data = {
       id_cliente: selectedCliente,
-      id_vendedor: usuario.user.id,
-      id_caja: estado?.asignada?.id_caja,
-      id_sucursal: estado?.asignada?.id_sucursal,
+      id_vendedor: vendedorRut,
+      id_caja: cajaSeleccionada.id_caja,
+      id_sucursal: sucursalOrigenId,
       tipo_entrega: tipoEntrega,
       impuesto: taxRate,
       descuento_total_porcentaje: discount,
@@ -129,7 +195,10 @@ const PuntoDeVenta = () => {
           id_producto: item.id_producto,
           cantidad: item.cantidad,
           estado: item.estado,
-          tipo_defecto: item.tipo_defecto || null,
+          tipo_defecto: item.tipo_defecto ?? null,
+          ...(item.id_insumo_destino != null
+            ? { id_insumo_destino: Number(item.id_insumo_destino) }
+            : {}),
         }));
       }
     }
@@ -137,18 +206,13 @@ const PuntoDeVenta = () => {
     return data;
   };
 
-  const handleProceedToPayment = () => {
-    setProductosRetornables([]);
-    const productosRetornablesEnCarrito = cart.filter(
-      (item) => item.es_retornable
-    );
+  const finalizarFlujoVenta = (productosRetornablesSeleccionados = []) => {
     const isFactura = tipoDocumento === "factura";
 
     if (isFactura) {
       const cliente = clientes?.clientes?.find(
         (c) => c.id_cliente === selectedCliente
       );
-
       if (!cliente || !cliente.razon_social || !cliente.rut) {
         dispatch(
           showNotification({
@@ -159,69 +223,88 @@ const PuntoDeVenta = () => {
         );
         return;
       }
-      setOpenClienteModal(false);
-      setOpenModal(false);
-      setOpenRetornablesModal(false);
-      setOpenAlert(false);
-      setOpenPagoModal(true);
     }
 
-    const yaConfirmados = productosRetornables.length > 0;
+    if (tipoEntrega === "despacho_a_domicilio") {
+      const cliente = clientes?.clientes?.find(
+        (c) => Number(c.id_cliente) === Number(selectedCliente)
+      );
+      const direccionFinal = usarDireccionGuardada
+        ? (cliente?.direccion || "").trim()
+        : (direccionEntrega || "").trim();
+
+      if (!direccionFinal) {
+        dispatch(
+          showNotification({
+            message:
+              "Para envío a domicilio debes indicar una dirección de entrega.",
+            severity: "warning",
+          })
+        );
+        return;
+      }
+    }
+    const venta = armarVentaData(productosRetornablesSeleccionados);
+    setVentaData(venta);
+
+    setOpenClienteModal(false);
+    setOpenModal(false);
+    setOpenRetornablesModal(false);
+    setOpenAlert(false);
+
+    if (isFactura) {
+      handleConfirmPayment(
+        {
+          montoPago: null,
+          metodoPago: null,
+          notas: "Factura emitida, pago pendiente",
+          referencia: null,
+        },
+        venta
+      );
+    } else {
+      setOpenPagoModal(true);
+    }
+  };
+
+  const handleProceedToPayment = () => {
+    const productosRetornablesEnCarrito = cart.filter(
+      (item) => item.es_retornable
+    );
+    const yaConfirmados =
+      retornablesConfirmados || productosRetornables.length > 0;
+
     if (productosRetornablesEnCarrito.length > 0 && !yaConfirmados) {
       setProductosRetornables(productosRetornablesEnCarrito);
       setOpenRetornablesModal(true);
       return;
     }
 
-    const venta = armarVentaData(productosRetornables);
-    setVentaData(venta);
-
-    if (isFactura) {
-      handleConfirmPayment({
-        montoPago: null,
-        metodoPago: null,
-        notas: "Factura emitida, pago pendiente",
-        referencia: null,
-      });
-    } else {
-      setOpenPagoModal(true);
-    }
+    finalizarFlujoVenta(productosRetornables);
   };
 
   const handleConfirmRetornables = (productosSeleccionados) => {
-    const productosValidos = productosSeleccionados.filter(
+    const productosValidos = (productosSeleccionados || []).filter(
       (p) => p.cantidad > 0
     );
     setProductosRetornables(productosValidos);
-    const venta = armarVentaData(productosValidos);
-    setVentaData(venta);
-
     setOpenRetornablesModal(false);
+    setRetornablesConfirmados(true);
 
-    if (tipoDocumento === "factura") {
-      handleConfirmPayment({
-        montoPago: null,
-        metodoPago: null,
-        notas: "Factura emitida, pago pendiente",
-        referencia: null,
-      });
-    } else {
-      setOpenPagoModal(true);
-    }
+    finalizarFlujoVenta(productosValidos);
   };
 
-  const handleConfirmPayment = async ({
-    montoPago,
-    metodoPago,
-    notas,
-    referencia,
-  }) => {
-    if (!ventaData) return;
+  const handleConfirmPayment = async (
+    { montoPago, metodoPago, notas, referencia },
+    ventaOverride = null
+  ) => {
+    const baseVenta = ventaOverride || ventaData;
+    if (!baseVenta) return;
 
-    const isFactura = ventaData.tipo_documento === "factura";
+    const isFactura = baseVenta.tipo_documento === "factura";
 
     const ventaFinal = {
-      ...ventaData,
+      ...baseVenta,
       ...(isFactura
         ? {
             id_metodo_pago: null,
@@ -253,6 +336,7 @@ const PuntoDeVenta = () => {
       setOpenPagoModal(false);
       setVentaData(null);
       setProductosRetornables([]);
+      setRetornablesConfirmados(false);
       setTipoDocumento("boleta");
       setTipoEntrega("retiro_en_sucursal");
       setDireccionEntrega("");
@@ -281,39 +365,142 @@ const PuntoDeVenta = () => {
 
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
   const [discount, setDiscount] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(9);
+  const debouncedSearch = useDebouncedValue(search, 500);
+  const isSearching = search !== debouncedSearch;
 
   useEffect(() => {
-    if (usuario?.rol === "administrador" && !selectedVendedor) {
+    if (isLoading) return;
+    dispatch(clearCart());
+
+    const sucAct = activeSucursalId;
+
+    if (rol === "administrador") {
+      setSelectedVendedor("");
+      seleccionarCaja(null);
       setOpenModal(true);
+      setOpenCajaModal(false);
+      setAbrirCajaModal(false);
+      setCajaParaApertura(null);
+      return;
     }
-  }, [usuario, selectedVendedor]);
+
+    setSelectedVendedor((prev) => prev || usuario?.user?.rut || "");
+
+    if (
+      estado?.cajaSeleccionada?.id_sucursal != null &&
+      Number(estado.cajaSeleccionada.id_sucursal) !== Number(sucAct)
+    ) {
+      seleccionarCaja(null);
+    }
+
+    if (sucAct == null && rol !== "vendedor") return;
+
+    const cajasBase = estado?.cajasAsignadas || [];
+
+    const preferidasAdmin =
+      rol === "administrador" && sucAct != null
+        ? cajasBase.filter((c) => c.id_sucursal === sucAct)
+        : cajasBase;
+
+    const cajasEnUso = rol === "vendedor" ? cajasBase : preferidasAdmin;
+    if (cajasEnUso.length === 0) {
+      setOpenModal(false);
+      setOpenCajaModal(false);
+      setAbrirCajaModal(false);
+      dispatch(
+        showNotification({
+          severity: "info",
+          message:
+            rol === "vendedor"
+              ? "No tienes cajas asignadas."
+              : "No hay cajas en la sucursal actual.",
+        })
+      );
+      return;
+    }
+
+    const abierta = cajasEnUso.find((c) => c.estado === "abierta");
+    if (abierta) {
+      /* if (rol === "administrador") {
+        try {
+          seleccionarCaja(abierta);
+        } catch {}
+        setOpenCajaModal(false);
+        setAbrirCajaModal(false);
+        return;
+      } */
+      setOpenCajaModal(true);
+      setAbrirCajaModal(false);
+      setCajaParaApertura(null);
+      return;
+    }
+
+    const cerrada = cajasEnUso.find((c) => c.estado === "cerrada");
+    if (cerrada) {
+      setCajaParaApertura(null);
+      setAbrirCajaModal(false);
+      setOpenCajaModal(true);
+    } else {
+      setOpenCajaModal(true);
+    }
+    //eslint-disable-next-line
+  }, [mode, activeSucursalId, isLoading, rol, usuario?.user?.rut]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search);
-      setIsSearching(false);
-    }, 500);
+    if (!cart.some((i) => i.es_retornable)) {
+      setRetornablesConfirmados(false);
+      setProductosRetornables([]);
+    }
+  }, [cart]);
 
-    setIsSearching(true);
-    return () => clearTimeout(timer);
-  }, [search]);
+  useEffect(() => {
+    if (rol !== "administrador") return;
+    if (isLoading) return;
+    if (!selectedVendedor) return;
+    setOpenCajaModal(!estado?.cajaSeleccionada?.id_caja);
+  }, [
+    rol,
+    isLoading,
+    selectedVendedor,
+    activeSucursalId,
+    estado?.cajaSeleccionada?.id_caja,
+  ]);
+
+  useEffect(() => {
+    if (
+      rol === "vendedor" &&
+      usuario?.user?.rut &&
+      selectedVendedor !== usuario.user.rut
+    ) {
+      setSelectedVendedor(usuario.user.rut);
+    }
+    //eslint-disable-next-line
+  }, [rol, usuario?.user?.rut]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (rol !== "vendedor") return;
+    if (estado.cajaSeleccionada?.id_caja) return;
+    setOpenCajaModal(true);
+  }, [isLoading, rol, estado.cajaSeleccionada?.id_caja]);
 
   const {
     data: productosData,
     isLoading: loadingProductos,
     error: errorProductos,
-    refetch,
-  } = useGetAvailabreProductosQuery({
-    categoria: category === "all" ? undefined : category,
-    search: debouncedSearch,
-    page,
-    limit: pageSize,
-  });
+  } = useGetAvailabreProductosQuery(
+    {
+      categoria: category === "all" ? undefined : category,
+      search: debouncedSearch,
+      page,
+      limit: pageSize,
+      id_sucursal: sucursalOrigenId,
+    },
+    { skip: !sucursalOrigenId }
+  );
 
   const {
     data: categoriasProductos,
@@ -328,34 +515,86 @@ const PuntoDeVenta = () => {
     usuario?.rol === "administrador" ? errorVendedores : null
   );
 
-  const isCajaDeHoy = (fechaApertura) => {
-    if (!fechaApertura) return false;
-    const fechaCaja = new Date(fechaApertura).toDateString();
-    const fechaHoy = new Date().toDateString();
-    return fechaCaja === fechaHoy;
-  };
-
   const handleSelectVendedor = (rut) => {
-    if (!rut) {
-      console.error("⚠️ Error: Rut seleccionado es inválido.");
-      return;
-    }
-
-    const cajaSeleccionada = vendedores?.find((v) => v.rut === rut)
-      ?.cajasAsignadas[0];
-
-    if (
-      usuario?.rol === "vendedor" &&
-      cajaSeleccionada &&
-      !isCajaDeHoy(cajaSeleccionada.fecha_apertura)
-    ) {
-      alert("⚠️ La caja seleccionada no es del día de hoy. Elige otra.");
-      return;
-    }
-
+    if (estado?.cajaSeleccionada) seleccionarCaja(null);
     setSelectedVendedor(rut);
-    setTimeout(() => setOpenModal(false), 200);
+    setOpenModal(false);
+    /* setOpenCajaModal(true); */
+    setPendingOpenCaja(true);
   };
+
+  useEffect(() => {
+    if (!pendingOpenCaja) return;
+    if (isLoading) return;
+
+    setOpenCajaModal(true);
+    setPendingOpenCaja(false);
+  }, [pendingOpenCaja, isLoading]);
+
+  const vendedoresFiltrados = useMemo(() => {
+    const all = (vendedores || []).filter(isOperadorPOS);
+    if (rol === "vendedor") {
+      return all.filter((v) => v.rut === usuario?.user?.rut);
+    }
+    if (mode === "global") return all;
+    return all.filter((v) =>
+      v?.cajasAsignadas?.some((c) => c.id_sucursal === activeSucursalId)
+    );
+  }, [vendedores, rol, usuario?.user?.rut, mode, activeSucursalId]);
+
+  const cajasDelVendedorSeleccionado = useMemo(() => {
+    if (!selectedVendedor) return [];
+    const vend = vendedoresFiltrados.find((v) => v.rut === selectedVendedor);
+    const cajas = vend?.cajasAsignadas || [];
+    const branchId = Number(activeSucursalId);
+
+    const visibles =
+      mode === "global"
+        ? cajas
+        : cajas.filter((c) => Number(c.id_sucursal) === branchId);
+
+    return visibles.map((c) => ({
+      ...c,
+      _vendedor: {
+        rut: vend?.rut,
+        nombre: vend?.nombre,
+        rol: getRolName(vend?.rol),
+      },
+    }));
+  }, [selectedVendedor, vendedoresFiltrados, mode, activeSucursalId]);
+
+  const debeElegirCaja = !cajaSeleccionada?.id_caja;
+
+  const cajasParaModal = useMemo(() => {
+    const base =
+      rol === "administrador"
+        ? cajasDelVendedorSeleccionado
+        : estado.cajasAsignadas || [];
+
+    const branchId = Number(activeSucursalId);
+
+    const visibles =
+      mode === "global"
+        ? base
+        : base.filter((c) => Number(c.id_sucursal) === branchId);
+
+    return visibles.map((c) => ({
+      ...c,
+      sucursal: c.sucursal || {
+        id_sucursal: Number(c.id_sucursal),
+        nombre:
+          sucursalById.get(Number(c.id_sucursal)) ||
+          `Sucursal ${c.id_sucursal}`,
+      },
+    }));
+  }, [
+    rol,
+    cajasDelVendedorSeleccionado,
+    estado.cajasAsignadas,
+    mode,
+    activeSucursalId,
+    sucursalById,
+  ]);
 
   useEffect(() => {
     if (usuario?.rol === "administrador" && !selectedVendedor) {
@@ -367,15 +606,45 @@ const PuntoDeVenta = () => {
     dispatch(calculateTaxes(taxRate));
   }, [subtotal, descuento, taxRate, dispatch]);
 
-  useEffect(() => {
-    refetch();
-  }, [category, refetch]);
-
   const handleCategoryClick = (category) => {
     setCategory(category);
   };
 
+  const sucursalCart = cart[0]?.id_sucursal_origen;
+  if (sucursalCart && sucursalCart !== sucursalOrigenId) {
+    dispatch(
+      showNotification({
+        message:
+          "No puedes mezclar productos de distintas sucursales en la misma venta.",
+        severity: "info",
+      })
+    );
+    return;
+  }
+
   const handleAddToCart = (product) => {
+    const stockDisponible = getStockForSucursal(
+      product.inventario,
+      sucursalOrigenId
+    );
+
+    const qtyEnCarrito = cart
+      .filter(
+        (i) =>
+          i.id_producto === product.id_producto &&
+          i.id_sucursal_origen === sucursalOrigenId
+      )
+      .reduce((s, i) => s + i.cantidad, 0);
+
+    if (qtyEnCarrito + 1 > stockDisponible) {
+      dispatch(
+        showNotification({
+          message: "No hay stock suficiente en la sucursal seleccionada.",
+          severity: "warning",
+        })
+      );
+      return;
+    }
     dispatch(
       addItem({
         id_producto: product.id_producto,
@@ -384,7 +653,9 @@ const PuntoDeVenta = () => {
         cantidad: 1,
         descuento_porcentaje: 0,
         es_retornable: product.es_retornable,
+        id_insumo_retorno: product.id_insumo_retorno || null,
         tipo: product.tipo || "producto",
+        id_sucursal_origen: sucursalOrigenId,
       })
     );
   };
@@ -404,6 +675,28 @@ const PuntoDeVenta = () => {
 
   const handleQuantityChange = (id_producto, tipo, cantidad) => {
     if (cantidad < 1) return;
+
+    const item = cart.find(
+      (i) => i.id_producto === id_producto && i.tipo === tipo
+    );
+    if (item) {
+      const stockDisponible = getStockForSucursal(
+        (productosData?.productos || []).find(
+          (p) => p.id_producto === id_producto
+        )?.inventario,
+        item.id_sucursal_origen
+      );
+      if (cantidad > stockDisponible) {
+        dispatch(
+          showNotification({
+            message: "Cantidad supera el stock disponible en la sucursal.",
+            severity: "warning",
+          })
+        );
+        return;
+      }
+    }
+
     dispatch(updateItemQuantity({ id_producto, tipo, cantidad }));
   };
 
@@ -423,25 +716,9 @@ const PuntoDeVenta = () => {
   };
 
   const handleCerrarCaja = async () => {
-    let cajaId;
-    if (usuario?.rol === "administrador") {
-      const vendedorSeleccionado = vendedores?.find(
-        (v) => v.rut === selectedVendedor
-      );
-      cajaId = vendedorSeleccionado?.cajasAsignadas[0]?.id_caja;
-    } else {
-      cajaId = estado?.asignada?.id_caja;
-    }
-    if (!cajaId) {
-      dispatch(
-        showNotification({
-          message: "No hay caja seleccionada para cerrar",
-          severity: "error",
-        })
-      );
-      return;
-    }
-    if (!estado?.asignada?.id_caja) return;
+    const cajaId = estado?.cajaSeleccionada?.id_caja;
+
+    if (!estado?.cajaSeleccionada?.id_caja) return;
     setCajaCerrando(true);
     try {
       await closeCaja({ idCaja: cajaId });
@@ -452,6 +729,7 @@ const PuntoDeVenta = () => {
           severity: "success",
         })
       );
+      setOpenCajaModal(true);
     } catch (error) {
       console.error("Error al cerrar la caja:", error);
       setCajaCerrando(false);
@@ -464,17 +742,21 @@ const PuntoDeVenta = () => {
     }
   };
 
-  if (usuario?.rol === "vendedor" && !estado?.cajaAbierta) {
+  if (!["vendedor", "administrador"].includes(usuario?.rol)) {
     return (
-      <AperturaCajaModal
-        caja={estado.asignada}
-        onCajaAbierta={() => {}}
-        onClose={() => {}}
-      />
+      <Typography>No tienes permiso para acceder al Punto de Venta.</Typography>
     );
   }
 
-  if (selectedVendedor && estado.fechaInvalida) {
+  if (usuario?.rol === "vendedor" && !estado.cajasAsignadas?.length) {
+    return <Typography>No tienes una caja asignada.</Typography>;
+  }
+
+  if (
+    usuario?.rol === "administrador" &&
+    selectedVendedor &&
+    estado?.fechaInvalida
+  ) {
     return (
       <Box p={3} textAlign="center">
         <Typography variant="h5" color="error">
@@ -504,32 +786,12 @@ const PuntoDeVenta = () => {
     );
   }
 
-  if (!["vendedor", "administrador"].includes(usuario?.rol)) {
-    return (
-      <Typography>No tienes permiso para acceder al Punto de Venta.</Typography>
-    );
-  }
-
-  if (usuario?.rol === "vendedor" && !estado.asignada) {
-    return <Typography>No tienes una caja asignada.</Typography>;
-  }
-
-  if (!estado.isLoading && estado.asignada && estado.cajaListaParaAbrir) {
-    return (
-      <AperturaCajaModal
-        caja={estado.asignada}
-        onCajaAbierta={() => {}}
-        onClose={() => {}}
-      />
-    );
-  }
-
   if (
     isLoading ||
     loadingProductos ||
     loadingCategorias ||
     loadingClientes ||
-    (usuario?.rol !== "administrador" && loadingVendedores)
+    (usuario?.rol === "administrador" && loadingVendedores)
   ) {
     return <LoaderComponent />;
   }
@@ -540,12 +802,16 @@ const PuntoDeVenta = () => {
     return <Typography color="error">{relevantError.message}</Typography>;
   }
 
-  if (isMobile) {
+  /*   if (isMobile) {
     return <PuntoDeVentaMobile />;
-  }
+  } */
+  const isFactura = tipoDocumento === "factura";
 
   return (
     <Box p={3} mb={3}>
+      {debeElegirCaja && (
+        <Typography>Selecciona una caja para continuar.</Typography>
+      )}
       <BarraSuperior
         selectedVendedor={selectedVendedor}
         onSelectVendedor={() => setOpenModal(true)}
@@ -561,11 +827,12 @@ const PuntoDeVenta = () => {
         onChangeUsarDireccionGuardada={setUsarDireccionGuardada}
         onCerrarCaja={confirmAlert}
         cajaAbierta={estado.cajaAbierta}
-        cajaAsignada={estado.asignada}
+        cajaSeleccionada={estado.cajaSeleccionada}
         clientes={clientes}
         isClosing={isClosing}
         cajaCerrando={cajaCerrando}
         theme={theme}
+        rol={rol}
       />
       <CategoriasSelector
         categorias={categoriasProductos}
@@ -576,58 +843,82 @@ const PuntoDeVenta = () => {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-
-      <Box display="flex" gap={2} flexDirection={isMobile ? "column" : "row"}>
-        <ProductosGrid
-          productos={productosData?.productos}
-          loading={loadingProductos}
-          isSearching={isSearching}
-          page={page}
-          totalPages={
-            productosData?.paginacion?.totalPages ||
-            Math.ceil(productosData.paginacion.totalItems / pageSize)
-          }
-          onPageChange={(event, value) => setPage(value)}
-          onAddToCart={handleAddToCart}
-        />
-        <Box
-          width={isMobile ? "100%" : "75%"}
-          maxWidth={"100%"}
-          mt={isMobile ? 3 : 0}
-        >
-          <CarritoDeCompras
-            cart={cart}
-            subtotal={subtotal}
-            descuento={descuento}
-            impuestos={impuestos}
-            total={total}
-            discount={discount}
-            taxRate={taxRate}
-            onRemove={handleRemoveFromCart}
-            onQuantityChange={handleQuantityChange}
-            onPriceChange={handlePriceChange}
-            onTaxRateChange={handleTaxRateChange}
-            onDiscountChange={handleDiscountChange}
-            onProceedToPayment={handleProceedToPayment}
-            productosRetornables={productosRetornables}
-            refButton={botonAbrirPagoRef}
+      {!debeElegirCaja && (
+        <Box display="flex" gap={2} flexDirection={isMobile ? "column" : "row"}>
+          <ProductosGrid
+            productos={productosData?.productos}
+            loading={loadingProductos}
+            isSearching={isSearching}
+            page={page}
+            totalPages={
+              productosData?.paginacion?.totalPages ||
+              Math.ceil(productosData.paginacion.totalItems / pageSize)
+            }
+            onPageChange={(event, value) => setPage(value)}
+            onAddToCart={handleAddToCart}
+            sucursalId={sucursalOrigenId}
           />
+          <Box
+            width={isMobile ? "100%" : "75%"}
+            maxWidth={"100%"}
+            mt={isMobile ? 3 : 0}
+          >
+            <CarritoDeCompras
+              cart={cart}
+              subtotal={subtotal}
+              descuento={descuento}
+              impuestos={impuestos}
+              total={total}
+              discount={discount}
+              taxRate={taxRate}
+              onRemove={handleRemoveFromCart}
+              onQuantityChange={handleQuantityChange}
+              onPriceChange={handlePriceChange}
+              onTaxRateChange={handleTaxRateChange}
+              onDiscountChange={handleDiscountChange}
+              onProceedToPayment={handleProceedToPayment}
+              productosRetornables={productosRetornables}
+              refButton={botonAbrirPagoRef}
+              ctaLabel={isFactura ? "Confirmar venta" : "Proceder al pago"}
+            />
+          </Box>
         </Box>
-      </Box>
+      )}
+
       <SelectVendedorModal
         open={openModal}
-        onClose={() => setOpenModal(false)}
-        vendedores={vendedores || []}
+        onClose={() => {}}
+        vendedores={vendedoresFiltrados}
         selectedVendedor={selectedVendedor}
         onSelect={handleSelectVendedor}
-        esAdministrador={usuario?.rol === "administrador"}
       />
+      <SelectCajaModal
+        open={openCajaModal}
+        onBack={() => {
+          setOpenCajaModal(false);
+          setOpenModal(true);
+        }}
+        onClose={() => {}}
+        cajas={cajasParaModal}
+        onSelect={(caja) => {
+          if (caja.estado === "cerrada") {
+            setCajaParaApertura(caja);
+            setAbrirCajaModal(true);
+            return;
+          }
+          if (seleccionarCaja(caja)) setOpenCajaModal(false);
+        }}
+        usuario={usuario}
+        vendedor={selectedVendedor}
+      />
+
       <SelectClienteModal
         open={openClienteModal}
         onClose={() => setOpenClienteModal(false)}
         clientes={clientes || []}
         selectedCliente={selectedCliente}
         onSelect={setSelectedCliente}
+        idSucursal={mode !== "global" ? sucursalOrigenId : undefined}
       />
       <AlertDialog
         openAlert={openAlert}
@@ -641,9 +932,10 @@ const PuntoDeVenta = () => {
         onClose={() => setOpenRetornablesModal(false)}
         productos={productosRetornables}
         onConfirm={handleConfirmRetornables}
+        isFactura={isFactura}
       />
       <ProcesarPagoModal
-        open={openPagoModal}
+        open={openPagoModal && !isFactura}
         onClose={handleClosePagoModal}
         onConfirm={handleConfirmPayment}
         total={total}
@@ -654,6 +946,16 @@ const PuntoDeVenta = () => {
           { id: 4, nombre: "Transferencia" },
         ]}
         isLoading={isCreating}
+      />
+      <AperturaCajaModal
+        open={abrirCajaModal}
+        caja={cajaParaApertura}
+        onClose={() => setAbrirCajaModal(false)}
+        onCajaAbierta={(cajaAbierta) => {
+          seleccionarCaja(cajaAbierta);
+          setAbrirCajaModal(false);
+          setOpenCajaModal(false);
+        }}
       />
     </Box>
   );

@@ -16,15 +16,41 @@ export const productosEstadisticasApi = createApi({
     }),
 
     getProductoEstadisticasPorMes: builder.query({
-      query: ({ mes, anio }) => `/analisis/productos?mes=${mes}&anio=${anio}`,
+      query: ({ mes, anio, id_sucursal } = {}) => ({
+        url: "/analisis/productos",
+        params: {
+          mes,
+          anio,
+          ...(id_sucursal != null ? { id_sucursal } : {}),
+        },
+      }),
       providesTags: ["ProductoEstadisticas"],
     }),
     getKpiProductoPorFecha: builder.query({
-      query: () => "/analisis/productos/kpi-hoy",
+      query: ({ id_sucursal } = {}) => ({
+        url: "/analisis/productos/kpi-hoy",
+        params: id_sucursal != null ? { id_sucursal } : undefined,
+      }),
+
       providesTags: ["ProductoEstadisticas"],
     }),
     getResumenProductosPorFecha: builder.query({
-      query: (fecha) => `/analisis/productos/resumen-por-fecha?fecha=${fecha}`,
+      query: (arg) => {
+        if (typeof arg === "string") {
+          return {
+            url: "/analisis/productos/resumen-por-fecha",
+            params: { fecha: arg },
+          };
+        }
+        const { fecha, id_sucursal } = arg || {};
+        return {
+          url: "/analisis/productos/resumen-por-fecha",
+          params: {
+            fecha,
+            ...(id_sucursal != null ? { id_sucursal } : {}),
+          },
+        };
+      },
       providesTags: ["ProductoEstadisticas"],
     }),
   }),

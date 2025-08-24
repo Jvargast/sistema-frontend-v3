@@ -19,14 +19,16 @@ import {
 import { useState } from "react";
 import { useGetVentasTendenciaMensualQuery } from "../../../store/services/ventasEstadisticasApi";
 import { useTranslation } from "react-i18next";
+import PropTypes from "prop-types";
 
-const RevenueTrendChart = () => {
+const RevenueTrendChart = ({ idSucursal }) => {
   const { t, i18n } = useTranslation();
   const currentYear = new Date().getFullYear();
   const [anio, setAnio] = useState(currentYear);
 
   const { data, isLoading, isError } = useGetVentasTendenciaMensualQuery({
     anio,
+    ...(idSucursal != null ? { id_sucursal: idSucursal } : {}),
   });
 
   const handleChange = (event) => {
@@ -120,5 +122,7 @@ const RevenueTrendChart = () => {
     </Box>
   );
 };
+
+RevenueTrendChart.propTypes = { idSucursal: PropTypes.number };
 
 export default RevenueTrendChart;

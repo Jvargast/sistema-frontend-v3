@@ -148,7 +148,7 @@ const Sidebar = ({
     insumos: { label: "Insumos", icon: "InventoryOutlined" },
     camiones: { label: "Camiones", icon: "LocalShippingOutlined" },
     "inventario-camion": {
-      label: "Inventario Camión",
+      label: "Gestión de Retorno",
       icon: "InventoryOutlined",
     },
     viajes: { label: "Viajes", icon: "TripOriginOutlined" },
