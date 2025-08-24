@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
+  Chip,
   IconButton,
   Typography,
   useMediaQuery,
@@ -24,6 +25,16 @@ import AlertDialog from "../../components/common/AlertDialog";
 import { CustomPagination } from "../../components/common/CustomPagination";
 import Header from "../../components/common/Header";
 import DataGridCustomToolbar from "../../components/common/DataGridCustomToolBar";
+import { useSelector } from "react-redux";
+
+const CHIP_COLOR_KEYS = ["primary", "secondary", "success", "warning", "info"];
+const hashStr = (s) =>
+  Array.from(String(s)).reduce((a, c) => a + c.charCodeAt(0), 0);
+const getChipColorKey = (sucursal) => {
+  const base = sucursal?.nombre ?? sucursal?.id_sucursal ?? "";
+  const h = hashStr(base);
+  return CHIP_COLOR_KEYS[h % CHIP_COLOR_KEYS.length];
+};
 
 const Clientes = () => {
   const theme = useTheme();
@@ -32,8 +43,10 @@ const Clientes = () => {
   const location = useLocation();
 
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  /*   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-  const isDesktop = useMediaQuery(theme.breakpoints.up("md")); */
+
+  const { mode, activeSucursalId } = useSelector((s) => s.scope);
+  const highlightSucursalId =
+    mode !== "global" ? Number(activeSucursalId) || null : null;
 
   const [openAlert, setOpenAlert] = useState(false);
   const [page, setPage] = useState(0);
@@ -42,11 +55,26 @@ const Clientes = () => {
   const [search, setSearch] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
 
-  const { data, isLoading, isError, error, refetch } = useGetAllClientesQuery({
+  useEffect(() => {
+    setPage(0);
+  }, [mode, activeSucursalId]);
+
+  const clienteParams = useMemo(() => {
+    const base = { search, page: page + 1, limit: pageSize };
+    if (mode !== "global" && Number(activeSucursalId)) {
+      base.id_sucursal = Number(activeSucursalId);
+    }
+    return base;
+  }, [search, page, pageSize, mode, activeSucursalId]);
+
+  /*  const { data, isLoading, isError, error, refetch } = useGetAllClientesQuery({
     search,
     page: page + 1,
     limit: pageSize,
-  });
+  }); */
+
+  const { data, isLoading, isError, error, refetch } =
+    useGetAllClientesQuery(clienteParams);
   const [deleteClientes, { isLoading: isDeleting }] =
     useDeleteClientesMutation();
 
@@ -86,6 +114,70 @@ const Clientes = () => {
       minWidth: 120,
       resizable: false,
     },
+    {
+      field: "Sucursales",
+      headerName: "Sucursales",
+      flex: 0.3,
+      minWidth: 160,
+      sortable: false,
+      renderCell: ({ row }) => {
+        const list = Array.isArray(row.Sucursales) ? row.Sucursales : [];
+        if (!list.length) {
+          return (
+            <Chip size="small" label="Sin sucursal" sx={{ fontWeight: 600 }} />
+          );
+        }
+
+        const max = isMobile ? 2 : 3; 
+        const shown = list.slice(0, max);
+        const rest = list.length - shown.length;
+
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 0.5,
+              overflow: "hidden",
+            }}
+          >
+            {shown.map((s) => {
+              const colorKey = getChipColorKey(s);
+              const isHighlight =
+                highlightSucursalId &&
+                Number(s.id_sucursal) === highlightSucursalId;
+
+              return (
+                <Chip
+                  key={s.id_sucursal}
+                  size="small"
+                  label={s.nombre ?? `Sucursal ${s.id_sucursal}`}
+                  color={isHighlight ? "primary" : colorKey}
+                  variant={isHighlight ? "filled" : "outlined"}
+                  sx={{
+                    fontWeight: 700,
+                    maxWidth: 160,
+                    "& .MuiChip-label": {
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    },
+                  }}
+                />
+              );
+            })}
+            {rest > 0 && (
+              <Chip
+                size="small"
+                variant="outlined"
+                label={`+${rest}`}
+                sx={{ fontWeight: 700 }}
+              />
+            )}
+          </Box>
+        );
+      },
+    },
+
     {
       field: "direccion",
       headerName: "Dirección",

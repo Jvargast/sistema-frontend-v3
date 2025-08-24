@@ -1,90 +1,122 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useSelector } from "react-redux";
 import {
   useGetCajaAsignadaQuery,
   useGetEstadoCajaQuery,
 } from "../store/services/cajaApi";
-import { useSelector } from "react-redux";
+
+const normalizeCaja = (c, asignadas = []) => {
+  if (!c) return c;
+  const a = asignadas.find((x) => x.id_caja === c.id_caja) || {};
+  const sucursal =
+    c.sucursal ??
+    a.sucursal ??
+    (c.id_sucursal
+      ? { id_sucursal: c.id_sucursal, nombre: a?.sucursal?.nombre }
+      : undefined);
+
+  const usuario_asignado =
+    c.usuario_asignado ??
+    c._vendedor?.rut ??
+    a.usuario_asignado ??
+    a._vendedor?.rut;
+
+  return {
+    ...a,
+    ...c,
+    sucursal,
+    usuario_asignado,
+  };
+};
 
 const useVerificarCaja = (selectedVendedor = null) => {
-  const usuario = useSelector((state) => state.auth);
+  const { user, rol } = useSelector((state) => state.auth);
 
   const rutUsuario =
-    usuario?.rol === "administrador" && selectedVendedor
-      ? selectedVendedor
-      : usuario?.user?.id;
+    rol === "administrador" && selectedVendedor ? selectedVendedor : user?.id;
 
   const {
-    data: cajaAsignada,
-    isLoading: loadingAsignada,
-    error: errorCaja,
-    refetch: refetchCaja,
+    data: cajasAsignadasData,
+    isLoading: loadingAsignadas,
+    error: errorAsignadas,
+    /* refetch: refetchAsignadas, */
   } = useGetCajaAsignadaQuery(rutUsuario ? { rutUsuario } : undefined, {
     skip: !rutUsuario,
     refetchOnMountOrArgChange: true,
   });
 
   const {
-    data: estadoCaja,
-    isLoading: loadingEstado,
-    error: errorEstado,
-    refetch: refetchEstado,
+    data: cajasAbiertasData,
+    isLoading: loadingAbiertas,
+    error: errorAbiertas,
+    /* refetch: refetchAbiertas, */
   } = useGetEstadoCajaQuery(rutUsuario ? { rutUsuario } : undefined, {
     skip: !rutUsuario,
     refetchOnMountOrArgChange: true,
   });
 
   const [estado, setEstado] = useState({
+    cajasAsignadas: [],
+    cajasAbiertas: [],
+    cajaSeleccionada: null,
     cajaAbierta: false,
-    caja: null,
-    asignada: null,
-    isLoading: true,
-    fechaInvalida: false,
     cajaListaParaAbrir: false,
+    fechaInvalida: false,
   });
 
   useEffect(() => {
-    if (cajaAsignada) {
-      const caja = cajaAsignada?.caja || null;
-
-      setEstado((prev) => ({
-        ...prev,
-        asignada: caja, // 📌 Se asigna sin depender de la fecha
-        isLoading: loadingAsignada,
-        cajaListaParaAbrir: caja?.estado === "cerrada", // 📌 Se puede abrir si está cerrada, sin depender de la fecha
-      }));
-    } else {
-      setEstado((prev) => ({
-        ...prev,
-        asignada: null,
-        isLoading: loadingAsignada,
-      }));
-    }
-  }, [cajaAsignada, loadingAsignada]);
+    const asignadas = cajasAsignadasData?.cajas || [];
+    setEstado((prev) => ({ ...prev, cajasAsignadas: asignadas }));
+  }, [cajasAsignadasData]);
 
   useEffect(() => {
-    if (estadoCaja) {
-      const cajaAbierta = estadoCaja?.cajaAbierta || false;
-      const caja = estadoCaja?.caja || null;
+    const asignadas = cajasAsignadasData?.cajas || [];
+    const abiertasRaw = (cajasAbiertasData?.cajas || []).filter(
+      (c) => c.estado === "abierta"
+    );
+    const abiertas = abiertasRaw.map((c) => normalizeCaja(c, asignadas));
+
+    setEstado((prev) => ({
+      ...prev,
+      cajasAbiertas: abiertas,
+      cajaAbierta: abiertas.length > 0,
+      cajaSeleccionada:
+        prev.cajaSeleccionada &&
+        abiertas.some((c) => c.id_caja === prev.cajaSeleccionada.id_caja)
+          ? normalizeCaja(prev.cajaSeleccionada, asignadas)
+          : null,
+      cajaListaParaAbrir: abiertas.length === 0,
+    }));
+  }, [cajasAbiertasData, cajasAsignadasData]);
+
+  const seleccionarCaja = useCallback((caja) => {
+    if (!caja) {
       setEstado((prev) => ({
         ...prev,
-        cajaAbierta: estadoCaja?.cajaAbierta || false,
-        caja: estadoCaja?.caja || prev.caja,
-        cajaListaParaAbrir: !cajaAbierta && caja?.estado === "cerrada",
+        cajaSeleccionada: null,
+        cajaAbierta: false,
+        cajaListaParaAbrir: (prev.cajasAbiertas || []).length === 0,
       }));
+      return true;
     }
-  }, [estadoCaja]);
-
-  useEffect(() => {
-    if (usuario?.rol === "administrador" && selectedVendedor) {
-      refetchCaja();
-      refetchEstado();
-    }
-  }, [selectedVendedor, refetchCaja, refetchEstado, usuario]);
+    if (caja.estado !== "abierta") return false;
+    setEstado((prev) => {
+      if (prev.cajaSeleccionada?.id_caja === caja.id_caja) return prev;
+      return {
+        ...prev,
+        cajaSeleccionada: caja,
+        cajaAbierta: true,
+        cajaListaParaAbrir: false,
+      };
+    });
+    return true;
+  }, []);
 
   return {
     estado,
-    isLoading: loadingEstado || loadingAsignada,
-    error: errorEstado || errorCaja,
+    seleccionarCaja,
+    isLoading: !rutUsuario || loadingAsignadas || loadingAbiertas,
+    error: errorAsignadas || errorAbiertas,
   };
 };
 

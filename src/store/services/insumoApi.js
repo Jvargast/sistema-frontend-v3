@@ -4,25 +4,23 @@ import { baseQueryWithReauthEnhanced } from "./fettchQuery";
 export const insumoApi = createApi({
   reducerPath: "insumoApi",
   baseQuery: baseQueryWithReauthEnhanced,
-  tagTypes: ["Insumo"],
+  tagTypes: ["Insumo", "InsumoList"],
   endpoints: (builder) => ({
     getAllInsumos: builder.query({
       query: (params) => ({
         url: `/insumos/`,
         params,
       }),
-      providesTags: ["Insumo"],
-      /* transformResponse: (response) => {
-        return response.data.map((group) => ({
-          tipo: group.tipo,
-          insumos: group.items,
-          paginacion: {
-            totalItems: group.totalItems,
-            totalPages: group.totalPages,
-            currentPage: group.currentPage,
-          },
-        }));
-      },  */   
+      providesTags: (result) =>
+        result?.items?.length
+          ? [
+              { type: "InsumoList", id: "PAGINATED" },
+              ...result.items.map((i) => ({ type: "Insumo", id: i.id_insumo })),
+            ]
+          : [{ type: "InsumoList", id: "PAGINATED" }],
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+      keepUnusedDataFor: 60,
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -32,9 +30,72 @@ export const insumoApi = createApi({
       },
     }),
 
+    getStocksForInsumos: builder.query({
+      query: ({ ids, id_sucursal }) => ({
+        url: `/insumos/stock`,
+        params: { ids: ids.join(","), id_sucursal },
+      }),
+      transformResponse: (res) => (Array.isArray(res) ? res : res?.data ?? []),
+      forceRefetch({ currentArg, previousArg }) {
+        if (!previousArg) return true;
+        return (
+          Number(currentArg.id_sucursal) !== Number(previousArg.id_sucursal) ||
+          currentArg.ids.join(",") !== previousArg.ids.join(",")
+        );
+      },
+    }),
+
+    getStocksByFormula: builder.query({
+      query: ({ id_formula, id_sucursal, multiplicador = 1 }) => ({
+        url: `/insumos/stock/by-formula`,
+        params: { id_formula, id_sucursal, multiplicador },
+      }),
+      transformResponse: (res) => (Array.isArray(res) ? res : res?.data ?? []),
+      forceRefetch({ currentArg, previousArg }) {
+        if (!previousArg) return true;
+        return (
+          Number(currentArg.id_formula) !== Number(previousArg.id_formula) ||
+          Number(currentArg.id_sucursal) !== Number(previousArg.id_sucursal) ||
+          Number(currentArg.multiplicador ?? 1) !==
+            Number(previousArg.multiplicador ?? 1)
+        );
+      },
+    }),
+
+    getAllInsumosAll: builder.query({
+      query: (params) => ({
+        url: `/insumos/all`,
+        params,
+      }),
+      transformResponse: (res) => {
+        if (Array.isArray(res)) return res;
+        if (Array.isArray(res?.items)) return res.items;
+        if (Array.isArray(res?.data?.items)) return res.data.items;
+        if (Array.isArray(res?.data)) return res.data;
+        return [];
+      },
+      providesTags: (result) =>
+        Array.isArray(result) && result.length
+          ? [
+              { type: "InsumoList", id: "ALL" },
+              ...result.map((i) => ({ type: "Insumo", id: i.id_insumo })),
+            ]
+          : [{ type: "InsumoList", id: "ALL" }],
+      refetchOnFocus: false,
+      keepUnusedDataFor: 120,
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("Error al obtener la lista completa de insumos", error);
+        }
+      },
+    }),
+
     getInsumoById: builder.query({
       query: (id) => `/insumos/${id}`,
-      providesTags: ["Insumo"],
+      transformResponse: (response) => response?.data ?? response,
+      providesTags: (result, error, id) => [{ type: "Insumo", id }],
     }),
 
     createInsumo: builder.mutation({
@@ -43,16 +104,23 @@ export const insumoApi = createApi({
         method: "POST",
         body: newInsumo,
       }),
-      invalidatesTags: ["Insumo"], // Invalidar caché de productos
+      invalidatesTags: [
+        { type: "InsumoList", id: "PAGINATED" },
+        { type: "InsumoList", id: "ALL" },
+      ],
     }),
 
     updateInsumo: builder.mutation({
-      query: ({ id, ...updatedInsumo }) => ({
+      query: ({ id, data }) => ({
         url: `/insumos/${id}`,
         method: "PUT",
-        body: updatedInsumo,
+        body: data,
       }),
-      invalidatesTags: ["Insumo"], // Invalidar caché de productos
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Insumo", id },
+        { type: "InsumoList", id: "PAGINATED" },
+        { type: "InsumoList", id: "ALL" },
+      ],
     }),
 
     deleteInsumo: builder.mutation({
@@ -60,7 +128,11 @@ export const insumoApi = createApi({
         url: `/insumos/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Insumo"], // Invalidar caché de productos
+      invalidatesTags: (result, error, id) => [
+        { type: "Insumo", id },
+        { type: "InsumoList", id: "PAGINATED" },
+        { type: "InsumoList", id: "ALL" },
+      ],
     }),
 
     deleteInsumos: builder.mutation({
@@ -70,9 +142,13 @@ export const insumoApi = createApi({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ids}) ,
+        body: JSON.stringify({ ids }),
       }),
-      invalidatesTags: ["Insumo"],
+      invalidatesTags: (result, error, { ids = [] }) => [
+        ...ids.map((id) => ({ type: "Insumo", id })),
+        { type: "InsumoList", id: "PAGINATED" },
+        { type: "InsumoList", id: "ALL" },
+      ],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -89,6 +165,10 @@ export const {
   useDeleteInsumoMutation,
   useDeleteInsumosMutation,
   useGetAllInsumosQuery,
+  useGetAllInsumosAllQuery,
+  useLazyGetAllInsumosAllQuery,
   useGetInsumoByIdQuery,
   useUpdateInsumoMutation,
+  useGetStocksByFormulaQuery,
+  useLazyGetStocksByFormulaQuery,
 } = insumoApi;

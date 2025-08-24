@@ -13,6 +13,7 @@ import { convertirChileAUtc, obtenerFechaChile } from "../../utils/fechaUtils";
 
 const Analisis = () => {
   const hoy = convertirChileAUtc(obtenerFechaChile().format("YYYY-MM-DD"));
+  const fechaLabel = obtenerFechaChile().format("DD-MM-YYYY");
   const dispatch = useDispatch();
 
   const [generarVentas, { isLoading: loadingVentas }] =
@@ -22,25 +23,34 @@ const Analisis = () => {
   const [generarProductos, { isLoading: loadingProductos }] =
     useGenerarProductoEstadisticasMutation();
 
-  const handleGenerar = async (callback, tipo) => {
+  const handleGenerar = async (trigger, tipo) => {
     try {
-      await callback({ fecha: hoy });
+      const resp = await trigger({ fecha: hoy }).unwrap();
+
+      const detalle =
+        typeof resp === "object" && resp
+          ? resp.count != null
+            ? ` (${resp.count} registro(s))`
+            : ""
+          : "";
+
       dispatch(
         showNotification({
-          message: `✅ Estadísticas de ${tipo} generadas para ${hoy}`,
+          message: `Estadísticas de ${tipo} generadas para ${fechaLabel}${detalle}`,
           severity: "success",
         })
       );
     } catch (err) {
-      console.log(err);
-      dispatch(
-        showNotification({
-          message: `❌ Error al generar estadísticas de ${tipo}`,
-          severity: "error",
-        })
-      );
+      console.error(err);
+      const msg =
+        err?.data?.error ||
+        err?.error ||
+        `Error al generar estadísticas de ${tipo}`;
+      dispatch(showNotification({ message: `❌ ${msg}`, severity: "error" }));
     }
   };
+
+  const anyLoading = loadingVentas || loadingPedidos || loadingProductos;
 
   return (
     <Box sx={{ p: 4 }}>
@@ -62,10 +72,10 @@ const Analisis = () => {
           size="large"
           sx={{ py: 3, px: 4, fontSize: "1rem" }}
           startIcon={<PointOfSaleIcon fontSize="large" />}
-          disabled={loadingVentas}
+          disabled={anyLoading}
           onClick={() => handleGenerar(generarVentas, "ventas")}
         >
-          Ventas
+          {loadingVentas ? "Generando…" : "Ventas"}
         </Button>
 
         <Button
@@ -74,10 +84,10 @@ const Analisis = () => {
           size="large"
           sx={{ py: 3, px: 4, fontSize: "1rem" }}
           startIcon={<ShoppingCartIcon fontSize="large" />}
-          disabled={loadingPedidos}
+          disabled={anyLoading}
           onClick={() => handleGenerar(generarPedidos, "pedidos")}
         >
-          Pedidos
+          {loadingPedidos ? "Generando…" : "Pedidos"}
         </Button>
 
         <Button
@@ -86,10 +96,10 @@ const Analisis = () => {
           size="large"
           sx={{ py: 3, px: 4, fontSize: "1rem" }}
           startIcon={<InventoryIcon fontSize="large" />}
-          disabled={loadingProductos}
+          disabled={anyLoading}
           onClick={() => handleGenerar(generarProductos, "productos")}
         >
-          Productos
+          {loadingProductos ? "Generando…" : "Productos"}
         </Button>
       </Stack>
     </Box>
@@ -97,4 +107,3 @@ const Analisis = () => {
 };
 
 export default Analisis;
-0

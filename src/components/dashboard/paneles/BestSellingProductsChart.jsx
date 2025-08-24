@@ -8,10 +8,12 @@ import {
   Cell,
   CartesianGrid,
 } from "recharts";
-import { Box, Typography, CircularProgress, useTheme } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import { useGetResumenProductosPorFechaQuery } from "../../../store/services/productosEstadisticasApi";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
+import PropTypes from "prop-types";
+import { useMemo } from "react";
 
 const colors = [
   "#A3C4F3",
@@ -23,11 +25,20 @@ const colors = [
   "#FFB5E8",
 ];
 
-const BestSellingProductsChart = () => {
-  const theme = useTheme();
+const BestSellingProductsChart = ({ idSucursal }) => {
   const { t, i18n } = useTranslation();
   const hoy = dayjs().format("YYYY-MM-DD");
-  const { data, isLoading, isError } = useGetResumenProductosPorFechaQuery(hoy);
+  const queryArgs = useMemo(
+    () => ({
+      fecha: hoy,
+      ...(idSucursal != null ? { id_sucursal: idSucursal } : {}),
+    }),
+    [hoy, idSucursal]
+  );
+  const { data, isLoading, isError } = useGetResumenProductosPorFechaQuery(
+    queryArgs,
+    { refetchOnMountOrArgChange: true }
+  );
 
   const chartData = Array.isArray(data)
     ? data
@@ -115,5 +126,7 @@ const BestSellingProductsChart = () => {
     </Box>
   );
 };
+
+BestSellingProductsChart.propTypes = { idSucursal: PropTypes.number };
 
 export default BestSellingProductsChart;

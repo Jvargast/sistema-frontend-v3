@@ -13,6 +13,7 @@ import { ShoppingBag, MonetizationOn } from "@mui/icons-material";
 import { mdiBarcode } from "@mdi/js";
 import Icon from "@mdi/react";
 import PropTypes from "prop-types";
+import { getImageUrl } from "../../../store/services/apiBase";
 
 const DetallesVenta = ({ detalles }) => {
   const theme = useTheme();
@@ -38,9 +39,10 @@ const DetallesVenta = ({ detalles }) => {
           const nombre = esProducto
             ? item.producto?.nombre_producto
             : item.insumo?.nombre_insumo;
-          const imagen = esProducto
+          const rawImagen = esProducto
             ? item.producto?.image_url
             : item.insumo?.image_url;
+          const imagen = getImageUrl(rawImagen);
           const codigo = esProducto
             ? item.producto?.codigo_barra
             : item.insumo?.codigo;
@@ -60,13 +62,22 @@ const DetallesVenta = ({ detalles }) => {
               }}
             >
               <Avatar
-                src={imagen || ""}
+                src={imagen || undefined}
                 alt={nombre}
                 variant="rounded"
                 sx={{
                   width: 60,
                   height: 60,
                   backgroundColor: imagen ? "transparent" : "#f0f0f0",
+                  border: "1px solid black"
+                }}
+                imgProps={{
+                  onError: (e) => {
+                    e.currentTarget.src = "";
+                  },
+                  loading: "lazy",
+                  crossOrigin: "anonymous",
+                  referrerPolicy: "no-referrer",
                 }}
               >
                 {!imagen && <ShoppingBag sx={{ color: "#757575" }} />}

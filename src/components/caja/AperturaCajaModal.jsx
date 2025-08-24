@@ -8,10 +8,17 @@ import {
   Backdrop,
   Fade,
   Divider,
+  InputAdornment,
 } from "@mui/material";
-import { Close, AttachMoney, Person, Store, Assignment } from "@mui/icons-material";
+import {
+  Close,
+  AttachMoney,
+  Person,
+  Store,
+  Assignment,
+} from "@mui/icons-material";
 import PropTypes from "prop-types";
-import { useOpenCajaMutation } from "../../store/services/cajaApi";
+import { cajaApi, useOpenCajaMutation } from "../../store/services/cajaApi";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 
@@ -27,106 +34,136 @@ const modalStyle = {
   boxShadow: 24,
 };
 
-const AperturaCajaModal = ({ caja, onCajaAbierta, onClose }) => {
+const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
   const dispatch = useDispatch();
   const [montoInicial, setMontoInicial] = useState("");
   const [error, setError] = useState(null);
   const [openCaja, { isLoading }] = useOpenCajaMutation();
 
   const handleAbrirCaja = async () => {
-    
-    const monto = parseFloat(montoInicial);
-    if (!monto || monto <= 0) {
+    if (!caja?.id_caja) {
+      setError("Caja inválida.");
+      return;
+    }
+    if (caja?.estado === "abierta") {
+      dispatch(
+        showNotification({
+          message: "Esta caja ya está abierta.",
+          severity: "info",
+        })
+      );
+      onClose?.();
+      return;
+    }
+
+    const monto = Number(montoInicial);
+    if (!Number.isFinite(monto) || monto <= 0) {
       setError("Ingrese un monto inicial válido.");
       return;
     }
 
     try {
-      await openCaja({
-        idCaja: caja?.id_caja,
+      const resp = await openCaja({
+        idCaja: caja.id_caja,
         saldoInicial: monto,
-      });
+      }).unwrap();
+
+      console.log("ABRIENDO CAJA:", resp);
+      const apiCaja = resp?.caja ?? resp;
+
+      const cajaNormalizada = {
+        ...caja,
+        ...apiCaja,
+        estado: "abierta",
+        fecha_apertura: apiCaja.fecha_apertura ?? new Date().toISOString(),
+        saldo_inicial: Number(apiCaja.saldo_inicial ?? monto),
+        saldo_final:
+          apiCaja.saldo_final == null ? null : Number(apiCaja.saldo_final),
+        sucursal:
+          apiCaja.sucursal ??
+          caja.sucursal ??
+          (apiCaja.id_sucursal
+            ? {
+                id_sucursal: apiCaja.id_sucursal,
+                nombre: `Sucursal ${apiCaja.id_sucursal}`,
+              }
+            : undefined),
+      };
       setError(null);
-      onCajaAbierta();
-      dispatch(showNotification({
-        message: "Se ha abierto la caja correctamente",
-        severity: "success"
-      }))
-    } catch (error) {
-      console.error("Error al abrir la caja:", error);
+      dispatch(
+        showNotification({
+          message: "Se ha abierto la caja correctamente",
+          severity: "success",
+        })
+      );
+      onCajaAbierta?.(cajaNormalizada);
+      setMontoInicial("");
+      dispatch(cajaApi.util.invalidateTags?.(["Caja"]));
+      onClose?.();
+    } catch (e) {
+      console.error("Error al abrir la caja:", e);
       setError("No se pudo abrir la caja. Intente nuevamente.");
-      dispatch(showNotification({
-        message: `No se pudo abrir la caja. Intente nuevamente.${error}`,
-        severity: "error"
-      }))
+      dispatch(
+        showNotification({
+          message: "No se pudo abrir la caja. Intente nuevamente.",
+          severity: "error",
+        })
+      );
     }
   };
 
-  if (!caja) {
-    return (
-      <Box p={3}>
-        <Typography>Cargando datos de la caja...</Typography>
-      </Box>
-    );
-  }
+  if (!caja) return null;
 
   return (
     <Modal
-      open={true}
+      open={open}
       onClose={onClose}
       closeAfterTransition
       BackdropComponent={Backdrop}
     >
-      <Fade in={true}>
+      <Fade in={!!open}>
         <Box sx={modalStyle}>
-          {/* Botón de cierre */}
           <Button
             onClick={onClose}
             sx={{
               position: "absolute",
               top: 10,
               right: 10,
-              minWidth: "32px",
+              minWidth: 32,
               borderRadius: "50%",
-              color: "#333",
-              "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" },
             }}
           >
             <Close />
           </Button>
 
-          {/* Título */}
           <Typography variant="h5" fontWeight="bold" mb={2} textAlign="center">
             Apertura de Caja
           </Typography>
-
           <Divider sx={{ mb: 2 }} />
 
-          {/* Información de la caja */}
           <Box display="flex" flexDirection="column" gap={2} mb={2}>
             <Box display="flex" alignItems="center" gap={1}>
               <Assignment sx={{ color: "#1976d2" }} />
-              <Typography variant="body1">
-                <strong>ID Caja:</strong> {caja?.id_caja || "No disponible"}
+              <Typography>
+                <strong>ID Caja:</strong> {caja.id_caja}
               </Typography>
             </Box>
             <Box display="flex" alignItems="center" gap={1}>
               <Store sx={{ color: "#0288d1" }} />
-              <Typography variant="body1">
+              <Typography>
                 <strong>Sucursal:</strong>{" "}
                 {caja?.sucursal?.nombre || "Sin sucursal"}
               </Typography>
             </Box>
             <Box display="flex" alignItems="center" gap={1}>
               <Person sx={{ color: "#673AB7" }} />
-              <Typography variant="body1">
+              <Typography>
                 <strong>Usuario Asignado:</strong>{" "}
                 {caja?.usuario_asignado || "No asignado"}
               </Typography>
             </Box>
           </Box>
 
-          {/* Campo de Monto Inicial */}
           <TextField
             label="Monto Inicial"
             type="number"
@@ -137,21 +174,23 @@ const AperturaCajaModal = ({ caja, onCajaAbierta, onClose }) => {
             error={!!error}
             helperText={error}
             InputProps={{
-              startAdornment: <AttachMoney sx={{ color: "#ff9800" }} />,
+              startAdornment: (
+                <InputAdornment position="start">
+                  <AttachMoney />
+                </InputAdornment>
+              ),
             }}
           />
 
-          {/* Botón para abrir caja */}
           <Button
             variant="contained"
-            sx={{
-              backgroundColor: "#4CAF50",
-              color: "#fff",
-              width: "100%",
-              "&:hover": { backgroundColor: "#388E3C" },
-            }}
+            sx={{ width: "100%" }}
             onClick={handleAbrirCaja}
-            disabled={isLoading || !montoInicial}
+            disabled={
+              isLoading ||
+              !Number.isFinite(Number(montoInicial)) ||
+              Number(montoInicial) <= 0
+            }
           >
             {isLoading ? "Abriendo..." : "Abrir Caja"}
           </Button>
@@ -162,9 +201,10 @@ const AperturaCajaModal = ({ caja, onCajaAbierta, onClose }) => {
 };
 
 AperturaCajaModal.propTypes = {
-  caja: PropTypes.object, // La caja debe ser pasada como prop
-  onCajaAbierta: PropTypes.func, // Callback al abrir la caja
-  onClose: PropTypes.func, // Callback para cerrar el modal
+  open: PropTypes.bool,
+  caja: PropTypes.object,
+  onCajaAbierta: PropTypes.func,
+  onClose: PropTypes.func,
 };
 
 export default AperturaCajaModal;

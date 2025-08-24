@@ -8,38 +8,104 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { useGetAllInsumosQuery } from "../../store/services/insumoApi";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { useGetAllInsumosAllQuery } from "../../store/services/insumoApi";
+import useSucursalActiva from "../../hooks/useSucursalActiva";
+
+const getStockFromInventarios = (inventario, idSucursal) => {
+  if (Array.isArray(inventario)) {
+    if (idSucursal != null) {
+      const m = inventario.find(
+        (iv) => Number(iv?.id_sucursal) === Number(idSucursal)
+      );
+      return Number(m?.cantidad) || 0;
+    }
+    return inventario.reduce((acc, iv) => acc + (Number(iv?.cantidad) || 0), 0);
+  }
+  return Number(inventario?.cantidad) || 0;
+};
 
 const SelectorInsumo = ({
   label,
   onInsumoSeleccionado,
   insumoSeleccionado = null,
+  idSucursal,
   size = "medium",
 }) => {
-  const { data, isLoading } = useGetAllInsumosQuery({ limit: 1000 });
-  const insumos = useMemo(() => data?.data?.items || [], [data]);
   const theme = useTheme();
+  const sucursalActiva = useSucursalActiva();
+
+  const resolvedSucursalId = useMemo(() => {
+    const fromHook = sucursalActiva?.id_sucursal ?? sucursalActiva?.id ?? null;
+    return idSucursal ?? fromHook ?? null;
+  }, [idSucursal, sucursalActiva?.id_sucursal, sucursalActiva?.id]);
+
+  const {
+    data: dataAll = [],
+    isFetching,
+    refetch,
+  } = useGetAllInsumosAllQuery(
+    {
+      limit: 1000,
+      includeInventario: true,
+      ...(resolvedSucursalId ? { id_sucursal: resolvedSucursalId } : {}),
+    },
+    { refetchOnMountOrArgChange: true }
+  );
+
+  const insumos = dataAll;
+  const insumosFiltrados = useMemo(() => {
+    if (!resolvedSucursalId) return insumos;
+    return insumos.map((i) => ({
+      ...i,
+      inventario: Array.isArray(i.inventario)
+        ? i.inventario.filter(
+            (iv) => Number(iv?.id_sucursal) === Number(resolvedSucursalId)
+          )
+        : i.inventario,
+    }));
+  }, [insumos, resolvedSucursalId]);
+
+  useEffect(() => {
+    refetch();
+  }, [resolvedSucursalId, refetch]);
 
   const selectedValue = useMemo(() => {
     if (!insumoSeleccionado) return null;
     return (
-      insumos.find((i) => i.id_insumo === insumoSeleccionado.id_insumo) ||
-      insumoSeleccionado
+      insumosFiltrados.find(
+        (i) => i.id_insumo === insumoSeleccionado.id_insumo
+      ) ?? null
     );
-  }, [insumos, insumoSeleccionado]);
+  }, [insumosFiltrados, insumoSeleccionado]);
+
+  useEffect(() => {
+    if (
+      insumoSeleccionado &&
+      !insumosFiltrados.some(
+        (i) => i.id_insumo === insumoSeleccionado.id_insumo
+      )
+    ) {
+      onInsumoSeleccionado(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resolvedSucursalId, insumosFiltrados]);
 
   return (
     <Autocomplete
-      options={insumos}
+      key={`insumo-${resolvedSucursalId ?? "all"}`}
+      options={insumosFiltrados}
       value={selectedValue}
       size={size}
-      loading={isLoading}
+      loading={isFetching}
       getOptionLabel={(o) => o?.nombre_insumo || ""}
       onChange={(_, nuevo) => onInsumoSeleccionado(nuevo)}
       isOptionEqualToValue={(opt, val) => opt?.id_insumo === val?.id_insumo}
       renderOption={(props, option) => {
-        const stock = option?.inventario?.cantidad ?? 0;
+        const stock = getStockFromInventarios(
+          option?.inventario,
+          resolvedSucursalId
+        );
         const stockColor =
           stock > 20
             ? theme.palette.success.main
@@ -93,7 +159,7 @@ const SelectorInsumo = ({
             ...params.InputProps,
             endAdornment: (
               <>
-                {isLoading && <CircularProgress size={18} />}
+                {isFetching && <CircularProgress size={18} />}
                 {params.InputProps.endAdornment}
               </>
             ),
@@ -109,6 +175,7 @@ SelectorInsumo.propTypes = {
   onInsumoSeleccionado: PropTypes.func.isRequired,
   insumoSeleccionado: PropTypes.object,
   size: PropTypes.oneOf(["small", "medium"]),
+  idSucursal: PropTypes.number,
 };
 
 export default SelectorInsumo;

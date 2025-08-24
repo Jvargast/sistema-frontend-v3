@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import {
   Box,
@@ -30,6 +30,10 @@ import { useGetCajaAsignadaQuery } from "../../store/services/cajaApi";
 import NoCajaAsignadaDialog from "../../components/chofer/NoCajaAsignadaMessage";
 import { obtenerCoordsDesdeDireccion } from "../../utils/obtenerCords";
 import MiniCartSummary from "../../components/pedido/MiniCartSummary";
+import useSucursalActiva from "../../hooks/useSucursalActiva";
+import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
+import { getStockForSucursal } from "../../utils/inventoryUtils";
+import SucursalPickerHeader from "../../components/common/SucursalPickerHeader";
 
 const StyledConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -91,10 +95,36 @@ const initialFormState = {
   notas: "",
   coords: { lat: null, lng: null },
   prioridad: "normal",
+  id_sucursal: null,
 };
 
 const CrearPedido = () => {
   const [formState, setFormState] = useState(initialFormState);
+  const { rol } = useSelector((s) => s.auth);
+  const { mode } = useSelector((s) => s.scope);
+  const sucursalActiva = useSucursalActiva();
+  const { data: sucursales } = useGetAllSucursalsQuery();
+
+  const isAdmin = rol === "administrador" || rol?.nombre === "administrador";
+  const canChooseSucursal =
+    mode === "global" || (!sucursalActiva?.id_sucursal && isAdmin);
+
+  const sucursalActual = useMemo(() => {
+    const id = canChooseSucursal
+      ? formState.id_sucursal
+      : sucursalActiva?.id_sucursal || formState.id_sucursal || null;
+    if (!id) return null;
+    return (
+      (sucursales || []).find((s) => Number(s.id_sucursal) === Number(id)) ||
+      null
+    );
+  }, [
+    canChooseSucursal,
+    sucursalActiva?.id_sucursal,
+    formState.id_sucursal,
+    sucursales,
+  ]);
+
   const [openNoCajaModal, setOpenNoCajaModal] = useState(false);
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart.items);
@@ -121,6 +151,25 @@ const CrearPedido = () => {
       setOpenNoCajaModal(false);
     }
   }, [loadingCaja, cajaAsignada]);
+
+  useEffect(() => {
+    if (mode !== "global") {
+      const idFromHook = sucursalActiva?.id_sucursal || null;
+      if (idFromHook && formState.id_sucursal !== idFromHook) {
+        setFormState((prev) => ({ ...prev, id_sucursal: idFromHook }));
+        return;
+      }
+    }
+    if (mode === "global") {
+      const idFromCaja =
+        cajaAsignada?.cajas?.[0]?.id_sucursal ??
+        cajaAsignada?.caja?.id_sucursal ??
+        null;
+      if (!formState.id_sucursal && idFromCaja) {
+        setFormState((prev) => ({ ...prev, id_sucursal: idFromCaja }));
+      }
+    }
+  }, [mode, sucursalActiva?.id_sucursal, cajaAsignada, formState.id_sucursal]);
 
   useEffect(() => {
     const cliente = formState.selectedCliente;
@@ -151,7 +200,61 @@ const CrearPedido = () => {
     //eslint-disable-next-line
   }, [formState.selectedCliente]);
 
+  useEffect(() => {
+    if (!formState.id_sucursal) return;
+    const otraSucursal = cart.some(
+      (i) =>
+        i.id_sucursal_origen && i.id_sucursal_origen !== formState.id_sucursal
+    );
+    if (otraSucursal) {
+      dispatch(clearCart());
+      dispatch(
+        showNotification({
+          message:
+            "La sucursal cambió. Se vació el carrito para evitar mezclar.",
+          severity: "info",
+        })
+      );
+    }
+    setFormState((prev) => ({
+      ...prev,
+      selectedCliente: null,
+      direccionEntrega: "",
+      tipoDocumento: "boleta",
+    }));
+  }, [formState.id_sucursal, cart, dispatch]);
+
   const handleAddToCart = (product) => {
+    const idSucursal = formState.id_sucursal;
+    if (!idSucursal) {
+      dispatch(
+        showNotification({
+          message: "Selecciona una sucursal para ver/añadir productos.",
+          severity: "info",
+        })
+      );
+      return;
+    }
+
+    const stockDisponible = getStockForSucursal(product.inventario, idSucursal);
+
+    const qtyEnCarrito = cart
+      .filter(
+        (i) =>
+          i.id_producto === product.id_producto &&
+          i.id_sucursal_origen === idSucursal
+      )
+      .reduce((s, i) => s + i.cantidad, 0);
+
+    if (qtyEnCarrito + 1 > stockDisponible) {
+      dispatch(
+        showNotification({
+          message: "No hay stock suficiente en la sucursal seleccionada.",
+          severity: "warning",
+        })
+      );
+      return;
+    }
     const isInsumo = product.tipo === "insumo";
     const idInsumo = isInsumo
       ? parseInt(
@@ -168,17 +271,28 @@ const CrearPedido = () => {
         cantidad: 1,
         tipo: product.tipo || "producto",
         ...(isInsumo && { id_insumo: idInsumo }),
+        id_sucursal_origen: idSucursal,
       })
     );
   };
 
   const handleCreatePedido = async () => {
-    const { selectedCliente, tipoDocumento } = formState;
+    const { selectedCliente, tipoDocumento, id_sucursal } = formState;
 
     if (!selectedCliente) {
       dispatch(
         showNotification({
           message: "Selecciona un cliente antes de continuar.",
+          severity: "warning",
+        })
+      );
+      return;
+    }
+
+    if (!id_sucursal) {
+      dispatch(
+        showNotification({
+          message: "Debes seleccionar una sucursal para el pedido.",
           severity: "warning",
         })
       );
@@ -199,6 +313,7 @@ const CrearPedido = () => {
     }
 
     const pedidoData = {
+      id_sucursal,
       id_cliente: formState.selectedCliente?.id_cliente,
       direccion_entrega: formState.direccionEntrega,
       lat: formState.coords.lat,
@@ -248,6 +363,13 @@ const CrearPedido = () => {
       <Typography variant="h4" fontWeight={700} textAlign="center" mb={3}>
         Crear Pedido
       </Typography>
+      <SucursalPickerHeader
+        sucursales={sucursales || []}
+        idSucursal={formState.id_sucursal}
+        canChoose={canChooseSucursal}
+        onChange={(id) => setFormState((p) => ({ ...p, id_sucursal: id }))}
+        nombreSucursal={sucursalActual?.nombre}
+      />
       <Stepper
         activeStep={activeStep}
         alternativeLabel
@@ -272,31 +394,34 @@ const CrearPedido = () => {
             formState={formState}
             setFormState={setFormState}
             mostrarMetodoPago={formState.tipoDocumento !== "factura"}
+            idSucursalFiltro={formState.id_sucursal}
             extraFields={
-              <TextField
-                select
-                fullWidth
-                label="Prioridad del Pedido"
-                value={formState.prioridad}
-                onChange={(e) =>
-                  setFormState((prev) => ({
-                    ...prev,
-                    prioridad: e.target.value,
-                  }))
-                }
-                variant="outlined"
-                sx={{
-                  mt: 3,
-                  backgroundColor: theme.palette.background.default,
-                  borderRadius: 1,
-                  input: { color: theme.palette.text.primary },
-                  label: { color: theme.palette.text.secondary },
-                }}
-              >
-                <MenuItem value="alta">Alta</MenuItem>
-                <MenuItem value="normal">Media</MenuItem>
-                <MenuItem value="baja">Baja</MenuItem>
-              </TextField>
+              <>
+                <TextField
+                  select
+                  fullWidth
+                  label="Prioridad del Pedido"
+                  value={formState.prioridad}
+                  onChange={(e) =>
+                    setFormState((prev) => ({
+                      ...prev,
+                      prioridad: e.target.value,
+                    }))
+                  }
+                  variant="outlined"
+                  sx={{
+                    mt: 3,
+                    backgroundColor: theme.palette.background.default,
+                    borderRadius: 1,
+                    input: { color: theme.palette.text.primary },
+                    label: { color: theme.palette.text.secondary },
+                  }}
+                >
+                  <MenuItem value="alta">Alta</MenuItem>
+                  <MenuItem value="normal">Media</MenuItem>
+                  <MenuItem value="baja">Baja</MenuItem>
+                </TextField>
+              </>
             }
           />
 
@@ -323,6 +448,7 @@ const CrearPedido = () => {
           <PedidoProductos
             selectedCategory={category}
             onAddToCart={handleAddToCart}
+            sucursalId={formState.id_sucursal}
           />
           <MiniCartSummary onOpenCart={() => setActiveStep(2)} />
           <Stack direction="row" justifyContent="space-between" mt={2}>

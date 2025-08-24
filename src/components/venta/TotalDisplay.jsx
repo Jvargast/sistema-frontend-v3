@@ -20,6 +20,7 @@ const TotalsDisplay = ({
   onTaxRateChange,
   productosRetornables,
   refButton,
+  ctaLabel
 }) => {
   return (
     <Box>
@@ -103,7 +104,7 @@ const TotalsDisplay = ({
             "&:hover": { backgroundColor: "#388E3C" },
           }}
         >
-          Proceder al pago
+          {ctaLabel}
         </Button>
       </Box>
     </Box>
@@ -124,6 +125,7 @@ TotalsDisplay.propTypes = {
     PropTypes.func,
     PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
   ]),
+  ctaLabel: PropTypes.string
 };
 
 export default TotalsDisplay;

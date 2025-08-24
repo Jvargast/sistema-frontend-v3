@@ -29,6 +29,11 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useCreateProduccionMutation } from "../../store/services/produccionApi";
 import Header from "../../components/common/Header";
+import useSucursalActiva from "../../hooks/useSucursalActiva";
+import { useGetStocksByFormulaQuery } from "../../store/services/insumoApi";
+import FloatingStockBadge from "../../components/produccion/FloatingStockBadge";
+import InsumoStatusList from "../../components/produccion/InsumoStatusLists";
+import { useSelector } from "react-redux";
 
 const steps = [
   "Seleccionar fórmula",
@@ -38,44 +43,92 @@ const steps = [
 ];
 
 const PanelProduccion = () => {
-  //const theme = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { rol } = useSelector((s) => s.auth);
+  const isAdmin = ["admin", "administrador", "superadmin"].includes(
+    typeof rol === "string"
+      ? rol.toLowerCase()
+      : String(rol?.nombre || "").toLowerCase()
+  );
   const [activeStep, setActiveStep] = useState(0);
   const [formulaSel, setFormulaSel] = useState(null);
   const [cantLote, setCantLote] = useState(1);
 
-  const { data: formulaDetalle, isFetching } = useGetFormulaByIdQuery(
-    formulaSel?.id_formula,
-    { skip: !formulaSel, refetchOnMountOrArgChange: true }
-  );
+  const sucursalActiva = useSucursalActiva();
+  const idSucursal = sucursalActiva?.id_sucursal ?? sucursalActiva?.id ?? null;
+
+  const { data: formulaDetalle, isFetching: loadingFormula } =
+    useGetFormulaByIdQuery(
+      { id: formulaSel?.id_formula, id_sucursal: idSucursal },
+      {
+        skip: !formulaSel,
+        refetchOnMountOrArgChange: true,
+      }
+    );
+
   const { data: formulasResp, isFetching: loadingFormulas } =
     useGetAllFormulasQuery({ limit: 1000 });
-  const [crearProduccion, { isLoading: procesando }] =
-    useCreateProduccionMutation();
-
   const formulas = formulasResp?.formulas ?? [];
+
+  const shouldFetchStocks =
+    Boolean(formulaSel?.id_formula) &&
+    Boolean(idSucursal) &&
+    Number(cantLote) > 0;
+
+  const { data: stocksByFormula = [], isFetching: loadingStocks } =
+    useGetStocksByFormulaQuery(
+      {
+        id_formula: formulaSel?.id_formula,
+        id_sucursal: idSucursal,
+        multiplicador: cantLote,
+      },
+      { skip: !shouldFetchStocks }
+    );
 
   const unidadesSalida = useMemo(() => {
     const rendimiento = Number(formulaDetalle?.cantidad_requerida) || 0;
-    return rendimiento * cantLote;
+    return rendimiento * (Number(cantLote) || 1);
   }, [formulaDetalle, cantLote]);
+
+  const stockMap = useMemo(() => {
+    const map = new Map();
+    (stocksByFormula || []).forEach((s) => {
+      map.set(Number(s.id_insumo), {
+        stock: Number(s.stock ?? s.available ?? s.cantidad ?? 0),
+        requerido: Number(s.requerido ?? s.required ?? 0),
+      });
+    });
+    return map;
+  }, [stocksByFormula]);
 
   const insumos = useMemo(() => {
     if (!formulaDetalle) return [];
-    return formulaDetalle.FormulaProductoDetalles.map((d) => ({
-      id: d.id_insumo,
-      nombre: d.Insumo?.nombre_insumo ?? "—",
-      unidad: d.unidad_de_medida || "u.",
-      stock: Number(d.Insumo?.inventario?.cantidad) || 0,
-      requerido: Number(d.cantidad_requerida) * cantLote,
-    }));
-  }, [formulaDetalle, cantLote]);
+
+    return (formulaDetalle.FormulaProductoDetalles ?? []).map((d) => {
+      const baseReq =
+        (Number(d.cantidad_requerida) || 0) * (Number(cantLote) || 1);
+      const s = stockMap.get(Number(d.id_insumo));
+      const stock = Number(s?.stock ?? 0);
+      const requerido = Number(s?.requerido ?? baseReq);
+
+      return {
+        id: d.id_insumo,
+        nombre: d.Insumo?.nombre_insumo ?? "—",
+        unidad: d.unidad_de_medida || "u.",
+        stock,
+        requerido,
+      };
+    });
+  }, [formulaDetalle, cantLote, stockMap]);
 
   const stockOk = insumos.every((i) => i.stock >= i.requerido);
 
   const next = () => setActiveStep((s) => Math.min(s + 1, steps.length - 1));
   const back = () => setActiveStep((s) => Math.max(s - 1, 0));
+
+  const [crearProduccion, { isLoading: procesando }] =
+    useCreateProduccionMutation();
 
   const buildPayload = () => ({
     id_formula: formulaSel.id_formula,
@@ -85,19 +138,19 @@ const PanelProduccion = () => {
       unidad: i.unidad,
     })),
     cantidad_lote: cantLote,
+    id_sucursal: idSucursal,
   });
 
   const ejecutarProduccion = async () => {
     try {
       await crearProduccion(buildPayload()).unwrap();
-      console.log(buildPayload())
       dispatch(
         showNotification({
           message: "Producción registrada con éxito",
           severity: "success",
         })
       );
-      navigate("/produccion/historial");
+      navigate(isAdmin ? "/admin/produccion" : "/productos");
     } catch (err) {
       dispatch(
         showNotification({
@@ -107,6 +160,8 @@ const PanelProduccion = () => {
       );
     }
   };
+
+  const isStep2Loading = loadingFormula || (shouldFetchStocks && loadingStocks);
 
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
@@ -128,6 +183,17 @@ const PanelProduccion = () => {
             <Typography variant="h6" gutterBottom>
               Selecciona la fórmula a producir
             </Typography>
+
+            {!idSucursal && (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: 1.5 }}
+              >
+                Selecciona/activa una sucursal para evaluar stock.
+              </Typography>
+            )}
+
             <AutocompleteGenerico
               options={formulas}
               isLoading={loadingFormulas}
@@ -155,7 +221,8 @@ const PanelProduccion = () => {
               size="small"
               defaultValue={formulaSel}
             />
-            {isFetching && formulaSel && (
+
+            {loadingFormula && formulaSel && (
               <Box mt={2} display="flex" justifyContent="center">
                 <CircularProgress size={24} />
               </Box>
@@ -173,7 +240,11 @@ const PanelProduccion = () => {
             </Collapse>
 
             <Stack direction="row" justifyContent="flex-end" mt={2}>
-              <Button variant="contained" disabled={!formulaSel} onClick={next}>
+              <Button
+                variant="contained"
+                disabled={!formulaSel || !idSucursal}
+                onClick={next}
+              >
                 Siguiente
               </Button>
             </Stack>
@@ -217,9 +288,7 @@ const PanelProduccion = () => {
                   sx={(t) => ({
                     border: `1px solid ${t.palette.primary.main}`,
                     color: t.palette.primary.main,
-                    "&:hover": {
-                      bgcolor: t.palette.action.hover,
-                    },
+                    "&:hover": { bgcolor: t.palette.action.hover },
                   })}
                   onClick={() => setCantLote((v) => Math.max(1, v - 1))}
                 >
@@ -252,9 +321,7 @@ const PanelProduccion = () => {
                   sx={(t) => ({
                     border: `1px solid ${t.palette.primary.main}`,
                     color: t.palette.primary.main,
-                    "&:hover": {
-                      bgcolor: t.palette.action.hover,
-                    },
+                    "&:hover": { bgcolor: t.palette.action.hover },
                   })}
                   onClick={() => setCantLote((v) => v + 1)}
                 >
@@ -289,20 +356,14 @@ const PanelProduccion = () => {
               <Button
                 variant="outlined"
                 onClick={back}
-                sx={{
-                  borderRadius: 2,
-                  textTransform: "none",
-                }}
+                sx={{ borderRadius: 2, textTransform: "none" }}
               >
                 Atrás
               </Button>
               <Button
                 variant="contained"
                 onClick={next}
-                sx={{
-                  borderRadius: 2,
-                  textTransform: "none",
-                }}
+                sx={{ borderRadius: 2, textTransform: "none" }}
               >
                 Siguiente
               </Button>
@@ -314,14 +375,13 @@ const PanelProduccion = () => {
       {activeStep === 2 && (
         <Card elevation={4}>
           <CardContent>
-            {isFetching ? (
+            {isStep2Loading ? (
               <CircularProgress />
             ) : (
               <>
                 <IndicadoresPanel insumos={insumos} />
-
+                <InsumoStatusList items={insumos} />
                 <Divider sx={{ my: 3 }} />
-
                 <Stack direction="row" justifyContent="space-between">
                   <Button variant="outlined" onClick={back}>
                     Atrás
@@ -366,6 +426,13 @@ const PanelProduccion = () => {
           </CardContent>
         </Card>
       )}
+
+      <FloatingStockBadge
+        insumos={insumos}
+        loading={isStep2Loading}
+        sucursalNombre={sucursalActiva?.nombre}
+        sucursalId={idSucursal}
+      />
     </Box>
   );
 };

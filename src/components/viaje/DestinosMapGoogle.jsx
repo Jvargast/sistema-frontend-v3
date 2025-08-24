@@ -329,208 +329,217 @@ export default function DestinosMapGoogle({ ruta, recorridoReal, directions }) {
         </Box>
       </Box>
 
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        center={center}
-        zoom={13}
-        options={{
-          disableDefaultUI: true,
+      <Box
+        sx={{
+          position: "relative",
+          borderRadius: 2,
+          overflow: "hidden",
+          mb: 3,
         }}
       >
-        {ruta.length === 0 && (
-          <Box
-            sx={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              transform: "translate(-50%, -50%)",
-              zIndex: 10,
-              background: "#fff9",
-              borderRadius: "12px",
-              boxShadow: 2,
-              p: 3,
-            }}
-          >
-            <Typography color="text.secondary" fontWeight={500}>
-              No hay destinos pendientes. Ruta completada. 🎉
-            </Typography>
-          </Box>
-        )}
-        {directions && (
-          <DirectionsRenderer
-            directions={directions}
-            options={{ suppressMarkers: true }}
-          />
-        )}
-
-        {/* Marcador origen */}
-        {ruta?.length > 0 && (
-          <div>
-            <Marker
-              onClick={() => setActiveMarker("origen")}
-              position={{ lat: ruta[0].lat, lng: ruta[0].lng }}
-              icon={{
-                path: window.google.maps.SymbolPath.CIRCLE,
-                scale: 10,
-                fillColor: "#ef476f",
-                fillOpacity: 1,
-                strokeWeight: 2,
-                strokeColor: "#fff",
+        <GoogleMap
+          mapContainerStyle={mapContainerStyle}
+          center={center}
+          zoom={13}
+          options={{
+            disableDefaultUI: true,
+          }}
+        >
+          {ruta.length === 0 && (
+            <Box
+              sx={{
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                transform: "translate(-50%, -50%)",
+                zIndex: 10,
+                background: "#fff9",
+                borderRadius: "12px",
+                boxShadow: 2,
+                p: 3,
               }}
-              label={{
-                text: "🏠",
-                color: "#fff",
-                fontSize: "16px",
-              }}
+            >
+              <Typography color="text.secondary" fontWeight={500}>
+                No hay destinos pendientes. Ruta completada. 🎉
+              </Typography>
+            </Box>
+          )}
+          {directions && (
+            <DirectionsRenderer
+              directions={directions}
+              options={{ suppressMarkers: true }}
             />
-            {activeMarker === "origen" && (
-              <InfoWindow
-                position={{ lat: ruta[0].lat, lng: ruta[0].lng }}
-                onCloseClick={() => setActiveMarker(null)}
-                options={{ pixelOffset: new window.google.maps.Size(0, -30) }}
-              >
-                <div style={infoWindowStyle}>
-                  <strong style={strongStyle}>Origen actual</strong>
-                  <div>{ruta[0].direccion || "Sin dirección registrada"}</div>
-                </div>
-              </InfoWindow>
-            )}
-          </div>
-        )}
+          )}
 
-        {/* Marcadores pendientes */}
-        {ruta
-          ?.slice(1)
-          .filter(
-            (d) =>
-              !isEntregado(d, recorridoReal) &&
-              isValidCoord(d.lat) &&
-              isValidCoord(d.lng)
-          )
-          .map((d, i) => (
-            <Box key={`pendiente-wrap-${i}`}>
+          {/* Marcador origen */}
+          {ruta?.length > 0 && (
+            <div>
               <Marker
-                key={`pendiente-${i}`}
-                position={{ lat: d.lat, lng: d.lng }}
-                onClick={() => setActiveMarker(`pendiente-${i}`)}
+                onClick={() => setActiveMarker("origen")}
+                position={{ lat: ruta[0].lat, lng: ruta[0].lng }}
                 icon={{
-                  url: `data:image/svg+xml;utf-8,
+                  path: window.google.maps.SymbolPath.CIRCLE,
+                  scale: 10,
+                  fillColor: "#ef476f",
+                  fillOpacity: 1,
+                  strokeWeight: 2,
+                  strokeColor: "#fff",
+                }}
+                label={{
+                  text: "🏠",
+                  color: "#fff",
+                  fontSize: "16px",
+                }}
+              />
+              {activeMarker === "origen" && (
+                <InfoWindow
+                  position={{ lat: ruta[0].lat, lng: ruta[0].lng }}
+                  onCloseClick={() => setActiveMarker(null)}
+                  options={{ pixelOffset: new window.google.maps.Size(0, -30) }}
+                >
+                  <div style={infoWindowStyle}>
+                    <strong style={strongStyle}>Origen actual</strong>
+                    <div>{ruta[0].direccion || "Sin dirección registrada"}</div>
+                  </div>
+                </InfoWindow>
+              )}
+            </div>
+          )}
+
+          {/* Marcadores pendientes */}
+          {ruta
+            ?.slice(1)
+            .filter(
+              (d) =>
+                !isEntregado(d, recorridoReal) &&
+                isValidCoord(d.lat) &&
+                isValidCoord(d.lng)
+            )
+            .map((d, i) => (
+              <Box key={`pendiente-wrap-${i}`}>
+                <Marker
+                  key={`pendiente-${i}`}
+                  position={{ lat: d.lat, lng: d.lng }}
+                  onClick={() => setActiveMarker(`pendiente-${i}`)}
+                  icon={{
+                    url: `data:image/svg+xml;utf-8,
       <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34">
         <circle cx="17" cy="17" r="16" fill="%234361ee" stroke="white" stroke-width="3"/>
         <text x="50%" y="56%" text-anchor="middle" fill="white" font-size="16" font-family="Roboto" font-weight="bold" dy=".3em">${
           i + 1
         }</text>
       </svg>`,
-                  scaledSize: new window.google.maps.Size(34, 34),
-                  anchor: new window.google.maps.Point(17, 5),
-                }}
-              />
-              {activeMarker === `pendiente-${i}` && (
-                <InfoWindow
-                  position={{ lat: d.lat, lng: d.lng }}
-                  onCloseClick={() => setActiveMarker(null)}
-                >
-                  <div style={infoWindowStyle}>
-                    <button
-                      onClick={() => setActiveMarker(null)}
-                      style={buttonClose}
-                      aria-label="Cerrar"
-                      tabIndex={0}
-                      onMouseOver={(e) =>
-                        (e.currentTarget.style.color = "#e53935")
-                      }
-                      onMouseOut={(e) =>
-                        (e.currentTarget.style.color = "#bdbdbd")
-                      }
-                    >
-                      ×
-                    </button>
-                    <span style={badgeStyle}>Pedido pendiente</span>
-                    <span style={idStyle}>#{d.id_pedido}</span>
-                    <span style={nameStyle}>{d.nombre_cliente}</span>
-                    <span style={addressStyle}>{d.direccion}</span>
-                    <div style={estadoStyle}>
-                      <span style={dotStyle}></span>
-                      <span
-                        style={{
-                          fontSize: 12,
-                          color: "#fbc02d",
-                          fontWeight: 600,
-                        }}
+                    scaledSize: new window.google.maps.Size(34, 34),
+                    anchor: new window.google.maps.Point(17, 5),
+                  }}
+                />
+                {activeMarker === `pendiente-${i}` && (
+                  <InfoWindow
+                    position={{ lat: d.lat, lng: d.lng }}
+                    onCloseClick={() => setActiveMarker(null)}
+                  >
+                    <div style={infoWindowStyle}>
+                      <button
+                        onClick={() => setActiveMarker(null)}
+                        style={buttonClose}
+                        aria-label="Cerrar"
+                        tabIndex={0}
+                        onMouseOver={(e) =>
+                          (e.currentTarget.style.color = "#e53935")
+                        }
+                        onMouseOut={(e) =>
+                          (e.currentTarget.style.color = "#bdbdbd")
+                        }
                       >
-                        Pendiente
-                      </span>{" "}
+                        ×
+                      </button>
+                      <span style={badgeStyle}>Pedido pendiente</span>
+                      <span style={idStyle}>#{d.id_pedido}</span>
+                      <span style={nameStyle}>{d.nombre_cliente}</span>
+                      <span style={addressStyle}>{d.direccion}</span>
+                      <div style={estadoStyle}>
+                        <span style={dotStyle}></span>
+                        <span
+                          style={{
+                            fontSize: 12,
+                            color: "#fbc02d",
+                            fontWeight: 600,
+                          }}
+                        >
+                          Pendiente
+                        </span>{" "}
+                      </div>
                     </div>
-                  </div>
-                </InfoWindow>
-              )}
-            </Box>
-          ))}
+                  </InfoWindow>
+                )}
+              </Box>
+            ))}
 
-        {/* Marcadores entregados */}
-        {recorridoReal
-          ?.slice(1)
-          .filter((d) => isValidCoord(d.lat) && isValidCoord(d.lng))
-          .map((d, i) => (
-            <Box key={`entregado-${i}`}>
-              <Marker
-                onClick={() => setActiveMarker(`entregado-${i}`)}
-                position={{ lat: d.lat, lng: d.lng }}
-                icon={{
-                  url: `data:image/svg+xml;utf-8,
+          {/* Marcadores entregados */}
+          {recorridoReal
+            ?.slice(1)
+            .filter((d) => isValidCoord(d.lat) && isValidCoord(d.lng))
+            .map((d, i) => (
+              <Box key={`entregado-${i}`}>
+                <Marker
+                  onClick={() => setActiveMarker(`entregado-${i}`)}
+                  position={{ lat: d.lat, lng: d.lng }}
+                  icon={{
+                    url: `data:image/svg+xml;utf-8,
       <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34">
         <circle cx="17" cy="17" r="16" fill="%234caf50" stroke="white" stroke-width="3"/>
         <text x="50%" y="56%" text-anchor="middle" fill="white" font-size="16" font-family="Roboto" font-weight="bold" dy=".3em">${
           i + 1
         }</text>
       </svg>`,
-                  scaledSize: new window.google.maps.Size(34, 34),
-                  anchor: new window.google.maps.Point(17, 5),
-                }}
-              />
-              {activeMarker === `entregado-${i}` && (
-                <InfoWindow
-                  position={{ lat: d.lat, lng: d.lng }}
-                  onCloseClick={() => setActiveMarker(null)}
-                  options={{
-                    pixelOffset: new window.google.maps.Size(0, -30),
+                    scaledSize: new window.google.maps.Size(34, 34),
+                    anchor: new window.google.maps.Point(17, 5),
                   }}
-                >
-                  <div style={entregadoInfoWindowStyle}>
-                    <button
-                      onClick={() => setActiveMarker(null)}
-                      style={buttonClose}
-                      aria-label="Cerrar"
-                      tabIndex={0}
-                      onMouseOver={(e) =>
-                        (e.currentTarget.style.color = "#e53935")
-                      }
-                      onMouseOut={(e) =>
-                        (e.currentTarget.style.color = "#bdbdbd")
-                      }
-                    >
-                      ×
-                    </button>
-                    <span style={badgeEntregadoStyle}>Entregado</span>
-                    <strong style={strongEntregadoStyle}>
-                      {d.nombre_cliente}
-                    </strong>
-                    <div style={addressEntregadoStyle}>{d.direccion}</div>
-                    {d.hora && (
-                      <div style={horaEntregadoStyle}>
-                        <span style={checkDotStyle}></span>
-                        <span>
-                          <b>Entregado:</b>{" "}
-                          {convertirFechaLocal(d.hora, "DD-MM-YYYY HH:mm")}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </InfoWindow>
-              )}
-            </Box>
-          ))}
-      </GoogleMap>
+                />
+                {activeMarker === `entregado-${i}` && (
+                  <InfoWindow
+                    position={{ lat: d.lat, lng: d.lng }}
+                    onCloseClick={() => setActiveMarker(null)}
+                    options={{
+                      pixelOffset: new window.google.maps.Size(0, -30),
+                    }}
+                  >
+                    <div style={entregadoInfoWindowStyle}>
+                      <button
+                        onClick={() => setActiveMarker(null)}
+                        style={buttonClose}
+                        aria-label="Cerrar"
+                        tabIndex={0}
+                        onMouseOver={(e) =>
+                          (e.currentTarget.style.color = "#e53935")
+                        }
+                        onMouseOut={(e) =>
+                          (e.currentTarget.style.color = "#bdbdbd")
+                        }
+                      >
+                        ×
+                      </button>
+                      <span style={badgeEntregadoStyle}>Entregado</span>
+                      <strong style={strongEntregadoStyle}>
+                        {d.nombre_cliente}
+                      </strong>
+                      <div style={addressEntregadoStyle}>{d.direccion}</div>
+                      {d.hora && (
+                        <div style={horaEntregadoStyle}>
+                          <span style={checkDotStyle}></span>
+                          <span>
+                            <b>Entregado:</b>{" "}
+                            {convertirFechaLocal(d.hora, "DD-MM-YYYY HH:mm")}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </InfoWindow>
+                )}
+              </Box>
+            ))}
+        </GoogleMap>
+      </Box>
     </>
   );
 }

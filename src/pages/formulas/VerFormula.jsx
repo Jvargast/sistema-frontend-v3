@@ -17,16 +17,19 @@ import {
   useGetFormulaByIdQuery,
   useUpdateFormulaMutation,
 } from "../../store/services/FormulaProductoApi";
-import /* React, */ { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import FormulaDisplay from "../../components/formulas/FormulaDisplay";
+import useSucursalActiva from "../../hooks/useSucursalActiva";
 
 const VerFormula = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const theme = useTheme();
+  const sucursalActiva = useSucursalActiva();
+  const idSucursal = sucursalActiva?.id_sucursal ?? sucursalActiva?.id ?? null;
 
   const [updateFormula, { isLoading: saving }] = useUpdateFormulaMutation();
   const {
@@ -34,7 +37,13 @@ const VerFormula = () => {
     isLoading,
     error,
     refetch,
-  } = useGetFormulaByIdQuery(id);
+  } = useGetFormulaByIdQuery(
+    { id: Number(id) },
+    {
+      skip: !id,
+      refetchOnMountOrArgChange: true,
+    }
+  );
   const [isEditing, setIsEditing] = useState(false);
 
   const [nombreFormula, setNombreFormula] = useState("");
@@ -46,13 +55,15 @@ const VerFormula = () => {
     if (formula) {
       setNombreFormula(formula.nombre_formula);
       setProductoFinal(formula.Producto);
-      setCantidadFinal(formula.cantidad_requerida);
+      setCantidadFinal(
+        formula.cantidad_producto_final ?? formula.cantidad_requerida ?? 0
+      );
 
-      const adaptados = formula.FormulaProductoDetalles.map((d) => ({
+      const adaptados = (formula.FormulaProductoDetalles ?? []).map((d) => ({
         id_formula_detalle: d.id_formula_detalle,
         nombre: d.Insumo?.nombre_insumo,
-        cantidad: d.cantidad_requerida,
-        descripcion: d.unidad_de_medida || "u.",
+        cantidad: d.cantidad ?? d.cantidad_requerida ?? 0,
+        descripcion: d.unidad_medida ?? d.unidad_de_medida ?? "u.",
         objetoSeleccionado: d.Insumo,
       }));
 
@@ -94,6 +105,19 @@ const VerFormula = () => {
     }
   };
 
+  const handleAddInsumo = () => {
+    setInsumos((prev) => [
+      ...prev,
+      {
+        id_formula_detalle: `tmp-${Date.now()}`,
+        nombre: "",
+        cantidad: 0,
+        descripcion: "u.",
+        objetoSeleccionado: null,
+      },
+    ]);
+  };
+
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" mt={5}>
@@ -117,7 +141,7 @@ const VerFormula = () => {
         mx: "auto",
         p: 4,
         borderRadius: 4,
-        backgroundColor: theme.palette.background.paper
+        backgroundColor: theme.palette.background.paper,
       }}
     >
       <Stack direction="row" justifyContent="space-between" mb={2}>
@@ -210,6 +234,8 @@ const VerFormula = () => {
               nombre_producto: nombre,
             }));
         }}
+        idSucursal={idSucursal}
+        onInsumoAdd={handleAddInsumo}
       />
     </Box>
   );

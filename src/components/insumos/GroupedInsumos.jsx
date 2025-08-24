@@ -6,12 +6,17 @@ import {
   Pagination,
   Typography,
   useTheme,
+  Chip,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useGetAllInsumosQuery } from "../../store/services/insumoApi";
 import LoaderComponent from "../common/LoaderComponent";
 import DataGridCustomToolbar from "../common/DataGridCustomToolBar";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import EditIcon from "@mui/icons-material/Edit";
 import { useHasPermission } from "../../utils/useHasPermission";
@@ -19,7 +24,9 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { alpha } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import ImageNotSupportedOutlinedIcon from "@mui/icons-material/ImageNotSupportedOutlined";
-import { Select, MenuItem, InputLabel, FormControl } from "@mui/material";
+import useSucursalActiva from "../../hooks/useSucursalActiva";
+import { getImageUrl } from "../../store/services/apiBase";
+import ImageCell from "../common/ImageCell";
 
 const GroupedInsumos = ({
   tipo,
@@ -38,11 +45,18 @@ const GroupedInsumos = ({
 
   const canEditInsumo = useHasPermission("inventario.insumo.editar");
 
+  const sucursalActiva = useSucursalActiva();
+  const { rol } = useSelector((state) => state.auth);
+
   const { data, isLoading, isError } = useGetAllInsumosQuery({
     tipo,
     page: pagination.page + 1,
     limit: pagination.pageSize,
     search,
+    includeInventario: true,
+    ...(rol === "administrador" && sucursalActiva?.id_sucursal
+      ? { id_sucursal: sucursalActiva.id_sucursal }
+      : {}),
   });
 
   const handlePaginationChange = (model) => {
@@ -61,16 +75,35 @@ const GroupedInsumos = ({
   }, [isError, dispatch]);
 
   const rows = useMemo(() => {
-    return data?.data?.items
-      ? data.data.items.map((row) => ({
-          ...row,
-          stock:
-            row.inventario?.cantidad !== undefined
-              ? row.inventario.cantidad
-              : "Sin Stock",
-        }))
-      : [];
-  }, [data?.data?.items]);
+    const items = data?.data?.items || [];
+    return items.map((row) => {
+      let stockTotal = 0;
+
+      if (Array.isArray(row.inventario)) {
+        if (rol !== "administrador" && sucursalActiva?.id_sucursal) {
+          stockTotal =
+            row.inventario.find(
+              (inv) => inv.id_sucursal === sucursalActiva.id_sucursal
+            )?.cantidad || 0;
+        } else {
+          stockTotal = row.inventario.reduce(
+            (acc, inv) => acc + (inv.cantidad || 0),
+            0
+          );
+        }
+      } else {
+        stockTotal =
+          typeof row?.inventario?.cantidad === "number"
+            ? row.inventario.cantidad
+            : 0;
+      }
+
+      return {
+        ...row,
+        stock: stockTotal,
+      };
+    });
+  }, [data?.data?.items, rol, sucursalActiva]);
 
   if (isLoading) return <LoaderComponent />;
 
@@ -106,7 +139,7 @@ const GroupedInsumos = ({
               <Box display="flex" alignItems="center" gap={2}>
                 {row.image_url ? (
                   <img
-                    src={row.image_url}
+                    src={getImageUrl(row.image_url)}
                     alt={row.nombre_insumo}
                     style={{
                       width: 48,
@@ -135,7 +168,24 @@ const GroupedInsumos = ({
                 <Box>
                   <strong>{row.nombre_insumo}</strong>
                   <Typography fontSize={13} color="text.secondary">
-                    Stock: <b>{row.stock}</b>
+                    Stock:{" "}
+                    {row.stock === 0 ? (
+                      <Chip
+                        label="Sin stock"
+                        color="error"
+                        size="small"
+                        sx={{ fontWeight: 700, fontSize: 12, ml: 0.5 }}
+                      />
+                    ) : row.stock < 10 ? (
+                      <Chip
+                        label={row.stock}
+                        color="warning"
+                        size="small"
+                        sx={{ fontWeight: 700, fontSize: 12, ml: 0.5 }}
+                      />
+                    ) : (
+                      <b>{row.stock}</b>
+                    )}
                   </Typography>
                 </Box>
               </Box>
@@ -237,6 +287,7 @@ const GroupedInsumos = ({
     );
   }
 
+  // --- Vista Desktop (DataGrid) ---
   return (
     <Box>
       <Box
@@ -281,43 +332,55 @@ const GroupedInsumos = ({
           sx={{ fontSize: "1rem" }}
           rows={rows}
           columns={[
-            { field: "id_insumo", headerName: "ID", flex: 0.25 },
+            { field: "id_insumo", headerName: "ID", flex: 0.2 },
             {
               field: "image_url",
               headerName: "Imagen",
               sortable: false,
               resizable: false,
               width: 100,
-              renderCell: (params) =>
-                params.value ? (
-                  <img
-                    src={params.value}
-                    alt="Insumo"
-                    style={{
-                      width: "50px",
-                      height: "50px",
-                      borderRadius: "8px",
-                    }}
-                  />
-                ) : (
-                  <ImageNotSupportedOutlinedIcon
-                    sx={{ width: 50, height: 50, color: "grey.400" }}
-                  />
-                ),
+              renderCell: (params) => (
+                <ImageCell url={getImageUrl(params.value)} />
+              ),
             },
             {
               field: "nombre_insumo",
               headerName: "Nombre",
-              flex: 0.5,
+              flex: 0.55,
               sortable: false,
               resizable: false,
             },
             {
               field: "stock",
-              headerName: "Stock",
-              flex: 0.315,
+              headerName:
+                rol !== "administrador" && sucursalActiva?.nombre
+                  ? `Stock (${sucursalActiva.nombre})`
+                  : "Stock Total",
+              flex: 0.25,
               sortable: false,
               resizable: false,
+              renderCell: (params) => {
+                const stock = params.value ?? 0;
+                return stock === 0 ? (
+                  <Chip
+                    label="Sin stock"
+                    color="error"
+                    size="small"
+                    sx={{ fontWeight: 700, fontSize: 13 }}
+                  />
+                ) : stock < 10 ? (
+                  <Chip
+                    label={stock}
+                    color="warning"
+                    size="small"
+                    sx={{ fontWeight: 700, fontSize: 13 }}
+                  />
+                ) : (
+                  <Typography fontWeight={700} fontSize={15}>
+                    {stock}
+                  </Typography>
+                );
+              },
             },
             ...(canEditInsumo
               ? [
@@ -349,8 +412,6 @@ const GroupedInsumos = ({
                         >
                           <VisibilityIcon />
                         </IconButton>
-
-                        {/* Botón Editar */}
                         <IconButton
                           color="primary"
                           onClick={(e) => {
@@ -368,14 +429,13 @@ const GroupedInsumos = ({
           ]}
           getRowId={(row) => row.id_insumo}
           paginationMode="server"
-          rowCount={data?.data.totalItems || 0}
+          rowCount={Math.max(0, parseInt(data?.data?.totalItems, 10) || 0)}
           paginationModel={pagination}
           checkboxSelection
           onRowSelectionModelChange={(selectedIds) => {
             const selectedInsumos = selectedIds
-              .map((id) => rows.find((row) => row.id_insumo === id)?.id_insumo)
-              .filter((id) => id);
-
+              .map((id) => rows.find((r) => r.id_insumo === id)?.id_insumo)
+              .filter(Boolean);
             setSelectedRows((prev) => ({
               ...prev,
               [tipo]: selectedInsumos,
@@ -392,6 +452,7 @@ const GroupedInsumos = ({
     </Box>
   );
 };
+
 GroupedInsumos.propTypes = {
   tipo: PropTypes.string.isRequired,
   search: PropTypes.string.isRequired,

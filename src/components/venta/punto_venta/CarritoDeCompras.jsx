@@ -18,7 +18,8 @@ const CarritoDeCompras = ({
   onDiscountChange,
   onProceedToPayment,
   productosRetornables,
-  refButton
+  refButton,
+  ctaLabel,
 }) => (
   <Paper
     elevation={3}
@@ -56,6 +57,7 @@ const CarritoDeCompras = ({
         onProceedToPayment={onProceedToPayment}
         productosRetornables={productosRetornables}
         refButton={refButton}
+        ctaLabel={ctaLabel}
       />
     </Box>
   </Paper>
@@ -77,9 +79,10 @@ CarritoDeCompras.propTypes = {
   onProceedToPayment: PropTypes.func.isRequired,
   productosRetornables: PropTypes.array,
   refButton: PropTypes.oneOfType([
-    PropTypes.func, 
-    PropTypes.shape({ current: PropTypes.any })
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.any }),
   ]),
+  ctaLabel: PropTypes.string
 };
 
 export default CarritoDeCompras;

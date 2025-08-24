@@ -1,5 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauthEnhanced } from "./fettchQuery";
+import { productoApi } from "./productoApi";
 
 export const ventasApi = createApi({
   reducerPath: "ventasApi",
@@ -29,7 +30,7 @@ export const ventasApi = createApi({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.error("Error al obtener la venta:", error); // aquí corregido
+          console.error("Error al obtener la venta:", error);
         }
       },
     }),
@@ -41,11 +42,30 @@ export const ventasApi = createApi({
         body: newVenta,
       }),
       invalidatesTags: ["Ventas"],
-      async onQueryStarted(args, { queryFulfilled }) {
+      async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
+          const suc = args.id_sucursal;
+          dispatch(
+            productoApi.util.invalidateTags([
+              { type: "Inventario", id: `LIST-${suc}` },
+              ...args.productos.map((p) => ({
+                type: "Inventario",
+                id: `${p.id_producto}-${suc}`,
+              })),
+            ])
+          );
+          dispatch(
+            productoApi.util.invalidateTags([
+              { type: "Producto", id: "LIST" },
+              ...args.productos.map((p) => ({
+                type: "Producto",
+                id: p.id_producto,
+              })),
+            ])
+          );
         } catch (error) {
-          console.error("Error al crear la venta:", error); // aquí corregido
+          console.error("Error al crear la venta:", error);
         }
       },
     }),
@@ -60,9 +80,9 @@ export const ventasApi = createApi({
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("Venta actualizada correctamente:", data); // aquí corregido
+          console.log("Venta actualizada correctamente:", data);
         } catch (error) {
-          console.error("Error al actualizar la venta:", error); // aquí corregido
+          console.error("Error al actualizar la venta:", error);
         }
       },
     }),
@@ -92,7 +112,7 @@ export const ventasApi = createApi({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.error("Error al eliminar la venta:", error); // aquí corregido
+          console.error("Error al eliminar la venta:", error);
         }
       },
     }),

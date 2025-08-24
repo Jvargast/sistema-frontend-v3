@@ -4,14 +4,23 @@ import { baseQueryWithReauthEnhanced } from "./fettchQuery";
 export const productoApi = createApi({
   reducerPath: "productoApi",
   baseQuery: baseQueryWithReauthEnhanced,
-  tagTypes: ["Producto"],
+  tagTypes: ["Producto", "Inventario"],
   endpoints: (builder) => ({
     getAllProductos: builder.query({
       query: (params) => ({
         url: `/productos/`,
         params,
       }),
-      providesTags: ["Producto"],
+      providesTags: (result) =>
+        result?.productos
+          ? [
+              { type: "Producto", id: "LIST" },
+              ...result.productos.map((p) => ({
+                type: "Producto",
+                id: p.id_producto,
+              })),
+            ]
+          : [{ type: "Producto", id: "LIST" }],
       transformResponse: (response) => ({
         productos: response.data,
         paginacion: response.total,
@@ -30,7 +39,16 @@ export const productoApi = createApi({
         url: `/productos/disponible`,
         params,
       }),
-      providesTags: ["Producto"],
+      providesTags: (result, error, arg) =>
+        result?.productos
+          ? [
+              ...result.productos.map((p) => ({
+                type: "Inventarios",
+                id: `${p.id_producto}-${arg.id_sucursal}`,
+              })),
+              { type: "Inventarios", id: `LIST-${arg.id_sucursal}` },
+            ]
+          : [{ type: "Inventarios", id: `LIST-${arg.id_sucursal}` }],
       transformResponse: (response) => ({
         productos: response.data,
         paginacion: response.total,
@@ -73,16 +91,16 @@ export const productoApi = createApi({
         method: "POST",
         body: newProducto,
       }),
-      invalidatesTags: ["Producto"], 
+      invalidatesTags: ["Producto"],
     }),
 
     updateProducto: builder.mutation({
-      query: ({ id, ...updatedProducto }) => ({
+      query: ({ id, data }) => ({
         url: `/productos/${id}`,
         method: "PUT",
-        body: updatedProducto,
+        body: data,
       }),
-      invalidatesTags: ["Producto"], 
+      invalidatesTags: ["Producto"],
     }),
 
     deleteProducto: builder.mutation({
@@ -90,7 +108,7 @@ export const productoApi = createApi({
         url: `/productos/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Producto"], 
+      invalidatesTags: ["Producto"],
     }),
 
     deleteProductos: builder.mutation({

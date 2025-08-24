@@ -4,12 +4,23 @@ import { baseQueryWithReauthEnhanced } from "./fettchQuery";
 export const clientesApi = createApi({
   reducerPath: "clientesApi",
   baseQuery: baseQueryWithReauthEnhanced,
-  tagTypes: ["Cliente"], // Identificador para invalidar cache
+  tagTypes: ["Cliente"],
   endpoints: (builder) => ({
-    // Obtener cliente por ID
     getClienteById: builder.query({
-      query: (id) => `/clientes/${id}`,
-      providesTags: ["Cliente"], // Cache de clientes
+      query: (arg) => {
+        if (typeof arg === "string" || typeof arg === "number") {
+          return `/clientes/${arg}`;
+        }
+        const { id, id_sucursal } = arg || {};
+        return {
+          url: `/clientes/${id}`,
+          params: id_sucursal ? { id_sucursal } : undefined,
+        };
+      },
+      providesTags: (result, error, arg) => {
+        const id = typeof arg === "object" ? arg?.id : arg;
+        return [{ type: "Cliente", id }, "Cliente"];
+      },
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -21,7 +32,7 @@ export const clientesApi = createApi({
 
     getPorcentajeClientesNuevos: builder.query({
       query: () => `/clientes/nuevos/porcentaje`,
-      providesTags: ["Cliente"], // Cache de clientes
+      providesTags: ["Cliente"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -35,8 +46,8 @@ export const clientesApi = createApi({
       query: (params) => ({ url: `/clientes/`, params }),
       providesTags: ["Cliente"],
       transformResponse: (response) => ({
-        clientes: response.data, 
-        paginacion: response.total, 
+        clientes: response.data,
+        paginacion: response.total,
       }),
       async onQueryStarted(args, { queryFulfilled }) {
         try {
@@ -47,14 +58,13 @@ export const clientesApi = createApi({
       },
     }),
 
-    // Crear un cliente
     createCliente: builder.mutation({
       query: (newClient) => ({
         url: `/clientes/`,
         method: "POST",
         body: newClient,
       }),
-      invalidatesTags: ["Cliente"], // Invalida cache
+      invalidatesTags: ["Cliente"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -64,14 +74,13 @@ export const clientesApi = createApi({
       },
     }),
 
-    // Actualizar un cliente
     updateCliente: builder.mutation({
       query: ({ id, ...formData }) => ({
         url: `/clientes/${id}`,
         method: "PUT",
         body: { ...formData },
       }),
-      invalidatesTags: ["Cliente"], // Invalida cache
+      invalidatesTags: ["Cliente"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -81,14 +90,13 @@ export const clientesApi = createApi({
         }
       },
     }),
-    // Borrar muchos clientes
     deleteClientes: builder.mutation({
       query: ({ ids }) => ({
         url: `/clientes/`,
         method: "PATCH",
-        body: { ids }, // Enviamos el array de IDs en el body
+        body: { ids },
       }),
-      invalidatesTags: ["Cliente"], // Invalida el caché
+      invalidatesTags: ["Cliente"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -97,13 +105,12 @@ export const clientesApi = createApi({
         }
       },
     }),
-    // Desactivar un cliente
     deactivateCliente: builder.mutation({
       query: (id) => ({
         url: `/clientes/${id}/deactivate`,
         method: "PATCH",
       }),
-      invalidatesTags: ["Cliente"], // Invalida cache
+      invalidatesTags: ["Cliente"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -114,13 +121,12 @@ export const clientesApi = createApi({
       },
     }),
 
-    // Reactivar un cliente
     reactivateCliente: builder.mutation({
       query: (id) => ({
         url: `/clientes/${id}/reactivate`,
         method: "PATCH",
       }),
-      invalidatesTags: ["Cliente"], // Invalida cache
+      invalidatesTags: ["Cliente"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -133,7 +139,6 @@ export const clientesApi = createApi({
   }),
 });
 
-// Exporta los hooks generados automáticamente
 export const {
   useGetClienteByIdQuery,
   useGetAllClientesQuery,
@@ -144,5 +149,3 @@ export const {
   useReactivateClienteMutation,
   useGetPorcentajeClientesNuevosQuery,
 } = clientesApi;
-
-

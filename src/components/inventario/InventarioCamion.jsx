@@ -21,7 +21,6 @@ const InventarioCamion = ({
     lista,
   } = inventarioData;
 
-  console.log(inventarioData);
 
   const columnas = isTablet ? 6 : 10;
 

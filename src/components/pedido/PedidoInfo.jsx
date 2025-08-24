@@ -11,7 +11,6 @@ import dayjs from "dayjs";
 import { formatCLP } from "../../utils/formatUtils";
 
 const InfoPedido = ({ pedido }) => {
-  console.log(pedido);
   const theme = useTheme();
   const estado = pedido.EstadoPedido?.nombre_estado || "Desconocido";
   const colorEstado =

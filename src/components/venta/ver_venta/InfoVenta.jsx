@@ -12,11 +12,11 @@ import {
   PointOfSale,
   MonetizationOn,
 } from "@mui/icons-material";
+import RoomIcon from "@mui/icons-material/Room";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
 
 const InfoVenta = ({ venta }) => {
-  console.log(venta);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -40,6 +40,15 @@ const InfoVenta = ({ venta }) => {
       icon: <PointOfSale sx={{ color: "#e91e63" }} />,
       label: "Caja",
       value: `#${venta.caja.id_caja} (${venta.caja.estado})`,
+    },
+    {
+      icon: `${venta.direccion_entrega}` ? (
+        <RoomIcon sx={{ color: "red" }} />
+      ) : (
+        <></>
+      ),
+      label: `${venta.direccion_entrega ? "Dirección" : ""}`,
+      value: `${venta.direccion_entrega ? venta.direccion_entrega : ""}`,
     },
     {
       icon: <MonetizationOn sx={{ color: "#388e3c" }} />,
@@ -133,7 +142,7 @@ const InfoVenta = ({ venta }) => {
             }}
           >
             <Box display="flex" alignItems="center">
-              {icon}
+              {value ? icon : ""}
             </Box>
             <Typography
               variant="body2"
@@ -144,7 +153,7 @@ const InfoVenta = ({ venta }) => {
                 lineHeight: 1.4,
               }}
             >
-              <strong>{label}:</strong> {value}
+              <strong>{label + `${label ? ":" : ""}`}</strong> {value}
             </Typography>
           </Box>
         ))}
@@ -160,6 +169,7 @@ InfoVenta.propTypes = {
       apellido: PropTypes.string.isRequired,
     }).isRequired,
     fecha: PropTypes.string.isRequired,
+    direccion_entrega: PropTypes.string,
     sucursal: PropTypes.shape({
       nombre: PropTypes.string.isRequired,
     }).isRequired,

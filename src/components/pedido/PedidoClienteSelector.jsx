@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -21,67 +21,131 @@ import { useNavigate } from "react-router-dom";
 import { useGetAllClientesQuery } from "../../store/services/clientesApi";
 import LoaderComponent from "../common/LoaderComponent";
 
+function useDebounce(value, delay = 300) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
+
 const PedidoClienteSelector = ({
   open,
   onClose,
   selectedCliente,
   onSelect,
+  idSucursal,
 }) => {
+  const limit = 10;
   const theme = useTheme();
   const navigate = useNavigate();
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [clientes, setClientes] = useState([]);
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
+  const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [preSelectedCliente, setPreSelectedCliente] = useState(null);
+  const [ready, setReady] = useState(false);
 
-  const { data, isLoading, isFetching, refetch } = useGetAllClientesQuery({
-    page,
-    search: searchTerm,
-  });
+  const params = useMemo(() => {
+    const p = { page, limit, activo: true };
+    if (debouncedSearch?.trim()) p.search = debouncedSearch.trim();
+    const n = Number(idSucursal);
+    if (!Number.isNaN(n) && !!n) p.id_sucursal = n;
+    return p;
+  }, [page, limit, debouncedSearch, idSucursal]);
 
-  const observer = useRef();
-  const lastClienteRef = useCallback(
-    (node) => {
-      if (isFetching || !hasMore) return;
-      if (observer.current) observer.current.disconnect();
+  const skip = !open;
 
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
-          setPage((prev) => prev + 1);
-        }
-      });
-
-      if (node) observer.current.observe(node);
-    },
-    [isFetching, hasMore]
-  );
+  const { data, isLoading, isFetching, isError, isSuccess } =
+    useGetAllClientesQuery(params, {
+      skip,
+      keepUnusedDataFor: 30,
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    });
 
   useEffect(() => {
-    if (data?.clientes) {
-      setClientes((prev) =>
-        page === 1 ? data.clientes : [...prev, ...data.clientes]
-      );
-      setHasMore(data?.paginacion?.totalPages > page);
-    }
+    if (!data) return;
+    const raw = Array.isArray(data?.clientes)
+      ? data.clientes
+      : Array.isArray(data)
+      ? data
+      : [];
+
+    const pageItems = raw.filter((c) => c?.activo !== false);
+    setItems((prev) => (page === 1 ? pageItems : [...prev, ...pageItems]));
+
+    const totalPages = Number(data?.paginacion?.totalPages) || 1;
+    setHasMore(page < totalPages && pageItems.length > 0);
+
+    if (page === 1) setReady(true);
   }, [data, page]);
 
   useEffect(() => {
     if (!open) return;
     setPreSelectedCliente(selectedCliente || null);
-    setPage(1);
-    setSearchTerm("");
   }, [open, selectedCliente]);
 
-  useEffect(() => {
-    setPage(1);
-    refetch();
-  }, [searchTerm, refetch]);
+  const prevSucursalRef = useRef(idSucursal);
 
-  if (isLoading) return <LoaderComponent />;
+  useEffect(() => {
+    if (prevSucursalRef.current === idSucursal) return;
+    setPage(1);
+    setHasMore(true);
+    setReady(false);
+    prevSucursalRef.current = idSucursal;
+  }, [idSucursal]);
+
+  const prevSearchRef = useRef(debouncedSearch);
+
+  useEffect(() => {
+    if (prevSearchRef.current === debouncedSearch) return;
+    setPage(1);
+    setHasMore(true);
+    setReady(false);
+    prevSearchRef.current = debouncedSearch;
+  }, [debouncedSearch]);
+
+  const observer = useRef(null);
+  useEffect(() => {
+    if (!open && observer.current) observer.current.disconnect();
+  }, [open]);
+
+  console.log("PARAMS =>", params);
+  useEffect(() => {
+    console.log("DATA =>", data?.clientes?.length, data);
+  }, [data]);
+  useEffect(() => {
+    console.log("ITEMS =>", items.length, "PAGE =>", page, "READY =>", ready);
+  }, [items, page, ready]);
+
+  const lastClienteRef = useCallback(
+    (node) => {
+      if (isFetching || !hasMore) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) setPage((prev) => prev + 1);
+      });
+      if (node) observer.current.observe(node);
+    },
+    [isFetching, hasMore]
+  );
+
+  if (open && isLoading && page === 1) return <LoaderComponent />;
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth disableRestoreFocus>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      disableRestoreFocus
+    >
       <DialogTitle
         sx={{
           display: "flex",
@@ -90,13 +154,13 @@ const PedidoClienteSelector = ({
           fontWeight: "bold",
           background: theme.palette.primary.main,
           color: theme.palette.primary.contrastText,
-          padding: "16px 24px",
+          p: "16px 24px",
         }}
       >
         <Box display="flex" alignItems="center" gap={1}>
           <PersonIcon
             sx={{ fontSize: 30, color: theme.palette.primary.contrastText }}
-          />{" "}
+          />
           Seleccionar Cliente
         </Box>
         <IconButton onClick={onClose} sx={{ color: "white" }}>
@@ -116,12 +180,13 @@ const PedidoClienteSelector = ({
             sx={{ "& input": { fontSize: "1rem" } }}
           />
         </Box>
+
         <Box display="flex" justifyContent="flex-end" mt={1} mb={2}>
           <Button
             variant="outlined"
             startIcon={<AddCircleOutlineIcon />}
             onClick={() => {
-              onClose(); // Cierra el modal antes de redirigir
+              onClose();
               navigate("/clientes/crear");
             }}
             sx={{
@@ -165,22 +230,20 @@ const PedidoClienteSelector = ({
 
         <Box
           sx={{
-            maxHeight: "300px",
+            maxHeight: 300,
             overflowY: "auto",
             p: 1,
-            "&::-webkit-scrollbar": {
-              width: "6px",
-            },
+            "&::-webkit-scrollbar": { width: 6 },
             "&::-webkit-scrollbar-thumb": {
               backgroundColor: "#cfd8dc",
-              borderRadius: "4px",
+              borderRadius: 4,
             },
           }}
         >
-          {clientes.map((cliente, index) => (
+          {items.map((cliente, index) => (
             <Box
               key={cliente.id_cliente}
-              ref={index === clientes.length - 1 ? lastClienteRef : null}
+              ref={index === items.length - 1 ? lastClienteRef : null}
               onClick={() => setPreSelectedCliente(cliente)}
               sx={{
                 p: 2,
@@ -192,9 +255,7 @@ const PedidoClienteSelector = ({
                     ? theme.palette.action.selected
                     : theme.palette.background.default,
                 transition: "background 0.2s",
-                "&:hover": {
-                  backgroundColor: theme.palette.action.hover,
-                },
+                "&:hover": { backgroundColor: theme.palette.action.hover },
                 border:
                   preSelectedCliente?.id_cliente === cliente.id_cliente
                     ? `1.5px solid ${theme.palette.primary.main}`
@@ -202,7 +263,7 @@ const PedidoClienteSelector = ({
               }}
             >
               <Typography fontWeight="bold">{cliente.nombre}</Typography>
-              <Typography fontSize="0.9rem" color="textSecondary">
+              <Typography fontSize="0.9rem" color="text.secondary">
                 {cliente.telefono} | {cliente.direccion}
               </Typography>
             </Box>
@@ -211,6 +272,23 @@ const PedidoClienteSelector = ({
           {isFetching && (
             <Box display="flex" justifyContent="center" mt={2}>
               <CircularProgress size={30} />
+            </Box>
+          )}
+
+          {open &&
+            ready &&
+            !isFetching &&
+            !isLoading &&
+            isSuccess &&
+            items.length === 0 && (
+              <Box p={2} textAlign="center" color="text.secondary">
+                {isError ? "Error al cargar clientes." : "Sin resultados."}
+              </Box>
+            )}
+
+          {!ready && items.length === 0 && (
+            <Box p={2} textAlign="center" color="text.secondary">
+              Cargando…
             </Box>
           )}
         </Box>
@@ -232,9 +310,6 @@ const PedidoClienteSelector = ({
         <Button
           onClick={() => {
             onSelect(preSelectedCliente);
-            requestAnimationFrame(() => {
-              document.body.focus(); 
-            });
             onClose();
           }}
           variant="contained"
@@ -259,6 +334,7 @@ PedidoClienteSelector.propTypes = {
   onClose: PropTypes.func.isRequired,
   selectedCliente: PropTypes.object,
   onSelect: PropTypes.func.isRequired,
+  idSucursal: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 };
 
 export default PedidoClienteSelector;

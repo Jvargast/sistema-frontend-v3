@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -19,7 +19,7 @@ import { useGetAllChoferesQuery } from "../../store/services/usuariosApi";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 
-const AsignarChoferModal = ({ open, onClose, camionId }) => {
+const AsignarChoferModal = ({ open, onClose, camionId, sucursalId }) => {
   const dispatch = useDispatch();
   const {
     data: choferes = [],
@@ -28,7 +28,24 @@ const AsignarChoferModal = ({ open, onClose, camionId }) => {
   } = useGetAllChoferesQuery();
   const [choferSeleccionado, setChoferSeleccionado] = useState(null);
 
+  const choferesFiltrados = useMemo(() => {
+    const sid = Number(sucursalId);
+    if (!sid) return [];
+
+    const list = Array.isArray(choferes) ? choferes : [];
+    return list.filter((c) => {
+      const plano = c?.id_sucursal;
+      const anidado = c?.Sucursal?.id_sucursal;
+      const idDelChofer = Number(plano ?? anidado ?? 0);
+      return idDelChofer === sid;
+    });
+  }, [choferes, sucursalId]);
+
   const [asignarChofer, { isLoading }] = useAsignarChoferMutation();
+
+  useEffect(() => {
+    if (open) setChoferSeleccionado("");
+  }, [open, sucursalId]);
 
   useEffect(() => {
     if (!loadingChoferes && choferes.length > 0) {
@@ -66,11 +83,20 @@ const AsignarChoferModal = ({ open, onClose, camionId }) => {
       aria-describedby="asignar-chofer-descripcion"
     >
       <DialogTitle
-        sx={{ backgroundColor: "#1976D2", color: "#fff", textAlign: "center" }}
+        sx={{
+          backgroundColor: (theme) => theme.palette.primary.main,
+          textAlign: "center",
+          color: (theme) => theme.palette.text.primary,
+        }}
       >
         Asignar Chofer
       </DialogTitle>
-      <DialogContent sx={{ padding: "20px", backgroundColor: "#F5F5F5" }}>
+      <DialogContent
+        sx={{
+          padding: "20px",
+          backgroundColor: (theme) => theme.palette.background.paper,
+        }}
+      >
         {loadingChoferes ? (
           <Box
             display="flex"
@@ -88,9 +114,16 @@ const AsignarChoferModal = ({ open, onClose, camionId }) => {
           <FormControl
             fullWidth
             margin="normal"
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+            sx={{
+              backgroundColor: (theme) => theme.palette.background.paper,
+              borderRadius: 1,
+            }}
           >
-            <InputLabel id="chofer-label" sx={{ color: "black" }} shrink={true}>
+            <InputLabel
+              id="chofer-label"
+              sx={{ color: (theme) => theme.palette.text.primary }}
+              shrink={true}
+            >
               Seleccionar Chofer
             </InputLabel>
             <Select
@@ -104,18 +137,18 @@ const AsignarChoferModal = ({ open, onClose, camionId }) => {
                 padding: "8px",
                 borderRadius: "8px",
                 "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#1976D2",
+                  borderColor: (theme) => theme.palette.primary.main,
                 },
                 "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#115293",
+                  borderColor: (theme) => theme.palette.primary.dark,
                 },
                 "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0D47A1",
+                  borderColor: (theme) => theme.palette.primary.dark,
                 },
               }}
             >
               <MenuItem value="">Ninguno</MenuItem>{" "}
-              {choferes.map((chofer) => (
+              {choferesFiltrados.map((chofer) => (
                 <MenuItem
                   key={chofer.rut || `chofer-${Math.random()}`}
                   value={chofer.rut}
@@ -127,8 +160,19 @@ const AsignarChoferModal = ({ open, onClose, camionId }) => {
           </FormControl>
         )}
       </DialogContent>
-      <DialogActions sx={{ padding: "16px", backgroundColor: "#F5F5F5" }}>
-        <Button onClick={onClose} sx={{ color: "#D32F2F", fontWeight: "bold" }}>
+      <DialogActions
+        sx={{
+          padding: "16px",
+          backgroundColor: (theme) => theme.palette.background.default,
+        }}
+      >
+        <Button
+          onClick={onClose}
+          sx={{
+            color: (theme) => theme.palette.error.main,
+            fontWeight: "bold",
+          }}
+        >
           Cancelar
         </Button>
         <Button
@@ -138,12 +182,17 @@ const AsignarChoferModal = ({ open, onClose, camionId }) => {
           disabled={!choferSeleccionado || isLoading}
           sx={{
             fontWeight: "bold",
-            backgroundColor: "#1976D2",
-            "&:hover": { backgroundColor: "#115293" },
+            backgroundColor: (theme) => theme.palette.primary.main,
+            "&:hover": {
+              backgroundColor: (theme) => theme.palette.primary.dark,
+            },
           }}
         >
           {isLoading ? (
-            <CircularProgress size={24} sx={{ color: "#fff" }} />
+            <CircularProgress
+              size={24}
+              sx={{ color: (theme) => theme.palette.primary.contrastText }}
+            />
           ) : (
             "Asignar"
           )}
@@ -157,6 +206,7 @@ AsignarChoferModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   camionId: PropTypes.number.isRequired,
+  sucursalId: PropTypes.number.isRequired,
 };
 
 export default AsignarChoferModal;

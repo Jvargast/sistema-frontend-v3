@@ -2,46 +2,62 @@ import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { logout } from "../reducers/authSlice";
 import { apiUrl } from "./apiBase";
 
-// Define el baseQuery original con configuración estándar
+function getScope(state) {
+  const role = state?.auth?.rol?.nombre || state?.auth?.rol;
+  const isAdmin = role === "administrador";
+
+  const activeSucursalId =
+    state?.scope?.activeSucursalId ?? state?.auth?.user?.id_sucursal ?? null;
+
+  const mode = state?.scope?.mode || "sucursal";
+  return { activeSucursalId, mode, isAdmin };
+}
+
 const baseQuery = fetchBaseQuery({
-  baseUrl: apiUrl || "http://localhost:3000/api", // Define tu base URL
-  credentials: "include", // Incluye automáticamente cookies
+  baseUrl: apiUrl || "http://localhost:3000/api",
+  credentials: "include",
   prepareHeaders: (headers, { getState }) => {
-    const token = getState().auth.token; // Obtén el token desde el estado global
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`); // Agrega el token al header de autorización
+    const state = getState();
+    const token = state?.auth?.token;
+    if (token) headers.set("authorization", `Bearer ${token}`);
+
+    const { activeSucursalId, mode, isAdmin } = getScope(state);
+    if (activeSucursalId != null) {
+      headers.set("x-sucursal-id", String(activeSucursalId));
     }
+    if (isAdmin && mode) {
+      headers.set("x-scope-mode", mode);
+    }
+
     return headers;
   },
 });
 
-// Extiende baseQuery para manejar la renovación del token
 export const baseQueryWithReauthEnhanced = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
-  // Si el token está expirado (401 Unauthorized), intenta renovar
-  if (result.error && result.error.status === 401) {
+  if (result?.error?.status === 401) {
     console.warn("Token expirado, intentando renovar...");
 
     try {
-      // Llama a la ruta /auth/refresh-token para renovar el token
       const refreshResult = await baseQuery(
         { url: "/auth/refresh-token", method: "POST" },
         api,
         extraOptions
       );
 
-      if (refreshResult.data) {
-        console.log("Token renovado exitosamente, reintentando la solicitud...");
-        // Si el token fue renovado, reintenta la solicitud original
+      if (refreshResult?.data) {
+        console.log(
+          "Token renovado exitosamente, reintentando la solicitud..."
+        );
         result = await baseQuery(args, api, extraOptions);
       } else {
-        console.error("Error al renovar el token, cerrando sesión...");
-        api.dispatch(logout()); // Cierra sesión si la renovación falla
+        console.error("No se pudo renovar el token, cerrando sesión...");
+        api.dispatch(logout());
       }
     } catch (error) {
       console.error("Error crítico durante la renovación del token:", error);
-      api.dispatch(logout()); // Cierra sesión en caso de error crítico
+      api.dispatch(logout());
     }
   }
 

@@ -7,16 +7,18 @@ export const productoRetornableApi = createApi({
   tagTypes: ["ProductoRetornable"],
   endpoints: (builder) => ({
     getPendientes: builder.query({
-      query: () => ({
+      query: (params = {}) => ({
         url: "/producto-retornable/pendientes",
+        params,
       }),
-      providesTags: ["ProductoRetornable"],
+      transformResponse: (res) => (Array.isArray(res) ? res : res?.data || []),
+      providesTags: ["Retornables"],
     }),
     inspeccionar: builder.mutation({
-      query: ({ items }) => ({
+      query: ({ id_sucursal_inspeccion, items }) => ({
         url: "/producto-retornable/inspeccionar",
         method: "POST",
-        body: { items },
+        body: { id_sucursal_inspeccion, items },
       }),
       invalidatesTags: ["ProductoRetornable"],
     }),

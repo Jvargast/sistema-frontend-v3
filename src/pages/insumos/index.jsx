@@ -1,14 +1,17 @@
-import { useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Box, Button, Tab, Tabs, useTheme } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { Add } from "@mui/icons-material";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   useCreateInsumoMutation,
   useDeleteInsumosMutation,
+  useLazyGetAllInsumosAllQuery,
 } from "../../store/services/insumoApi";
 import { useGetAllTiposQuery } from "../../store/services/tipoInsumoApi";
+import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import Header from "../../components/common/Header";
 import AlertDialog from "../../components/common/AlertDialog";
@@ -17,12 +20,22 @@ import GroupedInsumos from "../../components/insumos/GroupedInsumos";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import { useHasPermission } from "../../utils/useHasPermission";
 import { useIsMobile } from "../../utils/useIsMobile";
+import useSucursalActiva from "../../hooks/useSucursalActiva";
+import InventarioMatrizInsumos from "../../components/insumos/InventarioMatrizInsumos";
+import InventarioTabsInsumosPorSucursal from "../../components/insumos/InventarioTabsInsumosPorSucursal";
+import InventarioAccordionInsumosPorInsumo from "../../components/insumos/InventarioAccordionInsumosPorInsumo";
 
 const Insumos = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useIsMobile();
+
+  const { rol } = useSelector((state) => state.auth);
+  const sucursalActiva = useSucursalActiva();
+  const { data: sucursales, isLoading: loadingSucursales } =
+    useGetAllSucursalsQuery();
+
   const {
     data: tiposData,
     isLoading: isLoadingTipos,
@@ -30,9 +43,10 @@ const Insumos = () => {
   } = useGetAllTiposQuery();
 
   const tipos = useMemo(
-    () => tiposData?.map((tipo) => tipo.nombre_tipo) || [],
+    () => tiposData?.map((t) => t.nombre_tipo) || [],
     [tiposData]
   );
+
   const [searchInputs, setSearchInputs] = useState({});
   const [searches, setSearches] = useState({});
   const [selectedRows, setSelectedRows] = useState({});
@@ -46,38 +60,56 @@ const Insumos = () => {
   const canDeleteInsumo = useHasPermission("inventario.insumo.eliminar");
 
   const [tabIndex, setTabIndex] = useState(0);
-  const handleTabChange = (_, newValue) => {
-    setTabIndex(newValue);
-  };
+  const [vista, setVista] = useState(0);
 
-  const handleSearchInputChange = (tipo, value) => {
-    setSearchInputs((prev) => ({
-      ...prev,
-      [tipo]: value,
-    }));
-  };
+  const shouldFetchAll = vista === 1 || vista === 2 || vista === 3;
 
-  const handleSearch = (tipo) => {
-    setSearches((prev) => ({
-      ...prev,
-      [tipo]: searchInputs[tipo],
-    }));
-  };
-
-  const handleEdit = useCallback(
-    (row) => {
-      navigate(`/insumos/editar/${row.id_insumo}`, {
-        state: { refetch: true },
-      });
+  const [
+    triggerAll,
+    {
+      data: allInsumos = [],
+      isFetching: isLoadingAll /* , isError: isErrorAll */,
     },
-    [navigate]
+  ] = useLazyGetAllInsumosAllQuery();
+
+  const insumosAll = allInsumos;
+
+  const insumosFiltradosPorSucursal = useMemo(() => {
+    if (rol === "administrador" || !sucursalActiva?.id_sucursal) {
+      return insumosAll;
+    }
+    return insumosAll.map((ins) => ({
+      ...ins,
+      inventario: Array.isArray(ins.inventario)
+        ? ins.inventario.filter(
+            (inv) => inv.id_sucursal === sucursalActiva.id_sucursal
+          )
+        : ins.inventario,
+    }));
+  }, [insumosAll, rol, sucursalActiva]);
+
+  const sucursalesParaVistas = useMemo(
+    () => (rol === "administrador" ? sucursales || [] : []),
+    [rol, sucursales]
   );
+
+  const handleTabChange = (_, newValue) => setTabIndex(newValue);
+  const handleVistaChange = (_, value) => setVista(value);
+
+  const handleSearchInputChange = (tipo, value) =>
+    setSearchInputs((prev) => ({ ...prev, [tipo]: value }));
+
+  const handleSearch = (tipo) =>
+    setSearches((prev) => ({ ...prev, [tipo]: searchInputs[tipo] }));
+
+  const handleEdit = (row) => {
+    navigate(`/insumos/editar/${row.id_insumo}`, { state: { refetch: true } });
+  };
 
   const fields = useMemo(
     () => [
       { name: "nombre_insumo", label: "Nombre del Insumo", type: "text" },
       { name: "unidad_de_medida", label: "Unidad de Medida", type: "text" },
-      { name: "cantidad_inicial", label: "Cantidad Inicial", type: "number" },
       { name: "es_para_venta", label: "¿Para Venta?", type: "checkbox" },
       {
         name: "id_tipo_insumo",
@@ -90,14 +122,20 @@ const Insumos = () => {
         defaultValue: 1,
       },
     ],
-    [tipos]
+    [tipos,]
   );
+
+  useEffect(() => {
+    if (shouldFetchAll) {
+      triggerAll({ includeInventario: true });
+    }
+  }, [shouldFetchAll, triggerAll]);
 
   const handleCreate = async (data) => {
     try {
       const cleanData = {
         ...data,
-        codigo_barra: data.codigo_barra || null,
+        codigo_barra: data.codigo_barra || "",
         unidad_de_medida: data.unidad_de_medida || null,
         precio: data.precio || null,
       };
@@ -154,7 +192,7 @@ const Insumos = () => {
     }
   };
 
-  if (isLoadingTipos) return <LoaderComponent />;
+  if (isLoadingTipos || loadingSucursales) return <LoaderComponent />;
   if (isErrorTipos) {
     dispatch(
       showNotification({
@@ -167,7 +205,9 @@ const Insumos = () => {
 
   return (
     <Box sx={{ padding: "2rem" }}>
-      <Header title="Insumos" subtitle="Lista de Insumos" />
+      <Header title="Insumos" subtitle="Gestión de Insumos" />
+
+      {/* Acciones */}
       <Box
         sx={{
           display: "flex",
@@ -208,8 +248,9 @@ const Insumos = () => {
                 if (
                   Object.values(selectedRows).flat().length > 0 &&
                   !isDeleting
-                )
+                ) {
                   setOpenAlert(true);
+                }
               }}
               title="Eliminar Seleccionados"
             >
@@ -279,40 +320,167 @@ const Insumos = () => {
           ))}
       </Box>
 
-      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
+      <Box sx={{ mb: 2 }}>
         <Tabs
-          value={tabIndex}
-          onChange={handleTabChange}
+          value={vista}
+          onChange={handleVistaChange}
           variant="scrollable"
           scrollButtons="auto"
+          TabIndicatorProps={{ style: { display: "none" } }}
+          sx={{
+            p: 1,
+            borderRadius: 3,
+            bgcolor:
+              theme.palette.mode === "light"
+                ? theme.palette.background.paper
+                : theme.palette.grey[900],
+            boxShadow:
+              theme.palette.mode === "light"
+                ? "0 8px 24px rgba(0,0,0,0.08)"
+                : "0 8px 24px rgba(0,0,0,0.35)",
+            "& .MuiTab-root": {
+              position: "relative",
+              overflow: "hidden",
+              WebkitTapHighlightColor: "transparent",
+              outline: "none",
+              minHeight: 56,
+              px: 2.4,
+              mx: 0.6,
+              borderRadius: 999,
+              textTransform: "none",
+              fontWeight: 800,
+              fontSize: 15,
+              letterSpacing: 0.2,
+              border: `1px solid ${theme.palette.divider}`,
+              color:
+                theme.palette.mode === "light"
+                  ? theme.palette.grey[900]
+                  : theme.palette.grey[300],
+              transition: "all .18s ease",
+              "& .MuiTouchRipple-root": { display: "none" },
+
+              "&:hover": {
+                background:
+                  theme.palette.mode === "light"
+                    ? alpha(theme.palette.primary.main, 0.08)
+                    : alpha(theme.palette.primary.light, 0.16),
+                borderColor:
+                  theme.palette.mode === "light"
+                    ? alpha(theme.palette.primary.main, 0.2)
+                    : alpha(theme.palette.primary.light, 0.3),
+              },
+              "&.Mui-focusVisible, &:focus-visible": {
+                outline: "none",
+                boxShadow: `0 0 0 3px ${alpha(
+                  theme.palette.primary.main,
+                  0.25
+                )}`,
+              },
+              "&.Mui-selected": {
+                borderColor: "transparent",
+                color:
+                  theme.palette.mode === "light"
+                    ? theme.palette.grey[900]
+                    : theme.palette.grey[300],
+                background:
+                  theme.palette.mode === "light"
+                    ? `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
+                    : `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+                boxShadow: `0 10px 22px ${alpha(
+                  theme.palette.primary.main,
+                  0.35
+                )}`,
+              },
+            },
+          }}
         >
-          {tipos.map((tipo) => (
-            <Tab label={tipo} key={tipo} />
-          ))}
+          <Tab disableRipple label="Listado por Tipo" />
+          <Tab disableRipple label="Matriz Global" />
+          <Tab disableRipple label="Por Sucursal" />
+          <Tab disableRipple label="Por Insumo" />
         </Tabs>
       </Box>
 
-      {tipos.map((tipo, idx) => (
-        <Box
-          key={tipo}
-          role="tabpanel"
-          hidden={tabIndex !== idx}
-          sx={{ mt: 2 }}
-        >
-          {tabIndex === idx && (
-            <GroupedInsumos
-              tipo={tipo}
-              search={searches[tipo] || ""}
-              searchInput={searchInputs[tipo] || ""}
-              setSearchInput={(value) => handleSearchInputChange(tipo, value)}
-              setSearch={() => handleSearch(tipo)}
-              handleEdit={handleEdit}
-              setSelectedRows={setSelectedRows}
-              isMobile={isMobile}
-            />
-          )}
-        </Box>
-      ))}
+      {/* Vista 0: listado por tipo (tu GroupedInsumos actual) */}
+      {vista === 0 && (
+        <>
+          <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
+            <Tabs
+              value={tabIndex}
+              onChange={handleTabChange}
+              variant="scrollable"
+              scrollButtons="auto"
+            >
+              {tipos.map((tipo) => (
+                <Tab label={tipo} key={tipo} />
+              ))}
+            </Tabs>
+          </Box>
+
+          {tipos.map((tipo, idx) => (
+            <Box
+              key={tipo}
+              role="tabpanel"
+              hidden={tabIndex !== idx}
+              sx={{ mt: 2 }}
+            >
+              {tabIndex === idx && (
+                <GroupedInsumos
+                  tipo={tipo}
+                  search={searches[tipo] || ""}
+                  searchInput={searchInputs[tipo] || ""}
+                  setSearchInput={(value) =>
+                    handleSearchInputChange(tipo, value)
+                  }
+                  setSearch={() => handleSearch(tipo)}
+                  handleEdit={handleEdit}
+                  setSelectedRows={setSelectedRows}
+                  isMobile={isMobile}
+                />
+              )}
+            </Box>
+          ))}
+        </>
+      )}
+
+      {/* Vista 1: Matriz Global (mock) */}
+      {vista === 1 &&
+        (isLoadingAll ? (
+          <LoaderComponent />
+        ) : (
+          <InventarioMatrizInsumos
+            insumos={insumosFiltradosPorSucursal}
+            sucursales={
+              rol === "administrador"
+                ? sucursales || []
+                : sucursales?.filter(
+                    (s) => s.id_sucursal === sucursalActiva?.id_sucursal
+                  ) || []
+            }
+          />
+        ))}
+
+      {/* Vista 2: Tabs por Sucursal */}
+      {vista === 2 &&
+        (isLoadingAll ? (
+          <LoaderComponent />
+        ) : (
+          <InventarioTabsInsumosPorSucursal
+            insumos={insumosFiltradosPorSucursal}
+            sucursales={sucursalesParaVistas}
+          />
+        ))}
+
+      {/* Vista 3: Acordeón por Insumo */}
+      {vista === 3 &&
+        (isLoadingAll ? (
+          <LoaderComponent />
+        ) : (
+          <InventarioAccordionInsumosPorInsumo
+            insumos={insumosFiltradosPorSucursal}
+            sucursales={sucursalesParaVistas}
+          />
+        ))}
 
       <AlertDialog
         openAlert={openAlert}

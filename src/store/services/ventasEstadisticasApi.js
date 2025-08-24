@@ -16,27 +16,48 @@ export const ventasEstadisticasApi = createApi({
     }),
 
     getVentasEstadisticasPorMes: builder.query({
-      query: ({ mes, anio }) => `/analisis/ventas?mes=${mes}&anio=${anio}`,
+      query: ({ mes, anio, id_sucursal } = {}) => ({
+        url: "/analisis/ventas",
+        params: {
+          mes,
+          anio,
+          ...(id_sucursal != null ? { id_sucursal } : {}),
+        },
+      }),
       providesTags: ["VentasEstadisticas"],
     }),
     getKpiVentasPorFecha: builder.query({
-      query: () => "/analisis/ventas/kpi-hoy",
+      query: (params) => ({ url: `/analisis/ventas/kpi-hoy`, params }),
       providesTags: ["VentasEstadisticas"],
     }),
     getVentasResumenSemanal: builder.query({
-      query: () => "/analisis/ventas/resumen-semanal",
+      query: (/* { id_sucursal } = {} */) => ({
+        url: "/analisis/ventas/resumen-semanal",
+        // params: id_sucursal != null ? { id_sucursal } : undefined,
+      }),
     }),
 
     getVentasTendenciaMensual: builder.query({
-      query: ({ anio }) => `/analisis/ventas/tendencia-mensual?anio=${anio}`,
+      query: ({ anio, id_sucursal } = {}) => ({
+        url: "/analisis/ventas/tendencia-mensual",
+        params: {
+          anio,
+          ...(id_sucursal != null ? { id_sucursal } : {}),
+        },
+      }),
       providesTags: ["VentasEstadisticas"],
     }),
 
     getResumenVentasPorTipoEntrega: builder.query({
-      query: (fecha) => `/analisis/ventas/resumen-por-tipo-entrega?fecha=${fecha}`,
+      query: ({ fecha, id_sucursal } = {}) => ({
+        url: "/analisis/ventas/resumen-por-tipo-entrega",
+        params: {
+          fecha,
+          ...(id_sucursal != null ? { id_sucursal } : {}),
+        },
+      }),
       providesTags: ["VentasEstadisticas"],
     }),
-    
   }),
 });
 
@@ -46,5 +67,5 @@ export const {
   useGetKpiVentasPorFechaQuery,
   useGetVentasResumenSemanalQuery,
   useGetVentasTendenciaMensualQuery,
-  useGetResumenVentasPorTipoEntregaQuery
+  useGetResumenVentasPorTipoEntregaQuery,
 } = ventasEstadisticasApi;

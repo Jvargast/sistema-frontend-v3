@@ -21,7 +21,10 @@ export const pedidosEstadisticasApi = createApi({
     }),
 
     getKpiPedidosPorFecha: builder.query({
-      query: () => "/analisis/pedidos/kpi-hoy",
+      query: (params) => ({
+        url: `/analisis/pedidos/kpi-hoy`,
+        params,
+      }),
       providesTags: ["PedidosEstadisticas"],
     }),
   }),

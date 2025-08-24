@@ -15,6 +15,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useLoginMutation } from "../../store/services/authApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { getInitialRoute } from "../../utils/navigationUtils";
+import { finishLogin } from "../../store/reducers/authSlice";
 
 const formatRut = (value) => {
   const cleanValue = value.replace(/[^0-9kK]/gi, "");
@@ -70,14 +71,14 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      await login(credentials).unwrap();
+      const data = await login(credentials).unwrap();
+      dispatch(finishLogin(data));
       dispatch(
         showNotification({
           message: "Inicio de sesión exitoso.",
           severity: "success",
         })
       );
-      navigate("/dashboard", { replace: true });
     } catch (error) {
       dispatch(
         showNotification({

@@ -5,21 +5,46 @@ import { Visibility } from "@mui/icons-material";
 import { useGetAllProduccionQuery } from "../../store/services/produccionApi";
 import EmptyState from "../../components/common/EmptyState";
 import DataTable from "../../components/common/DataTable";
+import { useSelector } from "react-redux";
 
+const getProdSucursalId = (p) =>
+  Number(
+    p?.id_sucursal ??
+      p?.Sucursal?.id_sucursal ??
+      p?.sucursal?.id_sucursal ??
+      NaN
+  );
 
 const HistorialProduccion = () => {
   const navigate = useNavigate();
 
+  const {
+    mode,
+    activeSucursalId,
+    sucursales = [],
+  } = useSelector((s) => s.scope);
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const { data, isLoading, refetch, error } = useGetAllProduccionQuery(
-    {
-      page: page + 1,
-      limit: rowsPerPage,
-    },
-    { refetchOnMountOrArgChange: true }
-  );
+  const [sucursalFiltro, setSucursalFiltro] = useState("");
+
+  useEffect(() => {
+    if (mode === "global") {
+      setSucursalFiltro(""); 
+    } else {
+      setSucursalFiltro(String(activeSucursalId ?? ""));
+    }
+  }, [mode, activeSucursalId]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [mode, activeSucursalId, sucursalFiltro]);
+
+  const { data, isLoading, refetch, error } = useGetAllProduccionQuery({
+    page: page + 1,
+    limit: rowsPerPage,
+  });
 
   useEffect(() => {
     refetch();
@@ -28,11 +53,32 @@ const HistorialProduccion = () => {
   const producciones = useMemo(() => data?.producciones || [], [data]);
   const totalItems = useMemo(() => data?.paginacion?.totalItems || 0, [data]);
 
+  const produccionesFiltradas = producciones.filter((p) => {
+    const pSuc = getProdSucursalId(p);
+    if (mode === "global") {
+      if (sucursalFiltro && Number(pSuc) !== Number(sucursalFiltro))
+        return false;
+    } else {
+      if (activeSucursalId && Number(pSuc) !== Number(activeSucursalId))
+        return false;
+    }
+    return true;
+  });
+
   const columns = [
+    { id: "id_produccion", label: "ID", render: (row) => row.id_produccion },
     {
-      id: "id_produccion",
-      label: "ID",
-      render: (row) => row.id_produccion,
+      id: "sucursal",
+      label: "Sucursal",
+      render: (row) => {
+        const sid = getProdSucursalId(row);
+        const nombre =
+          row?.Sucursal?.nombre ||
+          sucursales.find((s) => Number(s.id_sucursal) === Number(sid))
+            ?.nombre ||
+          (sid ? `Sucursal ${sid}` : "—");
+        return <Chip label={nombre} size="small" sx={{ fontWeight: "bold" }} />;
+      },
     },
     {
       id: "fecha_produccion",
@@ -53,15 +99,12 @@ const HistorialProduccion = () => {
       label: "Fabricadas",
       render: (row) => parseInt(row.unidades_fabricadas, 10),
     },
-    {
-      id: "cantidad_lote",
-      label: "Lotes",
-      render: (row) => row.cantidad_lote,
-    },
+    { id: "cantidad_lote", label: "Lotes", render: (row) => row.cantidad_lote },
     {
       id: "operario",
       label: "Operario",
-      render: (row) => row.Usuarios?.nombre || row.rut_usuario,
+      render: (row) =>
+        row.operario?.nombre || row.Usuarios?.nombre || row.rut_usuario,
     },
     {
       id: "estado",
@@ -88,7 +131,7 @@ const HistorialProduccion = () => {
     },
   ];
 
-  if (!isLoading && producciones.length === 0) {
+  if (!isLoading && produccionesFiltradas.length === 0) {
     return (
       <EmptyState
         title="No hay registros de producción"
@@ -104,13 +147,13 @@ const HistorialProduccion = () => {
       title="Listado de Producción"
       subtitle="Gestión de Producción"
       columns={columns}
-      rows={producciones}
+      rows={produccionesFiltradas}
       totalItems={totalItems}
       rowsPerPage={rowsPerPage}
       page={page}
       handleChangePage={(_, newPage) => setPage(newPage)}
-      handleChangeRowsPerPage={(event) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
+      handleChangeRowsPerPage={(e) => {
+        setRowsPerPage(parseInt(e.target.value, 10));
         setPage(0);
       }}
       loading={isLoading}

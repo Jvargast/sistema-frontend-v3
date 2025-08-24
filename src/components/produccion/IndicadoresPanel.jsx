@@ -32,7 +32,7 @@ const IndicadoresPanel = ({ insumos }) => {
         bgcolor:
           t.palette.mode === "light" ? t.palette.grey[50] : t.palette.grey[900],
         border: 1,
-        borderColor: "divider", // ← fino borde gris; quítalo si no lo quieres
+        borderColor: "divider", 
       }}
     >
       <Stack

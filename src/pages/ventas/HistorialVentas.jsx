@@ -18,11 +18,11 @@ import {
   TextField,
   MenuItem,
 } from "@mui/material";
-import { Visibility, Cancel, Delete } from "@mui/icons-material";
+import { Visibility, Cancel, Delete, FilterAltOff } from "@mui/icons-material";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../../components/common/BackButton";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AlertDialog from "../../components/common/AlertDialog";
 import Header from "../../components/common/Header";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
@@ -32,6 +32,19 @@ import { exportarVentasExcel } from "../../utils/exportarExcel";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
+import { useSelector } from "react-redux";
+
+const getVentaSucursalId = (v) =>
+  Number(
+    v?.id_sucursal ??
+      v?.Sucursal?.id_sucursal ??
+      v?.sucursal?.id_sucursal ??
+      NaN
+  );
+
+const userOperaEnSucursal = (u, targetId) =>
+  Number(u?.Sucursal?.id_sucursal) === targetId ||
+  (u?.cajasAsignadas ?? []).some((c) => Number(c.id_sucursal) === targetId);
 
 const HistorialVentas = ({
   ventas,
@@ -47,9 +60,50 @@ const HistorialVentas = ({
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:600px)");
 
-  const { data: vendedores, loading: loadingVendedores } =
+  const { mode, activeSucursalId, sucursales } = useSelector((s) => s.scope);
+
+  const { data: vendedores, isLoading: loadingVendedores } =
     useGetAllUsuariosConCajaQuery();
   const [vendedorFiltro, setVendedorFiltro] = useState("");
+  const [sucursalFiltro, setSucursalFiltro] = useState("");
+
+  useEffect(() => {
+    if (mode === "global") {
+      setSucursalFiltro("");
+    } else {
+      setSucursalFiltro(String(activeSucursalId ?? ""));
+    }
+    setVendedorFiltro("");
+  }, [mode, activeSucursalId]);
+
+  useEffect(() => {
+    if (mode === "global") setVendedorFiltro("");
+  }, [sucursalFiltro, mode]);
+
+  const vendedoresFiltrados = useMemo(() => {
+    const base = vendedores ?? [];
+    if (mode === "global" && !sucursalFiltro) return base;
+    const targetId = Number(
+      mode === "global" ? sucursalFiltro : activeSucursalId
+    );
+    if (!targetId) return base;
+    return base.filter((u) => userOperaEnSucursal(u, targetId));
+  }, [vendedores, mode, sucursalFiltro, activeSucursalId]);
+
+  const sucursalesList = sucursales ?? [];
+
+  const sucursalValueSafe = sucursalesList.some(
+    (s) => String(s.id_sucursal) === String(sucursalFiltro)
+  )
+    ? String(sucursalFiltro)
+    : "";
+
+  const vendedorValueSafe = (vendedoresFiltrados ?? []).some(
+    (v) => v.rut === vendedorFiltro
+  )
+    ? vendedorFiltro
+    : "";
+
   /**
    * EXCEL EXPORT
    */
@@ -71,14 +125,41 @@ const HistorialVentas = ({
       if (!(fechaVenta >= fechaInicio && fechaVenta <= fechaFin)) return false;
     }
 
-    if (vendedorFiltro && venta.vendedor?.rut !== vendedorFiltro) return false;
+    if (vendedorValueSafe && venta.vendedor?.rut !== vendedorValueSafe)
+      return false;
+
+    const vSuc = getVentaSucursalId(venta);
+    if (mode === "global") {
+      if (sucursalFiltro && Number(vSuc) !== Number(sucursalFiltro))
+        return false;
+    } else {
+      if (activeSucursalId && Number(vSuc) !== Number(activeSucursalId))
+        return false;
+    }
     return true;
   });
+
+  const filtrosActivos = Boolean(
+    vendedorValueSafe ||
+      (mode === "global" && sucursalValueSafe) ||
+      fechaInicio ||
+      fechaFin
+  );
+
+  const resetFiltros = () => {
+    setVendedorFiltro("");
+    setSucursalFiltro(mode === "global" ? "" : String(activeSucursalId ?? ""));
+    setFechaInicio(null);
+    setFechaFin(null);
+    setSelected([]);
+    handleChangePage?.(null, 0);
+  };
 
   /**------------------------------------------------ */
 
   const headers = [
     "ID",
+    "Sucursal",
     "Vendedor",
     "Cliente",
     "Total",
@@ -106,6 +187,19 @@ const HistorialVentas = ({
     }
   };
 
+  const vendedorExportName = vendedorValueSafe
+    ? vendedores?.find((v) => v.rut === vendedorValueSafe)?.nombre || ""
+    : undefined;
+
+  const sucursalExportName =
+    mode === "global"
+      ? sucursales?.find(
+          (s) => String(s.id_sucursal) === String(sucursalFiltro)
+        )?.nombre || "Todas"
+      : sucursales?.find(
+          (s) => Number(s.id_sucursal) === Number(activeSucursalId)
+        )?.nombre || "-";
+
   if (loadingVendedores) {
     return <LoaderComponent />;
   }
@@ -126,25 +220,55 @@ const HistorialVentas = ({
       </Box>
 
       <Header title="Ventas" subtitle="Gestión de Ventas" />
-
-      <TextField
-        select
-        size="small"
-        label="Vendedor"
-        value={vendedorFiltro}
-        onChange={(e) => setVendedorFiltro(e.target.value)}
-        sx={{ minWidth: 180, mr: 2 }}
-        disabled={loadingVendedores}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          borderRadius: 2,
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 2,
+          alignItems: "center",
+          bgcolor: (t) =>
+            t.palette.mode === "light" ? "#fff" : "background.paper",
+          boxShadow: "0 1px 6px rgba(0,0,0,0.06)",
+        }}
       >
-        <MenuItem value="">Todos</MenuItem>
-        {vendedores?.map((v) => (
-          <MenuItem key={v.rut} value={v.rut}>
-            {v.nombre} {v.apellido} - {v.Sucursal.nombre}
-          </MenuItem>
-        ))}
-      </TextField>
+        {mode === "global" && (
+          <TextField
+            select
+            size="small"
+            label="Sucursal"
+            value={sucursalValueSafe}
+            onChange={(e) => setSucursalFiltro(e.target.value)}
+            sx={{ minWidth: 200 }}
+          >
+            <MenuItem value="">Todas</MenuItem>
+            {sucursalesList.map((s) => (
+              <MenuItem key={s.id_sucursal} value={String(s.id_sucursal)}>
+                {s.nombre}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
 
-      <Box display="flex" gap={2} mb={2} alignItems="center" flexWrap="wrap">
+        <TextField
+          select
+          size="small"
+          label="Vendedor"
+          value={vendedorValueSafe}
+          onChange={(e) => setVendedorFiltro(e.target.value)}
+          sx={{ minWidth: 200 }}
+          disabled={loadingVendedores}
+        >
+          <MenuItem value="">Todos</MenuItem>
+          {vendedoresFiltrados?.map((v) => (
+            <MenuItem key={v.rut} value={v.rut}>
+              {v.nombre} {v.apellido} - {v.Sucursal.nombre}
+            </MenuItem>
+          ))}
+        </TextField>
+
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <DatePicker
             label="Desde"
@@ -154,7 +278,7 @@ const HistorialVentas = ({
               textField: {
                 size: "small",
                 variant: "outlined",
-                sx: { minWidth: 140, height: 40 },
+                sx: { minWidth: 160, height: 40 },
               },
             }}
           />
@@ -166,24 +290,26 @@ const HistorialVentas = ({
               textField: {
                 size: "small",
                 variant: "outlined",
-                sx: { minWidth: 140, height: 40 },
+                sx: { minWidth: 160, height: 40 },
               },
             }}
           />
         </LocalizationProvider>
+
+        <Box sx={{ flex: 1 }} />
+
         <Button
           variant="outlined"
           size="small"
-          sx={{ height: 40, minWidth: 160, fontWeight: 500 }}
+          sx={{ height: 40, minWidth: 170, fontWeight: 500 }}
           onClick={() =>
             exportarVentasExcel({
               ventas: ventasFiltradas,
               fechaInicio,
               fechaFin,
-              vendedorNombre: vendedorFiltro
-                ? vendedores?.find((v) => v.rut === vendedorFiltro)?.nombre ||
-                  ""
-                : undefined,
+              vendedorNombre: vendedorExportName,
+              sucursalNombre: sucursalExportName,
+              sucursales,
               onExportSuccess: (fileName) =>
                 dispatch(
                   showNotification({
@@ -196,13 +322,14 @@ const HistorialVentas = ({
         >
           Exportar por Fechas
         </Button>
+
         <Button
           variant="contained"
           color="primary"
           size="small"
           sx={{
             height: 40,
-            minWidth: 170,
+            minWidth: 180,
             fontWeight: 500,
             boxShadow: "none",
             textTransform: "none",
@@ -214,10 +341,10 @@ const HistorialVentas = ({
               ),
               fechaInicio,
               fechaFin,
-              vendedorNombre: vendedorFiltro
-                ? vendedores?.find((v) => v.rut === vendedorFiltro)?.nombre ||
-                  ""
-                : undefined,
+              vendedorNombre: vendedorExportName,
+              sucursalNombre: sucursalExportName,
+              sucursales,
+
               onExportSuccess: (fileName) =>
                 dispatch(
                   showNotification({
@@ -231,7 +358,24 @@ const HistorialVentas = ({
         >
           Exportar Seleccionadas
         </Button>
-      </Box>
+
+        <Button
+          variant="text"
+          size="small"
+          startIcon={<FilterAltOff />}
+          onClick={resetFiltros}
+          disabled={!filtrosActivos}
+          sx={{
+            height: 40,
+            fontWeight: 500,
+            ml: { xs: 0, sm: 1 },
+            color: (t) =>
+              t.palette.mode === "light" ? "text.secondary" : "grey.300",
+          }}
+        >
+          Limpiar filtros
+        </Button>
+      </Paper>
 
       <Paper
         elevation={3}
@@ -317,6 +461,19 @@ const HistorialVentas = ({
                     <strong>Fecha:</strong>{" "}
                     {new Date(venta.fecha).toLocaleDateString()}
                   </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Sucursal:</strong>{" "}
+                    {mode === "global"
+                      ? sucursales?.find(
+                          (s) =>
+                            Number(s.id_sucursal) === getVentaSucursalId(venta)
+                        )?.nombre ||
+                        `Sucursal ${getVentaSucursalId(venta) || "-"}`
+                      : sucursales?.find(
+                          (s) =>
+                            Number(s.id_sucursal) === Number(activeSucursalId)
+                        )?.nombre || "-"}
+                  </Typography>
                 </Box>
                 {/* Acciones */}
                 <Box display="flex" justifyContent="flex-end" gap={1}>
@@ -397,6 +554,15 @@ const HistorialVentas = ({
                         />
                       </TableCell>
                       <TableCell align="center">{venta.id_venta}</TableCell>
+                      <TableCell align="center">
+                        {(() => {
+                          const id = getVentaSucursalId(venta);
+                          const s = sucursales?.find(
+                            (x) => Number(x.id_sucursal) === id
+                          );
+                          return s?.nombre || `Sucursal ${id || "-"}`;
+                        })()}
+                      </TableCell>
                       <TableCell align="center">
                         {venta.vendedor?.nombre || "Desconocido"}
                       </TableCell>

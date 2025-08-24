@@ -70,14 +70,6 @@ const DataTable = ({
     );
   }
 
-  if (!rows.length) {
-    return (
-      <Box textAlign="center" mt={4}>
-        <Typography color="error">{errorMessage}</Typography>
-      </Box>
-    );
-  }
-
   return (
     <Box sx={{ p: 2, maxWidth: "100%", mx: "auto", mb: 2 }}>
       {showBackButton && (
@@ -103,56 +95,67 @@ const DataTable = ({
       {isMobile ? (
         <>
           <Box display="flex" flexDirection="column" gap={2}>
-            {rows.map((row, idx) => (
-              <Box
-                key={row.id || idx}
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-                  backgroundColor: `${
-                    theme.palette.mode === "light"
-                      ? theme.palette.grey[100]
-                      : theme.palette.background.paper
-                  }`,
-                }}
-              >
-                {columns.map((col) => {
-                  const cellValue = col.render ? col.render(row) : row[col.id];
-                  const value =
-                    col.format === "currency" && typeof cellValue === "number"
-                      ? formatCLP(cellValue)
-                      : cellValue;
+            {rows.map((row, idx) => {
+              const rowKey =
+                row.id ?? row.id_pedido ?? row.id_venta ?? row.uuid ?? `${idx}`;
+              return (
+                <Box
+                  key={rowKey}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                    backgroundColor: `${
+                      theme.palette.mode === "light"
+                        ? theme.palette.grey[100]
+                        : theme.palette.background.paper
+                    }`,
+                  }}
+                >
+                  {columns.map((col) => {
+                    const cellValue = col.render
+                      ? col.render(row)
+                      : row[col.id];
+                    const value =
+                      col.format === "currency" && typeof cellValue === "number"
+                        ? formatCLP(cellValue)
+                        : cellValue;
 
-                  return (
-                    <Box key={col.id} sx={{ mb: 1.2 }}>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        component="div"
-                        sx={{ mb: 0.5 }}
-                      >
-                        {col.label}
-                      </Typography>
-
-                      {typeof value === "string" ||
-                      typeof value === "number" ? (
+                    return (
+                      <Box key={col.id} sx={{ mb: 1.2 }}>
                         <Typography
-                          variant="body2"
-                          fontWeight="500"
+                          variant="caption"
+                          color="text.secondary"
                           component="div"
+                          sx={{ mb: 0.5 }}
                         >
-                          {value}
+                          {col.label}
                         </Typography>
-                      ) : (
-                        <Box>{value}</Box>
-                      )}
-                      <Divider sx={{ mt: 1 }} />
-                    </Box>
-                  );
-                })}
+
+                        {typeof value === "string" ||
+                        typeof value === "number" ? (
+                          <Typography
+                            variant="body2"
+                            fontWeight="500"
+                            component="div"
+                          >
+                            {value}
+                          </Typography>
+                        ) : (
+                          <Box>{value}</Box>
+                        )}
+                        <Divider sx={{ mt: 1 }} />
+                      </Box>
+                    );
+                  })}
+                </Box>
+              );
+            })}
+            {rows.length === 0 && (
+              <Box sx={{ p: 3, textAlign: "center", color: "text.secondary" }}>
+                {errorMessage ?? "Sin resultados en esta página."}
               </Box>
-            ))}
+            )}
           </Box>
           {totalItems > rowsPerPage && (
             <Box display="flex" justifyContent="center" mt={2}>
@@ -206,44 +209,64 @@ const DataTable = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row, index) => (
-                  <TableRow
-                    key={row.id || `row-${index}`}
-                    hover
-                    sx={{
-                      backgroundColor:
-                        theme.palette.mode === "dark"
-                          ? theme.palette.background.default
-                          : "#fff",
-                    }}
-                  >
-                    {columns.map((col) => {
-                      const cellValue = col.render
-                        ? col.render(row)
-                        : row[col.id];
-                      const formattedValue =
-                        col.format === "currency" &&
-                        typeof cellValue === "number"
-                          ? formatCLP(cellValue)
-                          : cellValue;
+                {rows.length > 0 ? (
+                  rows.map((row, index) => {
+                    const rowKey =
+                      row.id ??
+                      row.id_pedido ??
+                      row.id_venta ??
+                      row.uuid ??
+                      `${index}`;
+                    return (
+                      <TableRow
+                        key={rowKey}
+                        hover
+                        sx={{
+                          backgroundColor:
+                            theme.palette.mode === "dark"
+                              ? theme.palette.background.default
+                              : "#fff",
+                        }}
+                      >
+                        {columns.map((col) => {
+                          const cellValue = col.render
+                            ? col.render(row)
+                            : row[col.id];
+                          const formattedValue =
+                            col.format === "currency" &&
+                            typeof cellValue === "number"
+                              ? formatCLP(cellValue)
+                              : cellValue;
 
-                      return (
-                        <TableCell
-                          key={`cell-${row.id || index}-${col.id}`}
-                          align="center"
-                          sx={{
-                            fontSize: { xs: "0.8rem", sm: "0.95rem" },
-                            whiteSpace: "nowrap",
-                            color: theme.palette.text.primary,
-                            borderBottom: `1px solid ${borderColor}`,
-                          }}
-                        >
-                          {formattedValue}
-                        </TableCell>
-                      );
-                    })}
+                          return (
+                            <TableCell
+                              key={`cell-${rowKey}-${col.id}`}
+                              align="center"
+                              sx={{
+                                fontSize: { xs: "0.8rem", sm: "0.95rem" },
+                                whiteSpace: "nowrap",
+                                color: theme.palette.text.primary,
+                                borderBottom: `1px solid ${borderColor}`,
+                              }}
+                            >
+                              {formattedValue}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    );
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      align="center"
+                      sx={{ py: 6 }}
+                    >
+                      {errorMessage ?? "Sin resultados en esta página."}
+                    </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </TableContainer>

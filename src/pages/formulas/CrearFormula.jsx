@@ -81,18 +81,21 @@ const CrearFormula = () => {
     >
       <Box
         sx={{
-          display: "flex",
+          display: "grid",
+          gridTemplateColumns: "1fr auto 1fr",
           alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
           mb: 2,
+          minHeight: 40, 
         }}
       >
-        <BackButton to="/formulas" label="Volver" /> {/* ← nuevo */}
+        <Box sx={{ justifySelf: "start" }}>
+          <BackButton to="/formulas" label="Volver" />
+        </Box>
+
         <Typography
           variant="h4"
           fontWeight="bold"
-          sx={{ flexGrow: 1, textAlign: { xs: "center", sm: "right" } }}
+          sx={{ gridColumn: 2, textAlign: "center" }}
         >
           🛠️ Crear nueva fórmula
         </Typography>

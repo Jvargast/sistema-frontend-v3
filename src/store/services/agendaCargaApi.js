@@ -1,4 +1,3 @@
-// agendaCarga.js
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauthEnhanced } from "./fettchQuery"; // tu baseQuery con manejo de reauth
 
@@ -7,7 +6,6 @@ export const agendaCargaApi = createApi({
   baseQuery: baseQueryWithReauthEnhanced,
   tagTypes: ["AgendaCarga"],
   endpoints: (builder) => ({
-    // Obtener agenda por ID
     getAgendaById: builder.query({
       query: (id) => `/agendas/${id}`,
       providesTags: (result, error, id) => [{ type: "AgendaCarga", id }],
@@ -31,12 +29,9 @@ export const agendaCargaApi = createApi({
         }
       },
     }),
-    // dentro de endpoints: (builder) => ({
+
     getAllAgendas: builder.query({
-      query: (params) => {
-        const searchParams = new URLSearchParams(params).toString();
-        return `/agendas?${searchParams}`;
-      },
+      query: (params) => ({ url: "/agendas", params }),
       providesTags: ["AgendaCarga"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
@@ -47,7 +42,6 @@ export const agendaCargaApi = createApi({
       },
     }),
 
-    // Crear nueva agenda
     createAgenda: builder.mutation({
       query: (body) => ({
         url: "/agendas/",
@@ -64,7 +58,6 @@ export const agendaCargaApi = createApi({
       },
     }),
 
-    // Confirmar carga de camión
     confirmarCargaCamion: builder.mutation({
       query: (body) => ({
         url: "/agendas/confirmar-carga",
@@ -83,7 +76,6 @@ export const agendaCargaApi = createApi({
   }),
 });
 
-// Hooks que genera RTK Query
 export const {
   useGetAgendaByIdQuery,
   useGetAllAgendasQuery,

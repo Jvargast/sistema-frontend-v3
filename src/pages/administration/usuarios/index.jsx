@@ -29,8 +29,12 @@ import usePaginatedData from "../../../utils/usePaginateData";
 import Header from "../../../components/common/Header";
 import MobileUserManagement from "./MobileUserManagement";
 import { useIsMobile } from "../../../utils/useIsMobile";
+import { useSelector } from "react-redux";
 
 const UserManagement = () => {
+  const { mode, activeSucursalId } = useSelector((s) => s.scope);
+  const isSucursalScope = mode !== "global" && Number(activeSucursalId);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
@@ -44,7 +48,12 @@ const UserManagement = () => {
     pageSize,
     paginacion,
     handlePageChange,
-  } = usePaginatedData(useGetAllUsersQuery, 10);
+  } = usePaginatedData(
+    useGetAllUsersQuery,
+    10,
+    { ...(isSucursalScope ? { id_sucursal: Number(activeSucursalId) } : {}) },
+    `${mode}:${activeSucursalId}`
+  );
 
   const { data: empresas, isLoading: isLoadingEmpresas } =
     useGetAllEmpresasQuery();
@@ -94,22 +103,58 @@ const UserManagement = () => {
   ];
 
   const fields = [
-    { name: "rut", label: "RUT", type: "text", defaultValue: "" },
-    { name: "nombre", label: "Nombre", type: "text", defaultValue: "" },
-    { name: "apellido", label: "Apellido", type: "text", defaultValue: "" },
+    {
+      name: "rut",
+      label: "RUT",
+      type: "text",
+      defaultValue: "",
+      required: true,
+      helperText: "Ej: 12.345.678-9",
+    },
+    {
+      name: "nombre",
+      label: "Nombre",
+      type: "text",
+      defaultValue: "",
+      required: true,
+      requiredMessage: "Ingresa el nombre",
+    },
+    {
+      name: "apellido",
+      label: "Apellido",
+      type: "text",
+      defaultValue: "",
+      required: true,
+      requiredMessage: "Ingresa el apellido",
+    },
     {
       name: "password",
       label: "Contraseña",
       type: "password",
       defaultValue: "",
+      required: true,
+      minLength: 8,
+      minLengthMessage: "La contraseña debe tener al menos 8 caracteres",
+      helperText: "Mínimo 8 caracteres",
     },
-    { name: "email", label: "Email", type: "text", defaultValue: "" },
+    {
+      name: "email",
+      label: "Email",
+      type: "text",
+      defaultValue: "",
+      required: true,
+      format: "email",
+      formatMessage: "Formato de correo inválido",
+      helperText: "Ej: usuario@dominio.com",
+    },
     {
       name: "rolId",
       label: "Rol",
       type: "select",
       options: rolesOptions,
       defaultValue: rolesOptions[0]?.value || "",
+      required: true,
+      requiredMessage: "Selecciona un rol",
     },
     {
       name: "id_empresa",
@@ -120,6 +165,8 @@ const UserManagement = () => {
           value: empresa.id_empresa,
           label: empresa.nombre,
         })) || [],
+      required: true,
+      requiredMessage: "Selecciona una empresa",
     },
     {
       name: "id_sucursal",
@@ -130,6 +177,10 @@ const UserManagement = () => {
           value: sucursal.id_sucursal,
           label: sucursal.nombre,
         })) || [],
+      defaultValue: isSucursalScope ? Number(activeSucursalId) : "",
+      disabled: !!isSucursalScope,
+      required: true,
+      requiredMessage: "Selecciona una sucursal",
     },
   ];
 

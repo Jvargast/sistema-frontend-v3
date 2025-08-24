@@ -29,16 +29,18 @@ const BarraSuperior = ({
   onChangeUsarDireccionGuardada,
   onCerrarCaja,
   cajaAbierta,
-  cajaAsignada,
+  cajaSeleccionada,
   clientes,
   isClosing,
   cajaCerrando,
   theme,
+  rol,
 }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const clienteSeleccionado = clientes?.clientes?.find(
     (c) => c.id_cliente === selectedCliente
   );
+  const direccionCliente = clienteSeleccionado?.direccion?.trim() || "";
 
   const esEmpresa =
     clienteSeleccionado?.rut && clienteSeleccionado?.razon_social;
@@ -51,6 +53,7 @@ const BarraSuperior = ({
     } else {
       onChangeTipoDocumento("boleta");
     }
+    //eslint-disable-next-line
   }, [selectedCliente]);
 
   return (
@@ -88,48 +91,50 @@ const BarraSuperior = ({
           alignItems="center"
           gap={1}
         >
-          <Button
-            variant={selectedVendedor ? "contained" : "outlined"}
-            onClick={onSelectVendedor}
-            sx={{
-              minWidth: 170,
-              fontWeight: 600,
-              fontSize: "1rem",
-              borderRadius: 2,
-              color: selectedVendedor ? "#fff" : theme.palette.primary.main,
-              background: selectedVendedor
-                ? theme.palette.primary.main
-                : theme.palette.mode === "dark"
-                ? theme.palette.background.default
-                : theme.palette.background.paper,
-              justifyContent: "flex-start",
-              pl: 2,
-              borderColor: theme.palette.primary.main,
-              "&:hover": {
-                background: theme.palette.primary.main,
-                color: "#fff",
-                borderColor: theme.palette.primary.main,
-                "& .MuiButton-startIcon svg": {
-                  color: "#fff !important",
-                },
-              },
-              "& .MuiButton-startIcon svg": {
+          {rol !== "vendedor" && (
+            <Button
+              variant={selectedVendedor ? "contained" : "outlined"}
+              onClick={onSelectVendedor}
+              sx={{
+                minWidth: 170,
+                fontWeight: 600,
+                fontSize: "1rem",
+                borderRadius: 2,
                 color: selectedVendedor ? "#fff" : theme.palette.primary.main,
-                transition: "color 0.2s",
-              },
-            }}
-            startIcon={
-              selectedVendedor ? (
-                <CheckCircleOutlineIcon sx={{ color: "#fff" }} />
-              ) : (
-                <PersonOutlineIcon color="primary" />
-              )
-            }
-          >
-            {selectedVendedor
-              ? `Vendedor: ${selectedVendedor}`
-              : "Seleccionar Vendedor"}
-          </Button>
+                background: selectedVendedor
+                  ? theme.palette.primary.main
+                  : theme.palette.mode === "dark"
+                  ? theme.palette.background.default
+                  : theme.palette.background.paper,
+                justifyContent: "flex-start",
+                pl: 2,
+                borderColor: theme.palette.primary.main,
+                "&:hover": {
+                  background: theme.palette.primary.main,
+                  color: "#fff",
+                  borderColor: theme.palette.primary.main,
+                  "& .MuiButton-startIcon svg": {
+                    color: "#fff !important",
+                  },
+                },
+                "& .MuiButton-startIcon svg": {
+                  color: selectedVendedor ? "#fff" : theme.palette.primary.main,
+                  transition: "color 0.2s",
+                },
+              }}
+              startIcon={
+                selectedVendedor ? (
+                  <CheckCircleOutlineIcon sx={{ color: "#fff" }} />
+                ) : (
+                  <PersonOutlineIcon color="primary" />
+                )
+              }
+            >
+              {selectedVendedor
+                ? `Vendedor: ${selectedVendedor}`
+                : "Seleccionar Vendedor"}
+            </Button>
+          )}
 
           <Button
             variant={selectedCliente ? "contained" : "outlined"}
@@ -229,9 +234,9 @@ const BarraSuperior = ({
 
       {/* Caja Info */}
       <Box mb={2}>
-        {cajaAsignada && cajaAbierta ? (
+        {cajaSeleccionada && cajaAbierta ? (
           <Box mx={isMobile ? 0 : "auto"}>
-            <CajaInfo caja={cajaAsignada} />
+            <CajaInfo caja={cajaSeleccionada} />
           </Box>
         ) : (
           <Typography variant="subtitle2" color="text.secondary" sx={{ pl: 1 }}>
@@ -326,7 +331,6 @@ const BarraSuperior = ({
           <MenuItem value="despacho_a_domicilio">Envío a Domicilio</MenuItem>
         </TextField>
 
-        {/* Dirección de entrega (opcional) */}
         {tipoEntrega === "despacho_a_domicilio" && (
           <Box
             display="flex"
@@ -334,7 +338,7 @@ const BarraSuperior = ({
             flexDirection={isMobile ? "column" : "row"}
             gap={1}
             sx={{
-              minWidth: isMobile ? "100%" : 260,
+              minWidth: isMobile ? "100%" : 300,
               background:
                 theme.palette.mode === "dark"
                   ? theme.palette.background.paper
@@ -348,11 +352,14 @@ const BarraSuperior = ({
           >
             <Checkbox
               checked={usarDireccionGuardada}
-              onChange={(e) => onChangeUsarDireccionGuardada(e.target.checked)}
-              sx={{
-                p: 0.5,
-                color: theme.palette.primary.main,
+              onChange={(e) => {
+                const checked = e.target.checked;
+                onChangeUsarDireccionGuardada(checked);
+                if (!checked && direccionCliente) {
+                  onChangeDireccionEntrega(direccionCliente);
+                }
               }}
+              sx={{ p: 0.5, color: theme.palette.primary.main }}
             />
             <Typography
               fontSize="1rem"
@@ -360,22 +367,35 @@ const BarraSuperior = ({
             >
               Usar dirección guardada
             </Typography>
-            {!usarDireccionGuardada && (
+
+            {usarDireccionGuardada ? (
+              <TextField
+                label="Dirección guardada"
+                size="small"
+                value={direccionCliente || "—"}
+                InputProps={{ readOnly: true }}
+                sx={{
+                  flex: 1,
+                  minWidth: 220,
+                  background: theme.palette.background.paper,
+                  borderRadius: 2,
+                  "& fieldset": { borderColor: theme.palette.divider },
+                  "& .MuiInputBase-input": { fontWeight: 500 },
+                }}
+              />
+            ) : (
               <TextField
                 label="Dirección de entrega"
                 size="small"
                 value={direccionEntrega}
                 onChange={(e) => onChangeDireccionEntrega(e.target.value)}
                 sx={{
-                  minWidth: 200,
+                  flex: 1,
+                  minWidth: 220,
                   background: theme.palette.background.paper,
                   borderRadius: 2,
-                  "& fieldset": {
-                    borderColor: theme.palette.divider,
-                  },
-                  "& .MuiInputBase-input": {
-                    fontWeight: 500,
-                  },
+                  "& fieldset": { borderColor: theme.palette.divider },
+                  "& .MuiInputBase-input": { fontWeight: 500 },
                 }}
                 InputLabelProps={{
                   style: {
@@ -415,6 +435,8 @@ BarraSuperior.propTypes = {
   isClosing: PropTypes.bool,
   cajaCerrando: PropTypes.bool,
   theme: PropTypes.object.isRequired,
+  rol: PropTypes.string,
+  cajaSeleccionada: PropTypes.object,
 };
 
 export default BarraSuperior;

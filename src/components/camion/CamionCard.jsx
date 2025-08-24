@@ -85,7 +85,7 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
         alignItems: "stretch",
         position: "relative",
         overflow: "visible",
-        border: "1px solid black"
+        border: "1px solid black",
       }}
     >
       <Box
@@ -93,10 +93,10 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
           position: "static",
           top: { sm: 18 },
           right: { sm: 18 },
-          mb: { xs: 1.5, sm: 0 }, 
+          mb: { xs: 1.5, sm: 0 },
           display: "flex",
-          justifyContent: { xs: "flex-end", sm: "unset" }, 
-          width: { xs: "100%", sm: "auto" }, 
+          justifyContent: { xs: "flex-end", sm: "unset" },
+          width: { xs: "100%", sm: "auto" },
           zIndex: 2,
         }}
       >
@@ -342,6 +342,7 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
         open={openModal}
         onClose={() => setOpenModal(false)}
         camionId={camion.id_camion}
+        sucursalId={Number(camion.id_sucursal)}
       />
       <EditarCamionModal
         open={openEdit}
@@ -383,6 +384,7 @@ CamionCard.propTypes = {
     chofer: PropTypes.shape({
       nombre: PropTypes.string,
     }),
+    id_sucursal: PropTypes.number
   }).isRequired,
   onDelete: PropTypes.func.isRequired,
   isDeleting: PropTypes.bool.isRequired,

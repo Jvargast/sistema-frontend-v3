@@ -23,6 +23,7 @@ const PedidoForm = ({
   mostrarMetodoPago = true,
   mostrarTipoDocumento = true,
   extraFields,
+  idSucursalFiltro,
 }) => {
   const theme = useTheme();
   const [openClienteModal, setOpenClienteModal] = useState(false);
@@ -91,6 +92,7 @@ const PedidoForm = ({
           fullWidth
           onClick={() => setOpenClienteModal(true)}
           sx={{ textTransform: "none", fontSize: 16, boxShadow: "none" }}
+          disabled={!idSucursalFiltro}
         >
           {selectedCliente
             ? `Cliente: ${selectedCliente.nombre}`
@@ -114,22 +116,26 @@ const PedidoForm = ({
         )}
       </Box>
 
-      <PedidoClienteSelector
-        open={openClienteModal}
-        onClose={() => setOpenClienteModal(false)}
-        onSelect={(cliente) => {
-          setFormState((prev) => ({
-            ...prev,
-            selectedCliente: cliente,
-            tipoDocumento:
-              cliente?.tipo_cliente === "empresa" &&
-              cliente?.rut &&
-              cliente?.razon_social
-                ? "factura"
-                : "boleta",
-          }));
-        }}
-      />
+      {openClienteModal && (
+        <PedidoClienteSelector
+          key={`selector-${String(idSucursalFiltro || "global")}`}
+          open={openClienteModal}
+          onClose={() => setOpenClienteModal(false)}
+          onSelect={(cliente) => {
+            setFormState((prev) => ({
+              ...prev,
+              selectedCliente: cliente,
+              tipoDocumento:
+                cliente?.tipo_cliente === "empresa" &&
+                cliente?.rut &&
+                cliente?.razon_social
+                  ? "factura"
+                  : "boleta",
+            }));
+          }}
+          idSucursal={idSucursalFiltro}
+        />
+      )}
 
       <FormControlLabel
         control={
@@ -272,6 +278,7 @@ PedidoForm.propTypes = {
   mostrarMetodoPago: PropTypes.bool,
   mostrarTipoDocumento: PropTypes.bool,
   extraFields: PropTypes.node,
+  idSucursalFiltro: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 };
 
 export default PedidoForm;

@@ -10,17 +10,30 @@ import {
   useTheme,
 } from "@mui/material";
 import BrokenImageIcon from "@mui/icons-material/BrokenImage";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { getImageUrl } from "../../store/services/apiBase";
 
-const ProductCard = ({ product, onAddToCart }) => {
+const ProductCard = ({
+  product,
+  onAddToCart,
+  stock = 0,
+  disableAdd = false,
+}) => {
   const theme = useTheme();
   const [imageError, setImageError] = useState(false);
   const precio = Number(product.precio || 0);
-  const stock = product?.inventario?.cantidad || 0;
+  const stockInv = Number(stock ?? 0);
+  const sinStock = stockInv <= 0;
 
   const tipoLabel = product.tipo === "insumo" ? "Insumo" : "Producto";
   const tipoColor = product.tipo === "insumo" ? "default" : "primary";
+
+  const imageSrc = useMemo(() => {
+    const raw = product.image_url || "";
+    return raw ? getImageUrl(raw) : "";
+  }, [product.image_url]);
 
   return (
     <Card
@@ -41,16 +54,23 @@ const ProductCard = ({ product, onAddToCart }) => {
         background: theme.palette.background.paper,
       }}
     >
-      <Box position="absolute" top={10} left={10} zIndex={1}>
+      <Box
+        position="absolute"
+        top={10}
+        left={10}
+        zIndex={1}
+        display="flex"
+        gap={1}
+      >
         <Chip
           label={tipoLabel}
           size="small"
           color={tipoColor}
-          sx={{ fontSize: "0.75rem", fontWeight: 600 }}
+          sx={{ fontSize: "0.72rem", fontWeight: 700 }}
         />
       </Box>
 
-      {imageError ? (
+      {!imageSrc || imageError ? (
         <Box
           height={160}
           display="flex"
@@ -58,24 +78,29 @@ const ProductCard = ({ product, onAddToCart }) => {
           alignItems="center"
           justifyContent="center"
           sx={{
-            backgroundColor: "#e0e0e0",
+            backgroundColor: theme.palette.action.hover,
             borderTopLeftRadius: 16,
             borderTopRightRadius: 16,
+            gap: 0.5,
           }}
         >
-          <BrokenImageIcon sx={{ fontSize: 48, color: "#9e9e9e" }} />
-          <Typography
-            variant="caption"
-            color="textSecondary"
-            sx={{ mt: 1, opacity: 0.7 }}
-          >
-            No image
+          {imageError ? (
+            <BrokenImageIcon
+              sx={{ fontSize: 46, color: theme.palette.text.disabled }}
+            />
+          ) : (
+            <ImageOutlinedIcon
+              sx={{ fontSize: 46, color: theme.palette.text.disabled }}
+            />
+          )}
+          <Typography variant="caption" color="text.secondary">
+            Sin imagen
           </Typography>
         </Box>
       ) : (
         <CardMedia
           component="img"
-          image={product.image_url || "/placeholder.png"}
+          image={imageSrc}
           alt={product.nombre_producto}
           onError={() => setImageError(true)}
           sx={{
@@ -126,30 +151,31 @@ const ProductCard = ({ product, onAddToCart }) => {
 
         <Typography
           variant="body2"
-          color={stock > 0 ? "textSecondary" : "error"}
-          fontWeight={stock > 0 ? 400 : 600}
+          color={stockInv > 0 ? "textSecondary" : "error"}
+          fontWeight={stockInv > 0 ? 400 : 600}
           sx={{ mb: 1 }}
         >
-          {stock > 0 ? `Stock: ${stock}` : "Sin stock"}
+          {stockInv > 0 ? `Stock: ${stockInv}` : "Sin stock"}
         </Typography>
 
         <Button
           variant="contained"
           fullWidth
           onClick={() => onAddToCart(product)}
-          disabled={stock === 0}
+          disabled={sinStock || disableAdd}
           sx={{
             fontWeight: "bold",
             borderRadius: 2,
             py: 1,
-            backgroundColor: stock > 0 ? theme.palette.primary.main : "#bdbdbd",
+            backgroundColor:
+              stockInv > 0 ? theme.palette.primary.main : "#bdbdbd",
             "&:hover": {
               backgroundColor:
-                stock > 0 ? theme.palette.primary.dark : "#9e9e9e",
+                stockInv > 0 ? theme.palette.primary.dark : "#9e9e9e",
             },
           }}
         >
-          {stock > 0 ? "Agregar" : "Agotado"}
+          {stockInv > 0 ? "Agregar" : "Agotado"}
         </Button>
       </CardContent>
     </Card>
@@ -161,12 +187,17 @@ ProductCard.propTypes = {
     image_url: PropTypes.string,
     nombre_producto: PropTypes.string.isRequired,
     precio: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    inventario: PropTypes.shape({
-      cantidad: PropTypes.number,
-    }),
+    inventario: PropTypes.arrayOf(
+      PropTypes.shape({
+        cantidad: PropTypes.number,
+        id_sucursal: PropTypes.number,
+      })
+    ),
     tipo: PropTypes.string,
   }).isRequired,
   onAddToCart: PropTypes.func.isRequired,
+  stock: PropTypes.number,
+  disableAdd: PropTypes.bool,
 };
 
 export default ProductCard;

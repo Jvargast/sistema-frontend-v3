@@ -9,13 +9,29 @@ import {
 } from "@mui/material";
 import { useGetAvailabreProductosQuery } from "../../store/services/productoApi";
 
+const getStockFromInventarios = (inventario, idSucursal) => {
+  if (Array.isArray(inventario)) {
+    if (idSucursal != null) {
+      const m = inventario.find(
+        (iv) => Number(iv?.id_sucursal) === Number(idSucursal)
+      );
+      return Number(m?.cantidad) || 0;
+    }
+    return inventario.reduce((acc, iv) => acc + (Number(iv?.cantidad) || 0), 0);
+  }
+  return Number(inventario?.cantidad) || 0;
+};
+
 const SelectorProducto = ({
   label,
   onProductoSeleccionado,
   productoSeleccionado = null,
   size = "medium",
+  idSucursal,
 }) => {
-  const { data, isLoading } = useGetAvailabreProductosQuery();
+  const { data, isLoading } = useGetAvailabreProductosQuery(
+    idSucursal ? { id_sucursal: idSucursal } : {}
+  );
   const productos = data?.productos || [];
   const theme = useTheme();
 
@@ -26,12 +42,12 @@ const SelectorProducto = ({
       getOptionLabel={(o) => o?.nombre_producto || ""}
       loading={isLoading}
       onChange={(_, nuevo) => onProductoSeleccionado(nuevo)}
-      isOptionEqualToValue={(opt, val) => opt.id_producto === val.id_producto}
+      isOptionEqualToValue={(opt, val) => opt?.id_producto === val?.id_producto}
       size={size}
       renderOption={(optionProps, option) => {
         const { key, ...rest } = optionProps;
 
-        const stock = option?.inventario?.cantidad ?? 0;
+        const stock = getStockFromInventarios(option?.inventario, idSucursal);
         const stockColor =
           stock > 20
             ? theme.palette.success.main
@@ -41,7 +57,7 @@ const SelectorProducto = ({
 
         return (
           <Box
-            key={key} 
+            key={key}
             component="li"
             {...rest}
             sx={{
@@ -92,6 +108,7 @@ SelectorProducto.propTypes = {
   onProductoSeleccionado: PropTypes.func.isRequired,
   productoSeleccionado: PropTypes.object,
   size: PropTypes.oneOf(["small", "medium"]),
+  idSucursal: PropTypes.number,
 };
 
 export default SelectorProducto;

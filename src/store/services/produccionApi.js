@@ -1,5 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauthEnhanced } from "./fettchQuery";
+import { insumoApi } from "./insumoApi";
+import { productoApi } from "./productoApi";
 
 export const produccionApi = createApi({
   reducerPath: "produccionApi",
@@ -13,7 +15,7 @@ export const produccionApi = createApi({
       }),
       providesTags: ["Produccion"],
       transformResponse: (response) => ({
-        producciones: response.data,
+        producciones: response.producciones,
         paginacion: response.paginacion,
       }),
       async onQueryStarted(args, { queryFulfilled }) {
@@ -37,6 +39,22 @@ export const produccionApi = createApi({
         body: nuevaProduccion,
       }),
       invalidatesTags: ["Produccion"],
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            productoApi.util.invalidateTags([{ type: "Producto", id: "LIST" }])
+          );
+          dispatch(
+            insumoApi.util.invalidateTags([
+              { type: "InsumoList", id: "PAGINATED" },
+              { type: "InsumoList", id: "ALL" },
+            ])
+          );
+        } catch (error) {
+          console.log("Error al crear: ", error);
+        }
+      },
     }),
 
     updateProduccion: builder.mutation({
