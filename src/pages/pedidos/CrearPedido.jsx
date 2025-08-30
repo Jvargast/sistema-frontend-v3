@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import {
   Box,
@@ -153,6 +153,8 @@ const CrearPedido = () => {
   }, [loadingCaja, cajaAsignada]);
 
   useEffect(() => {
+    const toNum = (v) => (v == null ? null : Number(v));
+
     if (mode !== "global") {
       const idFromHook = sucursalActiva?.id_sucursal || null;
       if (idFromHook && formState.id_sucursal !== idFromHook) {
@@ -161,11 +163,10 @@ const CrearPedido = () => {
       }
     }
     if (mode === "global") {
-      const idFromCaja =
-        cajaAsignada?.cajas?.[0]?.id_sucursal ??
-        cajaAsignada?.caja?.id_sucursal ??
-        null;
-      if (!formState.id_sucursal && idFromCaja) {
+      const idFromCaja = toNum(
+        cajaAsignada?.cajas?.[0]?.id_sucursal ?? cajaAsignada?.caja?.id_sucursal
+      );
+      if (toNum(formState.id_sucursal) == null && idFromCaja != null) {
         setFormState((prev) => ({ ...prev, id_sucursal: idFromCaja }));
       }
     }
@@ -200,12 +201,34 @@ const CrearPedido = () => {
     //eslint-disable-next-line
   }, [formState.selectedCliente]);
 
+  const prevSucursalIdRef = useRef(null);
+
   useEffect(() => {
-    if (!formState.id_sucursal) return;
+    const currentId =
+      formState.id_sucursal == null ? null : Number(formState.id_sucursal);
+
+    const prevId = prevSucursalIdRef.current;
+    if (currentId == null) return;
+
+    if (prevId == null) {
+      prevSucursalIdRef.current = currentId;
+      return;
+    }
+
+    if (currentId === prevId) return;
+
+    const otraSucursal = cart.some(
+      (i) =>
+        i.id_sucursal_origen != null &&
+        Number(i.id_sucursal_origen) !== currentId
+    );
+
+    /* if (!formState.id_sucursal) return;
     const otraSucursal = cart.some(
       (i) =>
         i.id_sucursal_origen && i.id_sucursal_origen !== formState.id_sucursal
-    );
+    ); */
+    
     if (otraSucursal) {
       dispatch(clearCart());
       dispatch(
@@ -218,7 +241,6 @@ const CrearPedido = () => {
     }
     setFormState((prev) => ({
       ...prev,
-      selectedCliente: null,
       direccionEntrega: "",
       tipoDocumento: "boleta",
     }));
@@ -367,7 +389,9 @@ const CrearPedido = () => {
         sucursales={sucursales || []}
         idSucursal={formState.id_sucursal}
         canChoose={canChooseSucursal}
-        onChange={(id) => setFormState((p) => ({ ...p, id_sucursal: id }))}
+        onChange={(id) =>
+          setFormState((p) => ({ ...p, id_sucursal: Number(id) }))
+        }
         nombreSucursal={sucursalActual?.nombre}
       />
       <Stepper
