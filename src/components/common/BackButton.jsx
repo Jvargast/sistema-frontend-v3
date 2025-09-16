@@ -7,7 +7,6 @@ const BackButton = ({ to, label }) => {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  // Color negro en light, gris claro en dark
   const borderColor =
     theme.palette.mode === "dark" ? theme.palette.grey[700] : "#191919";
 

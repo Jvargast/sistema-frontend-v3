@@ -93,11 +93,6 @@ const Sidebar = ({
     }
   };
 
-  /* const canUseTab = (path) => {
-    return (
-      isDesktop && tabEnabledPaths.includes(path) && !shouldUseRouter(path)
-    );
-  }; */
 
   const canUseTab = (keyOrPath) =>
     isDesktop &&

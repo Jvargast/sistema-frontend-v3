@@ -8,7 +8,10 @@ export const routeToTabInfo = {
   },
   pagos: { label: "Pagos", icon: "PaymentOutlined" },
   facturas: { label: "Facturas", icon: "ReceiptOutlined" },
-  "admin-pedidos": { label: "Gestión de Pedidos", icon: "ShoppingCartOutlined"},
+  "admin-pedidos": {
+    label: "Gestión de Pedidos",
+    icon: "ShoppingCartOutlined",
+  },
 
   "admin/ventas": { label: "Ventas", icon: "AttachMoneyOutlined" },
   "admin/pedidos": { label: "Pedidos", icon: "ShoppingCartOutlined" },
@@ -21,6 +24,21 @@ export const routeToTabInfo = {
   "admin/usuarios": { label: "Usuarios", icon: "PeopleOutlined" },
   "admin/roles": { label: "Roles", icon: "SecurityOutlined" },
   "admin/empresa": { label: "Empresa", icon: "BusinessOutlined" },
+  "admin/gastos": { label: "Gastos", icon: "ReceiptLongOutlined" },
+  "admin/proveedores": { label: "Proveedores", icon: "PeopleOutlined" },
+  "admin/compras": { label: "Compras", icon: "ShoppingCartOutlined" },
+  "admin/ordenes-pago": {
+    label: "Órdenes de Pago",
+    icon: "RequestQuoteOutlined",
+  },
+  "admin/ordenes-pago/crear": {
+    label: "Nueva Orden de Pago",
+    icon: "ReceiptLongOutlined",
+  },
+  "admin/ordenes-pago/abono": {
+    label: "Registrar Abono",
+    icon: "PaymentOutlined",
+  },
 
   clientes: { label: "Clientes", icon: "PeopleOutlined" },
   categorias: { label: "Categorías", icon: "CategoryOutlined" },
@@ -38,6 +56,14 @@ export const routeToTabInfo = {
   misventas: { label: "Mis Ventas", icon: "PersonOutlined" },
   "ventas-chofer": { label: "Ventas Chofer", icon: "LocalShippingOutlined" },
   "agenda-carga": { label: "Agenda Carga", icon: "EventOutlined" },
+  "compras-crear": { label: "Nueva Compra", icon: "ShoppingCartOutlined" },
+  "gastos-crear": { label: "Registrar Gasto", icon: "AttachMoneyOutlined" },
+  "proveedor-crear": { label: "Nuevo Proveedor", icon: "PeopleOutlined" },
+  "categorias-gastos": {
+    label: "Categorías Gastos",
+    icon: "CategoryOutlined",
+  },
+  "centros-costo": { label: "Centros de Costo", icon: "MapOutlined" },
   miperfil: { label: "Mi Perfil", icon: "AccountCircleOutlined" },
   admin: { label: "Administración", icon: "AdminPanelSettingsOutlined" },
 };
