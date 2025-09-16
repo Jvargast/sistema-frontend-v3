@@ -174,7 +174,46 @@ export const modulesData = [
     ],
   }, */
   {
-    name: "Gestion",
+    name: "Modulo Compras",
+    permission: "vistas.admin.ver",
+    children: [
+      {
+        text: "Nueva Compra",
+        icon: <ShoppingCartOutlined />,
+        path: "compras-crear",
+        permission: "vistas.admin.ver" /* recomendado: vistas.compras.crear */,
+      },
+      {
+        text: "Registrar Gasto",
+        icon: <AttachMoneyOutlinedIcon />,
+        path: "gastos-crear",
+        permission: "vistas.admin.ver" /* recomendado: vistas.gastos.crear */,
+      },
+      {
+        text: "Nuevo Proveedor",
+        icon: <Groups2Outlined />,
+        path: "proveedor-crear",
+        permission:
+          "vistas.admin.ver" /* recomendado: vistas.proveedores.crear */,
+      },
+      {
+        text: "Categorías de Gastos",
+        icon: <CategoryOutlined />,
+        path: "categorias-gastos",
+        permission:
+          "vistas.admin.ver" /* recomendado: vistas.categoriasgasto.crear */,
+      },
+      {
+        text: "Centros de Costo",
+        icon: <MapOutlined />,
+        path: "centros-costo",
+        permission:
+          "vistas.admin.ver" /* recomendado: vistas.centrocosto.crear */,
+      },
+    ],
+  },
+  {
+    name: "Módulo Gestion",
     permission: "vistas.admin.ver",
     children: [
       {

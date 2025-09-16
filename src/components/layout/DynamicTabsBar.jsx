@@ -12,7 +12,6 @@ import {
 import {
   Close,
   Remove,
-  /*   CropSquare, */
   ViewQuilt,
   ClearAll,
 } from "@mui/icons-material";

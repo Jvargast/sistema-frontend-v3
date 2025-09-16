@@ -33,6 +33,12 @@ import { formulaProductoApi } from "./FormulaProductoApi";
 import { produccionApi } from "./produccionApi";
 import { productoRetornableApi } from "./productoRetornableApi";
 import { inventarioApi } from "./inventarioApi";
+import { proveedorApi } from "./proveedorApi";
+import { compraApi } from "./compraApi";
+import { centroCostoApi } from "./centroCostoApi";
+import { ordenPagoApi } from "./ordenPagoApi";
+import { categoriaGastoApi } from "./categoriaGastoApi";
+import { gastoApi } from "./gastoApi";
 
 export const apiMiddleware = [
   authApi.middleware,
@@ -70,6 +76,12 @@ export const apiMiddleware = [
   produccionApi.middleware,
   productoRetornableApi.middleware,
   inventarioApi.middleware,
+  proveedorApi.middleware,
+  compraApi.middleware,
+  centroCostoApi.middleware,
+  ordenPagoApi.middleware,
+  categoriaGastoApi.middleware,
+  gastoApi.middleware
 ];
 
 export const apiReducers = {
@@ -108,6 +120,12 @@ export const apiReducers = {
   [produccionApi.reducerPath]: produccionApi.reducer,
   [productoRetornableApi.reducerPath]: productoRetornableApi.reducer,
   [inventarioApi.reducerPath]: inventarioApi.reducer,
+  [proveedorApi.reducerPath]: proveedorApi.reducer,
+  [compraApi.reducerPath]: compraApi.reducer,
+  [centroCostoApi.reducerPath]: centroCostoApi.reducer,
+  [ordenPagoApi.reducerPath]: ordenPagoApi.reducer,
+  [categoriaGastoApi.reducerPath]: categoriaGastoApi.reducer,
+  [gastoApi.reducerPath]: gastoApi.reducer
 };
 
 const apiServices = {
@@ -146,6 +164,12 @@ const apiServices = {
   produccionApi,
   productoRetornableApi,
   inventarioApi,
+  proveedorApi,
+  compraApi,
+  centroCostoApi,
+  ordenPagoApi,
+  categoriaGastoApi,
+  gastoApi
 };
 
 export default apiServices;

@@ -8,18 +8,21 @@ dayjs.extend(timezone);
 const ZONA_HORARIA = "America/Santiago";
 
 /**
- * 🔹 Convierte una fecha UTC a formato local Chile
+ *
  * @param {string|Date} fechaUtc
  * @param {string} formato Ej: "DD-MM-YYYY HH:mm"
  * @returns {string}
  */
-export const convertirFechaLocal = (fechaUtc, formato = "DD-MM-YYYY, HH:mm") => {
+export const convertirFechaLocal = (
+  fechaUtc,
+  formato = "DD-MM-YYYY, HH:mm"
+) => {
   if (!fechaUtc) return "Sin fecha";
   return dayjs.utc(fechaUtc).tz(ZONA_HORARIA).format(formato);
 };
 
 /**
- * 🔹 Obtiene la fecha actual en Chile como objeto dayjs (zona horaria Chile)
+ *
  * @returns {dayjs.Dayjs}
  */
 export const obtenerFechaChile = () => {
@@ -27,7 +30,7 @@ export const obtenerFechaChile = () => {
 };
 
 /**
- * 🔹 Retorna la fecha actual en Chile como string formateado
+ *
  * @param {string} formato
  * @returns {string}
  */
@@ -36,7 +39,7 @@ export const obtenerFechaChileFormateada = (formato = "DD-MM-YYYY HH:mm") => {
 };
 
 /**
- * 🔹 Convierte una fecha local (Chile) a UTC en formato ISO
+ *
  * @param {string|Date} fechaLocal
  * @returns {string}
  */
@@ -45,7 +48,7 @@ export const convertirChileAUtc = (fechaLocal) => {
 };
 
 /**
- * 🔹 Muestra "hace 3 horas", etc. desde una fecha UTC
+ *
  * @param {string|Date} fechaUtc
  * @returns {string}
  */
@@ -58,4 +61,12 @@ export const tiempoDesdeChile = (fechaUtc) => {
   if (diff < 60) return `hace ${diff} min`;
   if (diff < 1440) return `hace ${Math.floor(diff / 60)} h`;
   return fecha.format("DD-MM-YYYY HH:mm");
+};
+
+export const formatearFechaSistemaUTC = (
+  isoUtc,
+  formato = "DD-MM-YYYY HH:mm"
+) => {
+  if (!isoUtc) return "—";
+  return dayjs.utc(isoUtc).tz(ZONA_HORARIA).format(formato);
 };

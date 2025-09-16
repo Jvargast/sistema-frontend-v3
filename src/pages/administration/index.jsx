@@ -9,6 +9,9 @@ import {
   SecurityOutlined,
   SupervisorAccountOutlined,
 } from "@mui/icons-material";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import RequestQuoteOutlinedIcon from "@mui/icons-material/RequestQuoteOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import AttachMoneyOutlinedIcon from "@mui/icons-material/AttachMoneyOutlined";
 import BusinessIcon from "@mui/icons-material/Business";
@@ -62,6 +65,24 @@ const navItems = [
     icon: <PeopleAltOutlined className="text-cyan-500" />,
     description: "Gestión de proveedores",
     path: "/admin/proveedores",
+  },
+  {
+    text: "Gastos",
+    icon: <ReceiptLongOutlinedIcon className="text-rose-500" />,
+    description: "Registro y listado de gastos",
+    path: "/admin/gastos",
+  },
+  {
+    text: "Compras",
+    icon: <ShoppingCartOutlinedIcon className="text-blue-500" />,
+    description: "Órdenes y facturas de compra",
+    path: "/admin/compras",
+  },
+  {
+    text: "Órdenes de Pago",
+    icon: <RequestQuoteOutlinedIcon className="text-emerald-600" />,
+    description: "Gestión de órdenes de pago",
+    path: "/admin/ordenes-pago",
   },
   {
     text: "Producción",
@@ -218,7 +239,7 @@ const Administration = () => {
                   color: "text.secondary",
                   textAlign: "center",
                   fontSize: 13.8,
-                  height: 34, 
+                  height: 34,
                   lineHeight: 1.2,
                   display: "-webkit-box",
                   WebkitLineClamp: 2,

@@ -22,6 +22,9 @@ const AlertDialog = ({
   onConfirm,
   title,
   message,
+  confirmLoading = false,
+  confirmLabel = "Confirmar",
+  cancelLabel = "Cancelar",
 }) => {
   const theme = useTheme();
   return (
@@ -66,7 +69,9 @@ const AlertDialog = ({
         </DialogContentText>
       </DialogContent>
 
-      <DialogActions sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}>
+      <DialogActions
+        sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}
+      >
         <Button
           onClick={onCloseAlert}
           variant="outlined"
@@ -80,13 +85,10 @@ const AlertDialog = ({
             },
           }}
         >
-          Cancelar
+          {cancelLabel}
         </Button>
         <Button
-          onClick={() => {
-            onConfirm();
-            onCloseAlert();
-          }}
+          onClick={onConfirm}
           variant="contained"
           startIcon={<CheckCircle />}
           sx={{
@@ -95,7 +97,7 @@ const AlertDialog = ({
             "&:hover": { backgroundColor: "#2E7D32" },
           }}
         >
-          Confirmar
+          {confirmLoading ? "Eliminando..." : confirmLabel}
         </Button>
       </DialogActions>
     </Dialog>
@@ -108,6 +110,9 @@ AlertDialog.propTypes = {
   onConfirm: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
   message: PropTypes.string.isRequired,
+  confirmLoading: PropTypes.bool,
+  confirmLabel: PropTypes.string,
+  cancelLabel: PropTypes.string,
 };
 
 export default AlertDialog;

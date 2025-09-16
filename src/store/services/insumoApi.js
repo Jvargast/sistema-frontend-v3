@@ -165,6 +165,7 @@ export const {
   useDeleteInsumoMutation,
   useDeleteInsumosMutation,
   useGetAllInsumosQuery,
+  useLazyGetAllInsumosQuery,
   useGetAllInsumosAllQuery,
   useLazyGetAllInsumosAllQuery,
   useGetInsumoByIdQuery,

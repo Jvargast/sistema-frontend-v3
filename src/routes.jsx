@@ -63,6 +63,19 @@ import VerInsumo from "./pages/insumos/VerInsumo";
 import InspeccionRetornables from "./pages/inventario_camion";
 import WelcomePage from "./components/common/WelcomePage";
 import VerViaje from "./pages/viajes/VerViaje";
+import CrearProveedor from "./pages/proveedores/CrearProveedor";
+import Crearcompra from "./pages/compras/Crearcompra";
+import RegistrarGasto from "./pages/gastos/RegistrarGasto";
+import CrearOrdenPago from "./pages/ordenesPago/CrearOrdenPago";
+import RegistrarAbonoOrden from "./pages/ordenesAbonos/RegistrarAbonoOrden";
+import CategoriaGastoManagement from "./pages/categoriasGastos/CategoriaGastoManagement";
+import ListarGastos from "./pages/gastos/ListarGastos";
+import VerGasto from "./pages/gastos/VerGasto";
+import CentroCostoManagement from "./pages/centrosCostos/CentroCostoManagement";
+import ListarProveedores from "./pages/proveedores/ListarProveedores";
+import VerProveedor from "./pages/proveedores/VerProveedor";
+import ListarCompras from "./pages/compras/ListarCompras";
+import VerCompra from "./pages/compras/VerCompra";
 
 // Configuración de rutas
 const router = createHashRouter([
@@ -395,7 +408,47 @@ const router = createHashRouter([
               },
             ],
           },
-
+          // compras-crear
+          {
+            path: "compras-crear",
+            element: <RoleBasedRoute requiredPermission="vistas.admin.ver" />, // recomendado: vistas.compras.crear
+            children: [{ path: "", element: <Crearcompra /> }],
+          },
+          //gastos-crear
+          {
+            path: "gastos-crear",
+            element: <RoleBasedRoute requiredPermission="vistas.admin.ver" />, // recomendado: vistas.gastos.crear
+            children: [{ path: "", element: <RegistrarGasto /> }],
+          },
+          //ordern-pago-crear
+          {
+            path: "orden-pago-crear",
+            element: <RoleBasedRoute requiredPermission="vistas.admin.ver" />, // recomendado: vistas.ordenpago.crear
+            children: [{ path: "", element: <CrearOrdenPago /> }],
+          },
+          //orden-pago-abono
+          {
+            path: "orden-pago-abono",
+            element: <RoleBasedRoute requiredPermission="vistas.admin.ver" />, // recomendado: vistas.ordenpago.abonar
+            children: [{ path: "", element: <RegistrarAbonoOrden /> }],
+          },
+          //proveedor-crear
+          {
+            path: "proveedor-crear",
+            element: <RoleBasedRoute requiredPermission="vistas.admin.ver" />, // recomendado: vistas.proveedores.crear
+            children: [{ path: "", element: <CrearProveedor /> }],
+          },
+          //categorias-gastos
+          {
+            path: "categorias-gastos",
+            element: <RoleBasedRoute requiredPermission="vistas.admin.ver" />, // recomendado: vistas.categoriasgasto.crear
+            children: [{ path: "", element: <CategoriaGastoManagement /> }],
+          },
+          {
+            path: "centros-costo",
+            element: <RoleBasedRoute requiredPermission="vistas.admin.ver" />,
+            children: [{ path: "", element: <CentroCostoManagement /> }],
+          },
           // perfil
           {
             path: "miperfil",
@@ -537,6 +590,45 @@ const router = createHashRouter([
                   {
                     path: "ver/:id",
                     element: <VerProduccion />,
+                  },
+                ],
+              },
+              {
+                path: "gastos",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.pedidos.ver" />
+                ),
+                children: [
+                  { path: "", element: <ListarGastos /> },
+                  {
+                    path: "ver/:id",
+                    element: <VerGasto />,
+                  },
+                ],
+              },
+              {
+                path: "proveedores",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.pedidos.ver" />
+                ),
+                children: [
+                  { path: "", element: <ListarProveedores /> },
+                  {
+                    path: "ver/:id",
+                    element: <VerProveedor />,
+                  },
+                ],
+              },
+              {
+                path: "compras",
+                element: (
+                  <RoleBasedRoute requiredPermission="vistas.pedidos.ver" />
+                ),
+                children: [
+                  { path: "", element: <ListarCompras /> },
+                  {
+                    path: "ver/:id",
+                    element: <VerCompra />,
                   },
                 ],
               },
