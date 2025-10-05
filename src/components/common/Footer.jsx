@@ -2,6 +2,7 @@ import { Box, Typography, Link, useTheme } from "@mui/material";
 
 const Footer = () => {
   const theme = useTheme();
+  const version = import.meta.env.VITE_APP_VERSION || "v0.0.0";
 
   return (
     <Box
@@ -26,6 +27,17 @@ const Footer = () => {
           WOU Chile
         </Link>{" "}
         © {new Date().getFullYear()}
+      </Typography>
+      <Typography
+        variant="caption"
+        sx={{
+          mt: 0.25,
+          display: "block",
+          color: "text.disabled",
+          letterSpacing: 0.2,
+        }}
+      >
+        Versión {version}
       </Typography>
     </Box>
   );
