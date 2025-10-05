@@ -9,12 +9,7 @@ import {
   Tooltip,
   Paper,
 } from "@mui/material";
-import {
-  Close,
-  Remove,
-  ViewQuilt,
-  ClearAll,
-} from "@mui/icons-material";
+import { Close, Remove, ViewQuilt, ClearAll } from "@mui/icons-material";
 import { useSelector, useDispatch } from "react-redux";
 import {
   closeTab,
@@ -26,6 +21,108 @@ import {
 import * as MuiIcons from "@mui/icons-material";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useNavigate } from "react-router";
+import { alpha } from "@mui/material/styles";
+
+const paperSx = (t) => ({
+  display: "flex",
+  alignItems: "center",
+  bgcolor:
+    t.palette.mode === "light"
+      ? t.palette.background.paper
+      : alpha(t.palette.background.paper, 0.6),
+  borderBottom: `1px solid ${
+    t.palette.roles?.border || alpha(t.palette.divider, 0.5)
+  }`,
+  minHeight: 34,
+  height: 34,
+  px: 0.25,
+});
+
+const scrollSx = (t) => ({
+  position: "relative",
+  flex: 1,
+  minWidth: 0,
+  overflowX: "auto",
+  whiteSpace: "nowrap",
+  display: "flex",
+  alignItems: "center",
+  "&::before, &::after": {
+    content: '""',
+    position: "sticky",
+    top: 0,
+    width: 8,
+    height: "100%",
+    pointerEvents: "none",
+    zIndex: 1,
+  },
+  "&::before": {
+    left: 0,
+    background: `linear-gradient(90deg, ${t.palette.background.paper}, transparent)`,
+  },
+  "&::after": {
+    right: 0,
+    background: `linear-gradient(270deg, ${t.palette.background.paper}, transparent)`,
+  },
+});
+
+const tabItemSx = (t, { active, last }) => {
+  const idleHover =
+    t.palette.mode === "light"
+      ? alpha(t.palette.primary.main, 0.04)
+      : alpha("#fff", 0.06);
+
+  const activeBg =
+    t.palette.mode === "light"
+      ? alpha(t.palette.primary.main, 0.08)
+      : alpha("#fff", 0.1);
+
+  return {
+    position: "relative",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 0.5,
+    height: 28,
+    px: 0.5,
+    borderRadius: 6,
+    cursor: "grab",
+    userSelect: "none",
+    transition: "background .14s, color .14s",
+    marginRight: last ? 0 : 0.25,
+    bgcolor: active ? activeBg : "transparent",
+    "&:hover": { backgroundColor: active ? activeBg : idleHover },
+    "&:active": { cursor: "grabbing" },
+    "&::after": {
+      content: '""',
+      position: "absolute",
+      left: "22%",
+      right: "22%",
+      bottom: 0,
+      height: 1.5,
+      borderRadius: 1.5,
+      background: active
+        ? `linear-gradient(90deg, ${t.palette.primary.main}, ${alpha(
+            t.palette.secondary?.main || t.palette.primary.light,
+            0.9
+          )})`
+        : "transparent",
+    },
+    "& .tab-action": {
+      opacity: 0,
+      transform: "translateY(-1px)",
+      transition: "opacity .1s, transform .1s",
+      marginLeft: 0,   
+    },
+    "&:hover .tab-action": { opacity: 1, transform: "translateY(0)" },
+  };
+};
+
+const tabLabelSx = (t, active) => ({
+  fontWeight: active ? 700 : 600,
+  fontSize: 12,
+  letterSpacing: -0.2,
+  color: active ? t.palette.primary.main : t.palette.text.secondary,
+  whiteSpace: "nowrap",
+});
 
 export default function DynamicTabsBar({ isDesktop }) {
   const { openTabs, activeTab } = useSelector((state) => state.tabs);
@@ -53,29 +150,8 @@ export default function DynamicTabsBar({ isDesktop }) {
       : visibleTabs[0]?.key ?? false;
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        bgcolor: "background.paper",
-        borderBottom: "1px solid #ededed",
-        minHeight: 44,
-        height: 44,
-        px: 1,
-      }}
-    >
-      <Box
-        className="custom-tabs-scrollbar"
-        sx={{
-          flex: 1,
-          minWidth: 0,
-          overflowX: "auto",
-          whiteSpace: "nowrap",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
+    <Paper elevation={0} sx={(t) => paperSx(t)}>
+      <Box className="custom-tabs-scrollbar" sx={(t) => scrollSx(t)}>
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="tabs" direction="horizontal">
             {(provided) => (
@@ -99,33 +175,12 @@ export default function DynamicTabsBar({ isDesktop }) {
                           ref={prov.innerRef}
                           {...prov.draggableProps}
                           {...prov.dragHandleProps}
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            padding: "0 18px",
-                            borderRadius: 8,
-                            height: 42,
-                            cursor: "pointer",
-                            marginRight: 0,
-                            borderRight:
-                              idx !== visibleTabs.length - 1
-                                ? "1px solid #ededed"
-                                : "none",
-                            bgcolor: isActive
-                              ? "rgba(25, 118, 210, 0.09)"
-                              : "transparent",
-                            borderBottom: isActive
-                              ? "2px solid #1976d2"
-                              : "2px solid transparent",
-                            "&:hover": {
-                              bgcolor: isActive
-                                ? "rgba(25, 118, 210, 0.11)"
-                                : "rgba(25, 118, 210, 0.04)",
-                            },
-                            userSelect: "none",
-                            transition:
-                              "background .2s, opacity .2s, border .2s",
-                          }}
+                          sx={(t) =>
+                            tabItemSx(t, {
+                              active: isActive,
+                              last: idx === visibleTabs.length - 1,
+                            })
+                          }
                           onClick={() => {
                             dispatch(setActiveTab(tab.key));
                             navigate("/" + tab.path);
@@ -133,46 +188,43 @@ export default function DynamicTabsBar({ isDesktop }) {
                         >
                           {IconComponent && (
                             <IconComponent
-                              sx={{
-                                fontSize: 18,
+                              sx={(t) => ({
+                                fontSize: 14,
                                 color: isActive
-                                  ? "primary.main"
-                                  : "action.active",
-                                mr: 0.5,
-                              }}
+                                  ? t.palette.primary.main
+                                  : t.palette.text.disabled,
+                                mr: 0.25,
+                              })}
                             />
                           )}
-                          <Typography
-                            sx={{
-                              fontWeight: isActive ? 500 : 400,
-                              fontSize: 13,
-                              color: isActive
-                                ? "primary.main"
-                                : "text.secondary",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
+                          <Typography sx={(t) => tabLabelSx(t, isActive)}>
                             {tab.label}
                           </Typography>
                           {/* Minimizar */}
                           <IconButton
+                            className="tab-action"
                             size="small"
                             onClick={(e) => {
                               e.stopPropagation();
                               dispatch(minimizeTab(tab.key));
                             }}
                             title="Minimizar"
-                            sx={{
-                              color: "#b0b0b0",
-                              "&:hover": { color: "#1976d2" },
-                              p: "4px",
-                              ml: 1,
-                            }}
+                            sx={(t) => ({
+                              p: "1px",
+                              ml: 0.25,
+                              color: t.palette.text.disabled,
+                              "&:hover": {
+                                color: t.palette.primary.main,
+                                backgroundColor: "transparent",
+                              },
+                              "& .MuiSvgIcon-root": { fontSize: 14 },
+                            })}
                           >
                             <Remove fontSize="small" />
                           </IconButton>
                           {/* Cerrar */}
                           <IconButton
+                            className="tab-action"
                             size="small"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -213,11 +265,16 @@ export default function DynamicTabsBar({ isDesktop }) {
                               }
                             }}
                             title="Cerrar"
-                            sx={{
-                              color: "#b0b0b0",
-                              "&:hover": { color: "#e53935" },
-                              p: "4px",
-                            }}
+                            sx={(t) => ({
+                              p: "1px",
+                              ml: 0.25,
+                              color: t.palette.text.disabled,
+                              "&:hover": {
+                                color: t.palette.error.main,
+                                backgroundColor: "transparent",
+                              },
+                              "& .MuiSvgIcon-root": { fontSize: 14 },
+                            })}
                           >
                             <Close fontSize="small" />
                           </IconButton>
@@ -249,6 +306,23 @@ export default function DynamicTabsBar({ isDesktop }) {
         anchorEl={anchorEl}
         open={!!anchorEl}
         onClose={() => setAnchorEl(null)}
+        slotProps={{
+          paper: {
+            elevation: 0,
+            sx: (t) => ({
+              mt: 0.5,
+              borderRadius: 2,
+              border: `1px solid ${
+                t.palette.roles?.border || alpha(t.palette.divider, 0.6)
+              }`,
+              boxShadow:
+                t.palette.mode === "light"
+                  ? "0 12px 32px rgba(2,6,23,0.12)"
+                  : "0 16px 40px rgba(0,0,0,0.45)",
+              "& .MuiMenuItem-root": { fontWeight: 600, fontSize: 13 },
+            }),
+          },
+        }}
       >
         {minimizedTabs.length === 0 && (
           <MenuItem disabled>No hay ventanas minimizadas</MenuItem>

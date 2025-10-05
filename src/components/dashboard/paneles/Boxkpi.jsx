@@ -5,7 +5,7 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 
 const MotionBox = motion.create(Box);
 
-const Boxkpi = ({
+const  Boxkpi = ({
   title,
   value,
   icon: Icon = TrendingUpIcon,
@@ -25,7 +25,7 @@ const Boxkpi = ({
         gap: 2,
         p: 3,
         borderRadius: 3,
-        border: `1px solid ${theme.palette.divider}`,
+        border: (t) => `1px solid ${t.palette.roles.border}`,
         backgroundColor: theme.palette.background.paper,
         boxShadow: 1,
         transition: "all 0.3s ease",

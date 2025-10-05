@@ -4,8 +4,8 @@ import { createSwapy } from "swapy";
 import {
   Box,
   Grid,
-  Typography,
-  Button,
+  /*   Typography,
+  Button, */
   Card,
   CardContent,
 } from "@mui/material";
@@ -21,7 +21,7 @@ import { formatCLP } from "../../utils/formatUtils";
 import { useGetKpiProductoPorFechaQuery } from "../../store/services/productosEstadisticasApi";
 import { useSelector } from "react-redux";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
-
+import DashboardHeader from "../../components/dashboard/paneles/DashboardHeader";
 
 const DashboardCentral = () => {
   const { mode, activeSucursalId } = useSelector((s) => s.scope || {});
@@ -173,7 +173,7 @@ const DashboardCentral = () => {
 
   return (
     <Box sx={{ p: 3, mb: 3 }}>
-      <Typography variant="h4" gutterBottom>
+      {/* <Typography variant="h4" gutterBottom>
         📊 {t("general.dashboard")}
       </Typography>
 
@@ -184,7 +184,13 @@ const DashboardCentral = () => {
         onClick={resetLayout}
       >
         🔄 {t("buttons.reset_order")}
-      </Button>
+      </Button> */}
+      <DashboardHeader
+        title={`📊 ${t("general.dashboard")}`}
+        subtitle={t("dashboard.overview_today")}
+        onReset={resetLayout}
+        rightActionLabel={`+ ${t("buttons.new_record")}`}
+      />
 
       {/* 📌 Contenedor de Swapy */}
       <div ref={containerRef}>

@@ -54,7 +54,10 @@ const RevenueTrendChart = ({ idSucursal }) => {
           mb: 2,
         }}
       >
-        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+        <Typography
+          variant="subtitle1"
+          sx={{ fontWeight: 600, color: (theme) => theme.palette.text.primary }}
+        >
           📈 {t("dashboard.monthly_revenue_trend")}
         </Typography>
 

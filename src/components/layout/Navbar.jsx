@@ -46,6 +46,7 @@ import { useTranslation } from "react-i18next";
 import { isColorLight } from "../../utils/colorUtil";
 import useTabNavigation from "../../utils/useTabNavigation";
 import ScopeSwitcher from "./ScopeSwitcher";
+import { alpha } from "@mui/material/styles";
 
 const rolColors = {
   chofer: "#FFE082",
@@ -67,6 +68,18 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
   const isAdmin = roleName === "administrador";
   const navbarColor = rolColors[roleName] || rolColors.default;
   const iconNavbarColor = isColorLight(navbarColor) ? "#2c3e50" : "#fff";
+
+  const iconBtnSx = (t) => ({
+    color: iconNavbarColor,
+    padding: 0.75,
+    borderRadius: 10,
+    transition: "background-color .15s ease, transform .15s ease",
+    "&:hover": {
+      backgroundColor:
+        t.palette.mode === "light" ? alpha("#000", 0.06) : alpha("#fff", 0.08),
+    },
+    "& .MuiSvgIcon-root": { fontSize: 24 },
+  });
 
   const navigate = useNavigate();
 
@@ -172,7 +185,17 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
       }}
     >
       <Toolbar
-        sx={{ justifyContent: "space-between", background: navbarColor }}
+        sx={(t) => ({
+          justifyContent: "space-between",
+          minHeight: 64,
+          px: { xs: 1.5, md: 2 },
+          background: navbarColor,
+          borderBottom: `1px solid ${
+            t.palette.roles?.border || "rgba(2,6,23,0.08)"
+          }`,
+          boxShadow: "0 4px 18px rgba(2,6,23,0.06)",
+          backdropFilter: "saturate(1.2) blur(6px)",
+        })}
       >
         {isTabletOrMobile ? (
           <Box
@@ -187,12 +210,7 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
               <IconButton
                 onClick={() => setMobileMenuOpen(true)}
                 aria-label="Abrir menú"
-                sx={{
-                  color: iconNavbarColor,
-                  "&:hover": {
-                    backgroundColor: "rgba(44,62,80,0.07)",
-                  },
-                }}
+                sx={(t) => iconBtnSx(t)}
               >
                 <MenuIcon />
               </IconButton>
@@ -212,6 +230,15 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
                 <Badge
                   badgeContent={notificaciones.filter((n) => !n.leida).length}
                   color="secondary"
+                  sx={{
+                    "& .MuiBadge-badge": {
+                      minWidth: 18,
+                      height: 18,
+                      fontSize: 10,
+                      fontWeight: 700,
+                      boxShadow: "0 0 0 2px rgba(255,255,255,0.8)",
+                    },
+                  }}
                 >
                   <NotificationsNoneOutlinedIcon sx={{ fontSize: 25 }} />
                 </Badge>
@@ -237,43 +264,15 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
                   setMobileMenuOpen(true);
                 }
               }}
-              sx={{
+              sx={(t) => ({
                 display: isDesktop ? "block" : "none",
-                border: "none",
-                outline: "none",
-                transition: "background 0.2s",
-                bgcolor: "transparent",
-                color: iconNavbarColor,
-                "&:hover": {
-                  backgroundColor: "rgba(44,62,80,0.07)",
-                },
-                borderWidth: 0,
-                ":focus": {
-                  outline: "none",
-                  boxShadow: "none",
-                },
-                ":active": {
-                  outline: "none",
-                  boxShadow: "none",
-                },
-                "&:focus": {
-                  outline: "none !important",
-                  boxShadow: "none !important",
-                },
-                "&:focus-visible": {
-                  outline: "none !important",
-                  boxShadow: "none !important",
-                },
-                "&:active": {
-                  outline: "none !important",
-                  boxShadow: "none !important",
-                },
-              }}
+                ...iconBtnSx(t),
+              })}
               aria-label="Abrir o cerrar menú lateral"
             >
               <MenuIcon />
             </IconButton>
-            <Box sx={{ flexGrow: 1, maxWidth: "600px" }}>
+            <Box sx={{ flexGrow: 1, maxWidth: 600, mx: 2 }}>
               <SearchBar
                 onResultSelect={(item) => {
                   console.log("Seleccionaste:", item);
@@ -318,6 +317,15 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
               <Badge
                 badgeContent={notificaciones.filter((n) => !n.leida).length}
                 color="secondary"
+                sx={{
+                  "& .MuiBadge-badge": {
+                    minWidth: 18,
+                    height: 18,
+                    fontSize: 10,
+                    fontWeight: 700,
+                    boxShadow: "0 0 0 2px rgba(255,255,255,0.8)",
+                  },
+                }}
               >
                 <NotificationsNoneOutlinedIcon sx={{ fontSize: "25px" }} />
               </Badge>
@@ -337,33 +345,39 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
 
             <Button
               onClick={handleClick}
-              sx={{
+              sx={(t) => ({
                 textTransform: "none",
                 backgroundColor:
-                  theme.palette.mode === "light"
-                    ? "#f5f5f5"
-                    : theme.palette.background.paper,
+                  t.palette.mode === "light"
+                    ? alpha("#000", 0.04)
+                    : alpha("#fff", 0.06),
                 borderRadius: "999px",
+                border: `1px solid ${
+                  t.palette.roles?.border || "rgba(2,6,23,0.08)"
+                }`,
+                px: 1.25,
+                py: 0.5,
                 padding: "6px 12px",
                 display: "flex",
                 alignItems: "center",
                 gap: "0.75rem",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                boxShadow: "0 2px 10px rgba(2,6,23,0.06)",
                 "&:hover": {
                   backgroundColor:
-                    theme.palette.mode === "light"
-                      ? "#e0e0e0"
-                      : theme.palette.background.default,
+                    t.palette.mode === "light"
+                      ? alpha("#000", 0.06)
+                      : alpha("#fff", 0.1),
                 },
-              }}
+              })}
             >
               <Avatar
                 sx={{
-                  width: 36,
-                  height: 36,
+                  width: 32,
+                  height: 32,
                   backgroundColor: "#3F51B5",
-                  fontSize: "0.9rem",
-                  fontWeight: "bold",
+                  fontSize: "0.85rem",
+                  fontWeight: 800,
+                  boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.25)",
                 }}
               >
                 {user?.nombre ? user.nombre.charAt(0).toUpperCase() : "U"}
@@ -381,8 +395,8 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
                 }}
               >
                 <Typography
-                  fontWeight="bold"
-                  fontSize="0.7rem"
+                  fontWeight={700}
+                  fontSize="0.78rem"
                   color={theme.palette.text.primary}
                   sx={{ lineHeight: 1.2 }}
                   noWrap
@@ -403,11 +417,33 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
               />
             </Button>
 
-            <Menu anchorEl={anchorEl} open={isOpen} onClose={handleClose}>
+            <Menu
+              anchorEl={anchorEl}
+              open={isOpen}
+              onClose={handleClose}
+              slotProps={{
+                paper: {
+                  elevation: 0,
+                  sx: (t) => ({
+                    mt: 1,
+                    borderRadius: 2,
+                    border: `1px solid ${
+                      t.palette.roles?.border || "rgba(2,6,23,0.08)"
+                    }`,
+                    boxShadow: "0 12px 32px rgba(2,6,23,0.12)",
+                    overflow: "hidden",
+                    "& .MuiMenuItem-root": {
+                      fontSize: 14,
+                      fontWeight: 600,
+                    },
+                  }),
+                },
+              }}
+            >
               <MenuItem
                 onClick={() => {
                   handleClose();
-                  openTabAndNavigate("miperfil", tabInfo); // 👈
+                  openTabAndNavigate("miperfil", tabInfo);
                 }}
               >
                 Mi Perfil
