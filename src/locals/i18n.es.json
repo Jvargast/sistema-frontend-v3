@@ -43,6 +43,7 @@
     "phone": "Teléfono"
   },
   "dashboard": {
+    "overview_today": "Resumen de hoy",
     "top_selling_product": "Producto/Insumo Más Vendido",
     "no_sales_recorded": "Sin ventas registradas",
     "units": "unidades",

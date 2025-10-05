@@ -1,76 +1,100 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { InputBase, IconButton, CircularProgress, Box } from "@mui/material";
+import {
+  Box,
+  InputBase,
+  IconButton,
+  CircularProgress,
+  Paper,
+  List,
+  ListItemButton,
+  ListItemText,
+  Typography,
+  Divider,
+} from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { Search } from "@mui/icons-material";
 import PropTypes from "prop-types";
 import { useSearchQuery } from "../../store/services/busquedaApi";
 
 const SearchBar = ({ onResultSelect }) => {
   const navigate = useNavigate();
-  const dropdownRef = useRef(null);
-  const [showDropdown, setShowDropdown] = useState(false);
 
+  const wrapperRef = useRef(null);
+  const dropdownRef = useRef(null);
+
+  const [showDropdown, setShowDropdown] = useState(false);
   const [query, setQuery] = useState("");
+
   const { data, isLoading, isError } = useSearchQuery(query, {
     skip: query.length < 2,
   });
 
+  const safeResultados = Array.isArray(data?.resultados) ? data.resultados : [];
+  const safeSugerencias = Array.isArray(data?.sugerencias)
+    ? data.sugerencias
+    : [];
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (data && data.resultados.length > 0) {
-      onResultSelect(data.resultados);
-    }
+    if (safeResultados.length > 0) onResultSelect?.(safeResultados);
   };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
         setShowDropdown(false);
       }
     };
+    const handleEsc = (e) => e.key === "Escape" && setShowDropdown(false);
+
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEsc);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
     };
   }, []);
 
   return (
     <Box
+      ref={wrapperRef}
       sx={{
         position: "relative",
         width: "100%",
-        maxWidth: {
-          xs: "100%",
-          sm: "600px",
-          md: "800px",
-          lg: "1000px",
-          xl: "1200px",
-        },
-        margin: "0 auto",
+        maxWidth: { xs: "100%", sm: 600, md: 800, lg: 1000, xl: 1200 },
+        mx: "auto",
       }}
     >
       <Box
         component="form"
         onSubmit={handleSubmit}
-        className="flex items-center w-full rounded-full px-4 py-2 shadow-sm focus-within:ring-2 focus-within:ring-blue-500 transition"
-        sx={{
-          backgroundColor: (theme) =>
-            theme.palette.mode == "dark" ? "#1e1e1e" : "#ffffff",
-          border: "1px solid",
-          borderColor: (theme) =>
-            theme.palette.mode === "dark" ? "#444444" : "#000000",
+        role="search"
+        aria-label="Buscar"
+        sx={(t) => ({
           display: "flex",
           alignItems: "center",
           width: "100%",
           px: 2,
-          py: 0.5,
-          minHeight: "36px",
-          borderRadius: "9999px",
-          transition: "box-shadow 0.2s ease-in-out",
+          py: 1,
+          minHeight: 44,
+          borderRadius: 9999,
+          backgroundColor:
+            t.palette.mode === "light"
+              ? t.palette.background.paper
+              : t.palette.background.default,
+          border: `1px solid ${t.palette.roles?.border || "rgba(2,6,23,0.12)"}`,
+          transition: "box-shadow .2s ease, border-color .2s ease",
           "&:focus-within": {
-            boxShadow: "0 0 0 3px rgba(0,123,255,0.3)",
-            borderColor: "transparent",
+            boxShadow: `0 0 0 3px rgba(59,130,246,0.30)`, 
+            borderColor: "#3B82F6",
           },
-        }}
+        })}
       >
         <InputBase
           placeholder="Buscar..."
@@ -80,19 +104,30 @@ const SearchBar = ({ onResultSelect }) => {
             setQuery(e.target.value);
             setShowDropdown(true);
           }}
-          sx={{
+          sx={(t) => ({
             flexGrow: 1,
-            color: (theme) =>
-              theme.palette.mode === "dark" ? "#ffffff" : "#000000",
+            color: t.palette.text.primary,
             "& input::placeholder": {
-              color: (theme) =>
-                theme.palette.mode === "dark" ? "#f4f4f4" : "#666666",
+              color: t.palette.text.secondary,
               opacity: 1,
             },
-            fontSize: "0.9rem",
-          }}
+            fontSize: "0.95rem",
+          })}
         />
-        <IconButton type="submit" className="text-blue-500">
+
+        <IconButton
+          type="submit"
+          aria-label="Realizar búsqueda"
+          sx={(t) => ({
+            color: t.palette.text.secondary,
+            "&:hover": {
+              backgroundColor:
+                t.palette.mode === "light"
+                  ? alpha(t.palette.primary.main, 0.08)
+                  : alpha("#fff", 0.08),
+            },
+          })}
+        >
           {isLoading ? (
             <CircularProgress size={20} color="inherit" />
           ) : (
@@ -101,123 +136,187 @@ const SearchBar = ({ onResultSelect }) => {
         </IconButton>
       </Box>
 
-      {/* Desplegable de resultados */}
       {showDropdown &&
-        data &&
-        (data.resultados.length > 0 || data.sugerencias.length > 0) && (
-          <div
+        (safeResultados.length > 0 || safeSugerencias.length > 0) && (
+          <Paper
             ref={dropdownRef}
-            className="absolute bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl mt-2 w-full max-h-64 overflow-y-auto shadow-xl z-50 custom-scroll"
+            elevation={0}
+            sx={(t) => ({
+              position: "absolute",
+              top: "calc(100% + 8px)",
+              left: 0,
+              right: 0,
+              zIndex: 1300, 
+              borderRadius: 3,
+              bgcolor: t.palette.background.paper,
+              border: `1px solid ${
+                t.palette.roles?.border || "rgba(2,6,23,0.12)"
+              }`,
+              boxShadow: "0 12px 32px rgba(2,6,23,0.12)",
+              overflow: "hidden",
+              maxHeight: 360,
+            })}
           >
-            {data.resultados.length > 0 ? (
-              data.resultados.map((item) => (
-                <div
-                  key={`${item.tipo}-${item.id}`}
-                  className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition flex justify-between items-center"
-                  onClick={() => {
-                    setShowDropdown(false);
-                    navigate(`/${item.tipo}/ver/${item.id}`);
+            <List
+              sx={{
+                py: 0.5,
+                overflowY: "auto",
+                maxHeight: 360,
+                "&::-webkit-scrollbar": { width: 6 },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: "rgba(100,100,100,0.35)",
+                  borderRadius: 3,
+                },
+              }}
+            >
+              {safeResultados.length === 0 ? (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    px: 2,
+                    py: 1.5,
+                    color: "text.disabled",
+                    fontWeight: 700,
                   }}
                 >
-                  <div>
-                    <div className="font-medium text-gray-900 dark:text-gray-100">
-                      {item.nombre}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      ({item.tipo})
-                    </div>
-                    <div className="text-xs text-gray-400 dark:text-gray-500">
-                      ID: {item.id}
-                    </div>
-                  </div>
-
-                  {(item.total !== null || item.fecha !== null) && (
-                    <div className="text-right ml-4 min-w-[120px]">
-                      {item.total !== null && (
-                        <div className="text-sm font-semibold text-green-700 dark:text-green-400">
-                          {new Intl.NumberFormat("es-CL", {
-                            style: "currency",
-                            currency: "CLP",
-                          }).format(item.total)}
-                        </div>
-                      )}
-                      {item.fecha !== null && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {new Date(item.fecha).toLocaleDateString("es-CL")}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className="px-4 py-3 text-sm text-gray-300 dark:text-gray-400">
-                Sin resultados
-              </div>
-            )}
-
-            {data.sugerencias.length > 0 && (
-              <>
-                <div className="px-4 py-2 text-xs uppercase text-gray-400 dark:text-gray-500">
-                  Sugerencias
-                </div>
-                {data.sugerencias.map((item) => (
-                  <div
+                  Sin resultados
+                </Typography>
+              ) : (
+                safeResultados.map((item) => (
+                  <ListItemButton
                     key={`${item.tipo}-${item.id}`}
-                    className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition flex justify-between items-center"
-                    onClick={() => onResultSelect(item)}
+                    onClick={() => {
+                      setShowDropdown(false);
+                      navigate(`/${item.tipo}/ver/${item.id}`);
+                    }}
+                    sx={(t) => ({
+                      mx: 0.5,
+                      my: 0.25,
+                      borderRadius: 2,
+                      alignItems: "flex-start",
+                      gap: 1,
+                      "&:hover": {
+                        backgroundColor:
+                          t.palette.mode === "light"
+                            ? alpha(t.palette.primary.main, 0.06)
+                            : alpha("#fff", 0.06),
+                      },
+                    })}
                   >
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-gray-100">
-                        {item.nombre}
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        ({item.tipo})
-                      </div>
-                    </div>
-
+                    <ListItemText
+                      primary={
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: 700 }}
+                        >
+                          {item.nombre}
+                        </Typography>
+                      }
+                      secondary={
+                        <>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: "block" }}
+                          >
+                            ({item.tipo}) · ID: {item.id}
+                          </Typography>
+                        </>
+                      }
+                    />
                     {(item.total !== null || item.fecha !== null) && (
-                      <div className="text-right ml-4 min-w-[120px]">
+                      <Box
+                        sx={{
+                          textAlign: "right",
+                          minWidth: 120,
+                          ml: 2,
+                          pt: 0.25,
+                        }}
+                      >
                         {item.total !== null && (
-                          <div className="text-sm font-semibold text-green-700 dark:text-green-400">
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>
                             {new Intl.NumberFormat("es-CL", {
                               style: "currency",
                               currency: "CLP",
                             }).format(item.total)}
-                          </div>
+                          </Typography>
                         )}
                         {item.fecha !== null && (
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <Typography variant="caption" color="text.secondary">
                             {new Date(item.fecha).toLocaleDateString("es-CL")}
-                          </div>
+                          </Typography>
                         )}
-                      </div>
+                      </Box>
                     )}
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
+                  </ListItemButton>
+                ))
+              )}
+
+              {safeSugerencias.length > 0 && (
+                <>
+                  <Divider sx={{ my: 0.5 }} />
+                  <Typography
+                    variant="overline"
+                    sx={{
+                      px: 2,
+                      py: 0.75,
+                      color: "text.secondary",
+                      letterSpacing: 1,
+                    }}
+                  >
+                    Sugerencias
+                  </Typography>
+                  {safeSugerencias.map((item) => (
+                    <ListItemButton
+                      key={`${item.tipo}-${item.id}`}
+                      onClick={() => {
+                        setShowDropdown(false);
+                        onResultSelect?.(item);
+                      }}
+                      sx={(t) => ({
+                        mx: 0.5,
+                        my: 0.25,
+                        borderRadius: 2,
+                        "&:hover": {
+                          backgroundColor:
+                            t.palette.mode === "light"
+                              ? alpha(t.palette.primary.main, 0.06)
+                              : alpha("#fff", 0.06),
+                        },
+                      })}
+                    >
+                      <ListItemText
+                        primary={
+                          <Typography
+                            variant="subtitle2"
+                            sx={{ fontWeight: 700 }}
+                          >
+                            {item.nombre}
+                          </Typography>
+                        }
+                        secondary={
+                          <Typography variant="caption" color="text.secondary">
+                            ({item.tipo})
+                          </Typography>
+                        }
+                      />
+                    </ListItemButton>
+                  ))}
+                </>
+              )}
+            </List>
+          </Paper>
         )}
 
       {isError && (
-        <div className="absolute text-red-500 text-sm mt-1">
+        <Typography
+          color="error"
+          variant="caption"
+          sx={{ position: "absolute", mt: 1 }}
+        >
           ❌ Error al buscar
-        </div>
+        </Typography>
       )}
-
-      <style>{`
-        .custom-scroll::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scroll::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-          background-color: rgba(100, 100, 100, 0.4);
-          border-radius: 3px;
-        }
-      `}</style>
     </Box>
   );
 };

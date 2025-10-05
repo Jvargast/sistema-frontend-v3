@@ -55,7 +55,14 @@ const SalesChart = ({ idSucursal }) => {
 
   return (
     <Box sx={{ p: 1, height: 320, display: "flex", flexDirection: "column" }}>
-      <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
+      <Typography
+        variant="subtitle1"
+        sx={{
+          mb: 1,
+          fontWeight: 600,
+          color: (theme) => theme.palette.text.primary,
+        }}
+      >
         📅 {t("dashboard.weekly_sales")} (CLP)
       </Typography>
 
@@ -72,7 +79,7 @@ const SalesChart = ({ idSucursal }) => {
           }}
         >
           <Typography variant="h6">
-            💤 {t("dashboard.no_sales_this_week")}
+            {t("dashboard.no_sales_this_week")}
           </Typography>
           <Typography variant="body2" color="text.disabled">
             {t("dashboard.come_back_later")}

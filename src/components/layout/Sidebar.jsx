@@ -13,6 +13,7 @@ import {
   useTheme,
   Collapse,
   useMediaQuery,
+  alpha,
 } from "@mui/material";
 import {
   HomeOutlined,
@@ -45,6 +46,76 @@ import {
   routeToTabInfo,
   shouldUseRouterPath,
 } from "../../utils/tabsConfig";
+
+const itemStyles = (t, isActive) => ({
+  mx: 1,
+  my: 0.5,
+  height: 44,
+  borderRadius: 10,
+  transition: "background-color .15s ease, color .15s ease",
+  backgroundColor: isActive
+    ? alpha(t.palette.primary.main, 0.1)
+    : "transparent",
+  color: isActive ? t.palette.text.primary : t.palette.text.secondary,
+  "&:hover": {
+    backgroundColor:
+      t.palette.mode === "light"
+        ? alpha(t.palette.primary.main, 0.08)
+        : alpha("#fff", 0.06),
+  },
+  "& .MuiListItemIcon-root": {
+    minWidth: 36,
+    color: isActive ? t.palette.primary.main : t.palette.text.secondary,
+    "& .MuiSvgIcon-root": { fontSize: 22 },
+  },
+  "& .MuiListItemText-primary": {
+    fontSize: 14,
+    fontWeight: isActive ? 700 : 600,
+    letterSpacing: -0.1,
+  },
+  ...(isActive
+    ? {
+        position: "relative",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          left: 6,
+          top: 8,
+          bottom: 8,
+          width: 3,
+          borderRadius: 3,
+          backgroundColor: t.palette.primary.main,
+          opacity: 0.9,
+        },
+      }
+    : {}),
+});
+
+const navActionSx = (t, isActive) => ({
+  flex: 1,
+  color: isActive ? t.palette.primary.main : t.palette.text.secondary,
+  transition: "color .15s ease, transform .15s ease",
+  "& .MuiSvgIcon-root": {
+    fontSize: 24,
+    transform: isActive ? "translateY(-1px)" : "none",
+  },
+  "& .MuiBottomNavigationAction-label": {
+    fontSize: 11.5,
+    fontWeight: isActive ? 700 : 600,
+    letterSpacing: 0.1,
+    marginTop: 2,
+  },
+  "&:hover": {
+    backgroundColor:
+      t.palette.mode === "light"
+        ? alpha(t.palette.primary.main, 0.06)
+        : alpha("#fff", 0.06),
+  },
+  "& .MuiTouchRipple-root": {
+    color: isActive ? t.palette.primary.main : t.palette.text.secondary,
+    opacity: 0.18,
+  },
+});
 
 const Sidebar = ({
   user,
@@ -93,7 +164,6 @@ const Sidebar = ({
     }
   };
 
-
   const canUseTab = (keyOrPath) =>
     isDesktop &&
     mainTabPaths.includes(keyOrPath) &&
@@ -131,7 +201,7 @@ const Sidebar = ({
             path,
           })
         );
-         dispatch(setActiveTab(key));
+        dispatch(setActiveTab(key));
       }
       navigate("/" + path);
     } else {
@@ -155,6 +225,10 @@ const Sidebar = ({
             "& .MuiDrawer-paper": {
               color: theme.palette.text.primary,
               backgroundColor: theme.palette.background.paper,
+              borderRight: `1px solid ${
+                theme.palette.roles?.border || "rgba(2,6,23,0.06)"
+              }`,
+              boxShadow: "0 8px 24px rgba(2,6,23,0.06)",
               width: drawerWidth,
               overflowY: "auto",
               scrollbarWidth: "none",
@@ -186,21 +260,26 @@ const Sidebar = ({
               .map((module) => (
                 <Box key={module.name}>
                   {/* Parent Module */}
+                  {/* <Typography
+                    variant="caption"
+                    sx={{
+                      mx: 2,
+                      mt: 1.5,
+                      mb: 0.5,
+                      color: theme.palette.text.disabled,
+                      fontWeight: 700,
+                      letterSpacing: 0.4,
+                    }}
+                  >
+                    {module.group || "GENERAL"}
+                  </Typography> */}
                   <ListItemButton
                     onClick={
                       module.children
                         ? () => handleToggleSection(module.name)
                         : () => handleNavigation(module)
                     }
-                    sx={{
-                      backgroundColor:
-                        activeModulePath === module.path
-                          ? theme.palette.action.selected
-                          : "transparent",
-                      "&:hover": {
-                        backgroundColor: theme.palette.action.hover,
-                      },
-                    }}
+                    sx={(t) => itemStyles(t, activeModulePath === module.path)}
                   >
                     {module.icon && <ListItemIcon>{module.icon}</ListItemIcon>}
                     <ListItemText primary={module.name} />
@@ -231,16 +310,10 @@ const Sidebar = ({
                             <ListItemButton
                               key={child.path}
                               onClick={() => handleNavigation(child)}
-                              sx={{
-                                pl: 4,
-                                backgroundColor:
-                                  active === child.path
-                                    ? theme.palette.action.selected
-                                    : "transparent",
-                                "&:hover": {
-                                  backgroundColor: theme.palette.action.hover,
-                                },
-                              }}
+                              sx={(t) => ({
+                                ...itemStyles(t, active === child.path),
+                                pl: 5,
+                              })}
                             >
                               {child.icon && (
                                 <ListItemIcon>{child.icon}</ListItemIcon>
@@ -267,20 +340,22 @@ const Sidebar = ({
               </Box>
               <Box textAlign="left">
                 <Typography
-                  fontWeight="bold"
-                  fontSize="0.9rem"
+                  fontWeight={700}
+                  fontSize="0.92rem"
                   sx={{ color: theme.palette.text.primary }}
                 >
                   {user?.nombre || ""}
                 </Typography>
                 <Typography
-                  fontSize="0.8rem"
+                  fontSize="0.78rem"
                   sx={{ color: theme.palette.text.secondary }}
                 >
                   {rol || ""}
                 </Typography>
               </Box>
-              <SettingsOutlined sx={{ fontSize: "25px" }} />
+              <SettingsOutlined
+                sx={{ fontSize: 22, color: theme.palette.text.secondary }}
+              />
             </FlexBetween>
           </Box>
         </Drawer>
@@ -299,47 +374,50 @@ const Sidebar = ({
               setActive(newValue);
             }
           }}
-          sx={{
+          showLabels
+          sx={(t) => ({
             position: "fixed",
             bottom: 0,
             left: 0,
             right: 0,
-            backgroundColor: "#2C2C2C",
-            boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.2)",
-            borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-            zIndex: 999,
-            pb: "env(safe-area-inset-bottom, 20px)",
-            height: "56px",
-          }}
+            zIndex: 1200,
+            backgroundColor:
+              t.palette.mode === "light"
+                ? t.palette.background.paper
+                : t.palette.background.default,
+            borderTop: `1px solid ${
+              t.palette.roles?.border || "rgba(2,6,23,0.08)"
+            }`,
+            boxShadow: "0 -4px 18px rgba(2,6,23,0.08)",
+            height: 64,
+            paddingBottom: "env(safe-area-inset-bottom, 12px)",
+            WebkitTransform: "translateZ(0)",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 2,
+              background: `linear-gradient(90deg, ${t.palette.primary.main}, ${t.palette.secondary.main})`,
+              opacity: 0.25,
+            },
+          })}
         >
           <BottomNavigationAction
             label="Home"
             value={initialHomeValue}
             icon={<HomeOutlined />}
-            sx={{
-              color:
-                pathname.substring(1) === initialHomeValue
-                  ? "#FFFFFF"
-                  : "rgba(255, 255, 255, 0.6)",
-              "& .MuiSvgIcon-root": {
-                fontSize: "1.8rem",
-              },
-            }}
+            sx={(t) =>
+              navActionSx(t, pathname.substring(1) === initialHomeValue)
+            }
           />
           {rol === "chofer" && (
             <BottomNavigationAction
               label="Mis Ventas"
               value="misventas"
               icon={<ShoppingCartOutlined />}
-              sx={{
-                color:
-                  pathname.substring(1) === "misventas"
-                    ? "#FFFFFF"
-                    : "rgba(255, 255, 255, 0.6)",
-                "& .MuiSvgIcon-root": {
-                  fontSize: "1.8rem",
-                },
-              }}
+              sx={(t) => navActionSx(t, pathname.substring(1) === "misventas")}
             />
           )}
 
@@ -348,45 +426,23 @@ const Sidebar = ({
               label="Pedidos"
               value="punto-pedido"
               icon={<ShoppingCartOutlined />}
-              sx={{
-                color:
-                  pathname.substring(1) === "punto-pedido"
-                    ? "#FFFFFF"
-                    : "rgba(255, 255, 255, 0.6)",
-                "& .MuiSvgIcon-root": {
-                  fontSize: "1.8rem",
-                },
-              }}
+              sx={(t) =>
+                navActionSx(t, pathname.substring(1) === "punto-pedido")
+              }
             />
           )}
           <BottomNavigationAction
             label="Perfil"
             value="miperfil"
             icon={<AccountCircle />}
-            sx={{
-              color:
-                pathname.substring(1) === "miperfil"
-                  ? "#FFFFFF"
-                  : "rgba(255, 255, 255, 0.6)",
-              "& .MuiSvgIcon-root": {
-                fontSize: "1.8rem",
-              },
-            }}
+            sx={(t) => navActionSx(t, pathname.substring(1) === "miperfil")}
           />
           <BottomNavigationAction
             label="Cerrar Sesión"
             value="logout"
             icon={<LogoutOutlined />}
             onClick={handleLogout}
-            sx={{
-              color:
-                pathname.substring(1) === "logout"
-                  ? "#FFFFFF"
-                  : "rgba(255, 255, 255, 0.6)",
-              "& .MuiSvgIcon-root": {
-                fontSize: "1.8rem",
-              },
-            }}
+            sx={(t) => navActionSx(t, pathname.substring(1) === "logout")}
           />
         </BottomNavigation>
       )}

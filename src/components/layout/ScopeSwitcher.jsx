@@ -33,35 +33,39 @@ export default function ScopeSwitcher() {
 
   const TOKENS = {
     surface: isDark
-      ? alpha(theme.palette.common.white, 0.04)
+      ? alpha(theme.palette.primary.main, 0.1)
       : theme.palette.background.paper,
-    border: alpha(theme.palette.divider, isDark ? 0.5 : 0.6),
+    border:
+      theme.palette.roles?.border ??
+      (isDark ? alpha("#FFFFFF", 0.12) : alpha(theme.palette.divider, 0.6)),
     shadow: isDark
-      ? "0 1px 0 rgb(231, 222, 222)"
-      : "0 1px 3px rgba(16,24,40,.06)",
-
+      ? "0 8px 24px rgba(0,0,0,0.25)"
+      : "0 8px 24px rgba(2,6,23,0.06)",
     togglesBg: isDark
-      ? alpha(theme.palette.primary.light, 0.12)
+      ? alpha(theme.palette.primary.main, 0.2)
       : alpha(theme.palette.primary.main, 0.06),
-    toggleSelectedBg: theme.palette.primary.main,
+    toggleSelectedBg: isDark
+      ? alpha(theme.palette.primary.light, 0.95)
+      : theme.palette.primary.main,
     toggleSelectedFg: theme.palette.primary.contrastText,
     surfaceMobile: isDark
-      ? alpha(theme.palette.background.paper, 0.16)
+      ? alpha(theme.palette.background.default, 0.25)
       : alpha(theme.palette.grey[100], 0.95),
-
-    idleToggleBg: isDark ? alpha("#fff", 0.1) : alpha("#000", 0.06),
+    idleToggleBg: isDark ? alpha("#FFFFFF", 0.08) : alpha("#000000", 0.06),
     idleToggleFg: theme.palette.text.primary,
-
     inputBgMobile: isDark
-      ? alpha(theme.palette.background.paper, 0.18)
+      ? alpha(theme.palette.background.paper, 0.16)
       : theme.palette.background.paper,
-
     inputBgDesktop: isDark
-      ? alpha(theme.palette.background.paper, 0.24)
+      ? alpha("#FFFFFF", 0.06)
       : alpha(theme.palette.background.paper, 0.6),
-    inputBorderMobile: alpha(theme.palette.divider, isDark ? 0.5 : 0.6),
+    inputBorderMobile: isDark
+      ? alpha("#FFFFFF", 0.12)
+      : alpha(theme.palette.divider, 0.6),
 
-    divider: alpha(theme.palette.text.primary, isDark ? 0.15 : 0.12),
+    divider: isDark
+      ? alpha("#FFFFFF", 0.14)
+      : alpha(theme.palette.text.primary, 0.12),
   };
 
   const rolName = (
@@ -101,7 +105,7 @@ export default function ScopeSwitcher() {
         gap: isMobile ? 0.75 : 1,
         px: isMobile ? 0 : 1,
         py: isMobile ? 0 : 0.75,
-        borderRadius: isMobile ? 1.5 : 999,
+        borderRadius: isMobile ? 2 : 999,
         bgcolor: isMobile ? TOKENS.surfaceMobile : TOKENS.surface,
         border: isMobile ? "none" : `1px solid ${TOKENS.border}`,
         boxShadow: isMobile ? "none" : TOKENS.shadow,
@@ -120,7 +124,7 @@ export default function ScopeSwitcher() {
             dispatch(setActiveSucursal(options[0].id_sucursal));
           }
         }}
-        sx={{
+        sx={(t) => ({
           bgcolor: isMobile ? "transparent" : TOKENS.togglesBg,
           borderRadius: 999,
           p: isMobile ? 0 : 0.25,
@@ -140,10 +144,31 @@ export default function ScopeSwitcher() {
             "& .MuiToggleButton-root:not(.Mui-selected)": {
               backgroundColor: TOKENS.idleToggleBg,
               color: TOKENS.idleToggleFg,
-              "&:hover": { backgroundColor: alpha(TOKENS.idleToggleBg, 0.9) },
+              "&:hover": {
+                backgroundColor: alpha(TOKENS.idleToggleBg, 0.95),
+              },
+              "& .MuiSvgIcon-root": { opacity: 0.8 },
+            },
+            "& .MuiToggleButton-root.Mui-selected": {
+              background: `linear-gradient(180deg, ${
+                t.palette.primary.main
+              } 0%, ${alpha(t.palette.primary.main, 0.92)} 100%)`,
+              color: TOKENS.toggleSelectedFg,
+              boxShadow: "0 4px 14px rgba(2,6,23,0.12)",
+              "&:hover": {
+                background: `linear-gradient(180deg, ${
+                  t.palette.primary.main
+                } 0%, ${alpha(t.palette.primary.main, 0.92)} 100%)`,
+              },
+              "& .MuiSvgIcon-root": { opacity: 1 },
+            },
+
+            "& .MuiToggleButton-root.Mui-focusVisible": {
+              outline: `2px solid ${alpha(t.palette.primary.main, 0.35)}`,
+              outlineOffset: 2,
             },
           },
-        }}
+        })}
       >
         <Tooltip title="Filtrar por una sucursal específica">
           <ToggleButton value="sucursal" disabled={!isAdmin}>
@@ -181,23 +206,32 @@ export default function ScopeSwitcher() {
         loadingText="Cargando..."
         noOptionsText={isFetching ? "Cargando..." : "Sin sucursales"}
         disabled={mode !== "sucursal" || !isAdmin || isFetching}
-        sx={{
+        sx={(t) => ({
           minWidth: isMobile ? "100%" : 260,
           flex: isMobile ? "1 0 100%" : "unset",
           mt: isMobile ? 0.5 : 0,
           "& .MuiOutlinedInput-root": {
             height: 36,
-            borderRadius: isMobile ? 1.5 : 999,
+            borderRadius: isMobile ? 2 : 999,
             backgroundColor: isMobile
               ? TOKENS.inputBgMobile
               : TOKENS.inputBgDesktop,
+            paddingRight: 1,
+            "& .MuiAutocomplete-input": {
+              padding: "6px 4px",
+              fontWeight: 600,
+              letterSpacing: -0.1,
+            },
             "& fieldset": {
               border: isMobile
                 ? `1px solid ${TOKENS.inputBorderMobile}`
                 : "none",
             },
+            "&.Mui-focused": {
+              boxShadow: `0 0 0 3px ${alpha(t.palette.primary.main, 0.22)}`,
+            },
           },
-        }}
+        })}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -221,6 +255,36 @@ export default function ScopeSwitcher() {
             }}
           />
         )}
+        slotProps={{
+          paper: {
+            elevation: 0,
+            sx: (t) => ({
+              mt: 0.75,
+              borderRadius: 2,
+              border: `1px solid ${
+                t.palette.roles?.border || "rgba(2,6,23,0.12)"
+              }`,
+              boxShadow: "0 12px 32px rgba(2,6,23,0.12)",
+              overflow: "hidden",
+              "& .MuiAutocomplete-option": {
+                fontWeight: 600,
+                letterSpacing: -0.1,
+                "&:hover, &.Mui-focused": {
+                  backgroundColor:
+                    t.palette.mode === "light"
+                      ? alpha(t.palette.primary.main, 0.06)
+                      : alpha("#fff", 0.06),
+                },
+                "&.Mui-selected": {
+                  backgroundColor:
+                    t.palette.mode === "light"
+                      ? alpha(t.palette.primary.main, 0.12)
+                      : alpha("#fff", 0.12),
+                },
+              },
+            }),
+          },
+        }}
       />
     </Box>
   );

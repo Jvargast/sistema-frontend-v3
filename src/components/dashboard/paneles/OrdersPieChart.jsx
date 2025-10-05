@@ -32,10 +32,8 @@ const OrdersPieChart = ({ idSucursal }) => {
     <Box
       sx={{
         height: 320,
-        px: 3,
-        py: 3,
         borderRadius: 3,
-
+        padding: "8px",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
@@ -98,7 +96,7 @@ const OrdersPieChart = ({ idSucursal }) => {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            💤 {t("dashboard.no_data_today")}
+            {t("dashboard.no_data_today")}
           </Typography>
         </Box>
       ) : (

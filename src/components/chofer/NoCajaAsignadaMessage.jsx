@@ -19,7 +19,7 @@ const NoCajaAsignadaDialog = ({ open, handleClose, choferName }) => {
 
   const handleIrACajas = () => {
     handleClose();
-    navigate("/cajas");
+    navigate("/admin/cajas");
   };
   return (
     <Dialog
