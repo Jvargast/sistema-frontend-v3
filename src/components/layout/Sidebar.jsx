@@ -358,6 +358,23 @@ const Sidebar = ({
               />
             </FlexBetween>
           </Box>
+          <Box
+            sx={{
+              mt: 1.25,
+              px: 3,
+              pb: 2,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Typography
+              variant="caption"
+              sx={{ color: "text.disabled", letterSpacing: 0.2 }}
+            >
+              Versión {import.meta.env.VITE_APP_VERSION || "v0.0.0"}
+            </Typography>
+          </Box>
         </Drawer>
       )}
 
