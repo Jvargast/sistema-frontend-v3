@@ -30,6 +30,7 @@ import {
 import CrearSucursalModal from "../../../components/empresa/CrearSucursalModal";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../../store/reducers/notificacionSlice";
+import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
 
 const Empresa = () => {
   const {
@@ -44,6 +45,16 @@ const Empresa = () => {
     isError: isErrorSucursales,
     refetch: refetchSucursales,
   } = useGetAllSucursalsQuery();
+
+  useRegisterRefresh(
+    "empresa",
+    async () => {
+      await Promise.all([refetchEmpresas(), refetchSucursales()]);
+      return true;
+    },
+    [refetchEmpresas, refetchSucursales]
+  );
+
   const [createSucursal] = useCreateSucursalMutation();
   const [deleteSucursal] = useDeleteSucursalMutation();
   const [updateSucursal] = useUpdateSucursalMutation();

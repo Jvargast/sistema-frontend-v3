@@ -24,6 +24,7 @@ import useSucursalActiva from "../../hooks/useSucursalActiva";
 import InventarioMatrizInsumos from "../../components/insumos/InventarioMatrizInsumos";
 import InventarioTabsInsumosPorSucursal from "../../components/insumos/InventarioTabsInsumosPorSucursal";
 import InventarioAccordionInsumosPorInsumo from "../../components/insumos/InventarioAccordionInsumosPorInsumo";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const Insumos = () => {
   const dispatch = useDispatch();
@@ -40,7 +41,17 @@ const Insumos = () => {
     data: tiposData,
     isLoading: isLoadingTipos,
     isError: isErrorTipos,
+    refetch: refetchTipos
   } = useGetAllTiposQuery();
+
+  useRegisterRefresh(
+    "insumos",
+    async () => {
+      await Promise.all([refetchTipos()]);
+      return true;
+    },
+    [refetchTipos]
+  );
 
   const tipos = useMemo(
     () => tiposData?.map((t) => t.nombre_tipo) || [],
@@ -68,7 +79,7 @@ const Insumos = () => {
     triggerAll,
     {
       data: allInsumos = [],
-      isFetching: isLoadingAll /* , isError: isErrorAll */,
+      isFetching: isLoadingAll,  
     },
   ] = useLazyGetAllInsumosAllQuery();
 
@@ -122,7 +133,7 @@ const Insumos = () => {
         defaultValue: 1,
       },
     ],
-    [tipos,]
+    [tipos]
   );
 
   useEffect(() => {

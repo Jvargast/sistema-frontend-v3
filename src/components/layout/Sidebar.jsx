@@ -406,8 +406,8 @@ const Sidebar = ({
               t.palette.roles?.border || "rgba(2,6,23,0.08)"
             }`,
             boxShadow: "0 -4px 18px rgba(2,6,23,0.08)",
-            height: 64,
-            paddingBottom: "env(safe-area-inset-bottom, 12px)",
+            height: 68,
+            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 6px)",
             WebkitTransform: "translateZ(0)",
             "&::before": {
               content: '""',

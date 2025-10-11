@@ -34,6 +34,7 @@ import { useGetStocksByFormulaQuery } from "../../store/services/insumoApi";
 import FloatingStockBadge from "../../components/produccion/FloatingStockBadge";
 import InsumoStatusList from "../../components/produccion/InsumoStatusLists";
 import { useSelector } from "react-redux";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const steps = [
   "Seleccionar fórmula",
@@ -58,7 +59,7 @@ const PanelProduccion = () => {
   const sucursalActiva = useSucursalActiva();
   const idSucursal = sucursalActiva?.id_sucursal ?? sucursalActiva?.id ?? null;
 
-  const { data: formulaDetalle, isFetching: loadingFormula } =
+  const { data: formulaDetalle, isFetching: loadingFormula, refetch: refetchFormula } =
     useGetFormulaByIdQuery(
       { id: formulaSel?.id_formula, id_sucursal: idSucursal },
       {
@@ -67,7 +68,7 @@ const PanelProduccion = () => {
       }
     );
 
-  const { data: formulasResp, isFetching: loadingFormulas } =
+  const { data: formulasResp, isFetching: loadingFormulas, refetch: refetchFormulas } =
     useGetAllFormulasQuery({ limit: 1000 });
   const formulas = formulasResp?.formulas ?? [];
 
@@ -76,7 +77,7 @@ const PanelProduccion = () => {
     Boolean(idSucursal) &&
     Number(cantLote) > 0;
 
-  const { data: stocksByFormula = [], isFetching: loadingStocks } =
+  const { data: stocksByFormula = [], isFetching: loadingStocks, refetch: refetchStocks } =
     useGetStocksByFormulaQuery(
       {
         id_formula: formulaSel?.id_formula,
@@ -85,6 +86,15 @@ const PanelProduccion = () => {
       },
       { skip: !shouldFetchStocks }
     );
+
+  useRegisterRefresh(
+    "produccion",
+    async () => {
+      await Promise.all([refetchFormula(), refetchFormulas(), refetchStocks()]);
+      return true;
+    },
+    [refetchFormula, refetchFormulas, refetchStocks]
+  );
 
   const unidadesSalida = useMemo(() => {
     const rendimiento = Number(formulaDetalle?.cantidad_requerida) || 0;

@@ -22,15 +22,25 @@ import BackButton from "../../components/common/BackButton";
 import MovimientosCajaModal from "../../components/caja/MovimientosCajaModal";
 import { InfoOutlined } from "@mui/icons-material";
 import MovimientosCajaList from "../../components/caja/MovimientosCajaList";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const ListarCajas = () => {
-  const { data: cajasData, isLoading, error } = useGetAllCajasQuery();
+  const { data: cajasData, isLoading, error, refetch } = useGetAllCajasQuery();
   const [selectedCaja, setSelectedCaja] = useState(null);
   const [detalleCajaId, setDetalleCajaId] = useState(null);
   const [movimientosCajaId, setMovimientosCajaId] = useState(null);
   const [search, setSearch] = useState("");
   const [openCrearCajaModal, setOpenCrearCajaModal] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
+
+  useRegisterRefresh(
+    "cajas",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
 
   const filteredCajas = cajasData?.rows.filter(
     (caja) =>
@@ -41,7 +51,6 @@ const ListarCajas = () => {
 
   if (isLoading) return <LoaderComponent />;
   if (error) return <Typography>Error al cargar las cajas.</Typography>;
-
 
   return (
     <Box p={3}>

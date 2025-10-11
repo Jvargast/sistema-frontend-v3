@@ -11,12 +11,15 @@ import Footer from "../../components/common/Footer";
 import DynamicTabsBar from "../../components/layout/DynamicTabsBar";
 import WelcomePage from "../../components/common/WelcomePage";
 
-import {
-  shouldUseRouterPath,
-} from "../../utils/tabsConfig";
+import { shouldUseRouterPath } from "../../utils/tabsConfig";
+import { isNativeApp } from "../../utils/isNativeApp";
+import PullToRefresh from "../../components/common/PullToRefresh";
+import { useRefreshBus } from "../../context/RefreshBusContextDef";
+import { getRefreshKeyFromPath } from "../../utils/refreshKey";
 
 const Layout = () => {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const native = isNativeApp();
   const [isSidebarOpen, setIsSidebarOpen] = useState(isDesktop);
   const drawerWidth = 250;
   const navigate = useNavigate();
@@ -50,7 +53,7 @@ const Layout = () => {
 
   useEffect(() => {
     if (!isDesktop) return;
-    if (isRouterOnly) return; 
+    if (isRouterOnly) return;
     if (openTabs.length === 0 && pathname !== "/" && pathname !== "/#") {
       navigate("/");
     }
@@ -78,6 +81,22 @@ const Layout = () => {
     isDesktop &&
     openTabs.length === 0 &&
     (cleanPath === "" || cleanPath === "#");
+
+  const BOTTOM_NAV_H = 68;
+  const { run } = useRefreshBus();
+  const scrollRef = useRef(null);
+
+  const handleRefresh = async () => {
+    //const parts = location.pathname.replace(/^\//, "").split("/");
+    //const base = parts[0] === "admin" ? parts[1] || "admin" : parts[0] || "";
+
+
+    const key = getRefreshKeyFromPath(pathname);
+    console.log("[PULL] path:", pathname, "→ key:", key);
+    const handled = await run(key);
+    console.log("[PULL] handled:", handled);
+    await new Promise((r) => setTimeout(r, 250));
+  };
 
   if (isLoading) return <LoaderComponent />;
   if (isError) return <div>Error al cargar los datos del usuario</div>;
@@ -120,28 +139,36 @@ const Layout = () => {
           )}
 
           <Box
+            ref={scrollRef}
             flexGrow={1}
             minWidth={0}
             sx={{
               overflowY: "auto",
-              pb: {
-                xs: "calc(56px + env(safe-area-inset-bottom, 0px))",
-                md: 0,
-              },
+              pb: isDesktop
+                ? 0
+                : `calc(${BOTTOM_NAV_H}px + env(safe-area-inset-bottom, 0px))`,
+              overscrollBehaviorY: "contain",
+              WebkitOverflowScrolling: "touch",
             }}
           >
-            {isDesktop ? (
-              isWelcome || !activeTab ? (
-                <WelcomePage />
+            <PullToRefresh
+              scrollTargetRef={scrollRef}
+              onRefresh={handleRefresh}
+              disabled={isDesktop}
+            >
+              {isDesktop ? (
+                isWelcome || !activeTab ? (
+                  <WelcomePage />
+                ) : (
+                  <Outlet />
+                )
               ) : (
                 <Outlet />
-              )
-            ) : (
-              <Outlet />
-            )}
+              )}
+            </PullToRefresh>
           </Box>
 
-          <Footer />
+          {!native && isDesktop && <Footer />}
         </Box>
       </Box>
     </LayoutContext.Provider>

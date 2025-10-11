@@ -9,6 +9,7 @@ import EmptyState from "../../components/common/EmptyState";
 import { useSelector } from "react-redux";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const estadoColores = {
   Pendiente: "warning",
@@ -68,6 +69,15 @@ const ListarPagos = () => {
       ...(idSucursalFiltro ? { id_sucursal: idSucursalFiltro } : {}),
     },
     { refetchOnMountOrArgChange: true }
+  );
+
+  useRegisterRefresh(
+    "pagos",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
   );
 
   useEffect(() => {

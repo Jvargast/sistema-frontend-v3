@@ -30,6 +30,7 @@ import Header from "../../../components/common/Header";
 import MobileUserManagement from "./MobileUserManagement";
 import { useIsMobile } from "../../../utils/useIsMobile";
 import { useSelector } from "react-redux";
+import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
 
 const UserManagement = () => {
   const { mode, activeSucursalId } = useSelector((s) => s.scope);
@@ -55,11 +56,30 @@ const UserManagement = () => {
     `${mode}:${activeSucursalId}`
   );
 
-  const { data: empresas, isLoading: isLoadingEmpresas } =
-    useGetAllEmpresasQuery();
-  const { data: sucursales, isLoading: isLoadingSucursales } =
-    useGetAllSucursalsQuery();
-  const { data: rolesData, isLoading: isLoadingRoles } = useGetAllRolesQuery();
+  const {
+    data: empresas,
+    isLoading: isLoadingEmpresas,
+    refetch: empresasRefetch,
+  } = useGetAllEmpresasQuery();
+  const {
+    data: sucursales,
+    isLoading: isLoadingSucursales,
+    refetch: sucursalesRefetch,
+  } = useGetAllSucursalsQuery();
+  const { data: rolesData, isLoading: isLoadingRoles, refetch: rolesRefetch } = useGetAllRolesQuery();
+
+  useRegisterRefresh(
+    "usuarios",
+    async () => {
+      await Promise.all([
+        empresasRefetch(),
+        sucursalesRefetch(),
+        rolesRefetch(),
+      ]);
+      return true;
+    },
+    [empresasRefetch, sucursalesRefetch, rolesRefetch]
+  );
 
   const rolesOptions =
     rolesData?.roles?.map((role) => ({

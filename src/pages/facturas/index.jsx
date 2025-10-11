@@ -7,6 +7,7 @@ import EmptyState from "../../components/common/EmptyState";
 import DataTable from "../../components/common/DataTable";
 import { useSelector } from "react-redux";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const estadoColores = {
   pendiente: "warning",
@@ -62,6 +63,15 @@ const ListarCuentasPorCobrar = () => {
   useEffect(() => {
     refetch();
   }, [page, rowsPerPage, idSucursalFiltro, refetch]);
+
+  useRegisterRefresh(
+    "facturas",
+    async () => {
+      await refetch(); 
+      return true;
+    },
+    [refetch]
+  );
 
   const cuentas = useMemo(() => data?.data || [], [data]);
   const totalItems = useMemo(() => data?.total?.totalItems || 0, [data]);

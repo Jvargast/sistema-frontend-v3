@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import ProveedorFilters from "../../components/proveedores/ProveedorFilters";
 import ProveedorTable from "../../components/proveedores/ProveedorTable";
 import { useGetAllProveedoresQuery } from "../../store/services/proveedorApi";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const useDebounced = (val, delay = 400) => {
   const [d, setD] = useState(val);
@@ -30,10 +31,19 @@ export default function ListarProveedores() {
     [page, rowsPerPage, debouncedSearch]
   );
 
-  const { data, isLoading, isError } = useGetAllProveedoresQuery(queryArgs, {
+  const { data, isLoading, isError, refetch } = useGetAllProveedoresQuery(queryArgs, {
     refetchOnFocus: false,
     refetchOnReconnect: false,
   });
+
+  useRegisterRefresh(
+    "proveedores",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
   const proveedores = useMemo(
     () => (Array.isArray(data) ? data : data?.items || data?.proveedores || []),
     [data]

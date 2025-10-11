@@ -29,6 +29,7 @@ import HistorialPedidos from "../../components/pedido/HistorialPedidos";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { onRefetchMisPedidos } from "../../utils/eventBus";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const MisPedidos = () => {
   const dispatch = useDispatch();
@@ -75,6 +76,15 @@ const MisPedidos = () => {
       fecha: formatFecha(fechaSeleccionada),
     },
     { refetchOnMountOrArgChange: true }
+  );
+
+  useRegisterRefresh(
+    "mis-pedidos",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
   );
 
   useEffect(() => {

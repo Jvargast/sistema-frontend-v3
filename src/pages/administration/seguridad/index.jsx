@@ -1,11 +1,4 @@
-import {
-  Box,
-  Card,
-  CardContent,
-  Divider,
-  Tab,
-  Tabs,
-} from "@mui/material";
+import { Box, Card, CardContent, Divider, Tab, Tabs } from "@mui/material";
 import usePaginatedData from "../../../utils/usePaginateData";
 import BackButton from "../../../components/common/BackButton";
 import AuditLogs from "../../../components/seguridad/AuditLogs";
@@ -18,6 +11,7 @@ import { useGetLogsQuery } from "../../../store/services/auditLogsApi";
 import { useGetAllLogsQuery } from "../../../store/services/logVentasApi";
 import { useState } from "react";
 import Header from "../../../components/common/Header";
+import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
 
 const Seguridad = () => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -26,6 +20,7 @@ const Seguridad = () => {
     isLoading: isLoadingLogsTransacciones,
     paginacion: transactionPagination,
     handlePageChange: handleTransactionPageChange,
+    refetch: refetchTransactions,
   } = usePaginatedData(useGetAllLogsQuery);
 
   const {
@@ -33,7 +28,17 @@ const Seguridad = () => {
     isLoading: isLoadingAuditLogs,
     paginacion: auditPagination,
     handlePageChange: handleAuditPageChange,
+    refetch: refetchAudit,
   } = usePaginatedData(useGetLogsQuery);
+
+  useRegisterRefresh(
+    "seguridad",
+    async () => {
+      await Promise.all([refetchTransactions(), refetchAudit()]);
+      return true;
+    },
+    [refetchTransactions, refetchAudit]
+  );
 
   const securitySettings = { twoFactorEnabled: true, lockoutEnabled: false };
 
@@ -122,9 +127,7 @@ const Seguridad = () => {
           <Divider />
 
           {/* Contenido de cada tab */}
-          <CardContent
-            sx={{ flex: 1, minHeight: 390, px: { xs: 1, md: 4 } }}
-          >
+          <CardContent sx={{ flex: 1, minHeight: 390, px: { xs: 1, md: 4 } }}>
             {tabIndex === 0 && (
               <AuditLogs
                 logs={auditLogsReview}

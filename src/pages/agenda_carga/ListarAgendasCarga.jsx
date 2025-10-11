@@ -8,6 +8,7 @@ import { useGetAllAgendasQuery } from "../../store/services/agendaCargaApi";
 import { convertirFechaLocal } from "../../utils/fechaUtils";
 import { useSelector } from "react-redux";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const estadoColores = {
   pendiente: "warning",
@@ -21,7 +22,8 @@ const ListarAgendasCarga = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const { data: sucursales } = useGetAllSucursalsQuery();
+  const { data: sucursales, refetch: refetchSucursales } =
+    useGetAllSucursalsQuery();
 
   const getAgendaSucursalId = (row) =>
     Number(
@@ -46,6 +48,15 @@ const ListarAgendasCarga = () => {
     ...(isSucursalScope ? { id_sucursal: Number(activeSucursalId) } : {}),
   };
   const { data, isLoading, refetch } = useGetAllAgendasQuery(queryArg);
+
+  useRegisterRefresh(
+    "agendas",
+    async () => {
+      await Promise.all([refetchSucursales(), refetch()]);
+      return true;
+    },
+    [refetchSucursales, refetch]
+  );
 
   useEffect(() => {
     refetch();

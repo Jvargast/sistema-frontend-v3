@@ -15,6 +15,7 @@ import "dayjs/locale/es";
 import "dayjs/locale/en";
 import { useMemo } from "react";
 import PropTypes from "prop-types";
+import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
 
 const CLPFormatter = new Intl.NumberFormat("es-CL", {
   style: "currency",
@@ -30,9 +31,29 @@ const SalesChart = ({ idSucursal }) => {
     () => (idSucursal ? { id_sucursal: idSucursal } : {}),
     [idSucursal]
   );
-  const { data, isLoading, isError } = useGetVentasResumenSemanalQuery(args, {
-    refetchOnMountOrArgChange: true,
-  });
+  const { data, isLoading, isError, refetch } = useGetVentasResumenSemanalQuery(
+    args,
+    {
+      refetchOnMountOrArgChange: true,
+    }
+  );
+
+  useRegisterRefresh(
+    "dashboard",
+    async () => {
+      await refetch();
+      return true;
+    },
+    [refetch]
+  );
+  useRegisterRefresh(
+    "",
+    async () => {
+      await refetch();
+      return true;
+    },
+    [refetch]
+  );
 
   const formateado =
     data?.map((d) => ({

@@ -15,6 +15,7 @@ import {
 import CamionCard from "../../components/camion/CamionCard";
 import Header from "../../components/common/Header";
 import { useSelector } from "react-redux";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const CamionesManagement = () => {
   const navigate = useNavigate();
@@ -41,6 +42,15 @@ const CamionesManagement = () => {
   } = useGetAllCamionesQuery();
   const [createCamion, { isLoading: isCreating }] = useCreateCamionMutation();
   const [deleteCamion, { isLoading: isDeleting }] = useDeleteCamionMutation();
+
+  useRegisterRefresh(
+    "camiones",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
 
   useEffect(() => {
     const next = mode === "global" ? "" : String(activeSucursalId ?? "");
@@ -207,11 +217,18 @@ const CamionesManagement = () => {
       );
       refetch();
     } catch (error) {
+      const code = error?.data?.code;
+      const msg =
+        code === "CAMION_TIENE_CHOFER"
+          ? "Este camión tiene un chofer asignado. Desasigna al chofer antes de eliminar."
+          : code === "CAMION_NOT_FOUND"
+          ? "El camión ya no existe (posible eliminación previa)."
+          : error?.data?.error ||
+            error?.message ||
+            "Error al eliminar el camión";
       dispatch(
         showNotification({
-          message:
-            "Error al eliminar el camión: " +
-            (error.data?.error || error.message),
+          message: msg,
           severity: "error",
         })
       );

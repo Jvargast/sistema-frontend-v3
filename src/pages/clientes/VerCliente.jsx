@@ -18,6 +18,7 @@ import LoaderComponent from "../../components/common/LoaderComponent";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import BackButton from "../../components/common/BackButton";
 import { useSelector } from "react-redux";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const VerCliente = () => {
   const theme = useTheme();
@@ -40,6 +41,15 @@ const VerCliente = () => {
         ? Number(activeSucursalId)
         : undefined,
   });
+
+  useRegisterRefresh(
+    "clientes",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
 
   const formData = clienteData
     ? {

@@ -22,6 +22,7 @@ import { formatCLP } from "../../utils/formatUtils";
 import { useGetAllComprasQuery } from "../../store/services/compraApi";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import { selectScope } from "../../store/reducers/scopeSlice";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const estadoChip = (v) =>
   ESTADOS_COMPRA.find((e) => e.value === String(v || "").toLowerCase()) || {
@@ -85,11 +86,20 @@ export default function ListarCompras() {
     [page, rowsPerPage, debouncedSearch, idSucursalParam]
   );
 
-  const { data, isLoading, isError } = useGetAllComprasQuery(queryArgs, {
+  const { data, isLoading, isError, refetch } = useGetAllComprasQuery(queryArgs, {
     skip: !ready,
     refetchOnFocus: false,
     refetchOnReconnect: false,
   });
+
+  useRegisterRefresh(
+    "compras",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
 
   const compras = useMemo(
     () => (Array.isArray(data) ? data : data?.items || data?.compras || []),

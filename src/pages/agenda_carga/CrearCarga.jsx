@@ -44,6 +44,7 @@ import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventar
 import { convertirFechaLocal } from "../../utils/fechaUtils";
 import CapacidadCargaCamion from "../../components/agenda_carga/CapacidadCargaCamion";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const CreateAgendaCargaForm = () => {
   const auth = useSelector((s) => s.auth);
@@ -99,6 +100,7 @@ const CreateAgendaCargaForm = () => {
     data: choferesRaw,
     isLoading: loadingChoferes,
     isError: errorChoferes,
+    refetch: refetchChoferes,
   } = useGetAllChoferesQuery(choferesArg, { refetchOnMountOrArgChange: true });
 
   const choferes = useMemo(() => {
@@ -110,6 +112,7 @@ const CreateAgendaCargaForm = () => {
     data: camiones,
     isLoading: loadingCamiones,
     isError: errorCamiones,
+    refetch: refetchCamiones,
   } = useGetAllCamionesQuery(
     sucursalReady ? { id_sucursal: Number(sucursalId) } : skipToken,
     { refetchOnMountOrArgChange: true }
@@ -119,6 +122,7 @@ const CreateAgendaCargaForm = () => {
     data: productosDisponibles,
     isLoading: loadingProductos,
     isError: errorProductos,
+    refetch: refetchProductos,
   } = useGetAvailabreProductosQuery(
     sucursalReady ? { id_sucursal: Number(sucursalId) } : skipToken,
     { refetchOnMountOrArgChange: true }
@@ -143,6 +147,7 @@ const CreateAgendaCargaForm = () => {
     data: inventarioData,
     isLoading: loadingInventario,
     error: errorInventario,
+    refetch: refetchInventario,
   } = useGetEstadoInventarioCamionQuery(Number(idCamion), { skip: !idCamion });
 
   const [openNoCajaModal, setOpenNoCajaModal] = useState(false);
@@ -153,6 +158,20 @@ const CreateAgendaCargaForm = () => {
       { rutUsuario: idChofer, id_sucursal: sucursalId },
       { skip: !idChofer }
     );
+
+  useRegisterRefresh(
+    "agenda-carga",
+    async () => {
+      await Promise.all([
+        refetchCamiones(),
+        refetchChoferes(),
+        refetchProductos(),
+        refetchInventario(),
+      ]);
+      return true;
+    },
+    [refetchCamiones, refetchChoferes, refetchProductos, refetchInventario]
+  );
 
   const opcionesSucursales = useMemo(() => {
     const rawApi = shouldFetchSucursales

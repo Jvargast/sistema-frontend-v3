@@ -12,6 +12,7 @@ import DataTable from "../../components/common/DataTable";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useDispatch } from "react-redux";
 import AlertDialog from "../../components/common/AlertDialog";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const ListarFormulasProductos = () => {
   const navigate = useNavigate();
@@ -27,6 +28,15 @@ const ListarFormulasProductos = () => {
       limit: rowsPerPage,
     },
     { refetchOnMountOrArgChange: true }
+  );
+
+  useRegisterRefresh(
+    "formulas",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
   );
 
   const [deleteFormula] = useDeleteFormulaMutation();
@@ -142,7 +152,7 @@ const ListarFormulasProductos = () => {
       <DataTable
         title="Fórmulas de Productos"
         subtitle="Gestión de Fórmulas"
-        headerAction={botonCrear}   
+        headerAction={botonCrear}
         columns={columns}
         rows={formulas}
         totalItems={totalItems}

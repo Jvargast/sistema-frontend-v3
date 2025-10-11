@@ -16,6 +16,7 @@ import { showNotification } from "../../../store/reducers/notificacionSlice";
 import LoaderComponent from "../../../components/common/LoaderComponent";
 import EditUserForm from "../../../components/usuarios/EditUser";
 import PasswordModal from "../../../components/usuarios/PasswordModal";
+import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
 
 const EditUser = () => {
   const { id } = useParams();
@@ -29,10 +30,26 @@ const EditUser = () => {
     data: userData,
     isFetching,
     error: fetchError,
+    refetch: refetchUser,
   } = useFindByRutQuery(id);
-  const { data: empresas } = useGetAllEmpresasQuery();
-  const { data: sucursales } = useGetAllSucursalsQuery();
-  const { data: rolesData } = useGetAllRolesQuery();
+  const { data: empresas, refetch: refetchEmpresas } = useGetAllEmpresasQuery();
+  const { data: sucursales, refetch: refetchSucursales } =
+    useGetAllSucursalsQuery();
+  const { data: rolesData, refetch: refetchRoles } = useGetAllRolesQuery();
+
+  useRegisterRefresh(
+    "usuarios",
+    async () => {
+      await Promise.all([
+        refetchUser(),
+        refetchEmpresas(),
+        refetchSucursales(),
+        refetchRoles(),
+      ]);
+      return true;
+    },
+    [refetchUser, refetchEmpresas, refetchSucursales, refetchRoles]
+  );
 
   const [updateUser] = useUpdateUserMutation();
   const [updateUserPassword] = useUpdateUserPasswordMutation();

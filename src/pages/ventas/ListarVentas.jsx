@@ -16,6 +16,7 @@ import EmptyState from "../../components/common/EmptyState";
 import { Outlet, useMatch, useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const ListaVentas = () => {
   const theme = useTheme();
@@ -30,6 +31,15 @@ const ListaVentas = () => {
     page: page + 1,
     limit: rowsPerPage,
   });
+
+  useRegisterRefresh(
+    "ventas",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
 
   const [deleteVenta] = useDeleteVentaMutation();
   const [rejectVenta] = useRejectVentaMutation();

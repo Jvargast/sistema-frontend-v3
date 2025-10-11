@@ -27,10 +27,15 @@ import Header from "../../components/common/Header";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
-import { useCreateCategoriaGastoMutation, useDeleteCategoriaGastoMutation, useGetAllCategoriasGastoQuery, useUpdateCategoriaGastoMutation } from "../../store/services/categoriaGastoApi";
+import {
+  useCreateCategoriaGastoMutation,
+  useDeleteCategoriaGastoMutation,
+  useGetAllCategoriasGastoQuery,
+  useUpdateCategoriaGastoMutation,
+} from "../../store/services/categoriaGastoApi";
 import CategoriaGastoCard from "../../components/categorias_gasto/CategoriaGastoCard";
 import CategoriaGastoDialog from "../../components/categorias_gasto/CategoriaGastoDialog";
-
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const TIPOS_CATEGORIA = [
   { id: "", label: "Todos" },
@@ -69,6 +74,15 @@ export default function CategoriaGastoManagement() {
   const { data, isLoading, isError, refetch } =
     useGetAllCategoriasGastoQuery(params);
 
+  useRegisterRefresh(
+    "categorias-gastos",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
+
   const categorias = React.useMemo(() => {
     if (!data) return [];
     if (Array.isArray(data)) return data;
@@ -78,9 +92,12 @@ export default function CategoriaGastoManagement() {
   const [openDlg, setOpenDlg] = React.useState(false);
   const [editItem, setEditItem] = React.useState(null);
 
-  const [createCat, { isLoading: creating }] = useCreateCategoriaGastoMutation();
-  const [updateCat, { isLoading: updating }] = useUpdateCategoriaGastoMutation();
-  const [deleteCat, { isLoading: deleting }] = useDeleteCategoriaGastoMutation();
+  const [createCat, { isLoading: creating }] =
+    useCreateCategoriaGastoMutation();
+  const [updateCat, { isLoading: updating }] =
+    useUpdateCategoriaGastoMutation();
+  const [deleteCat, { isLoading: deleting }] =
+    useDeleteCategoriaGastoMutation();
 
   const openCreate = () => {
     setEditItem(null);
@@ -94,7 +111,10 @@ export default function CategoriaGastoManagement() {
   const handleSubmit = async (payload) => {
     try {
       if (editItem) {
-        await updateCat({ id: editItem.id_categoria_gasto || editItem.id, ...payload }).unwrap();
+        await updateCat({
+          id: editItem.id_categoria_gasto || editItem.id,
+          ...payload,
+        }).unwrap();
         dispatch(
           showNotification({
             message: "Categoría actualizada",
@@ -249,7 +269,14 @@ export default function CategoriaGastoManagement() {
 
       <Grid container spacing={2}>
         {categorias.map((cat) => (
-          <Grid item key={cat.id_categoria_gasto || cat.id} xs={12} sm={6} md={4} lg={3}>
+          <Grid
+            item
+            key={cat.id_categoria_gasto || cat.id}
+            xs={12}
+            sm={6}
+            md={4}
+            lg={3}
+          >
             <CategoriaGastoCard
               categoria={cat}
               onEdit={() => openEdit(cat)}

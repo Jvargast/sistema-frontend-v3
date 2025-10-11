@@ -20,16 +20,34 @@ import { useState } from "react";
 import { useGetVentasTendenciaMensualQuery } from "../../../store/services/ventasEstadisticasApi";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
+import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
 
 const RevenueTrendChart = ({ idSucursal }) => {
   const { t, i18n } = useTranslation();
   const currentYear = new Date().getFullYear();
   const [anio, setAnio] = useState(currentYear);
 
-  const { data, isLoading, isError } = useGetVentasTendenciaMensualQuery({
+  const { data, isLoading, isError, refetch } = useGetVentasTendenciaMensualQuery({
     anio,
     ...(idSucursal != null ? { id_sucursal: idSucursal } : {}),
   });
+
+  useRegisterRefresh(
+    "dashboard",
+    async () => {
+      await refetch();
+      return true;
+    },
+    [refetch]
+  );
+  useRegisterRefresh(
+    "",
+    async () => {
+      await refetch();
+      return true;
+    },
+    [refetch]
+  );
 
   const handleChange = (event) => {
     setAnio(event.target.value);
