@@ -26,6 +26,7 @@ import { CustomPagination } from "../../components/common/CustomPagination";
 import Header from "../../components/common/Header";
 import DataGridCustomToolbar from "../../components/common/DataGridCustomToolBar";
 import { useSelector } from "react-redux";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const CHIP_COLOR_KEYS = ["primary", "secondary", "success", "warning", "info"];
 const hashStr = (s) =>
@@ -78,6 +79,15 @@ const Clientes = () => {
   const [deleteClientes, { isLoading: isDeleting }] =
     useDeleteClientesMutation();
 
+  useRegisterRefresh(
+    "clientes",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
+
   const paginacion = useMemo(() => data?.paginacion || {}, [data?.paginacion]);
   const rows = useMemo(
     () =>
@@ -128,7 +138,7 @@ const Clientes = () => {
           );
         }
 
-        const max = isMobile ? 2 : 3; 
+        const max = isMobile ? 2 : 3;
         const shown = list.slice(0, max);
         const rest = list.length - shown.length;
 

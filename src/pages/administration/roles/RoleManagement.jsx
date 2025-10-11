@@ -22,6 +22,7 @@ import {
   useGetAllRolesQuery,
 } from "../../../store/services/rolesApi";
 import { useHasPermission } from "../../../utils/useHasPermission";
+import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
 
 const RoleManagement = () => {
   const theme = useTheme();
@@ -40,6 +41,15 @@ const RoleManagement = () => {
   const [selectedRoleId, setSelectedRoleId] = useState(null);
 
   const { data: roles, isLoading, isError, refetch } = useGetAllRolesQuery();
+
+  useRegisterRefresh(
+    "roles",
+    async () => {
+      await refetch();
+      return true;
+    },
+    [refetch]
+  );
 
   const handleCreateRole = async () => {
     dispatch(
@@ -109,7 +119,7 @@ const RoleManagement = () => {
           justifyContent: "space-between",
           gap: { xs: 1.5, sm: 3 },
           mb: { xs: 2, md: 4 },
-          p: 1
+          p: 1,
         }}
       >
         {/* Botón Volver */}

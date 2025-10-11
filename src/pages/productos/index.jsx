@@ -42,6 +42,7 @@ import InventarioAccordionPorProducto from "../../components/productos/Inventari
 import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { useSelector } from "react-redux";
 import ImageCell from "../../components/common/ImageCell";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const Productos = () => {
   const location = useLocation();
@@ -79,6 +80,7 @@ const Productos = () => {
     data: dataTodosProductos,
     isLoading: isLoadingTodos,
     isError: isErrorTodos,
+    refetch: refetchAllProductos,
   } = useGetAllProductosQuery(
     { estado: "Disponible - Bodega", limit: 1000 },
     { skip: !shouldFetchAll }
@@ -97,7 +99,16 @@ const Productos = () => {
 
   const paginacion = useMemo(() => data?.paginacion || {}, [data?.paginacion]);
 
-  const { data: categorias } = useGetAllCategoriasQuery();
+  const { data: categorias, refetch: refetchCategorias } = useGetAllCategoriasQuery();
+
+  useRegisterRefresh(
+    "productos",
+    async () => {
+      await Promise.all([refetch(), refetchAllProductos(), refetchCategorias()]);
+      return true;
+    },
+    [refetch, refetchAllProductos, refetchCategorias]
+  );
 
   const [createProducto, { isLoading: isCreating }] =
     useCreateProductoMutation();

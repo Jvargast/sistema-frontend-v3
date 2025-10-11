@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { useMemo } from "react";
+import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
 
 const colors = [
   "#A3C4F3",
@@ -35,9 +36,26 @@ const BestSellingProductsChart = ({ idSucursal }) => {
     }),
     [hoy, idSucursal]
   );
-  const { data, isLoading, isError } = useGetResumenProductosPorFechaQuery(
+  const { data, isLoading, isError, refetch } = useGetResumenProductosPorFechaQuery(
     queryArgs,
     { refetchOnMountOrArgChange: true }
+  );
+
+  useRegisterRefresh(
+    "dashboard",
+    async () => {
+      await refetch();
+      return true;
+    },
+    [refetch]
+  );
+  useRegisterRefresh(
+    "",
+    async () => {
+      await refetch();
+      return true;
+    },
+    [refetch]
   );
 
   const chartData = Array.isArray(data)

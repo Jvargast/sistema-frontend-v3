@@ -19,6 +19,7 @@ import { useGetAllGastosQuery } from "../../store/services/gastoApi";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { alpha } from "@mui/material/styles";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const tipoChipColor = (t) =>
   ({
@@ -68,11 +69,23 @@ export default function ListarGastos() {
     [page, rowsPerPage, debouncedSearch, idSucursalParam]
   );
 
-  const { data, isLoading, isError } = useGetAllGastosQuery(queryArgs, {
-    skip: !ready,
-    refetchOnFocus: false,
-    refetchOnReconnect: false,
-  });
+  const { data, isLoading, isError, refetch } = useGetAllGastosQuery(
+    queryArgs,
+    {
+      skip: !ready,
+      refetchOnFocus: false,
+      refetchOnReconnect: false,
+    }
+  );
+
+  useRegisterRefresh(
+    "gastos",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
 
   const gastos = useMemo(
     () => (Array.isArray(data) ? data : data?.items || data?.gastos || []),

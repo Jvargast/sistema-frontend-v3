@@ -18,10 +18,10 @@ body {
 .app {
   height: 100%;
   width: 100%;
-  padding-bottom: var(
+/*   padding-bottom: var(
     --safe-area-inset-bottom,
     env(safe-area-inset-bottom, 20px)
-  );
+  ); */
   display: flex;
   flex-direction: column;
   overflow: hidden;

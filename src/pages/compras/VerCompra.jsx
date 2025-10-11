@@ -15,6 +15,7 @@ import CompraOverview from "../../components/compras/CompraOverview";
 import CompraDetailItems from "../../components/compras/CompraDetailItems";
 import CompraEditForm from "../../components/compras/CompraEditForm";
 import CompraItemsTable from "../../components/compras/CompraItemsTable";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 export default function VerCompra() {
   const { id } = useParams();
@@ -27,6 +28,15 @@ export default function VerCompra() {
     refetch,
   } = useGetCompraByIdQuery(id, { skip: !id });
   const { data: sucursales = [] } = useGetAllSucursalsQuery();
+
+  useRegisterRefresh(
+    "compras",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
 
   const [edit, setEdit] = useState(false);
   const [form, setForm] = useState(null);

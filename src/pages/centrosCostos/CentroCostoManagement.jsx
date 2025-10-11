@@ -32,6 +32,7 @@ import { selectScope } from "../../store/reducers/scopeSlice";
 import CentroCostoCard from "../../components/centro_de_costos/CentroCostoCard";
 import CentroCostoDialog from "../../components/centro_de_costos/CentroCostoDialog";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 export default function CentroCostoManagement() {
   const theme = useTheme();
@@ -71,6 +72,15 @@ export default function CentroCostoManagement() {
 
   const { data, isLoading, isError, refetch } =
     useGetAllCentrosCostoQuery(params);
+
+  useRegisterRefresh(
+    "centros-costo",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
 
   const centros = React.useMemo(() => {
     if (!data) return [];

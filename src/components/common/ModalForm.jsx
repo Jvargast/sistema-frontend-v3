@@ -52,6 +52,26 @@ const SlideUp = forwardRef(function SlideUp(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
+const buildDefaults = (fields) =>
+  fields.reduce((acc, field) => {
+    const def = field.defaultValue ?? (field.type === "checkbox" ? false : "");
+    acc[field.name] = field.type === "checkbox" ? Boolean(def) : def;
+    return acc;
+  }, {});
+
+const mergeInitial = (fields, initialData) => {
+  const base = buildDefaults(fields);
+  if (!initialData) return base;
+
+  for (const key of Object.keys(initialData)) {
+    const field = fields.find((f) => f.name === key);
+    if (!field) continue;
+    base[key] =
+      field.type === "checkbox" ? Boolean(initialData[key]) : initialData[key];
+  }
+  return base;
+};
+
 const ModalForm = ({
   open,
   onClose,
@@ -120,43 +140,9 @@ const ModalForm = ({
 
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState(
-    initialData ||
-      fields.reduce((acc, field) => {
-        const defaultValue = field.defaultValue || "";
-        return {
-          ...acc,
-          [field.name]:
-            field.type === "checkbox" ? Boolean(defaultValue) : defaultValue,
-        };
-      }, {})
-  );
+  const [formData, setFormData] = useState(mergeInitial(fields, initialData));
   useEffect(() => {
-    if (initialData) {
-      setFormData(
-        Object.keys(initialData).reduce((acc, key) => {
-          const field = fields.find((f) => f.name === key);
-          return {
-            ...acc,
-            [key]:
-              field?.type === "checkbox"
-                ? Boolean(initialData[key])
-                : initialData[key],
-          };
-        }, {})
-      );
-    } else {
-      setFormData(
-        fields.reduce((acc, field) => {
-          const defaultValue = field.defaultValue || "";
-          return {
-            ...acc,
-            [field.name]:
-              field.type === "checkbox" ? Boolean(defaultValue) : defaultValue,
-          };
-        }, {})
-      );
-    }
+    setFormData(mergeInitial(fields, initialData));
   }, [fields, initialData]);
 
   const isFieldDisabled = (name) =>
@@ -342,7 +328,7 @@ const ModalForm = ({
                         label={field.label}
                         name={field.name}
                         type={field.type}
-                        value={formData[field.name]}
+                        value={formData[field.name] ?? ""}
                         onChange={(e) => {
                           const { value } = e.target;
                           const raw = value.replace(/[^0-9kK.-]/g, "");

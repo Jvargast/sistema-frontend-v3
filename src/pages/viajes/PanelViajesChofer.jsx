@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { socket } from "../../socket";
 import { useDispatch } from "react-redux";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const PanelViajeChofer = () => {
   const usuario = useSelector((state) => state.auth.user);
@@ -31,6 +32,7 @@ const PanelViajeChofer = () => {
     data: viaje,
     isLoading,
     error,
+    refetch
   } = useGetAgendaViajeChoferQuery(
     { id_chofer: usuario?.id },
     {
@@ -39,6 +41,15 @@ const PanelViajeChofer = () => {
       refetchOnReconnect: true,
       refetchOnFocus: true,
     }
+  );
+
+  useRegisterRefresh(
+    "viajes",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
   );
 
   const dispatch = useDispatch();

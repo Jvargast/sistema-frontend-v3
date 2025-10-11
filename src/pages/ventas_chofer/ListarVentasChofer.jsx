@@ -7,6 +7,7 @@ import EmptyState from "../../components/common/EmptyState";
 import DataTable from "../../components/common/DataTable";
 import { useSelector } from "react-redux";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const estadoColores = { pendiente: "warning", pagado: "success" };
 
@@ -68,6 +69,15 @@ const ListarVentasChofer = () => {
     refetchOnMountOrArgChange: true,
     keepUnusedDataFor: 30,
   });
+
+  useRegisterRefresh(
+    "ventas-chofer",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
 
   useEffect(() => {
     setPage(0);

@@ -22,6 +22,7 @@ import { useGetKpiProductoPorFechaQuery } from "../../store/services/productosEs
 import { useSelector } from "react-redux";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
 import DashboardHeader from "../../components/dashboard/paneles/DashboardHeader";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const DashboardCentral = () => {
   const { mode, activeSucursalId } = useSelector((s) => s.scope || {});
@@ -42,15 +43,37 @@ const DashboardCentral = () => {
     [mode, resolvedSucursalId]
   );
 
-  const { data: ventas } = useGetKpiVentasPorFechaQuery(kpiArgs, {
-    refetchOnMountOrArgChange: true,
-  });
-  const { data: pedidos } = useGetKpiPedidosPorFechaQuery(kpiArgs, {
-    refetchOnMountOrArgChange: true,
-  });
-  const { data: producto } = useGetKpiProductoPorFechaQuery(kpiArgs, {
-    refetchOnMountOrArgChange: true,
-  });
+  const { data: ventas, refetch: refetchVentas } = useGetKpiVentasPorFechaQuery(
+    kpiArgs,
+    {
+      refetchOnMountOrArgChange: true,
+    }
+  );
+  const { data: pedidos, refetch: refetchPedidos } =
+    useGetKpiPedidosPorFechaQuery(kpiArgs, {
+      refetchOnMountOrArgChange: true,
+    });
+  const { data: producto, refetch: refetchProducto } =
+    useGetKpiProductoPorFechaQuery(kpiArgs, {
+      refetchOnMountOrArgChange: true,
+    });
+
+  useRegisterRefresh(
+    "",
+    async () => {
+      await Promise.all([refetchVentas(), refetchPedidos(), refetchProducto()]);
+      return true;
+    },
+    [refetchVentas, refetchPedidos, refetchProducto]
+  );
+  useRegisterRefresh(
+    "dashboard",
+    async () => {
+      await Promise.all([refetchVentas(), refetchPedidos(), refetchProducto()]);
+      return true;
+    },
+    [refetchVentas, refetchPedidos, refetchProducto]
+  );
 
   const chartsData = useMemo(
     () => [

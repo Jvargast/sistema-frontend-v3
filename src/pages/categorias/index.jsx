@@ -26,6 +26,7 @@ import AlertDialog from "../../components/common/AlertDialog";
 import { useHasPermission } from "../../utils/useHasPermission";
 import { useIsMobile } from "../../utils/useIsMobile";
 import Header from "../../components/common/Header";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const CategoriaManagement = () => {
   const isMobile = useIsMobile();
@@ -64,6 +65,15 @@ const CategoriaManagement = () => {
     isError,
     refetch,
   } = useGetAllCategoriasQuery();
+
+  useRegisterRefresh(
+    "categorias",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
 
   const handleEdit = (id) => {
     setSelectedCategoriaId(id);

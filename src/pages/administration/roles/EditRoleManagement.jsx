@@ -18,6 +18,7 @@ import { showNotification } from "../../../store/reducers/notificacionSlice";
 import { useGetAllpermisosQuery } from "../../../store/services/permisosRolesApi";
 import Row from "../../../components/roles/Row";
 import { useHasPermission } from "../../../utils/useHasPermission";
+import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
 
 const EditRole = () => {
   const { id } = useParams();
@@ -37,10 +38,24 @@ const EditRole = () => {
 
   const [searchPermiso, setSearchPermiso] = useState("");
 
-  const { data: permisosData, isFetching } = useGetAllpermisosQuery({
+  const {
+    data: permisosData,
+    isFetching,
+    refetch: refetchAllPermisos,
+  } = useGetAllpermisosQuery({
     page: 1,
     limit: 9999,
   });
+
+  useRegisterRefresh(
+    "roles",
+    async () => {
+      await refetch();
+      await refetchAllPermisos();
+      return true;
+    },
+    [refetch, refetchAllPermisos]
+  );
 
   const canEditPermisos = useHasPermission("auth.permisos.editar");
 
@@ -110,7 +125,6 @@ const EditRole = () => {
         })
       );
       navigate("../..", { relative: "path" });
-
     } catch (error) {
       dispatch(
         showNotification({

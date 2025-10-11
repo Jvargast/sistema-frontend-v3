@@ -219,7 +219,7 @@ const Administration = () => {
                   fontWeight: "bold",
                   color: (theme) => theme.palette.text.primary,
                   textAlign: "center",
-                  height: 32, // forzamos el alto para títulos de una o dos líneas
+                  height: 32,
                   lineHeight: 1.2,
                   overflow: "hidden",
                   textOverflow: "ellipsis",

@@ -9,21 +9,23 @@ import store from "./store/index.js";
 import Notification from "./components/utils/Notification.jsx";
 import NotificationListener from "./components/utils/NotificationListener.jsx";
 import { LoadScript } from "@react-google-maps/api";
-
+import { RefreshBusProvider } from "./context/RefreshBusContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
-      <LoadScript
-        googleMapsApiKey={import.meta.env.VITE_API_GOOGLE_MAPS}
-        libraries={["places", "marker"]}
-        language="es"
-        region="CL"
-      >
-        <Notification />
-        <NotificationListener />
-        <App />
-      </LoadScript>
+      <RefreshBusProvider>
+        <LoadScript
+          googleMapsApiKey={import.meta.env.VITE_API_GOOGLE_MAPS}
+          libraries={["places", "marker"]}
+          language="es"
+          region="CL"
+        >
+          <Notification />
+          <NotificationListener />
+          <App />
+        </LoadScript>
+      </RefreshBusProvider>
     </Provider>
   </StrictMode>
 );

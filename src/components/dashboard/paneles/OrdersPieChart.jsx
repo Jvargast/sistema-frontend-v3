@@ -11,6 +11,7 @@ import { useGetResumenVentasPorTipoEntregaQuery } from "../../../store/services/
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
+import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
 
 const COLORS = ["#A3C4F3", "#BFD8AF", "#FCD5CE", "#FFE5B4", "#D5AAFF"];
 
@@ -18,11 +19,28 @@ const OrdersPieChart = ({ idSucursal }) => {
   const theme = useTheme();
   const hoy = dayjs().format("YYYY-MM-DD");
 
-  const { data, isLoading, isError } = useGetResumenVentasPorTipoEntregaQuery({
-    fecha: hoy,
-    ...(idSucursal != null ? { id_sucursal: idSucursal } : {}),
-  });
+  const { data, isLoading, isError, refetch } =
+    useGetResumenVentasPorTipoEntregaQuery({
+      fecha: hoy,
+      ...(idSucursal != null ? { id_sucursal: idSucursal } : {}),
+    });
   const { t } = useTranslation();
+  useRegisterRefresh(
+    "dashboard",
+    async () => {
+      await refetch();
+      return true;
+    },
+    [refetch]
+  );
+  useRegisterRefresh(
+    "",
+    async () => {
+      await refetch();
+      return true;
+    },
+    [refetch]
+  );
 
   const chartData = Array.isArray(data)
     ? data.filter((item) => item.value > 0)

@@ -41,6 +41,7 @@ import InventarioCamion from "../../components/inventario/InventarioCamion";
 import DialogFinalizarViaje from "../../components/viaje/DialogFinalizarViaje";
 import { useChoferTracking } from "../../hooks/useChoferTracking";
 import { useSelector } from "react-redux";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const ViajeChofer = ({ viaje }) => {
   const dispatch = useDispatch();
@@ -131,6 +132,14 @@ const ViajeChofer = ({ viaje }) => {
     skip: !viaje?.id_camion,
   });
 
+  useRegisterRefresh(
+    "viajes",
+    async () => {
+      await Promise.all([refetchEntregas(), refetchInventario()]);
+      return true;
+    },
+    [refetchEntregas, refetchInventario]
+  );
   // Refs
   const isMounted = useRef(false);
   const isInventarioReady = useRef(false);

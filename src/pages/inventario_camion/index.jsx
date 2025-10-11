@@ -22,6 +22,7 @@ import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import SucursalPickerHeader from "../../components/common/SucursalPickerHeader";
 import { InfoOutlined, StorefrontOutlined } from "@mui/icons-material";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const InspeccionRetornables = () => {
   const dispatch = useDispatch();
@@ -51,6 +52,15 @@ const InspeccionRetornables = () => {
   } = useGetPendientesQuery(
     { id_sucursal_recepcion: idSucursal, origen },
     { skip: !idSucursal }
+  );
+
+  useRegisterRefresh(
+    "inventario-camion",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
   );
 
   const [inspeccionar, { isLoading: enviando }] = useInspeccionarMutation();

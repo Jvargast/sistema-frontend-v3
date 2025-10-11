@@ -7,6 +7,7 @@ import DataTable from "../../components/common/DataTable";
 import EmptyState from "../../components/common/EmptyState";
 import { useSelector } from "react-redux";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const ListarCotizaciones = () => {
   const navigate = useNavigate();
@@ -44,6 +45,15 @@ const ListarCotizaciones = () => {
     limit: rowsPerPage,
     ...(isSucursalScope ? { id_sucursal: Number(activeSucursalId) } : {}),
   });
+
+  useRegisterRefresh(
+    "cotizaciones",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
 
   useEffect(() => {
     refetch();

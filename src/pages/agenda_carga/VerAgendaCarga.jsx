@@ -17,6 +17,7 @@ import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import BackButton from "../../components/common/BackButton";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const estadoColores = {
   pendiente: "warning",
@@ -27,7 +28,16 @@ const estadoColores = {
 
 const VerAgendaCarga = () => {
   const { id } = useParams();
-  const { data, isLoading, isError } = useGetAgendaByIdQuery(id);
+  const { data, isLoading, isError, refetch } = useGetAgendaByIdQuery(id);
+
+  useRegisterRefresh(
+    "agendas",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
 
   if (isLoading) {
     return (

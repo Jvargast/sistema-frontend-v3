@@ -15,6 +15,7 @@ import EmptyColumn from "../../components/chofer/EmptyColumn";
 import { useIsMobile } from "../../utils/useIsMobile";
 import MobilePedidosBoard from "./MobilePedidosBoard";
 import { useSelector } from "react-redux";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const getPedidoSucursalId = (p) =>
   Number(
@@ -74,11 +75,20 @@ const PedidosBoard = () => {
   );
   // Antiguo
   const isMobile = useIsMobile();
-  const { data: allPedidosData, isLoading: allPedidosLoading } =
+  const { data: allPedidosData, isLoading: allPedidosLoading, refetch: refetchPedidos } =
     useGetAllPedidosQuery(queryArgs, { refetchOnMountOrArgChange: true });
 
-  const { data: choferesData = [], isLoading: choferesLoading } =
+  const { data: choferesData = [], isLoading: choferesLoading, refetch: refetchChoferes  } =
     useGetAllChoferesQuery(choferesArgs, { refetchOnMountOrArgChange: true });
+
+  useRegisterRefresh(
+    "",
+    async () => {
+      await Promise.all([refetchPedidos(), refetchChoferes()]);
+      return true;
+    },
+    [refetchPedidos, refetchChoferes]
+  );
 
   const derivedSucursales = useMemo(() => {
     const map = new Map();
@@ -394,6 +404,7 @@ const PedidosBoard = () => {
       (s) => String(s.id_sucursal) === String(sucursalFiltro)
     );
     if (!existe) setSucursalFiltro("");
+    //eslint-disable-next-line
   }, [mode, opcionesSucursales]);
 
   if (isMobile) {
@@ -406,7 +417,7 @@ const PedidosBoard = () => {
         allPedidosLoading={allPedidosLoading}
         choferesLoading={choferesLoading}
         mode={mode}
-        sucursales={opcionesSucursales} 
+        sucursales={opcionesSucursales}
         sucursalFiltro={String(sucursalFiltro)}
         onChangeSucursal={setSucursalFiltro}
       />

@@ -22,6 +22,7 @@ import { showNotification } from "../../store/reducers/notificacionSlice";
 import AlertDialog from "../../components/common/AlertDialog";
 import DataTable from "../../components/common/DataTable";
 import EmptyState from "../../components/common/EmptyState";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const getVentaSucursalId = (v) =>
   Number(
@@ -100,6 +101,15 @@ const ListarPedidos = () => {
     page: page + 1,
     limit: rowsPerPage,
   });
+
+  useRegisterRefresh(
+    "pedidos",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [rowMenuTarget, setRowMenuTarget] = useState(null);

@@ -6,6 +6,7 @@ import { useGetAllProduccionQuery } from "../../store/services/produccionApi";
 import EmptyState from "../../components/common/EmptyState";
 import DataTable from "../../components/common/DataTable";
 import { useSelector } from "react-redux";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const getProdSucursalId = (p) =>
   Number(
@@ -31,7 +32,7 @@ const HistorialProduccion = () => {
 
   useEffect(() => {
     if (mode === "global") {
-      setSucursalFiltro(""); 
+      setSucursalFiltro("");
     } else {
       setSucursalFiltro(String(activeSucursalId ?? ""));
     }
@@ -45,6 +46,15 @@ const HistorialProduccion = () => {
     page: page + 1,
     limit: rowsPerPage,
   });
+
+  useRegisterRefresh(
+    "produccion",
+    async () => {
+      await Promise.all([refetch()]);
+      return true;
+    },
+    [refetch]
+  );
 
   useEffect(() => {
     refetch();

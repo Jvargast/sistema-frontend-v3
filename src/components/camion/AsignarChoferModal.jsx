@@ -70,6 +70,9 @@ const AsignarChoferModal = ({ open, onClose, camionId, sucursalId }) => {
       );
     } catch (error) {
       console.error("Error al asignar chofer", error);
+      const msg =
+        error?.data?.error || error?.error || "No se pudo asignar el chofer.";
+      dispatch(showNotification({ message: msg, severity: "error" }));
     }
   };
 

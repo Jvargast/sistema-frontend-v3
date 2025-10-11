@@ -25,6 +25,7 @@ import ModalForm from "../../components/common/ModalForm";
 import AlertDialog from "../../components/common/AlertDialog";
 import { useIsMobile } from "../../utils/useIsMobile";
 import Header from "../../components/common/Header";
+import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
 const TipoInsumoManagement = () => {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ const TipoInsumoManagement = () => {
   const editarTipoInsumo = useHasPermission("inventario.tipoinsumo.editar");
   const borrarTipoInsumo = useHasPermission("inventario.tipoinsumo.eliminar");
 
-  const { data: tipoInsumo, isLoading: isLoadingTipoInsumo } =
+  const { data: tipoInsumo, isLoading: isLoadingTipoInsumo, refetch: refetchTipo } =
     useGetTipoByIdQuery(selectedTipoInsumoId, {
       skip: !selectedTipoInsumoId,
     });
@@ -55,6 +56,15 @@ const TipoInsumoManagement = () => {
     isError,
     refetch,
   } = useGetAllTiposQuery();
+
+  useRegisterRefresh(
+    "tipo-insumo",
+    async () => {
+      await Promise.all([refetch(), refetchTipo()]);
+      return true;
+    },
+    [refetch, refetchTipo]
+  );
 
   const handleEdit = (id) => {
     setSelectedTipoInsumoId(id);
