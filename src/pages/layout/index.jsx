@@ -37,6 +37,9 @@ const Layout = () => {
   const prevTabsLenRef = useRef(openTabs.length);
   const isRouterOnly = shouldUseRouterPath(currentPath);
 
+  const BOTTOM_NAV_H = 64;
+  const ANDROID_FALLBACK = 16;
+
   useEffect(() => {
     if (prevTabsLenRef.current === 1 && openTabs.length === 0) {
       justClosedLastTabRef.current = true;
@@ -82,14 +85,12 @@ const Layout = () => {
     openTabs.length === 0 &&
     (cleanPath === "" || cleanPath === "#");
 
-  const BOTTOM_NAV_H = 68;
   const { run } = useRefreshBus();
   const scrollRef = useRef(null);
 
   const handleRefresh = async () => {
     //const parts = location.pathname.replace(/^\//, "").split("/");
     //const base = parts[0] === "admin" ? parts[1] || "admin" : parts[0] || "";
-
 
     const key = getRefreshKeyFromPath(pathname);
     console.log("[PULL] path:", pathname, "→ key:", key);
@@ -146,7 +147,7 @@ const Layout = () => {
               overflowY: "auto",
               pb: isDesktop
                 ? 0
-                : `calc(${BOTTOM_NAV_H}px + env(safe-area-inset-bottom, 0px))`,
+                : `calc(${BOTTOM_NAV_H}px + max(env(safe-area-inset-bottom, 0px), ${ANDROID_FALLBACK}px))`,
               overscrollBehaviorY: "contain",
               WebkitOverflowScrolling: "touch",
             }}

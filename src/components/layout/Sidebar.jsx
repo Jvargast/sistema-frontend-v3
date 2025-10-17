@@ -47,6 +47,9 @@ import {
   shouldUseRouterPath,
 } from "../../utils/tabsConfig";
 
+const ANDROID_FALLBACK = 16; 
+const BASE_H = 64;
+
 const itemStyles = (t, isActive) => ({
   mx: 1,
   my: 0.5,
@@ -406,8 +409,8 @@ const Sidebar = ({
               t.palette.roles?.border || "rgba(2,6,23,0.08)"
             }`,
             boxShadow: "0 -4px 18px rgba(2,6,23,0.08)",
-            height: 68,
-            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 6px)",
+            height: `calc(${BASE_H}px + max(env(safe-area-inset-bottom, 0px), ${ANDROID_FALLBACK}px))`,
+            paddingBottom: `max(env(safe-area-inset-bottom, 0px), ${ANDROID_FALLBACK}px)`,
             WebkitTransform: "translateZ(0)",
             "&::before": {
               content: '""',
