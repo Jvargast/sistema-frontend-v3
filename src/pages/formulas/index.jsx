@@ -39,7 +39,7 @@ const ListarFormulasProductos = () => {
     [refetch]
   );
 
-  const [deleteFormula] = useDeleteFormulaMutation();
+  const [deleteFormula, { isLoading: isDeleting }] = useDeleteFormulaMutation();
 
   useEffect(() => {
     refetch();
@@ -57,15 +57,22 @@ const ListarFormulasProductos = () => {
     try {
       await deleteFormula(formulaSel.id_formula).unwrap();
       dispatch(
-        showNotification({ message: "Fórmula eliminada", severity: "success" })
+        showNotification({
+          message: "Fórmula deshabilitada",
+          severity: "success",
+        })
       );
+      await refetch();
     } catch (err) {
       dispatch(
         showNotification({
-          message: err?.data?.message || "No se pudo eliminar",
+          message: err?.data?.message || "No se pudo deshabilitar",
           severity: "error",
         })
       );
+    } finally {
+      setAlertOpen(false);
+      setFormulaSel(null);
     }
   };
 
@@ -171,10 +178,14 @@ const ListarFormulasProductos = () => {
       {formulaSel && (
         <AlertDialog
           openAlert={alertOpen}
-          onCloseAlert={() => setAlertOpen(false)}
+          onCloseAlert={() => {
+            setAlertOpen(false);
+            setFormulaSel(null);
+          }}
           onConfirm={confirmarBorrado}
-          title="Eliminar fórmula"
-          message={`¿Estás seguro de eliminar la fórmula "${formulaSel.nombre_formula}"? Esta acción es irreversible.`}
+          title="Deshabilitar fórmula"
+          message={`¿Estás seguro de deshabilitar la fórmula "${formulaSel.nombre_formula}"? No se borrarán sus producciones asociadas y podrás reactivarla más adelante.`}
+          confirmLoading={isDeleting}
         />
       )}
     </>
