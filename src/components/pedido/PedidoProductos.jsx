@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import { Box, Grid, Typography, Pagination } from "@mui/material";
 import { useGetAvailabreProductosQuery } from "../../store/services/productoApi";
@@ -9,45 +9,56 @@ const PedidoProductos = ({ selectedCategory, onAddToCart, sucursalId }) => {
   const [page, setPage] = useState(1);
   const pageSize = 9;
 
+  const queryArgs = useMemo(() => {
+    if (!sucursalId) return null;
+    return {
+      categoria: selectedCategory === "all" ? undefined : selectedCategory,
+      page,
+      limit: pageSize,
+      id_sucursal: Number(sucursalId),
+    };
+  }, [selectedCategory, page, pageSize, sucursalId]);
+
   const {
     data: productosData,
     isLoading,
     error,
-    refetch,
-  } = useGetAvailabreProductosQuery(
-    {
-      categoria: selectedCategory === "all" ? undefined : selectedCategory,
-      page,
-      limit: pageSize,
-      id_sucursal: sucursalId ? Number(sucursalId) : undefined,
-    },
-    { skip: !sucursalId }
-  );
+  } = useGetAvailabreProductosQuery(queryArgs, { skip: !queryArgs });
 
   useEffect(() => {
     setPage(1);
   }, [selectedCategory, sucursalId]);
-  useEffect(() => {
-    if (sucursalId) refetch();
-  }, [selectedCategory, page, sucursalId, refetch]);
 
-  if (!sucursalId)
+  if (!sucursalId) {
     return (
       <Typography>Selecciona una sucursal para ver el inventario.</Typography>
     );
+  }
   if (isLoading) return <Typography>Cargando productos...</Typography>;
   if (error)
     return <Typography color="error">Error al cargar productos</Typography>;
 
+  const productos = productosData?.productos ?? [];
+  const totalItems =
+    productosData?.paginacion?.totalItems ??
+    productosData?.totalItems ?? 
+    0;
+
+  const totalPages =
+    productosData?.paginacion?.totalPages ??
+    (totalItems > 0 ? Math.ceil(totalItems / pageSize) : 0);
+
+  const showPagination = (totalPages ?? 0) > 1;
+
   return (
     <Box>
-      {productosData?.productos.length > 0 ? (
+      {productos?.length > 0 ? (
         <>
           <Grid container spacing={1} mb={3}>
-            {productosData?.productos?.map((product) => {
+            {productos.map((product) => {
               const stockSucursal = getStockForSucursal(
                 product.inventario,
-                sucursalId
+                Number(sucursalId)
               );
               return (
                 <Grid
@@ -71,17 +82,17 @@ const PedidoProductos = ({ selectedCategory, onAddToCart, sucursalId }) => {
               );
             })}
           </Grid>
-          <Box display="flex" justifyContent="center" mt={2}>
-            <Pagination
-              count={
-                productosData?.paginacion?.totalPages ||
-                Math.ceil(productosData?.paginacion.totalItems / pageSize)
-              }
-              page={page}
-              onChange={(event, value) => setPage(value)}
-              color="primary"
-            />
-          </Box>
+
+          {showPagination && (
+            <Box display="flex" justifyContent="center" mt={2}>
+              <Pagination
+                count={Math.max(1, totalPages)} 
+                page={page}
+                onChange={(_, value) => setPage(value)}
+                color="primary"
+              />
+            </Box>
+          )}
         </>
       ) : (
         <Typography>No se encontraron productos.</Typography>
@@ -89,6 +100,7 @@ const PedidoProductos = ({ selectedCategory, onAddToCart, sucursalId }) => {
     </Box>
   );
 };
+
 PedidoProductos.propTypes = {
   selectedCategory: PropTypes.string.isRequired,
   onAddToCart: PropTypes.func.isRequired,

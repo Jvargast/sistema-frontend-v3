@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Box,
   Typography,
@@ -34,18 +34,77 @@ const modalStyle = {
   boxShadow: 24,
 };
 
+function normalizeCajaForView(raw = {}, fallback = {}) {
+  const r = { ...fallback, ...raw };
+
+  const id_caja = Number(
+    r.id_caja ?? r.id ?? r.caja_id ?? r.idCaja ?? r.cajaId ?? NaN
+  );
+
+  const id_sucursal = Number(
+    r.id_sucursal ??
+      r.sucursal_id ??
+      r.idSucursal ??
+      r.sucursal?.id_sucursal ??
+      NaN
+  );
+
+  const sucursal =
+    r.sucursal ||
+    (Number.isFinite(id_sucursal)
+      ? { id_sucursal, nombre: r.sucursal_nombre ?? r.sucursalName ?? null }
+      : undefined);
+
+  const usuario_asignado =
+    r.usuario_asignado ?? r._vendedor?.rut ?? r.vendedor_rut ?? null;
+
+  const saldo_inicial =
+    r.saldo_inicial == null ? null : Number(r.saldo_inicial);
+  const saldo_final = r.saldo_final == null ? null : Number(r.saldo_final);
+
+  const estado =
+    r.estado ??
+    (r.fecha_cierre ? "cerrada" : r.fecha_apertura ? "abierta" : undefined);
+
+  const vendedor = r._vendedor ?? r.vendedor ?? null;
+
+  const vendedor_nombre =
+    r.vendedor_nombre ?? vendedor?.nombre ?? r.usuario_nombre ?? null;
+
+  const vendedor_rol = r.vendedor_rol ?? vendedor?.rol ?? r.usuario_rol ?? null;
+
+  return {
+    ...r,
+    id_caja,
+    id_sucursal,
+    sucursal,
+    usuario_asignado,
+    saldo_inicial,
+    saldo_final,
+    estado,
+    fecha_apertura: r.fecha_apertura ?? r.fechaApertura ?? null,
+    fecha_cierre: r.fecha_cierre ?? r.fechaCierre ?? null,
+    vendedor_nombre,
+    vendedor_rol,
+  };
+}
+
 const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
   const dispatch = useDispatch();
   const [montoInicial, setMontoInicial] = useState("");
   const [error, setError] = useState(null);
   const [openCaja, { isLoading }] = useOpenCajaMutation();
 
+  const openLockRef = useRef(false);
+
+  const viewCaja = normalizeCajaForView(caja);
+
   const handleAbrirCaja = async () => {
-    if (!caja?.id_caja) {
+    if (!viewCaja?.id_caja) {
       setError("Caja inválida.");
       return;
     }
-    if (caja?.estado === "abierta") {
+    if (viewCaja?.estado === "abierta") {
       dispatch(
         showNotification({
           message: "Esta caja ya está abierta.",
@@ -62,6 +121,9 @@ const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
       return;
     }
 
+    if (openLockRef.current) return;
+    openLockRef.current = true;
+
     try {
       const resp = await openCaja({
         idCaja: caja.id_caja,
@@ -70,45 +132,40 @@ const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
 
       console.log("ABRIENDO CAJA:", resp);
       const apiCaja = resp?.caja ?? resp;
+      const merged = normalizeCajaForView(
+        {
+          ...viewCaja,
+          ...apiCaja,
+          estado: "abierta",
+          fecha_apertura: apiCaja?.fecha_apertura ?? new Date().toISOString(),
+          saldo_inicial:
+            apiCaja?.saldo_inicial != null ? apiCaja.saldo_inicial : monto,
+        },
+        viewCaja
+      );
 
-      const cajaNormalizada = {
-        ...caja,
-        ...apiCaja,
-        estado: "abierta",
-        fecha_apertura: apiCaja.fecha_apertura ?? new Date().toISOString(),
-        saldo_inicial: Number(apiCaja.saldo_inicial ?? monto),
-        saldo_final:
-          apiCaja.saldo_final == null ? null : Number(apiCaja.saldo_final),
-        sucursal:
-          apiCaja.sucursal ??
-          caja.sucursal ??
-          (apiCaja.id_sucursal
-            ? {
-                id_sucursal: apiCaja.id_sucursal,
-                nombre: `Sucursal ${apiCaja.id_sucursal}`,
-              }
-            : undefined),
-      };
       setError(null);
+      dispatch(cajaApi.util.invalidateTags(["Caja", "CajaUsuario"]));
+      onCajaAbierta?.(merged);
       dispatch(
         showNotification({
           message: "Se ha abierto la caja correctamente",
           severity: "success",
         })
       );
-      onCajaAbierta?.(cajaNormalizada);
       setMontoInicial("");
-      dispatch(cajaApi.util.invalidateTags?.(["Caja"]));
       onClose?.();
     } catch (e) {
       console.error("Error al abrir la caja:", e);
-      setError("No se pudo abrir la caja. Intente nuevamente.");
-      dispatch(
-        showNotification({
-          message: "No se pudo abrir la caja. Intente nuevamente.",
-          severity: "error",
-        })
-      );
+      const msg =
+        e?.data?.error ||
+        e?.data?.message ||
+        e?.message ||
+        "No se pudo abrir la caja. Intente nuevamente.";
+      setError(msg);
+      dispatch(showNotification({ message: msg, severity: "error" }));
+    } finally {
+      openLockRef.current = false;
     }
   };
 
@@ -145,22 +202,43 @@ const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
             <Box display="flex" alignItems="center" gap={1}>
               <Assignment sx={{ color: "#1976d2" }} />
               <Typography>
-                <strong>ID Caja:</strong> {caja.id_caja}
+                <strong>ID Caja:</strong> {viewCaja.id_caja ?? "—"}
               </Typography>
             </Box>
             <Box display="flex" alignItems="center" gap={1}>
               <Store sx={{ color: "#0288d1" }} />
               <Typography>
                 <strong>Sucursal:</strong>{" "}
-                {caja?.sucursal?.nombre || "Sin sucursal"}
+                {viewCaja?.sucursal?.nombre ??
+                  (Number.isFinite(viewCaja?.id_sucursal)
+                    ? `ID - ${viewCaja.id_sucursal}`
+                    : "Sin sucursal")}
               </Typography>
             </Box>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Person sx={{ color: "#673AB7" }} />
-              <Typography>
-                <strong>Usuario Asignado:</strong>{" "}
-                {caja?.usuario_asignado || "No asignado"}
-              </Typography>
+            <Box display="flex" alignItems="flex-start" gap={1}>
+              <Person sx={{ color: "#673AB7", mt: 0.5 }} />
+              <Box>
+                <Typography>
+                  <strong>Usuario asignado:</strong>{" "}
+                  {viewCaja?.usuario_asignado
+                    ? `${viewCaja?.vendedor_nombre || "Usuario"}${
+                        viewCaja?.vendedor_rol
+                          ? ` (${viewCaja.vendedor_rol})`
+                          : ""
+                      }`
+                    : "No asignado"}
+                </Typography>
+
+                {viewCaja?.usuario_asignado && (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ pl: "1.45em" }}
+                  >
+                    RUT: {viewCaja.usuario_asignado}
+                  </Typography>
+                )}
+              </Box>
             </Box>
           </Box>
 

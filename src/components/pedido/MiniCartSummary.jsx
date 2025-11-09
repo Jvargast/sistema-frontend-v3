@@ -5,6 +5,7 @@ import {
   Slide,
   useTheme,
   useMediaQuery,
+  Portal,
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useSelector } from "react-redux";
@@ -16,64 +17,102 @@ const MiniCartSummary = ({ onOpenCart }) => {
   const totalItems = cart.reduce((sum, item) => sum + (item.cantidad || 0), 0);
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isMdDown = useMediaQuery(theme.breakpoints.down("md"));
+  const isSmDown = useMediaQuery(theme.breakpoints.down("sm"));
   const visible = !!cart.length;
 
   if (!visible) return null;
 
+  const container = typeof document !== "undefined" ? document.body : null;
+
   return (
-    <Slide in={visible} direction={isMobile ? "up" : "left"}>
-      <Paper
-        elevation={10}
-        sx={{
-          position: "fixed",
-          ...(isMobile
-            ? {
-                bottom: "calc(env(safe-area-inset-bottom, 0px) + 72px)", 
-                left: "4vw",
-                right: "4vw",
-                top: "auto",
-                transform: "none",
-              }
-            : {
-                top: 90,
-                right: 10,
-                left: "auto",
-                bottom: "auto",
-                transform: "none",
-              }),
-          maxWidth: isMobile ? 420 : "auto",
-          minWidth: isMobile ? 0 : 220,
-          px: isMobile ? 2 : 3,
-          py: isMobile ? 1.7 : 1.5,
-          zIndex: 1500,
-          borderRadius: isMobile ? "999px" : "999px",
-          boxShadow: "0px 12px 36px 8px rgba(81,74,157,0.16)",
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          background: `linear-gradient(90deg, rgba(36,198,220,0.96) 0%, rgba(81,74,157,0.97) 100%)`,
-          color: "#fff",
-          cursor: "pointer",
-          transition: "box-shadow .2s, background .2s",
-          "&:hover": { boxShadow: "0px 16px 48px 12px rgba(81,74,157,0.18)" },
-        }}
-        onClick={onOpenCart}
-      >
-        <Badge badgeContent={totalItems} color="error" overlap="circular">
-          <ShoppingCartIcon fontSize="medium" />
-        </Badge>
-        <Typography fontWeight={600} fontSize={16} sx={{ mx: 1 }}>
-          {totalItems} producto{totalItems !== 1 ? "s" : ""}
-        </Typography>
-        <Typography fontWeight={700} fontSize={16}>
-          ${total.toLocaleString("es-CL")}
-        </Typography>
-        <Typography fontWeight={600} ml={1} fontSize={15}>
-          Ver carrito →
-        </Typography>
-      </Paper>
-    </Slide>
+    <Portal container={container}>
+      <Slide in={visible} direction={isMdDown ? "down" : "left"}>
+        <Paper
+          elevation={isMdDown ? 6 : 10}
+          sx={{
+            position: "fixed",
+            ...(isMdDown
+              ? {
+                  top: "calc(env(safe-area-inset-top, 0px) + 72px)",
+                  right: "4vw",
+                  left: "auto",
+                  width: "clamp(180px, 56vw, 360px)",
+                }
+              : {
+                  top: 100,
+                  right: 12,
+                }),
+            maxWidth: isMdDown ? "none" : "auto",
+            minWidth: isMdDown ? 0 : 220,
+            px: isSmDown ? 1.25 : isMdDown ? 1.75 : 3,
+            py: isSmDown ? 0.85 : isMdDown ? 1 : 1.5,
+            zIndex: Math.max(theme.zIndex.modal + 10, 2100),
+            borderRadius: 999,
+            display: "flex",
+            alignItems: "center",
+            gap: isSmDown ? 1 : 1.5,
+            cursor: "pointer",
+            background:
+              "linear-gradient(90deg, rgba(36,198,220,0.9) 0%, rgba(81,74,157,0.92) 100%)",
+            color: "#fff",
+            backdropFilter: "saturate(140%) blur(6px)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: isMdDown
+              ? "0 8px 24px rgba(81,74,157,0.18)"
+              : "0 12px 36px 8px rgba(81,74,157,0.16)",
+            transition: "box-shadow .2s, transform .2s",
+            "&:hover": {
+              boxShadow: "0 14px 44px rgba(81,74,157,0.22)",
+              transform: isMdDown ? "translateY(-2px)" : "translateX(-1px)",
+            },
+          }}
+          onClick={onOpenCart}
+        >
+          <Badge
+            badgeContent={totalItems}
+            color="error"
+            overlap="circular"
+            sx={{
+              "& .MuiBadge-badge": {
+                fontSize: isSmDown ? 10 : 11,
+                height: isSmDown ? 16 : 18,
+                minWidth: isSmDown ? 16 : 18,
+              },
+            }}
+          >
+            <ShoppingCartIcon fontSize={isMdDown ? "small" : "medium"} />
+          </Badge>
+
+          <Typography
+            fontWeight={700}
+            sx={{
+              mx: 0.5,
+              fontSize: isSmDown ? 13 : 14,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {totalItems} producto{totalItems !== 1 ? "s" : ""}
+          </Typography>
+
+          <Typography
+            fontWeight={800}
+            sx={{
+              fontSize: isSmDown ? 13 : 14,
+              whiteSpace: "nowrap",
+            }}
+          >
+            ${total.toLocaleString("es-CL")}
+          </Typography>
+
+          {!isSmDown && (
+            <Typography fontWeight={700} ml={1} sx={{ fontSize: 14 }}>
+              Ver carrito →
+            </Typography>
+          )}
+        </Paper>
+      </Slide>
+    </Portal>
   );
 };
 

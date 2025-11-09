@@ -32,22 +32,18 @@ export const usuariosApi = createApi({
         }
       },
     }),
-    // Obtener chofers
     getAllChoferes: builder.query({
       query: (params) => ({ url: `/usuarios/choferes`, params }),
       providesTags: ["User"],
     }),
-    // Obtener chofers
     getAllVendedores: builder.query({
       query: () => `/usuarios/vendedores`,
       providesTags: ["User"],
     }),
-    // Obtener chofers
     getAllUsuariosConCaja: builder.query({
       query: () => `/usuarios/usuarios-con-caja`,
       providesTags: ["User"],
     }),
-    // Crear un usuario
     createNewUser: builder.mutation({
       query: (newUser) => ({
         url: `/usuarios/crear`,
@@ -63,14 +59,13 @@ export const usuariosApi = createApi({
         }
       },
     }),
-    // Actualizar un usuario
     updateUser: builder.mutation({
       query: ({ rut, updates }) => ({
         url: `/usuarios/${rut}`,
         method: "PUT",
         body: updates,
       }),
-      invalidatesTags: ["User"], // Invalida cache
+      invalidatesTags: ["User"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -86,7 +81,7 @@ export const usuariosApi = createApi({
         method: "PUT",
         body: { newPassword },
       }),
-      invalidatesTags: ["User"], // Invalida el caché del usuario
+      invalidatesTags: ["User"], 
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -95,14 +90,12 @@ export const usuariosApi = createApi({
         }
       },
     }),
-
-    // Dar de baja un usuario
     deleteUser: builder.mutation({
       query: (rut) => ({
         url: `/usuarios/${rut}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["User"], // Invalida cache
+      invalidatesTags: ["User"], 
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -114,7 +107,7 @@ export const usuariosApi = createApi({
     }),
     getOwnProfile: builder.query({
       query: () => "/usuarios/mi-perfil",
-      providesTags: ["User"], // Cache de usuario
+      providesTags: ["User"], 
     }),
     changePassword: builder.mutation({
       query: (updates) => ({
@@ -151,7 +144,6 @@ export const usuariosApi = createApi({
   }),
 });
 
-// Exporta los hooks generados automáticamente
 export const {
   useFindByRutQuery,
   useGetAllUsersQuery,

@@ -45,7 +45,14 @@ const getVendedorLabel = (vendedor) => {
   return nombre || vendedor?.rut || null;
 };
 
-const SelectCajaModal = ({ open, onBack, cajas = [], onSelect, vendedor }) => {
+const SelectCajaModal = ({
+  open,
+  onBack,
+  cajas = [],
+  onSelect,
+  vendedor,
+  isAdmin = false,
+}) => {
   const [filtro, setFiltro] = useState("todas");
 
   const cajasFiltradas = useMemo(() => {
@@ -65,6 +72,9 @@ const SelectCajaModal = ({ open, onBack, cajas = [], onSelect, vendedor }) => {
 
   const vendedorLabel = getVendedorLabel(vendedor);
 
+  const dialogContainer =
+    typeof window !== "undefined" ? document.body : undefined;
+
   return (
     <Dialog
       open={open}
@@ -73,12 +83,22 @@ const SelectCajaModal = ({ open, onBack, cajas = [], onSelect, vendedor }) => {
       }}
       disableEscapeKeyDown
       fullWidth
-      maxWidth="sm"
+      className="select-caja-modal"
       sx={{
-        "& .MuiDialog-paper": {
-          borderRadius: 14,
+        "& .MuiDialog-container": { borderRadius: 0 },
+      }}
+      maxWidth="sm"
+      container={dialogContainer}
+      PaperProps={{
+        square: true,
+        sx: {
+          borderRadius: "14px",
           overflow: "hidden",
+          border: (t) => `1px solid ${t.palette.divider}`,
         },
+      }}
+      BackdropProps={{
+        sx: { borderRadius: 0 },
       }}
     >
       <DialogTitle
@@ -91,14 +111,18 @@ const SelectCajaModal = ({ open, onBack, cajas = [], onSelect, vendedor }) => {
           color: "white",
         }}
       >
-        <IconButton
-          size="small"
-          onClick={onBack}
-          sx={{ color: "white" }}
-          aria-label="Volver"
-        >
-          <ArrowBackIcon />
-        </IconButton>
+        {
+          /* isAdmin && ( */
+          <IconButton
+            size="small"
+            onClick={onBack}
+            sx={{ color: "white" }}
+            aria-label="Volver a selección de vendedores"
+          >
+            <ArrowBackIcon />
+          </IconButton>
+          /*  ) */
+        }
         Seleccionar Caja
         <Box flex={1} />
         {vendedorLabel && (
@@ -116,7 +140,7 @@ const SelectCajaModal = ({ open, onBack, cajas = [], onSelect, vendedor }) => {
           size="small"
           value={filtro}
           onChange={(_, v) => v && setFiltro(v)}
-          sx={{ mb: 2 }}
+          sx={{ mb: 2, borderRadius: 0 }}
         >
           <ToggleButton value="todas">Todas</ToggleButton>
           <ToggleButton value="abiertas">Abiertas</ToggleButton>
@@ -165,11 +189,11 @@ const SelectCajaModal = ({ open, onBack, cajas = [], onSelect, vendedor }) => {
         )}
       </DialogContent>
 
-      <DialogActions sx={{ px: 2, py: 1.5 }}>
+     {/*  <DialogActions sx={{ px: 2, py: 1.5 }}>
         <Button variant="text" onClick={onBack}>
-          Volver
+          {isAdmin ? "Volver" : "Salir"}
         </Button>
-      </DialogActions>
+      </DialogActions> */}
     </Dialog>
   );
 };
@@ -180,13 +204,14 @@ SelectCajaModal.propTypes = {
   cajas: PropTypes.array.isRequired,
   onSelect: PropTypes.func.isRequired,
   vendedor: PropTypes.oneOfType([
-    PropTypes.string, 
+    PropTypes.string,
     PropTypes.shape({
       rut: PropTypes.string,
       nombre: PropTypes.string,
       apellido: PropTypes.string,
     }),
   ]),
+  isAdmin: PropTypes.bool,
 };
 
 export default SelectCajaModal;

@@ -33,10 +33,26 @@ const SelectVendedorModal = ({
       disableEscapeKeyDown
       maxWidth="sm"
       fullWidth
-      sx={{
-        "& .MuiDialog-paper": {
-          borderRadius: "12px",
+      sx={{ "& .MuiDialog-container": { borderRadius: 0, clipPath: "none" } }}
+      PaperProps={{
+        square: true,
+        sx: {
+          borderRadius: "14px !important",
+          overflow: "hidden",
+          clipPath: "none !important",
+          border: (t) => `1px solid ${t.palette.divider}`,
         },
+      }}
+      slotProps={{
+        paper: {
+          square: true,
+          sx: {
+            borderRadius: "14px !important",
+            overflow: "hidden",
+            clipPath: "none !important",
+          },
+        },
+        backdrop: { sx: { borderRadius: 0 } },
       }}
     >
       <DialogTitle

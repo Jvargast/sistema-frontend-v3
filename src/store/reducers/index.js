@@ -7,6 +7,7 @@ import agendaViajeReducer from "./agendaViajesSlice";
 import tabReducer from "./tabSlice";
 import sucursalReducer from "./sucursalSlice";
 import scopeReducer from "./scopeSlice"; 
+import posReducer from "./posSlice";
 
 const reducers = {
   global: globalReducer,
@@ -18,6 +19,7 @@ const reducers = {
   tabs: tabReducer,
   sucursal: sucursalReducer,
   scope: scopeReducer,
+  pos: posReducer,
 };
 
 export default reducers;
