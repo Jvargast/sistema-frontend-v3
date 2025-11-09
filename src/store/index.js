@@ -2,6 +2,7 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import reducers from "./reducers";
 import { apiMiddleware, apiReducers } from "./services";
+import { loadPOSSelection, savePOSSelection } from "./posPersistence";
 
 const SCOPE_KEY = "app_scope";
 
@@ -27,14 +28,27 @@ const rootReducer = combineReducers({
   ...apiReducers,
 });
 
+const API_REDUCER_PATHS = Object.keys(apiReducers || {});
+
 const savedScope = loadScope();
-const preloadedState = savedScope ? { scope: savedScope } : undefined;
+const savedPOS = loadPOSSelection();
+
+const preloadedState = {
+  ...(savedScope ? { scope: savedScope } : {}),
+  ...(savedPOS ? { pos: savedPOS } : {}),
+};
 
 const store = configureStore({
   reducer: rootReducer,
-  preloadedState,
+  preloadedState: Object.keys(preloadedState).length
+    ? preloadedState
+    : undefined,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
+      immutableCheck: {
+        warnAfter: 64,
+        ignoredPaths: API_REDUCER_PATHS,
+      },
       serializableCheck: {
         ignoredActions: [
           "persist/PERSIST",
@@ -44,6 +58,7 @@ const store = configureStore({
           "persist/PURGE",
           "persist/REGISTER",
         ],
+        ignoredPaths: API_REDUCER_PATHS,
       },
     }).concat(apiMiddleware),
   devTools: true,
@@ -56,6 +71,15 @@ store.subscribe(() => {
       activeSucursalId: scope.activeSucursalId,
       mode: scope.mode,
     });
+  }
+});
+
+let lastPOS = null;
+store.subscribe(() => {
+  const { pos } = store.getState();
+  if (pos !== lastPOS) {
+    lastPOS = pos;
+    savePOSSelection(pos);
   }
 });
 

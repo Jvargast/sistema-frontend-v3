@@ -39,6 +39,7 @@ import { centroCostoApi } from "./centroCostoApi";
 import { ordenPagoApi } from "./ordenPagoApi";
 import { categoriaGastoApi } from "./categoriaGastoApi";
 import { gastoApi } from "./gastoApi";
+import { preferencesApi } from "./preferencesApi";
 
 export const apiMiddleware = [
   authApi.middleware,
@@ -81,7 +82,8 @@ export const apiMiddleware = [
   centroCostoApi.middleware,
   ordenPagoApi.middleware,
   categoriaGastoApi.middleware,
-  gastoApi.middleware
+  gastoApi.middleware,
+  preferencesApi.middleware
 ];
 
 export const apiReducers = {
@@ -125,7 +127,8 @@ export const apiReducers = {
   [centroCostoApi.reducerPath]: centroCostoApi.reducer,
   [ordenPagoApi.reducerPath]: ordenPagoApi.reducer,
   [categoriaGastoApi.reducerPath]: categoriaGastoApi.reducer,
-  [gastoApi.reducerPath]: gastoApi.reducer
+  [gastoApi.reducerPath]: gastoApi.reducer,
+  [preferencesApi.reducerPath]: preferencesApi.reducer
 };
 
 const apiServices = {
@@ -169,7 +172,8 @@ const apiServices = {
   centroCostoApi,
   ordenPagoApi,
   categoriaGastoApi,
-  gastoApi
+  gastoApi,
+  preferencesApi
 };
 
 export default apiServices;

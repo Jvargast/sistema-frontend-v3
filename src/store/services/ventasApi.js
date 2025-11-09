@@ -5,7 +5,7 @@ import { productoApi } from "./productoApi";
 export const ventasApi = createApi({
   reducerPath: "ventasApi",
   baseQuery: baseQueryWithReauthEnhanced,
-  tagTypes: ["Ventas"],
+  tagTypes: ["Ventas", "Inventario"],
   endpoints: (builder) => ({
     getAllVentas: builder.query({
       query: (params) => ({ url: `/ventas/`, params }),
@@ -41,7 +41,17 @@ export const ventasApi = createApi({
         method: "POST",
         body: newVenta,
       }),
-      invalidatesTags: ["Ventas"],
+      invalidatesTags: (result, error, arg) =>
+        error
+          ? []
+          : [
+              { type: "Inventario", id: `LIST-${arg.id_sucursal}` },
+              ...(arg.productos || []).map((p) => ({
+                type: "Inventario",
+                id: `${p.id_producto}-${arg.id_sucursal}`,
+              })),
+              "Ventas",
+            ],
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;

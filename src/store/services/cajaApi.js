@@ -4,9 +4,8 @@ import { baseQueryWithReauthEnhanced } from "./fettchQuery";
 export const cajaApi = createApi({
   reducerPath: "cajaApi",
   baseQuery: baseQueryWithReauthEnhanced,
-  tagTypes: ["Caja"],
+  tagTypes: ["Caja", "CajaUsuario"],
   endpoints: (builder) => ({
-    // Obtener todas las cajas
     getAllCajas: builder.query({
       query: (params) => ({
         url: `/cajas/`,
@@ -22,20 +21,18 @@ export const cajaApi = createApi({
       },
     }),
 
-    // Obtener caja por ID
     getCajaById: builder.query({
       query: (id) => `/cajas/${id}`,
       providesTags: ["Caja"],
     }),
 
-    // Verificar si hay una caja asignada al usuario
     getCajaAsignada: builder.query({
       query: ({ rutUsuario }) => `/cajas/asignada?rutUsuario=${rutUsuario}`,
-      providesTags: ["Caja"],
-      
+      providesTags: (result, error, arg) => [
+        { type: "CajaUsuario", id: arg?.rutUsuario || "me" },
+      ],
     }),
 
-    // Crear un nueva caja
     createCaja: builder.mutation({
       query: (newCaja) => ({
         url: "/cajas/",
@@ -46,27 +43,61 @@ export const cajaApi = createApi({
     }),
 
     getEstadoCaja: builder.query({
-      query: () => `/cajas/estado`,
-      providesTags: ["Caja"],
+      query: () => ({ url: `/cajas/estado` }),
+      serializeQueryArgs: () => "estado",
+      forceRefetch: ({ currentArg, previousArg }) =>
+        JSON.stringify(currentArg) !== JSON.stringify(previousArg),
+      providesTags: () => [{ type: "Caja", id: "estado" }],
     }),
 
     openCaja: builder.mutation({
-      query: (openCaja) => ({
-        url: `/cajas/abrir`,
-        method: "POST",
-        body: openCaja,
-      }),
-      invalidatesTags: ["Caja"],
+      query: (body) => ({ url: `/cajas/abrir`, method: "POST", body }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        const patch = dispatch(
+          cajaApi.util.updateQueryData(
+            "getEstadoCaja",
+             undefined,
+            (draft) => {
+              if (!draft || !Array.isArray(draft.cajas)) return;
+              const exists = draft.cajas.some(
+                (c) => Number(c.id_caja) === Number(arg?.idCaja)
+              );
+              if (!exists) {
+                draft.cajas.unshift({
+                  id_caja: arg?.idCaja,
+                  estado: "abierta",
+                  saldo_inicial: arg?.saldoInicial,
+                  fecha_apertura: new Date().toISOString(),
+                });
+              } else {
+                draft.cajas = draft.cajas.map((c) =>
+                  Number(c.id_caja) === Number(arg?.idCaja)
+                    ? {
+                        ...c,
+                        estado: "abierta",
+                        saldo_inicial: arg?.saldoInicial,
+                      }
+                    : c
+                );
+              }
+            }
+          )
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo(); 
+        }
+      },
+      invalidatesTags: ["Caja", "CajaUsuario"],
     }),
+
     closeCaja: builder.mutation({
-      query: (closeCaja) => ({
-        url: `/cajas/cerrar`,
-        method: "POST",
-        body: closeCaja,
-      }),
-      invalidatesTags: ["Caja"],
+      query: (body) => ({ url: `/cajas/cerrar`, method: "POST", body }),
+      invalidatesTags: ["Caja", { type: "Caja", id: "estado" }],
     }),
-    // Asignar una caja a un usuario
+
     assignCaja: builder.mutation({
       query: (assignCaja) => ({
         url: `/cajas/asignar`,
@@ -75,7 +106,7 @@ export const cajaApi = createApi({
       }),
       invalidatesTags: ["Caja"],
     }),
-    // Actualizar una caja existente
+
     updateCaja: builder.mutation({
       query: ({ id, updatedCaja }) => ({
         url: `/cajas/${id}`,
@@ -85,7 +116,6 @@ export const cajaApi = createApi({
       invalidatesTags: ["Caja"],
     }),
 
-    // Eliminar una caja
     deleteCaja: builder.mutation({
       query: (id) => ({
         url: `/cajas/${id}`,
@@ -96,7 +126,6 @@ export const cajaApi = createApi({
   }),
 });
 
-// Exportar hooks generados automáticamente
 export const {
   useCreateCajaMutation,
   useGetAllCajasQuery,

@@ -21,11 +21,10 @@ import { useGetAllCategoriasQuery } from "../../store/services/categoriaApi";
 import { useGetAllClientesQuery } from "../../store/services/clientesApi";
 import { useGetAllUsuariosConCajaQuery } from "../../store/services/usuariosApi";
 import { useCreateVentaMutation } from "../../store/services/ventasApi";
-import { useCloseCajaMutation } from "../../store/services/cajaApi";
+import { cajaApi, useCloseCajaMutation } from "../../store/services/cajaApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import AperturaCajaModal from "../../components/caja/AperturaCajaModal";
-import useVerificarCaja from "../../utils/useVerificationCaja";
 import AlertDialog from "../../components/common/AlertDialog";
 import SelectVendedorModal from "../../components/venta/SelectedVendedorModal";
 import ProcesarPagoModal from "../../components/venta/ProcesarPagoModal";
@@ -41,14 +40,15 @@ import CarritoDeCompras from "../../components/venta/punto_venta/CarritoDeCompra
 import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { getStockForSucursal } from "../../utils/inventoryUtils";
 import SelectCajaModal from "../../components/venta/SelectCajaModal";
-
-const getRolName = (rol) =>
-  typeof rol === "string" ? rol.toLowerCase() : rol?.nombre?.toLowerCase();
-
-const isOperadorPOS = (user) => {
-  const r = getRolName(user?.rol);
-  return r === "vendedor" || r === "administrador";
-};
+import {
+  useGetMyPrefsQuery,
+  useSaveMyPrefsMutation,
+} from "../../store/services/preferencesApi";
+import { skipToken } from "@reduxjs/toolkit/query";
+import usePOSSelector from "../../utils/usePOSSelector";
+import usePOSMemory from "../../hooks/usePosMemory";
+import { setCaja } from "../../store/reducers/posSlice";
+import { useNavigate } from "react-router";
 
 function useDebouncedValue(value, delay = 400) {
   const [v, setV] = useState(value);
@@ -59,33 +59,32 @@ function useDebouncedValue(value, delay = 400) {
   return v;
 }
 
+const blurActive = () => {
+  const el = document.activeElement;
+  if (el && typeof el.blur === "function") el.blur();
+};
+
 const PuntoDeVenta = () => {
-  const { mode, activeSucursalId, sucursales } = useSelector((s) => s.scope);
+  const { mode, activeSucursalId } = useSelector((s) => s.scope);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const closingLockRef = useRef(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const botonAbrirPagoRef = useRef(null);
 
   const [openPagoModal, setOpenPagoModal] = useState(false);
   const [ventaData, setVentaData] = useState(null);
-  const [selectedVendedor, setSelectedVendedor] = useState("");
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [retornablesConfirmados, setRetornablesConfirmados] = useState(false);
 
-  const [openModal, setOpenModal] = useState(false);
   const [openClienteModal, setOpenClienteModal] = useState(false);
-  const [openCajaModal, setOpenCajaModal] = useState(false);
-  const [abrirCajaModal, setAbrirCajaModal] = useState(false);
-  const [cajaParaApertura, setCajaParaApertura] = useState(null);
   const [openRetornablesModal, setOpenRetornablesModal] = useState(false);
   const [cajaCerrando, setCajaCerrando] = useState(false);
   const [openAlert, setOpenAlert] = useState(false);
-  const [pendingOpenCaja, setPendingOpenCaja] = useState(false);
 
   const [productosRetornables, setProductosRetornables] = useState([]);
 
-  const { estado, seleccionarCaja, isLoading, error } =
-    useVerificarCaja(selectedVendedor);
   const usuario = useSelector((state) => state.auth);
   const {
     items: cart,
@@ -96,11 +95,49 @@ const PuntoDeVenta = () => {
   } = useSelector((state) => state.cart);
   const sucursalActiva = useSucursalActiva();
 
+  const { data: myPrefs } = useGetMyPrefsQuery();
+  const [savePrefs] = useSaveMyPrefsMutation();
   const {
     data: vendedores,
     isLoading: loadingVendedores,
     error: errorVendedores,
+    refetch: refetchVendedores,
   } = useGetAllUsuariosConCajaQuery();
+
+  const {
+    estado,
+    seleccionarCaja,
+    reloadEstado,
+    rol,
+    selectedVendedor,
+    setSelectedVendedor,
+    vendedoresFiltrados,
+    cajasParaModal,
+    openVendedorModal,
+    setOpenVendedorModal,
+    openCajaModal,
+    setOpenCajaModal,
+    openAperturaModal,
+    setOpenAperturaModal,
+    cajaParaApertura,
+    handleSelectVendedor,
+    handleSelectCaja,
+    handleCajaAbierta,
+    isLoading: isPOSLoading,
+  } = usePOSSelector({
+    mode,
+    activeSucursalId,
+    vendedoresAll: vendedores,
+    myPrefs,
+    savePrefs,
+  });
+
+  usePOSMemory({
+    selectedVendedor,
+    setSelectedVendedor,
+    estado,
+    seleccionarCaja,
+  });
 
   const [createVenta, { isLoading: isCreating }] = useCreateVentaMutation();
   const [closeCaja, { isLoading: isClosing }] = useCloseCajaMutation();
@@ -111,11 +148,24 @@ const PuntoDeVenta = () => {
   const [direccionEntrega, setDireccionEntrega] = useState("");
   const [usarDireccionGuardada, setUsarDireccionGuardada] = useState(true);
 
-  const rol = getRolName(usuario?.rol);
   const cajaSeleccionada = estado?.cajaSeleccionada;
   const vendedorRut = cajaSeleccionada?.usuario_asignado
     ? cajaSeleccionada?.usuario_asignado
     : cajaSeleccionada?._vendedor?.rut || null;
+
+  const handleBackFromCaja = () => {
+    if (rol === "administrador") {
+      setOpenCajaModal(false);
+      setOpenVendedorModal(true);
+      seleccionarCaja(null);
+    } else {
+      if (window.history.length > 1) {
+        navigate(-1);
+      } else {
+        setOpenCajaModal(false);
+      }
+    }
+  };
 
   const sucursalOrigenId = useMemo(() => {
     if (cajaSeleccionada?.id_sucursal) return cajaSeleccionada.id_sucursal;
@@ -128,6 +178,9 @@ const PuntoDeVenta = () => {
     usuario?.user?.id_sucursal,
   ]);
 
+  const readyForData =
+    !!estado?.cajaSeleccionada?.id_caja && !!sucursalOrigenId;
+
   const clientesParams = useMemo(() => {
     const base = { page: 1, limit: 200, activo: true };
     if (mode !== "global" && sucursalOrigenId) {
@@ -137,21 +190,44 @@ const PuntoDeVenta = () => {
   }, [mode, sucursalOrigenId]);
 
   const { data: clientes, isLoading: loadingClientes } = useGetAllClientesQuery(
-    clientesParams,
+    readyForData ? clientesParams : skipToken,
     {
       skip: mode !== "global" && !sucursalOrigenId,
-      keepUnusedDataFor: 60,
+      keepUnusedDataFor: 300,
       refetchOnMountOrArgChange: true,
-      refetchOnFocus: true,
-      refetchOnReconnect: true,
+      refetchOnFocus: false,
+      refetchOnReconnect: false,
     }
   );
 
-  const sucursalById = useMemo(() => {
-    const m = new Map();
-    (sucursales || []).forEach((s) => m.set(Number(s.id_sucursal), s.nombre));
-    return m;
-  }, [sucursales]);
+  useEffect(() => {
+    if (rol !== "administrador" || !selectedVendedor) return;
+
+    const rutCajaActual =
+      estado?.cajaSeleccionada?._vendedor?.rut ||
+      estado?.cajaSeleccionada?.usuario_asignado ||
+      null;
+
+    if (rutCajaActual && String(rutCajaActual) === String(selectedVendedor)) {
+      return;
+    }
+
+    if (!estado?.cajaSeleccionada?.id_caja) return;
+
+    seleccionarCaja(null);
+    dispatch(setCaja(null));
+    dispatch(clearCart());
+    dispatch(cajaApi.util.invalidateTags(["Caja", "CajaUsuario"]));
+    reloadEstado?.();
+    refetchVendedores?.();
+    //eslint-disable-next-line
+  }, [
+    selectedVendedor,
+    rol,
+    estado?.cajaSeleccionada?.id_caja,
+    estado?.cajaSeleccionada?._vendedor?.rut,
+    estado?.cajaSeleccionada?.usuario_asignado,
+  ]);
 
   const armarVentaData = (productosRetornablesSeleccionados = null) => {
     const isFactura = tipoDocumento === "factura";
@@ -248,7 +324,6 @@ const PuntoDeVenta = () => {
     setVentaData(venta);
 
     setOpenClienteModal(false);
-    setOpenModal(false);
     setOpenRetornablesModal(false);
     setOpenAlert(false);
 
@@ -263,6 +338,7 @@ const PuntoDeVenta = () => {
         venta
       );
     } else {
+      blurActive();
       setOpenPagoModal(true);
     }
   };
@@ -275,11 +351,13 @@ const PuntoDeVenta = () => {
       retornablesConfirmados || productosRetornables.length > 0;
 
     if (productosRetornablesEnCarrito.length > 0 && !yaConfirmados) {
+      blurActive();
       setProductosRetornables(productosRetornablesEnCarrito);
       setOpenRetornablesModal(true);
       return;
     }
 
+    blurActive();
     finalizarFlujoVenta(productosRetornables);
   };
 
@@ -372,83 +450,18 @@ const PuntoDeVenta = () => {
   const isSearching = search !== debouncedSearch;
 
   useEffect(() => {
-    if (isLoading) return;
-    dispatch(clearCart());
+    if (openCajaModal) setOpenAlert(false);
+  }, [openCajaModal]);
 
-    const sucAct = activeSucursalId;
+  useEffect(() => {
+    if (estado?.cajaSeleccionada?.id_caja) setOpenAlert(false);
+  }, [estado?.cajaSeleccionada?.id_caja]);
 
-    if (rol === "administrador") {
-      setSelectedVendedor("");
-      seleccionarCaja(null);
-      setOpenModal(true);
-      setOpenCajaModal(false);
-      setAbrirCajaModal(false);
-      setCajaParaApertura(null);
-      return;
-    }
+  /*********************+*
+  
+  Reset Retornables
 
-    setSelectedVendedor((prev) => prev || usuario?.user?.rut || "");
-
-    if (
-      estado?.cajaSeleccionada?.id_sucursal != null &&
-      Number(estado.cajaSeleccionada.id_sucursal) !== Number(sucAct)
-    ) {
-      seleccionarCaja(null);
-    }
-
-    if (sucAct == null && rol !== "vendedor") return;
-
-    const cajasBase = estado?.cajasAsignadas || [];
-
-    const preferidasAdmin =
-      rol === "administrador" && sucAct != null
-        ? cajasBase.filter((c) => c.id_sucursal === sucAct)
-        : cajasBase;
-
-    const cajasEnUso = rol === "vendedor" ? cajasBase : preferidasAdmin;
-    if (cajasEnUso.length === 0) {
-      setOpenModal(false);
-      setOpenCajaModal(false);
-      setAbrirCajaModal(false);
-      dispatch(
-        showNotification({
-          severity: "info",
-          message:
-            rol === "vendedor"
-              ? "No tienes cajas asignadas."
-              : "No hay cajas en la sucursal actual.",
-        })
-      );
-      return;
-    }
-
-    const abierta = cajasEnUso.find((c) => c.estado === "abierta");
-    if (abierta) {
-      /* if (rol === "administrador") {
-        try {
-          seleccionarCaja(abierta);
-        } catch {}
-        setOpenCajaModal(false);
-        setAbrirCajaModal(false);
-        return;
-      } */
-      setOpenCajaModal(true);
-      setAbrirCajaModal(false);
-      setCajaParaApertura(null);
-      return;
-    }
-
-    const cerrada = cajasEnUso.find((c) => c.estado === "cerrada");
-    if (cerrada) {
-      setCajaParaApertura(null);
-      setAbrirCajaModal(false);
-      setOpenCajaModal(true);
-    } else {
-      setOpenCajaModal(true);
-    }
-    //eslint-disable-next-line
-  }, [mode, activeSucursalId, isLoading, rol, usuario?.user?.rut]);
-
+  **************************/
   useEffect(() => {
     if (!cart.some((i) => i.es_retornable)) {
       setRetornablesConfirmados(false);
@@ -456,51 +469,50 @@ const PuntoDeVenta = () => {
     }
   }, [cart]);
 
-  useEffect(() => {
-    if (rol !== "administrador") return;
-    if (isLoading) return;
-    if (!selectedVendedor) return;
-    setOpenCajaModal(!estado?.cajaSeleccionada?.id_caja);
-  }, [
-    rol,
-    isLoading,
-    selectedVendedor,
-    activeSucursalId,
-    estado?.cajaSeleccionada?.id_caja,
-  ]);
-
-  useEffect(() => {
-    if (
-      rol === "vendedor" &&
-      usuario?.user?.rut &&
-      selectedVendedor !== usuario.user.rut
-    ) {
-      setSelectedVendedor(usuario.user.rut);
-    }
-    //eslint-disable-next-line
-  }, [rol, usuario?.user?.rut]);
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (rol !== "vendedor") return;
-    if (estado.cajaSeleccionada?.id_caja) return;
-    setOpenCajaModal(true);
-  }, [isLoading, rol, estado.cajaSeleccionada?.id_caja]);
-
-  const {
-    data: productosData,
-    isLoading: loadingProductos,
-    error: errorProductos,
-  } = useGetAvailabreProductosQuery(
-    {
+  /*   const productosArgs = useMemo(() => {
+    if (!readyForData) return null;
+    return {
       categoria: category === "all" ? undefined : category,
       search: debouncedSearch,
       page,
       limit: pageSize,
       id_sucursal: sucursalOrigenId,
-    },
-    { skip: !sucursalOrigenId }
-  );
+    };
+  }, [
+    readyForData,
+    category,
+    debouncedSearch,
+    page,
+    pageSize,
+    sucursalOrigenId,
+  ]); */
+
+  const productosArgs = useMemo(() => {
+    if (!readyForData || !sucursalOrigenId) return null;
+    return {
+      categoria: category === "all" ? undefined : category,
+      search: debouncedSearch || undefined,
+      page,
+      limit: pageSize,
+      id_sucursal: Number(sucursalOrigenId),
+    };
+  }, [
+    readyForData,
+    category,
+    debouncedSearch,
+    page,
+    pageSize,
+    sucursalOrigenId,
+  ]);
+
+  const {
+    data: productosData,
+    isLoading: loadingProductos,
+    error: errorProductos,
+  } = useGetAvailabreProductosQuery(productosArgs ?? skipToken, {
+    refetchOnFocus: false,
+    refetchOnReconnect: false,
+  });
 
   const {
     data: categoriasProductos,
@@ -509,106 +521,30 @@ const PuntoDeVenta = () => {
   } = useGetAllCategoriasQuery();
 
   const relevantError = getFirstRelevantError(
-    error,
     errorProductos,
     errorCateogrias,
     usuario?.rol === "administrador" ? errorVendedores : null
   );
 
-  const handleSelectVendedor = (rut) => {
-    if (estado?.cajaSeleccionada) seleccionarCaja(null);
-    setSelectedVendedor(rut);
-    setOpenModal(false);
-    /* setOpenCajaModal(true); */
-    setPendingOpenCaja(true);
-  };
+  const debeElegirCaja =
+    !estado?.cajaSeleccionada?.id_caja && !estado.initializing;
 
-  useEffect(() => {
-    if (!pendingOpenCaja) return;
-    if (isLoading) return;
-
-    setOpenCajaModal(true);
-    setPendingOpenCaja(false);
-  }, [pendingOpenCaja, isLoading]);
-
-  const vendedoresFiltrados = useMemo(() => {
-    const all = (vendedores || []).filter(isOperadorPOS);
-    if (rol === "vendedor") {
-      return all.filter((v) => v.rut === usuario?.user?.rut);
-    }
-    if (mode === "global") return all;
-    return all.filter((v) =>
-      v?.cajasAsignadas?.some((c) => c.id_sucursal === activeSucursalId)
-    );
-  }, [vendedores, rol, usuario?.user?.rut, mode, activeSucursalId]);
-
-  const cajasDelVendedorSeleccionado = useMemo(() => {
-    if (!selectedVendedor) return [];
-    const vend = vendedoresFiltrados.find((v) => v.rut === selectedVendedor);
-    const cajas = vend?.cajasAsignadas || [];
-    const branchId = Number(activeSucursalId);
-
-    const visibles =
-      mode === "global"
-        ? cajas
-        : cajas.filter((c) => Number(c.id_sucursal) === branchId);
-
-    return visibles.map((c) => ({
-      ...c,
-      _vendedor: {
-        rut: vend?.rut,
-        nombre: vend?.nombre,
-        rol: getRolName(vend?.rol),
-      },
-    }));
-  }, [selectedVendedor, vendedoresFiltrados, mode, activeSucursalId]);
-
-  const debeElegirCaja = !cajaSeleccionada?.id_caja;
-
-  const cajasParaModal = useMemo(() => {
-    const base =
-      rol === "administrador"
-        ? cajasDelVendedorSeleccionado
-        : estado.cajasAsignadas || [];
-
-    const branchId = Number(activeSucursalId);
-
-    const visibles =
-      mode === "global"
-        ? base
-        : base.filter((c) => Number(c.id_sucursal) === branchId);
-
-    return visibles.map((c) => ({
-      ...c,
-      sucursal: c.sucursal || {
-        id_sucursal: Number(c.id_sucursal),
-        nombre:
-          sucursalById.get(Number(c.id_sucursal)) ||
-          `Sucursal ${c.id_sucursal}`,
-      },
-    }));
-  }, [
-    rol,
-    cajasDelVendedorSeleccionado,
-    estado.cajasAsignadas,
-    mode,
-    activeSucursalId,
-    sucursalById,
-  ]);
-
-  useEffect(() => {
-    if (usuario?.rol === "administrador" && !selectedVendedor) {
-      setOpenModal(true);
-    }
-  }, [usuario, selectedVendedor]);
-
+  /**
+   *
+   * Calculo de subtotales
+   *
+   */
   useEffect(() => {
     dispatch(calculateTaxes(taxRate));
   }, [subtotal, descuento, taxRate, dispatch]);
 
-  const handleCategoryClick = (category) => {
-    setCategory(category);
+  const handleCategoryClick = (c) => {
+    setCategory(c);
+    setPage(1);
   };
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
 
   const sucursalCart = cart[0]?.id_sucursal_origen;
   if (sucursalCart && sucursalCart !== sucursalOrigenId) {
@@ -712,33 +648,85 @@ const PuntoDeVenta = () => {
   };
 
   const confirmAlert = () => {
+    blurActive();
     setOpenAlert(true);
   };
 
   const handleCerrarCaja = async () => {
     const cajaId = estado?.cajaSeleccionada?.id_caja;
+    if (!cajaId || closingLockRef.current) return;
 
-    if (!estado?.cajaSeleccionada?.id_caja) return;
+    closingLockRef.current = true;
     setCajaCerrando(true);
+    setOpenAlert(false);
+
     try {
-      await closeCaja({ idCaja: cajaId });
-      setCajaCerrando(false);
+      // 1) Llamada al backend
+      await closeCaja({ idCaja: cajaId }).unwrap();
+
+      // 2) Invalidar cachés relacionadas (sin depender de arg)
+      //    Nota: aunque closeCaja ya invalide, aquí forzamos por seguridad.
+      dispatch(cajaApi.util.invalidateTags(["Caja", "CajaUsuario"]));
+
+      // 3) Refrescar estado del hook (asignadas + estado)
+      await Promise.all([reloadEstado?.(), refetchVendedores?.()]);
+
+      // 4) Limpiar selección de caja en UI + store + memoria local
+      seleccionarCaja(null);
+      dispatch(setCaja(null));
+      try {
+        const raw = localStorage.getItem("posSelection:v1");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          localStorage.setItem(
+            "posSelection:v1",
+            JSON.stringify({ ...parsed, caja: null, ts: Date.now() })
+          );
+        }
+      } catch {
+        /* noop */
+      }
+
+      // 5) UI feedback
       dispatch(
         showNotification({
           message: "Caja cerrada exitosamente",
           severity: "success",
         })
       );
-      setOpenCajaModal(true);
+      setOpenCajaModal(true); // deja visible el selector para abrir otra caja
     } catch (error) {
-      console.error("Error al cerrar la caja:", error);
+      // Si ya estaba cerrada, tratamos como éxito (idempotente)
+      const msg =
+        error?.data?.error ||
+        error?.data?.message ||
+        error?.message ||
+        String(error);
+      const yaCerrada = /ya está cerrada/i.test(msg);
+      if (yaCerrada) {
+        dispatch(cajaApi.util.invalidateTags(["Caja", "CajaUsuario"]));
+        await Promise.all([reloadEstado?.(), refetchVendedores?.()]);
+        seleccionarCaja(null);
+        dispatch(setCaja(null));
+        dispatch(
+          showNotification({
+            message: "La caja ya estaba cerrada",
+            severity: "info",
+          })
+        );
+        setOpenCajaModal(true);
+      } else {
+        console.error("Error al cerrar la caja:", error);
+        dispatch(
+          showNotification({
+            message: `Error al cerrar la caja: ${msg}`,
+            severity: "error",
+          })
+        );
+      }
+    } finally {
       setCajaCerrando(false);
-      dispatch(
-        showNotification({
-          message: `Error al cerrar la caja ${error}`,
-          severity: "success",
-        })
-      );
+      closingLockRef.current = false;
     }
   };
 
@@ -787,11 +775,11 @@ const PuntoDeVenta = () => {
   }
 
   if (
-    isLoading ||
+    isPOSLoading ||
     loadingProductos ||
     loadingCategorias ||
     loadingClientes ||
-    (usuario?.rol === "administrador" && loadingVendedores)
+    (rol === "administrador" && loadingVendedores)
   ) {
     return <LoaderComponent />;
   }
@@ -802,21 +790,25 @@ const PuntoDeVenta = () => {
     return <Typography color="error">{relevantError.message}</Typography>;
   }
 
-  /*   if (isMobile) {
-    return <PuntoDeVentaMobile />;
-  } */
   const isFactura = tipoDocumento === "factura";
 
   return (
     <Box p={3} mb={3}>
-      {debeElegirCaja && (
+      {debeElegirCaja && !openCajaModal && (
         <Typography>Selecciona una caja para continuar.</Typography>
       )}
       <BarraSuperior
         selectedVendedor={selectedVendedor}
-        onSelectVendedor={() => setOpenModal(true)}
+        onSelectVendedor={() => {
+          blurActive();
+          setOpenAlert(false);
+          setOpenVendedorModal(true);
+        }}
         selectedCliente={selectedCliente}
-        onSelectCliente={() => setOpenClienteModal(true)}
+        onSelectCliente={() => {
+          blurActive();
+          setOpenClienteModal(true);
+        }}
         tipoDocumento={tipoDocumento}
         onChangeTipoDocumento={setTipoDocumento}
         tipoEntrega={tipoEntrega}
@@ -850,10 +842,7 @@ const PuntoDeVenta = () => {
             loading={loadingProductos}
             isSearching={isSearching}
             page={page}
-            totalPages={
-              productosData?.paginacion?.totalPages ||
-              Math.ceil(productosData.paginacion.totalItems / pageSize)
-            }
+            totalPages={productosData?.pagination?.totalPages ?? 1}
             onPageChange={(event, value) => setPage(value)}
             onAddToCart={handleAddToCart}
             sucursalId={sucursalOrigenId}
@@ -886,30 +875,24 @@ const PuntoDeVenta = () => {
       )}
 
       <SelectVendedorModal
-        open={openModal}
-        onClose={() => {}}
+        open={openVendedorModal}
+        onClose={() => setOpenVendedorModal(false)}
         vendedores={vendedoresFiltrados}
         selectedVendedor={selectedVendedor}
         onSelect={handleSelectVendedor}
       />
       <SelectCajaModal
         open={openCajaModal}
-        onBack={() => {
+        onBack={handleBackFromCaja}
+        onClose={() => {
+          setOpenAlert(false);
           setOpenCajaModal(false);
-          setOpenModal(true);
         }}
-        onClose={() => {}}
         cajas={cajasParaModal}
-        onSelect={(caja) => {
-          if (caja.estado === "cerrada") {
-            setCajaParaApertura(caja);
-            setAbrirCajaModal(true);
-            return;
-          }
-          if (seleccionarCaja(caja)) setOpenCajaModal(false);
-        }}
+        onSelect={handleSelectCaja}
         usuario={usuario}
         vendedor={selectedVendedor}
+        isAdmin={rol === "administrador"}
       />
 
       <SelectClienteModal
@@ -921,7 +904,11 @@ const PuntoDeVenta = () => {
         idSucursal={mode !== "global" ? sucursalOrigenId : undefined}
       />
       <AlertDialog
-        openAlert={openAlert}
+        openAlert={
+          openAlert &&
+          !!estado?.cajaSeleccionada?.id_caja &&
+          estado?.cajaAbierta
+        }
         onCloseAlert={() => setOpenAlert(false)}
         onConfirm={handleCerrarCaja}
         title="Confirmar Cierre de Caja"
@@ -948,14 +935,10 @@ const PuntoDeVenta = () => {
         isLoading={isCreating}
       />
       <AperturaCajaModal
-        open={abrirCajaModal}
+        open={openAperturaModal}
         caja={cajaParaApertura}
-        onClose={() => setAbrirCajaModal(false)}
-        onCajaAbierta={(cajaAbierta) => {
-          seleccionarCaja(cajaAbierta);
-          setAbrirCajaModal(false);
-          setOpenCajaModal(false);
-        }}
+        onClose={() => setOpenAperturaModal(false)}
+        onCajaAbierta={handleCajaAbierta}
       />
     </Box>
   );

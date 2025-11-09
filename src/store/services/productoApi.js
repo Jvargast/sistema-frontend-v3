@@ -11,13 +11,17 @@ export const productoApi = createApi({
         url: `/productos/`,
         params,
       }),
-      providesTags: (result) =>
+      providesTags: (result, error, arg) =>
         result?.productos
           ? [
               { type: "Producto", id: "LIST" },
               ...result.productos.map((p) => ({
                 type: "Producto",
                 id: p.id_producto,
+              })), { type: "Inventario", id: `LIST-${arg.id_sucursal}` },
+              ...result.productos.map((p) => ({
+                type: "Inventario",
+                id: `${p.id_producto}-${arg.id_sucursal}`,
               })),
             ]
           : [{ type: "Producto", id: "LIST" }],
@@ -42,16 +46,16 @@ export const productoApi = createApi({
       providesTags: (result, error, arg) =>
         result?.productos
           ? [
+              { type: "Inventario", id: `LIST-${arg.id_sucursal}` },
               ...result.productos.map((p) => ({
                 type: "Inventarios",
                 id: `${p.id_producto}-${arg.id_sucursal}`,
               })),
-              { type: "Inventarios", id: `LIST-${arg.id_sucursal}` },
             ]
           : [{ type: "Inventarios", id: `LIST-${arg.id_sucursal}` }],
       transformResponse: (response) => ({
         productos: response.data,
-        paginacion: response.total,
+        pagination: response.pagination,
       }),
       async onQueryStarted(args, { queryFulfilled }) {
         try {
