@@ -8,6 +8,7 @@ import {
   Stack,
   TextField,
   useTheme,
+  Alert,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EditIcon from "@mui/icons-material/Edit";
@@ -50,6 +51,7 @@ const VerFormula = () => {
   const [productoFinal, setProductoFinal] = useState(null);
   const [cantidadFinal, setCantidadFinal] = useState(null);
   const [insumos, setInsumos] = useState([]);
+  const [reactivating, setReactivating] = useState(false);
 
   useEffect(() => {
     if (formula) {
@@ -71,6 +73,8 @@ const VerFormula = () => {
     }
   }, [formula]);
 
+  const estaActiva = Boolean(formula?.activo);
+
   const construirPayload = () => ({
     id: formula.id_formula,
     nombre_formula: nombreFormula.trim(),
@@ -82,6 +86,30 @@ const VerFormula = () => {
       unidad_medida: i.descripcion,
     })),
   });
+
+  const handleReactivate = async () => {
+    try {
+      setReactivating(true);
+      await updateFormula({ id: formula.id_formula, activo: true }).unwrap();
+      dispatch(
+        showNotification({
+          message: "Fórmula reactivada.",
+          severity: "success",
+        })
+      );
+      await refetch();
+    } catch (err) {
+      dispatch(
+        showNotification({
+          message:
+            err?.data?.error || err?.data?.message || "No se pudo reactivar",
+          severity: "error",
+        })
+      );
+    } finally {
+      setReactivating(false);
+    }
+  };
 
   const handleSave = async () => {
     try {
@@ -144,7 +172,12 @@ const VerFormula = () => {
         backgroundColor: theme.palette.background.paper,
       }}
     >
-      <Stack direction="row" justifyContent="space-between" mb={2}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
         <Button
           startIcon={<ArrowBackIcon />}
           sx={{ textTransform: "none", fontWeight: "bold" }}
@@ -186,6 +219,25 @@ const VerFormula = () => {
         )}
       </Stack>
       <Divider sx={{ mb: 3 }} />
+      {!estaActiva && (
+        <Alert
+          severity="warning"
+          sx={{ mb: 2, borderRadius: 2 }}
+          action={
+            <Button
+              onClick={handleReactivate}
+              size="small"
+              variant="outlined"
+              disabled={reactivating}
+            >
+              {reactivating ? "Reactivando…" : "Reactivar"}
+            </Button>
+          }
+        >
+          Esta fórmula está deshabilitada. Puedes reactivarla para volver a
+          usarla.
+        </Alert>
+      )}
       <Typography
         variant="h4"
         fontWeight="bold"
