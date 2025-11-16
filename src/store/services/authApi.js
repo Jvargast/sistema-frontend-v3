@@ -34,8 +34,6 @@ export const authApi = createApi({
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-
-          // Este dato es importante: si tu backend devuelve { usuario, rol, permisos }
           dispatch(setUser(data));
         } catch (error) {
           console.log(error)
