@@ -34,7 +34,6 @@ export const inventarioCamionApi = createApi({
       providesTags: ["InventarioCamion"],
     }),
 
-    // Obtener estado del inventario del camión (Nuevo Endpoint)
     getEstadoInventarioCamion: builder.query({
       query: (id_camion) => ({
         url: `/inventario-camion/estado/${id_camion}`,

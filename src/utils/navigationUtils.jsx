@@ -7,7 +7,6 @@ export const getInitialRoute = (rolLike, permisosLike) => {
   const toPermName = (p) => {
     if (!p) return null;
     if (typeof p === "string") return p;
-    // soporta { nombre }, { permiso: { nombre } }, { permiso: "..." }
     if (typeof p.nombre === "string") return p.nombre;
     if (typeof p.permiso === "string") return p.permiso;
     if (typeof p.permiso?.nombre === "string") return p.permiso.nombre;

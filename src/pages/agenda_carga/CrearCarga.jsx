@@ -124,7 +124,13 @@ const CreateAgendaCargaForm = () => {
     isError: errorProductos,
     refetch: refetchProductos,
   } = useGetAvailabreProductosQuery(
-    sucursalReady ? { id_sucursal: Number(sucursalId) } : skipToken,
+    sucursalReady
+      ? {
+          id_sucursal: Number(sucursalId),
+          page: 1,
+          limit: 1000,
+        }
+      : skipToken,
     { refetchOnMountOrArgChange: true }
   );
 

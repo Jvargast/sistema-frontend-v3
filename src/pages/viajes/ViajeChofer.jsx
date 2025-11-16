@@ -7,6 +7,7 @@ import {
   Box,
   IconButton,
   Dialog,
+  DialogTitle,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { Container } from "@mui/material";
@@ -438,29 +439,50 @@ const ViajeChofer = ({ viaje }) => {
         }}
         keepMounted={false}
       >
-        <Box
-          sx={{
-            p: 2,
+        <DialogTitle
+          sx={(theme) => ({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "primary.main",
-            color: "#fff",
-          }}
+            bgcolor:
+              theme.palette.mode === "dark"
+                ? theme.palette.primary.dark + "22"
+                : theme.palette.primary.light + "44",
+            color: theme.palette.primary.main,
+            fontWeight: "bold",
+            fontSize: { xs: 18, sm: 22 },
+            borderTopLeftRadius: 16,
+            borderTopRightRadius: 16,
+            px: { xs: 2, sm: 4 },
+            py: { xs: 1.5, sm: 2 },
+            borderBottom: `1.5px solid ${
+              theme.palette.mode === "dark"
+                ? theme.palette.primary.dark
+                : theme.palette.primary.light
+            }`,
+          })}
         >
-          <Typography variant="h6">🛻 Inventario del Camión</Typography>
+          Detalle Visual del Inventario del Camión
           <IconButton
-            edge="end"
-            color="inherit"
             onClick={() => {
               setOpenInventarioModal(false);
               setFabOpen(false);
               document.activeElement.blur();
             }}
+            size="small"
+            sx={{
+              color: (theme) => theme.palette.primary.main,
+              "&:hover": {
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.primary.dark + "1A"
+                    : theme.palette.primary.light + "1A",
+              },
+            }}
           >
             <CloseIcon />
           </IconButton>
-        </Box>
+        </DialogTitle>
 
         <Box sx={{ p: 2 }}>
           <InventarioCamion

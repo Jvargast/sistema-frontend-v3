@@ -4,15 +4,14 @@ import { baseQueryWithReauthEnhanced } from "./fettchQuery";
 export const permisosApi = createApi({
     reducerPath: "permisosApi",
     baseQuery: baseQueryWithReauthEnhanced,
-    tagTypes: ["Permiso"], // Identificador para invalidar cache
+    tagTypes: ["Permiso"], 
     endpoints: (builder) => ({
-      // Obtener todos los permisos
       getAllpermisos: builder.query({
         query: (params) => ({ url: `/permisos/`, params }),
-        providesTags: ["Permiso"], // Para invalidar cache
+        providesTags: ["Permiso"], 
         transformResponse: (response) => ({
-          permisos: response.data, // Datos de permisos
-          paginacion: response.total, // Datos de paginación
+          permisos: response.data,
+          paginacion: response.total,
         }),
         async onQueryStarted(args, { queryFulfilled }) {
           try {
@@ -23,7 +22,6 @@ export const permisosApi = createApi({
         },
       }),
   
-      // Obtener un rol por ID
       getPermisoById: builder.query({
         query: (id) => `/permisos/${id}`,
         providesTags: ["Permiso"],
@@ -36,7 +34,6 @@ export const permisosApi = createApi({
         },
       }),
   
-      // Crear un rol
       createPermiso: builder.mutation({
         query: (newPermiso) => ({
           url: `/permisos/`,
@@ -53,7 +50,6 @@ export const permisosApi = createApi({
         },
       }),
   
-      // Actualizar un rol
       updatePermiso: builder.mutation({
         query: ({ id, ...formData }) => ({
           url: `/permisos/${id}`,
@@ -71,7 +67,6 @@ export const permisosApi = createApi({
         },
       }),
   
-      // Eliminar un rol
       deletePermiso: builder.mutation({
         query: (id) => ({
           url: `/permisos/${id}`,
@@ -89,7 +84,6 @@ export const permisosApi = createApi({
     }),
   });
   
-  // Exporta los hooks generados automáticamente
   export const {
     useGetAllpermisosQuery,
     useLazyGetAllpermisosQuery,
