@@ -95,7 +95,7 @@ const EditUser = () => {
           );
           return;
         }
-        await updateUserPassword({ rut: id, newPassword });
+        await updateUserPassword({ rut: id, newPassword }).unwrap();
         dispatch(
           showNotification({
             message: "Contraseña actualizada correctamente.",
