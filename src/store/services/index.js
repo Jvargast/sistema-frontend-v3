@@ -40,6 +40,7 @@ import { ordenPagoApi } from "./ordenPagoApi";
 import { categoriaGastoApi } from "./categoriaGastoApi";
 import { gastoApi } from "./gastoApi";
 import { preferencesApi } from "./preferencesApi";
+import { reportesAnalisisApi } from "./reportesAnalisisApi";
 
 export const apiMiddleware = [
   authApi.middleware,
@@ -83,7 +84,8 @@ export const apiMiddleware = [
   ordenPagoApi.middleware,
   categoriaGastoApi.middleware,
   gastoApi.middleware,
-  preferencesApi.middleware
+  preferencesApi.middleware,
+  reportesAnalisisApi.middleware
 ];
 
 export const apiReducers = {
@@ -128,7 +130,8 @@ export const apiReducers = {
   [ordenPagoApi.reducerPath]: ordenPagoApi.reducer,
   [categoriaGastoApi.reducerPath]: categoriaGastoApi.reducer,
   [gastoApi.reducerPath]: gastoApi.reducer,
-  [preferencesApi.reducerPath]: preferencesApi.reducer
+  [preferencesApi.reducerPath]: preferencesApi.reducer,
+  [reportesAnalisisApi.reducerPath]: reportesAnalisisApi.reducer
 };
 
 const apiServices = {
@@ -173,7 +176,8 @@ const apiServices = {
   ordenPagoApi,
   categoriaGastoApi,
   gastoApi,
-  preferencesApi
+  preferencesApi,
+  reportesAnalisisApi
 };
 
 export default apiServices;
