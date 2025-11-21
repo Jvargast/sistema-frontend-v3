@@ -76,7 +76,6 @@ export function exportarReporteDiarioExcel({
     0
   );
 
-
   const wb = XLSX.utils.book_new();
 
   const resumenAoa = [
@@ -97,20 +96,50 @@ export function exportarReporteDiarioExcel({
     ["Entregas", "Entregas pendientes", totalEntregasPendientes],
   ];
 
+  const chartDataAoa = [
+    ["Indicador", "Valor"],
+    ["Ventas - Monto ($)", totalVentasMonto],
+    ["Ventas - Cantidad", totalVentasCount],
+    ["Pedidos - Monto ($)", totalPedidosMonto],
+    ["Pedidos - Total", totalPedidos],
+    ["Pedidos - Pagados", totalPedidosPagados],
+    ["Productos - Monto ($)", totalProductosMonto],
+    ["Productos - Unidades", totalProductosVendidos],
+    ["Pagos - Monto ($)", totalPagosMonto],
+    ["Entregas - Total", totalEntregas],
+    ["Entregas - Exitosas", totalEntregasExitosas],
+    ["Entregas - Pendientes", totalEntregasPendientes],
+  ];
+
+  if (ventasEst.length) {
+    chartDataAoa.push(
+      [],
+      ["Ventas por tipo de entrega", ""],
+      ["TipoEntrega", "MontoTotal"]
+    );
+    ventasEst.forEach((v) => {
+      chartDataAoa.push([
+        v.tipo_entrega || "Sin tipo",
+        Number(v.monto_total || 0),
+      ]);
+    });
+  }
+
   const wsResumenDia = XLSX.utils.aoa_to_sheet(resumenAoa);
 
   wsResumenDia["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }];
 
   wsResumenDia["!autofilter"] = { ref: "A4:C4" };
 
-  wsResumenDia["!cols"] = [
-    { wch: 16 }, 
-    { wch: 35 }, 
-    { wch: 18 },
-  ];
+  wsResumenDia["!cols"] = [{ wch: 16 }, { wch: 35 }, { wch: 18 }];
 
   XLSX.utils.book_append_sheet(wb, wsResumenDia, "Resumen Día");
 
+  const wsChartData = XLSX.utils.aoa_to_sheet(chartDataAoa);
+
+  wsChartData["!cols"] = [{ wch: 30 }, { wch: 18 }];
+
+  XLSX.utils.book_append_sheet(wb, wsChartData, "Gráficos - Datos");
 
   if (ventasEst.length) {
     const ventasSheetData = ventasEst.map((v) => ({
@@ -125,16 +154,15 @@ export function exportarReporteDiarioExcel({
 
     wsVentasTipo["!autofilter"] = { ref: "A1:E1" };
     wsVentasTipo["!cols"] = [
-      { wch: 12 }, 
+      { wch: 12 },
       { wch: 10 },
-      { wch: 22 }, 
-      { wch: 16 }, 
-      { wch: 18 }, 
+      { wch: 22 },
+      { wch: 16 },
+      { wch: 18 },
     ];
 
     XLSX.utils.book_append_sheet(wb, wsVentasTipo, "Ventas x TipoEntrega");
   }
-
 
   if (pedidosEst.length) {
     const pedidosSheetData = pedidosEst.map((p) => ({
@@ -151,25 +179,24 @@ export function exportarReporteDiarioExcel({
 
     wsPedidos["!autofilter"] = { ref: "A1:G1" };
     wsPedidos["!cols"] = [
-      { wch: 12 }, 
+      { wch: 12 },
       { wch: 10 },
-      { wch: 14 }, 
-      { wch: 16 }, 
-      { wch: 16 }, 
-      { wch: 18 }, 
-      { wch: 18 }, 
+      { wch: 14 },
+      { wch: 16 },
+      { wch: 16 },
+      { wch: 18 },
+      { wch: 18 },
     ];
 
     XLSX.utils.book_append_sheet(wb, wsPedidos, "Pedidos");
   }
-
 
   if (productosEst.length) {
     const productosSheetData = productosEst.map((p) => ({
       Fecha: p.fecha,
       IdSucursal: p.id_sucursal || null,
       IdProducto: p.id_producto,
-      NombreProducto: p.producto?.nombre || null,
+      NombreProducto: p.nombre_item || null,
       IdInsumo: p.id_insumo,
       CantidadVendida: Number(p.cantidad_vendida || 0),
       MontoTotalCLP: Number(p.monto_total || 0),
@@ -179,11 +206,11 @@ export function exportarReporteDiarioExcel({
 
     wsProductos["!autofilter"] = { ref: "A1:G1" };
     wsProductos["!cols"] = [
-      { wch: 12 }, 
+      { wch: 12 },
       { wch: 10 },
-      { wch: 12 }, 
-      { wch: 28 }, 
-      { wch: 12 }, 
+      { wch: 12 },
+      { wch: 28 },
+      { wch: 12 },
       { wch: 18 },
       { wch: 18 },
     ];
@@ -204,11 +231,11 @@ export function exportarReporteDiarioExcel({
 
     wsPagos["!autofilter"] = { ref: "A1:E1" };
     wsPagos["!cols"] = [
-      { wch: 12 }, 
+      { wch: 12 },
       { wch: 10 },
-      { wch: 18 }, 
-      { wch: 18 }, 
-      { wch: 18 }, 
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 18 },
     ];
 
     XLSX.utils.book_append_sheet(wb, wsPagos, "Pagos x Método");
@@ -228,17 +255,16 @@ export function exportarReporteDiarioExcel({
 
     wsVentasChofer["!autofilter"] = { ref: "A1:F1" };
     wsVentasChofer["!cols"] = [
-      { wch: 12 }, 
-      { wch: 10 }, 
-      { wch: 10 }, 
-      { wch: 26 }, 
-      { wch: 16 }, 
-      { wch: 18 }, 
+      { wch: 12 },
+      { wch: 10 },
+      { wch: 10 },
+      { wch: 26 },
+      { wch: 16 },
+      { wch: 18 },
     ];
 
     XLSX.utils.book_append_sheet(wb, wsVentasChofer, "Ventas x Chofer");
   }
-
 
   if (entregasEst.length) {
     const entregasSheetData = entregasEst.map((e) => ({
@@ -255,18 +281,17 @@ export function exportarReporteDiarioExcel({
 
     wsEntregas["!autofilter"] = { ref: "A1:G1" };
     wsEntregas["!cols"] = [
-      { wch: 12 }, 
+      { wch: 12 },
       { wch: 10 },
-      { wch: 10 }, 
-      { wch: 26 }, 
-      { wch: 18 }, 
-      { wch: 20 }, 
-      { wch: 20 }, 
+      { wch: 10 },
+      { wch: 26 },
+      { wch: 18 },
+      { wch: 20 },
+      { wch: 20 },
     ];
 
     XLSX.utils.book_append_sheet(wb, wsEntregas, "Entregas x Chofer");
   }
-
 
   let nombre = `reporte-diario-${fecha}`;
   if (sucursalNombre) nombre += `-${sanitize(sucursalNombre).slice(0, 25)}`;
