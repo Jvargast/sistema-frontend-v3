@@ -43,6 +43,7 @@ const Analisis = () => {
     fecha: fechaReporte,
     id_sucursal: activeSucursalId ?? undefined,
   });
+  console.log(reporte)
 
   const handleGenerar = async (trigger, tipo) => {
     try {
@@ -83,6 +84,7 @@ const Analisis = () => {
       );
       return;
     }
+    console.log(reporte)
 
     exportarReporteDiarioExcel({
       fecha: reporte.fecha,
