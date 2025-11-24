@@ -1,4 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
+import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
   Box,
   Typography,
@@ -9,7 +11,10 @@ import {
   useTheme,
 } from "@mui/material";
 import BackButton from "../../components/common/BackButton";
-import { useGetPedidoByIdQuery } from "../../store/services/pedidosApi";
+import {
+  useGetPedidoByIdQuery,
+  useToggleMostrarEnTableroMutation,
+} from "../../store/services/pedidosApi";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import DetallesPedido from "../../components/pedido/DetallesPedido";
 import InfoPedido from "../../components/pedido/PedidoInfo";
@@ -20,16 +25,32 @@ import { useGetCuentaPorCobrarByVentaIdQuery } from "../../store/services/cuenta
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 
 import { PointOfSale, ReceiptLong, OpenInNew } from "@mui/icons-material";
+import { useDispatch } from "react-redux";
+import { showNotification } from "../../store/reducers/notificacionSlice";
 
 const VerPedido = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const theme = useTheme();
-  const { data, error, isLoading } = useGetPedidoByIdQuery(id);
+  const [toggleMostrarEnTablero, { isLoading: isToggling }] =
+    useToggleMostrarEnTableroMutation();
+  const { data, error, isLoading, refetch } = useGetPedidoByIdQuery(id);
   const { data: ventaData } = useGetVentaByIdQuery(data?.id_venta, {
     skip: !data?.id_venta,
   });
 
+  const estadoPedido = data?.EstadoPedido?.nombre_estado || "";
+
+  const ESTADOS_CON_TABLERO = [
+    "Pendiente",
+    "Pendiente de Confirmación",
+    "Confirmado",
+  ];
+
+  const puedeGestionarTablero = ESTADOS_CON_TABLERO.includes(estadoPedido);
+
+  const mostrarEnTablero = data?.mostrar_en_tablero ?? true;
   const [openPago, setOpenPago] = useState(false);
   const tipoDocumento = ventaData?.documentos[0]?.tipo_documento || "boleta";
 
@@ -56,6 +77,38 @@ const VerPedido = () => {
             : null,
       }
     : null;
+
+  const handleToggleTablero = async () => {
+    if (!data) return;
+    const nextValue = !mostrarEnTablero;
+
+    try {
+      await toggleMostrarEnTablero({
+        id_pedido: data.id_pedido,
+        mostrar_en_tablero: nextValue,
+      }).unwrap();
+
+      dispatch(
+        showNotification({
+          message: nextValue
+            ? "Pedido vuelto a mostrar en el tablero."
+            : "Pedido ocultado del tablero.",
+          severity: "success",
+        })
+      );
+
+      refetch();
+    } catch (error) {
+      console.error("Error al actualizar mostrar_en_tablero:", error);
+      dispatch(
+        showNotification({
+          message:
+            "No se pudo actualizar la visibilidad del pedido en el tablero.",
+          severity: "error",
+        })
+      );
+    }
+  };
 
   if (isLoading) return <LoaderComponent />;
 
@@ -183,26 +236,130 @@ const VerPedido = () => {
             theme.palette.mode === "dark"
               ? theme.palette.grey[100]
               : theme.palette.text.primary,
-
           boxShadow: theme.shadows[5],
         }}
       >
-        <Chip
-          label={`Estado: ${data.estado_pago || "Desconocido"}`}
-          color={data.pagado ? "success" : "warning"}
+        <Box
           sx={{
-            fontWeight: "bold",
-            mb: 2,
-            bgcolor: data.pagado
-              ? theme.palette.success.main
-              : theme.palette.warning.main,
-            color: theme.palette.getContrastText(
-              data.pagado
-                ? theme.palette.success.main
-                : theme.palette.warning.main
-            ),
+            display: "flex",
+            alignItems: { xs: "flex-start", sm: "center" },
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 1.5,
+            mb: 2.5,
           }}
-        />
+        >
+          {/* ESTADO DE PAGO */}
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            <Chip
+              label={`Estado de pago: ${data.estado_pago || "Desconocido"}`}
+              color={data.pagado ? "success" : "warning"}
+              sx={{
+                fontWeight: "bold",
+                bgcolor: data.pagado
+                  ? theme.palette.success.main
+                  : theme.palette.warning.main,
+                color: theme.palette.getContrastText(
+                  data.pagado
+                    ? theme.palette.success.main
+                    : theme.palette.warning.main
+                ),
+              }}
+            />
+          </Box>
+
+          {/* ESTADO EN TABLERO */}
+          {puedeGestionarTablero && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                px: 1.5,
+                py: 0.8,
+                borderRadius: 999,
+                border: `1px solid ${
+                  mostrarEnTablero
+                    ? theme.palette.primary.light
+                    : theme.palette.grey[400]
+                }`,
+                bgcolor: mostrarEnTablero
+                  ? theme.palette.mode === "dark"
+                    ? "rgba(129, 140, 248, 0.2)"
+                    : "rgba(59, 130, 246, 0.06)"
+                  : theme.palette.mode === "dark"
+                  ? "rgba(148, 163, 184, 0.18)"
+                  : "rgba(148, 163, 184, 0.08)",
+                boxShadow: theme.shadows[mostrarEnTablero ? 2 : 0],
+              }}
+            >
+              <Box
+                sx={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: "50%",
+                  display: "grid",
+                  placeItems: "center",
+                  bgcolor: mostrarEnTablero
+                    ? theme.palette.primary.main
+                    : theme.palette.grey[500],
+                  color: theme.palette.getContrastText(
+                    mostrarEnTablero
+                      ? theme.palette.primary.main
+                      : theme.palette.grey[500]
+                  ),
+                  flexShrink: 0,
+                }}
+              >
+                {mostrarEnTablero ? (
+                  <DashboardCustomizeIcon sx={{ fontSize: 18 }} />
+                ) : (
+                  <VisibilityOffIcon sx={{ fontSize: 18 }} />
+                )}
+              </Box>
+
+              <Box sx={{ minWidth: 0 }}>
+                <Typography
+                  variant="caption"
+                  sx={{ fontSize: 11, opacity: 0.8, display: "block" }}
+                >
+                  Tablero de choferes
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: 13,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {mostrarEnTablero
+                    ? "Mostrando en tablero"
+                    : "Oculto del tablero"}
+                </Typography>
+              </Box>
+
+              <Button
+                size="small"
+                variant={mostrarEnTablero ? "outlined" : "contained"}
+                color={mostrarEnTablero ? "inherit" : "primary"}
+                disabled={isToggling}
+                onClick={handleToggleTablero}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  borderRadius: 999,
+                  ml: 0.5,
+                  px: 1.8,
+                  fontSize: 12,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {mostrarEnTablero ? "Ocultar" : "Volver a mostrar"}
+              </Button>
+            </Box>
+          )}
+        </Box>
 
         <Box
           sx={{
@@ -259,12 +416,6 @@ const VerPedido = () => {
             </Button>
           </Box>
         )}
-
-        <ModalPagoPedido
-          open={openPago}
-          onClose={() => setOpenPago(false)}
-          pedido={data}
-        />
       </Paper>
 
       <Grid container spacing={3}>
@@ -276,6 +427,12 @@ const VerPedido = () => {
           <DetallesPedido detalles={data.DetallesPedido} />
         </Grid>
       </Grid>
+
+      <ModalPagoPedido
+        open={openPago}
+        onClose={() => setOpenPago(false)}
+        pedido={data}
+      />
     </Box>
   );
 };

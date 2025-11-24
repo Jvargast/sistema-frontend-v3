@@ -6,36 +6,52 @@ import {
   ClickAwayListener,
   Popper,
   useTheme,
+  IconButton,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import { useState } from "react";
 import PedidoTooltip from "./PedidoToolTip";
 import { obtenerFechaChile, obtenerHoraChile } from "../../utils/formatearHora";
 
 const estadoColors = (theme) => ({
+  Pendiente: theme.palette.warning.main,
   "Pendiente de Confirmación":
-    theme.palette.mode === "dark" ? "#666A75" : "#D7DBDD",
-  Confirmado: theme.palette.success.light,
-  "En Preparación": theme.palette.warning.light,
-  "En Entrega": theme.palette.info.light,
-  Default: theme.palette.secondary.light,
+    theme.palette.mode === "dark"
+      ? theme.palette.grey[500]
+      : theme.palette.grey[400],
+  Confirmado: theme.palette.success.main,
+  Default: theme.palette.grey[400],
 });
-
-const PedidoCard = ({ pedido, index }) => {
+const PedidoCard = ({ pedido, index, onSacarDeTablero, onVerDetalle }) => {
   const theme = useTheme();
   const coloresEstado = estadoColors(theme);
 
-  const borderColor = pedido?.id_chofer
-    ? coloresEstado[pedido.EstadoPedido?.nombre_estado] || coloresEstado.Default
-    : theme.palette.error.main;
+  const estadoNombre = pedido?.EstadoPedido?.nombre_estado || "Desconocido";
+  const borderColor = coloresEstado[estadoNombre] || coloresEstado.Default;
 
   const [anchorEl, setAnchorEl] = useState(null);
+  const [menuAnchor, setMenuAnchor] = useState(null);
 
   const handleMouseEnter = (event) => setAnchorEl(event.currentTarget);
   const handleMouseLeave = () => setAnchorEl(null);
   const handleClick = (event) =>
     setAnchorEl(anchorEl ? null : event.currentTarget);
 
-  const open = Boolean(anchorEl);
+  const openTooltip = Boolean(anchorEl);
+
+  const handleOpenMenu = (e) => {
+    e.stopPropagation();
+    setAnchorEl(null);
+    setMenuAnchor(e.currentTarget);
+  };
+  const handleCloseMenu = () => setMenuAnchor(null);
+  const openMenu = Boolean(menuAnchor);
 
   return (
     <>
@@ -45,6 +61,7 @@ const PedidoCard = ({ pedido, index }) => {
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
+            style={provided.draggableProps.style}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleClick}
@@ -63,8 +80,8 @@ const PedidoCard = ({ pedido, index }) => {
               boxShadow: snapshot.isDragging
                 ? theme.shadows[8]
                 : theme.shadows[1],
-              cursor: "grab",
-              transition: "all 0.18s",
+              cursor: snapshot.isDragging ? "grabbing" : "grab",
+              transition: snapshot.isDragging ? "none" : "all 0.18s",
               "&:hover": {
                 boxShadow: theme.shadows[6],
                 background:
@@ -73,57 +90,71 @@ const PedidoCard = ({ pedido, index }) => {
                     : theme.palette.grey[50],
               },
               width: "100%",
-              margin: "0 auto",
               overflow: "visible",
               wordBreak: "break-word",
-
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
+              gap: 1,
             }}
           >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                mb: 1,
-                alignItems: "center",
-              }}
-            >
-              <Typography
-                variant="subtitle2"
-                fontWeight="bold"
+            <Box sx={{ mb: 0.75 }}>
+              <Box
                 sx={{
-                  color: theme.palette.error.main,
-                  letterSpacing: 0.5,
-                  whiteSpace: "nowrap",
-                  mr: 1,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 0.5,
+                  gap: 1,
                 }}
               >
-                #{pedido.id_pedido}
-              </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      bgcolor: borderColor,
+                      boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography
+                    variant="subtitle2"
+                    fontWeight="bold"
+                    sx={{
+                      color: theme.palette.text.primary,
+                      letterSpacing: 0.5,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    #{pedido.id_pedido}
+                  </Typography>
+                </Box>
+
+                <IconButton size="small" onClick={handleOpenMenu}>
+                  <MoreVertIcon fontSize="small" />
+                </IconButton>
+              </Box>
 
               <Box
                 sx={{
-                  fontSize: "0.90rem",
-                  backgroundColor:
-                    theme.palette.mode === "dark" ? "#18203a" : "#e8f1fc",
-                  color:
-                    theme.palette.mode === "dark"
-                      ? "#d7e2fa"
-                      : theme.palette.primary.dark,
-                  px: 2,
-                  py: 0.5,
-                  borderRadius: 2,
-                  fontWeight: 600,
-                  minWidth: 90,
-                  textAlign: "right",
-                  lineHeight: 1.1,
-                  overflowWrap: "break-word",
+                  display: "flex",
+                  justifyContent: "flex-end",
                 }}
               >
-                <div>{obtenerFechaChile(pedido.fecha_pedido)}</div>
-                <div>{obtenerHoraChile(pedido.fecha_pedido)}</div>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    lineHeight: 1.2,
+                    textAlign: "right",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {obtenerFechaChile(pedido.fecha_pedido)} ·{" "}
+                  {obtenerHoraChile(pedido.fecha_pedido)}
+                </Typography>
               </Box>
             </Box>
 
@@ -155,26 +186,6 @@ const PedidoCard = ({ pedido, index }) => {
                   {pedido?.Cliente?.nombre ?? "Desconocido"}
                 </Box>
               </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: theme.palette.success.main,
-                  fontWeight: 700,
-                  display: "block",
-                }}
-              >
-                Estado:{" "}
-                <Box
-                  component="span"
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    fontWeight: 500,
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {pedido?.EstadoPedido?.nombre_estado}
-                </Box>
-              </Typography>
 
               <Typography
                 variant="body2"
@@ -204,8 +215,47 @@ const PedidoCard = ({ pedido, index }) => {
         )}
       </Draggable>
 
+      {openMenu && (
+        <Menu
+          anchorEl={menuAnchor}
+          open
+          onClose={handleCloseMenu}
+          elevation={3}
+          disableAutoFocus
+          disableEnforceFocus
+          disableRestoreFocus
+          MenuListProps={{
+            autoFocusItem: false,
+          }}
+        >
+          <MenuItem
+            onClick={() => {
+              handleCloseMenu();
+              onVerDetalle?.(pedido);
+            }}
+          >
+            <ListItemIcon>
+              <VisibilityIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="Ver detalle" />
+          </MenuItem>
+
+          <MenuItem
+            onClick={() => {
+              handleCloseMenu();
+              onSacarDeTablero?.(pedido);
+            }}
+          >
+            <ListItemIcon>
+              <RemoveCircleOutlineIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="Sacar del tablero" />
+          </MenuItem>
+        </Menu>
+      )}
+
       <Popper
-        open={open}
+        open={openTooltip}
         anchorEl={anchorEl}
         placement="right-start"
         sx={{
@@ -243,6 +293,8 @@ PedidoCard.propTypes = {
     fecha_pedido: PropTypes.string.isRequired,
   }).isRequired,
   index: PropTypes.number.isRequired,
+  onSacarDeTablero: PropTypes.func,
+  onVerDetalle: PropTypes.func,
 };
 
 export default PedidoCard;

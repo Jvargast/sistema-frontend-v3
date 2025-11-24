@@ -3,7 +3,13 @@ import { Droppable } from "@hello-pangea/dnd";
 import { Paper, Typography, Box, useTheme } from "@mui/material";
 import PedidoCard from "./PedidoCard";
 
-const Column = ({ droppableId, title, pedidos }) => {
+const Column = ({
+  droppableId,
+  title,
+  pedidos,
+  onVerDetalle,
+  onSacarDeTablero,
+}) => {
   const theme = useTheme();
   const EMPTY_SLOT_COUNT = 4;
   const showEmptySlots = pedidos.length < EMPTY_SLOT_COUNT;
@@ -18,7 +24,8 @@ const Column = ({ droppableId, title, pedidos }) => {
           {...provided.droppableProps}
           sx={{
             width: "100%",
-            height: "100%",
+            maxHeight: { xs: "65vh", md: "70vh" },
+            /* height: "100%", */
             boxSizing: "border-box",
             overflowY: "auto",
             borderRadius: 3,
@@ -76,7 +83,10 @@ const Column = ({ droppableId, title, pedidos }) => {
               display: "flex",
               flexDirection: "column",
               gap: 2,
-              minHeight: 240,
+              flex: 1,
+              minHeight: 0,
+              overflowY: "auto",
+              pr: 0.5,
             }}
           >
             {pedidos.map((pedido, index) => (
@@ -84,6 +94,8 @@ const Column = ({ droppableId, title, pedidos }) => {
                 key={pedido.id_pedido}
                 pedido={pedido}
                 index={index}
+                onVerDetalle={onVerDetalle}
+                onSacarDeTablero={onSacarDeTablero}
               />
             ))}
 
@@ -122,6 +134,8 @@ Column.propTypes = {
   droppableId: PropTypes.string.isRequired,
   title: PropTypes.node.isRequired,
   pedidos: PropTypes.array.isRequired,
+  onVerDetalle: PropTypes.func,
+  onSacarDeTablero: PropTypes.func,
 };
 
 export default Column;

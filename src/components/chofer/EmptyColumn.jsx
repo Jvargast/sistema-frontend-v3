@@ -6,9 +6,8 @@ const EmptyColumn = () => {
     <Paper
       elevation={1}
       sx={{
-
         width: "100%",
-        height: "100%", 
+        maxHeight: { xs: "65vh", md: "70vh" },
         boxSizing: "border-box",
         borderRadius: 3,
         p: 1,
@@ -31,7 +30,7 @@ const EmptyColumn = () => {
                 ? theme.palette.text.primary
                 : "#305088",
             letterSpacing: 0.5,
-            mb: 0.5
+            mb: 0.5,
           }}
         >
           Chofer

@@ -208,6 +208,24 @@ export const pedidosApi = createApi({
         }
       },
     }),
+    toggleMostrarEnTablero: builder.mutation({
+      query: ({ id_pedido, mostrar_en_tablero }) => ({
+        url: `/pedidos/${id_pedido}/mostrar-en-tablero`,
+        method: "PATCH",
+        body: { mostrar_en_tablero },
+      }),
+      invalidatesTags: ["Pedidos"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error(
+            "Error al actualizar mostrar_en_tablero del pedido:",
+            error
+          );
+        }
+      },
+    }),
   }),
 });
 
@@ -229,5 +247,6 @@ export const {
   useRevertPedidoMutation,
   useGetDetalleConTotalQuery,
   useRegistrarDesdePedidoMutation,
-  useRevertirEstadoPedidoMutation
+  useRevertirEstadoPedidoMutation,
+  useToggleMostrarEnTableroMutation
 } = pedidosApi;

@@ -16,6 +16,10 @@ const InfoPedido = ({ pedido }) => {
   const colorEstado =
     estado === "Pendiente"
       ? "warning"
+      : estado === "Pendiente de Confirmación"
+      ? "info"
+      : estado === "Confirmado"
+      ? "primary"
       : estado === "Cancelado"
       ? "error"
       : estado === "En Entrega"

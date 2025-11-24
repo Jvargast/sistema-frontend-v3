@@ -8,8 +8,6 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
-  /*   Box,
-  TextField, */
 } from "@mui/material";
 import { Visibility, Undo, MoreVert } from "@mui/icons-material";
 import {
@@ -62,14 +60,14 @@ function getEstadosAnteriores(estadoActual) {
 }
 
 const estadoColores = {
-  Pendiente: "default",
+  Pendiente: "warning",
+  "Pendiente de Confirmación": "default", 
+  Confirmado: "success",
   "Pendiente de Pago": "warning",
   Pagada: "success",
-  "Pendiente de Confirmación": "info",
-  Confirmado: "primary",
   Rechazado: "error",
-  "En Preparación": "secondary",
-  "En Entrega": "info",
+  "En Preparación": "info",
+  "En Entrega": "primary",
   Completada: "success",
   Cancelada: "error",
   Reembolsada: "default",

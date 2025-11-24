@@ -5,6 +5,7 @@ import {
   useGetAllPedidosQuery,
   useAsignarPedidoMutation,
   useDesasignarPedidoMutation,
+  useToggleMostrarEnTableroMutation,
 } from "../../store/services/pedidosApi";
 import { useGetAllChoferesQuery } from "../../store/services/usuariosApi";
 import Column from "../../components/chofer/Column";
@@ -16,6 +17,7 @@ import { useIsMobile } from "../../utils/useIsMobile";
 import MobilePedidosBoard from "./MobilePedidosBoard";
 import { useSelector } from "react-redux";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import { useNavigate } from "react-router";
 
 const getPedidoSucursalId = (p) =>
   Number(
@@ -37,7 +39,7 @@ const userOperaEnSucursal = (u, targetId) =>
   );
 
 const PedidosBoard = () => {
-  // Implementación - Scope
+  const navigate = useNavigate();
   const {
     mode,
     activeSucursalId,
@@ -64,8 +66,13 @@ const PedidosBoard = () => {
 
   const queryArgs = useMemo(() => {
     if (targetSucursalId)
-      return { id_sucursal: targetSucursalId, page: 1, limit: 200 };
-    if (mode === "global") return { page: 1, limit: 200 };
+      return {
+        id_sucursal: targetSucursalId,
+        page: 1,
+        limit: 200,
+        soloTablero: true,
+      };
+    if (mode === "global") return { page: 1, limit: 200, soloTablero: true };
     return skipToken;
   }, [targetSucursalId, mode]);
 
@@ -73,13 +80,46 @@ const PedidosBoard = () => {
     () => (targetSucursalId ? { id_sucursal: targetSucursalId } : skipToken),
     [targetSucursalId]
   );
-  // Antiguo
-  const isMobile = useIsMobile();
-  const { data: allPedidosData, isLoading: allPedidosLoading, refetch: refetchPedidos } =
-    useGetAllPedidosQuery(queryArgs, { refetchOnMountOrArgChange: true });
+  const [toggleMostrarEnTablero] = useToggleMostrarEnTableroMutation();
 
-  const { data: choferesData = [], isLoading: choferesLoading, refetch: refetchChoferes  } =
-    useGetAllChoferesQuery(choferesArgs, { refetchOnMountOrArgChange: true });
+  const isMobile = useIsMobile();
+  const {
+    data: allPedidosData,
+    isLoading: allPedidosLoading,
+    refetch: refetchPedidos,
+  } = useGetAllPedidosQuery(queryArgs, { refetchOnMountOrArgChange: true });
+
+  const {
+    data: choferesData = [],
+    isLoading: choferesLoading,
+    refetch: refetchChoferes,
+  } = useGetAllChoferesQuery(choferesArgs, { refetchOnMountOrArgChange: true });
+
+  const handleVerDetalle = (pedido) => {
+    navigate(`/admin/pedidos/ver/${pedido.id_pedido}`);
+  };
+
+  const handleSacarDeTablero = async (pedido) => {
+    try {
+      await toggleMostrarEnTablero({
+        id_pedido: pedido.id_pedido,
+        mostrar_en_tablero: false,
+      }).unwrap();
+      dispatch(
+        showNotification({
+          message: `Pedido #${pedido.id_pedido} sacado del tablero`,
+          severity: "success",
+        })
+      );
+    } catch (e) {
+      dispatch(
+        showNotification({
+          message: `No se pudo sacar del tablero: ${e}`,
+          severity: "error",
+        })
+      );
+    }
+  };
 
   useRegisterRefresh(
     "",
@@ -138,107 +178,6 @@ const PedidosBoard = () => {
   });
 
   const dispatch = useDispatch();
-  /*   useEffect(() => {
-    if (!allPedidosLoading && !choferesLoading) {
-      const allPedidos = allPedidosData?.pedidos || [];
-      const choferes = choferesData || [];
-
-      const newColumns = {
-        sinAsignar: [],
-      };
-
-      choferes.forEach((chofer) => {
-        newColumns[chofer.rut] = [];
-      });
-
-      const estadosPermitidos = [
-        "Pendiente de Confirmación",
-        "Confirmado",
-        "En Preparación",
-        "En Entrega",
-        "Pendiente",
-      ];
-
-      allPedidos.forEach((pedido) => {
-        if (!pedido.id_chofer) {
-          newColumns.sinAsignar.push(pedido);
-        } else if (
-          estadosPermitidos.includes(pedido?.EstadoPedido?.nombre_estado)
-        ) {
-          const rutChofer = pedido.Chofer?.rut;
-          if (rutChofer && newColumns[rutChofer]) {
-            newColumns[rutChofer].push(pedido);
-          }
-        }
-      });
-
-      setColumnsState(newColumns);
-    }
-  }, [allPedidosLoading, choferesLoading, allPedidosData, choferesData]); */
-
-  /*  useEffect(() => {
-    if (!targetSucursalId) {
-      setColumnsState({ sinAsignar: [] });
-      return;
-    }
-    if (allPedidosLoading || choferesLoading) return;
-
-    const allPedidos = allPedidosData?.pedidos || [];
-    const allChoferes = choferesData || [];
-
-    const choferesFiltrados = targetSucursalId
-      ? allChoferes.filter((u) => userOperaEnSucursal(u, targetSucursalId))
-      : mode === "global"
-      ? []
-      : allChoferes;
-
-    const newColumns = { sinAsignar: [] };
-    choferesFiltrados.forEach((ch) => {
-      newColumns[ch.rut] = [];
-    });
-
-    const estadosPermitidos = [
-      "Pendiente de Confirmación",
-      "Confirmado",
-      "En Preparación",
-      "En Entrega",
-      "Pendiente",
-    ];
-
-    const pedidosFiltradosScope = allPedidos.filter((p) => {
-      if (!targetSucursalId) return false;
-      return Number(getPedidoSucursalId(p)) === Number(targetSucursalId);
-    });
-
-    pedidosFiltradosScope.forEach((pedido) => {
-      const estadoNombre = pedido?.EstadoPedido?.nombre_estado;
-      const visible = estadosPermitidos.includes(estadoNombre);
-      if (!visible) return;
-
-      const rutChofer = pedido?.Chofer?.rut;
-
-      if (!pedido.id_chofer) {
-        newColumns.sinAsignar.push(pedido);
-        return;
-      }
-
-      if (rutChofer && newColumns[rutChofer]) {
-        newColumns[rutChofer].push(pedido);
-        return;
-      }
-
-      newColumns.sinAsignar.push(pedido);
-    });
-
-    setColumnsState(newColumns);
-  }, [
-    allPedidosLoading,
-    choferesLoading,
-    allPedidosData,
-    choferesData,
-    targetSucursalId,
-    mode,
-  ]); */
 
   const choferesFiltrados = useMemo(() => {
     const base = Array.isArray(choferesData) ? choferesData : [];
@@ -250,6 +189,8 @@ const PedidosBoard = () => {
     const { source, destination } = result;
     if (!destination) return;
 
+    const prevColumnsState = columnsState;
+
     const sourceId = source.droppableId;
     const destId = destination.droppableId;
 
@@ -257,7 +198,12 @@ const PedidosBoard = () => {
       return;
     }
 
-    const movedItem = columnsState[sourceId][source.index];
+    const original = columnsState[sourceId][source.index];
+
+    const movedItem = {
+      ...original,
+      EstadoPedido: original.EstadoPedido ? { ...original.EstadoPedido } : null,
+    };
 
     if (
       sourceId === destId &&
@@ -270,13 +216,28 @@ const PedidosBoard = () => {
     const newColumns = { ...columnsState };
     const sourceItems = Array.from(newColumns[sourceId]);
     const destItems = Array.from(newColumns[destId]);
+
     sourceItems.splice(source.index, 1);
+
+    if (destId === "sinAsignar") {
+      movedItem.id_chofer = null;
+      if (movedItem.EstadoPedido) {
+        movedItem.EstadoPedido.nombre_estado = "Pendiente";
+      }
+    } else {
+      movedItem.id_chofer = destId;
+      if (movedItem.EstadoPedido) {
+        movedItem.EstadoPedido.nombre_estado = "Pendiente de Confirmación";
+      }
+    }
+
     destItems.splice(destination.index, 0, movedItem);
 
     newColumns[sourceId] = sourceItems;
     newColumns[destId] = destItems;
 
     setColumnsState(newColumns);
+
     try {
       if (destId === "sinAsignar") {
         await desasignarPedido(movedItem.id_pedido).unwrap();
@@ -302,6 +263,7 @@ const PedidosBoard = () => {
       }
     } catch (error) {
       console.error("❌ Error asignando/desasignando pedido:", error);
+      setColumnsState(prevColumnsState);
       dispatch(
         showNotification({
           message: "Ocurrió un error al asignar/desasignar el pedido",
@@ -332,8 +294,6 @@ const PedidosBoard = () => {
     const estadosPermitidos = [
       "Pendiente de Confirmación",
       "Confirmado",
-      "En Preparación",
-      "En Entrega",
       "Pendiente",
     ];
 
@@ -420,48 +380,185 @@ const PedidosBoard = () => {
         sucursales={opcionesSucursales}
         sucursalFiltro={String(sucursalFiltro)}
         onChangeSucursal={setSucursalFiltro}
+        onSacarDeTablero={handleSacarDeTablero}
       />
     );
   }
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Box pb={4}>
+      <Box pb={3}>
         <Box
           sx={{
             display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: { xs: "flex-start", md: "center" },
             justifyContent: "space-between",
+            gap: 2.5,
+            pt: 2,
             mb: 4,
             px: 4,
           }}
         >
-          <Typography
-            variant="h4"
-            fontWeight="bold"
+          {/* TÍTULO + SUBTÍTULO */}
+          <Box>
+            <Typography
+              variant="h4"
+              fontWeight="bold"
+              sx={{
+                color: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.grey[100]
+                    : theme.palette.text.primary,
+                letterSpacing: 0.2,
+              }}
+            >
+              Administración de Pedidos
+            </Typography>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                color: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.grey[400]
+                    : theme.palette.grey[600],
+              }}
+            >
+              Gestiona claramente la asignación de pedidos a cada chofer.
+            </Typography>
+          </Box>
+
+          {/* LEYENDA ESTADOS */}
+          <Box
             sx={{
-              color: (theme) =>
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: 1,
+              px: 2,
+              py: 1.5,
+              borderRadius: 2,
+              bgcolor: (theme) =>
                 theme.palette.mode === "dark"
-                  ? theme.palette.grey[100]
-                  : theme.palette.text.primary,
-              letterSpacing: 0.2,
+                  ? "rgba(255,255,255,0.02)"
+                  : "#F5F7FB",
+              border: "1px dashed",
+              borderColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[700]
+                  : theme.palette.grey[300],
+              mt: { xs: 2, md: 0 },
             }}
           >
-            Administración de Pedidos
-          </Typography>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              color: (theme) =>
-                theme.palette.mode === "dark"
-                  ? theme.palette.grey[400]
-                  : theme.palette.grey[600],
-            }}
-          >
-            Gestiona claramente la asignación de pedidos a cada chofer.
-          </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: 0.8,
+                color: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.grey[300]
+                    : theme.palette.grey[700],
+                mb: 0.5,
+              }}
+            >
+              Leyenda estados
+            </Typography>
+
+            {/* Pendiente */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+              <Box
+                sx={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  bgcolor: (theme) => theme.palette.warning.main,
+                  flexShrink: 0,
+                }}
+              />
+              <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                Pendiente
+                <Typography
+                  component="span"
+                  variant="caption"
+                  sx={{
+                    ml: 0.5,
+                    fontSize: 11,
+                    color: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? theme.palette.grey[500]
+                        : theme.palette.grey[600],
+                  }}
+                >
+                  · Pedido creado, sin avanzar.
+                </Typography>
+              </Typography>
+            </Box>
+
+            {/* Pendiente de Confirmación */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+              <Box
+                sx={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark" ? "#666A75" : "#D7DBDD",
+                  flexShrink: 0,
+                }}
+              />
+              <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                Pend. de confirmación
+                <Typography
+                  component="span"
+                  variant="caption"
+                  sx={{
+                    ml: 0.5,
+                    fontSize: 11,
+                    color: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? theme.palette.grey[500]
+                        : theme.palette.grey[600],
+                  }}
+                >
+                  · Chofer debe aceptar o rechazar.
+                </Typography>
+              </Typography>
+            </Box>
+
+            {/* Confirmado */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+              <Box
+                sx={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  bgcolor: (theme) => theme.palette.success.light,
+                  flexShrink: 0,
+                }}
+              />
+              <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                Confirmado
+                <Typography
+                  component="span"
+                  variant="caption"
+                  sx={{
+                    ml: 0.5,
+                    fontSize: 11,
+                    color: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? theme.palette.grey[500]
+                        : theme.palette.grey[600],
+                  }}
+                >
+                  · Chofer aceptó el pedido.
+                </Typography>
+              </Typography>
+            </Box>
+          </Box>
         </Box>
+
         {mode === "global" && (
           <Box sx={{ px: 4, mt: -2, mb: 2, display: "flex", gap: 2 }}>
             <TextField
@@ -488,7 +585,13 @@ const PedidosBoard = () => {
           </Box>
         )}
 
-        <Box sx={{ overflowX: "auto" }}>
+        <Box
+          sx={
+            {
+              /* overflowX: "auto" */
+            }
+          }
+        >
           <Box
             sx={{
               display: "grid",
@@ -536,6 +639,8 @@ const PedidosBoard = () => {
                 </Box>
               }
               pedidos={columnsState.sinAsignar || []}
+              onVerDetalle={handleVerDetalle}
+              onSacarDeTablero={handleSacarDeTablero}
             />
 
             {(allPedidosLoading || choferesLoading) && (
@@ -579,6 +684,8 @@ const PedidosBoard = () => {
                     </Box>
                   }
                   pedidos={columnsState[chofer.rut] || []}
+                  onVerDetalle={handleVerDetalle}
+                  onSacarDeTablero={handleSacarDeTablero}
                 />
               ))}
             {!choferesLoading &&

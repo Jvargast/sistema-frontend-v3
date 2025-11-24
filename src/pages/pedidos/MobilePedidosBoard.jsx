@@ -25,6 +25,7 @@ import PropTypes from "prop-types";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import SectionHeader from "../../components/common/SectionHeader";
+import { obtenerFechaChile, obtenerHoraChile } from "../../utils/formatearHora";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -41,6 +42,7 @@ const MobilePedidosBoard = ({
   sucursales = [],
   sucursalFiltro = "",
   onChangeSucursal = () => {},
+  onSacarDeTablero, // 👈 NUEVO
 }) => {
   const [open, setOpen] = useState(false);
   const [selectedPedido, setSelectedPedido] = useState(null);
@@ -178,6 +180,7 @@ const MobilePedidosBoard = ({
                             #{pedido.id_pedido} —{" "}
                             {pedido.Cliente?.nombre || "Cliente"}
                           </Typography>
+
                           <Typography
                             fontSize={14}
                             color="text.secondary"
@@ -185,19 +188,46 @@ const MobilePedidosBoard = ({
                           >
                             {pedido.EstadoPedido?.nombre_estado}
                           </Typography>
+
+                          <Typography fontSize={12} color="text.secondary">
+                            {obtenerFechaChile(pedido.fecha_pedido)} ·{" "}
+                            {obtenerHoraChile(pedido.fecha_pedido)}
+                          </Typography>
                         </Box>
                       </Stack>
                     </CardContent>
-                    <CardActions sx={{ justifyContent: "flex-end", pt: 0 }}>
+                    <CardActions
+                      sx={{
+                        pt: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      {onSacarDeTablero && (
+                        <Button
+                          variant="text"
+                          color="error"
+                          size="small"
+                          sx={{
+                            fontWeight: 600,
+                            whiteSpace: "nowrap",
+                          }}
+                          onClick={() => onSacarDeTablero(pedido)}
+                        >
+                          Sacar del tablero
+                        </Button>
+                      )}
+
                       <Button
                         variant="contained"
                         color="primary"
-                        fullWidth
                         sx={{
                           borderRadius: 2,
                           fontWeight: "bold",
                           letterSpacing: 0.5,
                           boxShadow: 2,
+                          flex: 1,
                         }}
                         startIcon={<PersonIcon />}
                         onClick={() => handleOpen(pedido)}
@@ -283,6 +313,7 @@ const MobilePedidosBoard = ({
                                   #{pedido.id_pedido} —{" "}
                                   {pedido.Cliente?.nombre || "Cliente"}
                                 </Typography>
+
                                 <Typography
                                   fontSize={13}
                                   color="text.secondary"
@@ -290,11 +321,24 @@ const MobilePedidosBoard = ({
                                 >
                                   {pedido.EstadoPedido?.nombre_estado}
                                 </Typography>
+
+                                <Typography
+                                  fontSize={12}
+                                  color="text.secondary"
+                                >
+                                  {obtenerFechaChile(pedido.fecha_pedido)} ·{" "}
+                                  {obtenerHoraChile(pedido.fecha_pedido)}
+                                </Typography>
                               </Box>
                             </Stack>
                           </CardContent>
                           <CardActions
-                            sx={{ justifyContent: "flex-end", pt: 0 }}
+                            sx={{
+                              pt: 0,
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 0.5,
+                            }}
                           >
                             <Button
                               variant="outlined"
@@ -309,6 +353,20 @@ const MobilePedidosBoard = ({
                             >
                               Desasignar
                             </Button>
+
+                            {onSacarDeTablero && (
+                              <Button
+                                variant="text"
+                                color="inherit"
+                                size="small"
+                                sx={{
+                                  fontWeight: 500,
+                                }}
+                                onClick={() => onSacarDeTablero(pedido)}
+                              >
+                                Sacar del tablero
+                              </Button>
+                            )}
                           </CardActions>
                         </Card>
                       ))
@@ -320,6 +378,7 @@ const MobilePedidosBoard = ({
           </Stack>
         </>
       )}
+
       <Dialog
         open={open}
         onClose={handleClose}
@@ -374,6 +433,7 @@ const MobilePedidosBoard = ({
     </Box>
   );
 };
+
 MobilePedidosBoard.propTypes = {
   columnsState: PropTypes.object.isRequired,
   choferes: PropTypes.array.isRequired,
@@ -384,7 +444,8 @@ MobilePedidosBoard.propTypes = {
   mode: PropTypes.string.isRequired,
   sucursales: PropTypes.array,
   sucursalFiltro: PropTypes.string,
-  onChangeSucursal: PropTypes.func
+  onChangeSucursal: PropTypes.func,
+  onSacarDeTablero: PropTypes.func,
 };
 
 export default MobilePedidosBoard;
