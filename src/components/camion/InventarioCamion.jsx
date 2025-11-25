@@ -29,8 +29,6 @@ const InventarioCamion = forwardRef(({ id_camion }, ref) => {
     vacios = 0,
   } = data?.data || {};
 
-  console.log(data)
-
   const en_uso = capacidad_total - vacios;
   const disponibles_actuales = vacios;
 

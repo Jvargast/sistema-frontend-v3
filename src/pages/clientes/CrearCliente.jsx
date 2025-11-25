@@ -35,6 +35,7 @@ const CrearCliente = () => {
     telefono: "",
     apellido: "",
     razon_social: "",
+    rut: "",
     email: "",
     activo: true,
     lat: null,
@@ -223,6 +224,17 @@ const CrearCliente = () => {
               onChange={handleInputChange}
               variant="outlined"
               id="email"
+            />
+            <TextField
+              fullWidth
+              id="rut"
+              label={
+                formData.tipo_cliente === "empresa" ? "RUT Empresa" : "RUT"
+              }
+              name="rut"
+              value={formData.rut}
+              onChange={handleInputChange}
+              required
             />
           </Box>
         )}

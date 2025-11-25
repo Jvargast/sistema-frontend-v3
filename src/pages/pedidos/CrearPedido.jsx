@@ -105,6 +105,8 @@ const CrearPedido = () => {
   const sucursalActiva = useSucursalActiva();
   const { data: sucursales } = useGetAllSucursalsQuery();
 
+  const [puedeAvanzar, setPuedeAvanzar] = useState(true);
+
   const isAdmin = rol === "administrador" || rol?.nombre === "administrador";
   const canChooseSucursal =
     mode === "global" || (!sucursalActiva?.id_sucursal && isAdmin);
@@ -228,7 +230,7 @@ const CrearPedido = () => {
       (i) =>
         i.id_sucursal_origen && i.id_sucursal_origen !== formState.id_sucursal
     ); */
-    
+
     if (otraSucursal) {
       dispatch(clearCart());
       dispatch(
@@ -447,10 +449,15 @@ const CrearPedido = () => {
                 </TextField>
               </>
             }
+            onValidationChange={setPuedeAvanzar}
           />
 
           <Stack direction="row" justifyContent="flex-end" mt={2}>
-            <Button variant="contained" onClick={nextStep}>
+            <Button
+              variant="contained"
+              onClick={nextStep}
+              disabled={!puedeAvanzar}
+            >
               Siguiente
             </Button>
           </Stack>

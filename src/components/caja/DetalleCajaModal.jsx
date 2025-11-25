@@ -63,14 +63,18 @@ const DetalleCajaModal = ({ idCaja, onClose }) => {
   }, [caja]);
 
   const handleConfirmAction = async () => {
-    if (alertType === "abrir") {
-      await handleAbrirCaja();
-    } else if (alertType === "cerrar") {
-      await handleCerrarCaja();
-    } else if (alertType === "guardar") {
-      await handleGuardarCambios();
+    try {
+      if (alertType === "abrir") {
+        await handleAbrirCaja();
+      } else if (alertType === "cerrar") {
+        await handleCerrarCaja();
+      } else if (alertType === "guardar") {
+        await handleGuardarCambios();
+      }
+    } finally {
+      setAlertOpen(false);
+      setAlertType(null);
     }
-    setAlertType(null);
   };
 
   const handleAbrirCaja = async () => {
@@ -90,7 +94,7 @@ const DetalleCajaModal = ({ idCaja, onClose }) => {
       console.error("Error al abrir caja:", err);
       dispatch(
         showNotification({
-          message: `Error al abrir la caja: ${error}`,
+          message: `Error al abrir la caja: ${err?.data}`,
           severity: "error",
         })
       );

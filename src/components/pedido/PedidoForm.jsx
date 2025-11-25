@@ -24,6 +24,7 @@ const PedidoForm = ({
   mostrarTipoDocumento = true,
   extraFields,
   idSucursalFiltro,
+  onValidationChange,
 }) => {
   const theme = useTheme();
   const [openClienteModal, setOpenClienteModal] = useState(false);
@@ -39,6 +40,8 @@ const PedidoForm = ({
   } = formState;
 
   const isEmpresa = selectedCliente?.tipo_cliente === "empresa";
+  const empresaInvalida =
+    isEmpresa && (!selectedCliente?.rut || !selectedCliente?.razon_social);
   useEffect(() => {
     if (useClientAddress) {
       if (selectedCliente) {
@@ -70,6 +73,12 @@ const PedidoForm = ({
       }
     }
   }, [selectedCliente, tipoDocumento, setFormState]);
+
+  useEffect(() => {
+    if (typeof onValidationChange === "function") {
+      onValidationChange(!empresaInvalida);
+    }
+  }, [empresaInvalida, onValidationChange]);
 
   return (
     <Box
@@ -135,6 +144,12 @@ const PedidoForm = ({
           }}
           idSucursal={idSucursalFiltro}
         />
+      )}
+      {empresaInvalida && (
+        <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+          El cliente seleccionado es una empresa y no tiene RUT y Razón Social
+          registrados. No puedes continuar hasta que esos datos estén completos.
+        </Typography>
       )}
 
       <FormControlLabel
@@ -279,6 +294,7 @@ PedidoForm.propTypes = {
   mostrarTipoDocumento: PropTypes.bool,
   extraFields: PropTypes.node,
   idSucursalFiltro: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  onValidationChange: PropTypes.func,
 };
 
 export default PedidoForm;
