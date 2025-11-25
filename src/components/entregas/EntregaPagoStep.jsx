@@ -75,20 +75,19 @@ const EntregaPagoStep = ({ register, errors, detallePedido, watch }) => {
 
       <Box display="flex" flexDirection="column" gap={2}>
         <TextField
-          select
           label="Tipo de Documento"
           fullWidth
           variant="outlined"
+          value="boleta"
+          InputProps={{ readOnly: true }}
+        />
+        <input
+          type="hidden"
+          value="boleta"
           {...register("tipo_documento", {
             required: "Seleccione un tipo de documento",
           })}
-          error={!!errors.tipo_documento}
-          helperText={errors.tipo_documento?.message}
-          defaultValue="boleta"
-        >
-          <MenuItem value="boleta">🧾 Boleta</MenuItem>
-          <MenuItem value="factura">📄 Factura</MenuItem>
-        </TextField>
+        />
 
         <TextField
           label="Notas (opcional)"
