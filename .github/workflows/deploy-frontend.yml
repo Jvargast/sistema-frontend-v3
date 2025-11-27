@@ -23,7 +23,13 @@ jobs:
       - name: Build frontend
         run: npm run build:web
         env:
-          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}    
+          VITE_ENV: production
+          VITE_PLATFORM: web
+          VITE_APP_VERSION: 2.5.0
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
+          VITE_API_GOOGLE_MAPS: ${{ secrets.VITE_API_GOOGLE_MAPS }}
+          VITE_GOOGLE_MAPS_MAP: ${{ secrets.VITE_GOOGLE_MAPS_MAP }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
