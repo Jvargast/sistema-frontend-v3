@@ -75,7 +75,7 @@ import ListarProveedores from "./pages/proveedores/ListarProveedores";
 import VerProveedor from "./pages/proveedores/VerProveedor";
 import ListarCompras from "./pages/compras/ListarCompras";
 import VerCompra from "./pages/compras/VerCompra";
-import RegistrarCompra from "./pages/compras/Crearcompra";
+import RegistrarCompra from "./pages/compras/RegistrarCompra";
 
 // Configuración de rutas
 const router = createHashRouter([
