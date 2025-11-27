@@ -64,7 +64,6 @@ import InspeccionRetornables from "./pages/inventario_camion";
 import WelcomePage from "./components/common/WelcomePage";
 import VerViaje from "./pages/viajes/VerViaje";
 import CrearProveedor from "./pages/proveedores/CrearProveedor";
-import Crearcompra from "./pages/compras/Crearcompra";
 import RegistrarGasto from "./pages/gastos/RegistrarGasto";
 import CrearOrdenPago from "./pages/ordenesPago/CrearOrdenPago";
 import RegistrarAbonoOrden from "./pages/ordenesAbonos/RegistrarAbonoOrden";
@@ -76,6 +75,7 @@ import ListarProveedores from "./pages/proveedores/ListarProveedores";
 import VerProveedor from "./pages/proveedores/VerProveedor";
 import ListarCompras from "./pages/compras/ListarCompras";
 import VerCompra from "./pages/compras/VerCompra";
+import RegistrarCompra from "./pages/compras/Crearcompra";
 
 // Configuración de rutas
 const router = createHashRouter([
@@ -412,7 +412,7 @@ const router = createHashRouter([
           {
             path: "compras-crear",
             element: <RoleBasedRoute requiredPermission="vistas.admin.ver" />, // recomendado: vistas.compras.crear
-            children: [{ path: "", element: <Crearcompra /> }],
+            children: [{ path: "", element: <RegistrarCompra /> }],
           },
           //gastos-crear
           {
