@@ -1,8 +1,30 @@
-# React + Vite
+# ERP AguasValentino – Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend del sistema ERP de AguasValentino, desarrollado con **React + Vite** y orientado a la operación diaria de ventas, logística e inventario.
 
-Currently, two official plugins are available:
+## 🧩 Stack tecnológico
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 18** + **Vite 6**
+- **Redux Toolkit** + RTK Query
+- **React Router 7**
+- **Material UI 6** + **TailwindCSS**
+- **Socket.IO client** para notificaciones en tiempo real
+- **Capacitor** / **Electron** para empaquetar en mobile/desktop
+
+## 🏗️ Scripts principales
+
+```bash
+# Desarrollo
+npm run dev
+
+# Build web para producción
+npm run build:web
+
+# Preview del build local
+npm run preview
+
+# Build Android (Capacitor)
+npm run build:android
+
+# Build escritorio (Electron)
+npm run build:electron
