@@ -43,6 +43,7 @@ export default function AutocompleteDireccion({
     return () => {
       if (listener) window.google.maps.event.removeListener(listener);
     };
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleKeyDown = (e) => {

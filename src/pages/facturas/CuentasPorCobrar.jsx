@@ -33,6 +33,7 @@ const estadoColores = {
   pendiente: "warning",
   pagado: "success",
   vencido: "error",
+  anulado: "error",
 };
 
 const CLP = (valor) =>
@@ -70,6 +71,8 @@ const CuentaPorCobrarDetalle = ({ cuenta }) => {
   const [estadoEditado, setEstadoEditado] = useState(estado);
   const [fechaVencimientoEditada, setFechaVencimientoEditada] =
     useState(fecha_vencimiento);
+
+  const estaAnulada = estado === "anulado";
 
   const handleGuardarCambios = async () => {
     try {
@@ -110,9 +113,9 @@ const CuentaPorCobrarDetalle = ({ cuenta }) => {
         sx={{
           p: 3,
           borderRadius: 2,
-          background: modoEdicion
-            ? "linear-gradient(135deg, #d32f2f, #ef5350)" 
-            : "linear-gradient(135deg, #1e88e5, #64b5f6)", 
+          background: estaAnulada
+            ? "linear-gradient(135deg, #b71c1c, #f44336)"
+            : "linear-gradient(135deg, #1e88e5, #64b5f6)",
           color: "#fff",
           mb: 3,
           transition: "background 0.3s",
@@ -129,56 +132,57 @@ const CuentaPorCobrarDetalle = ({ cuenta }) => {
           </Typography>
 
           <Box display="flex" gap={1}>
-            {modoEdicion ? (
-              <>
+            {!estaAnulada &&
+              (modoEdicion ? (
+                <>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => setModoEdicion(false)}
+                    sx={{
+                      color: "#fff",
+                      borderColor: "#fff",
+                      "&:hover": {
+                        backgroundColor: "#ffffff22",
+                      },
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={handleGuardarCambios}
+                    sx={{
+                      backgroundColor: "#fff",
+                      color: "#d32f2f",
+                      fontWeight: "bold",
+                      "&:hover": {
+                        backgroundColor: "#f5f5f5",
+                      },
+                    }}
+                  >
+                    Guardar
+                  </Button>
+                </>
+              ) : (
                 <Button
                   variant="outlined"
                   size="small"
-                  onClick={() => setModoEdicion(false)}
+                  onClick={() => setModoEdicion(true)}
                   sx={{
                     color: "#fff",
                     borderColor: "#fff",
+                    textTransform: "none",
+                    fontWeight: "bold",
                     "&:hover": {
                       backgroundColor: "#ffffff22",
                     },
                   }}
                 >
-                  Cancelar
+                  Editar
                 </Button>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={handleGuardarCambios}
-                  sx={{
-                    backgroundColor: "#fff",
-                    color: "#d32f2f",
-                    fontWeight: "bold",
-                    "&:hover": {
-                      backgroundColor: "#f5f5f5",
-                    },
-                  }}
-                >
-                  Guardar
-                </Button>
-              </>
-            ) : (
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={() => setModoEdicion(true)}
-                sx={{
-                  color: "#fff",
-                  borderColor: "#fff",
-                  textTransform: "none",
-                  fontWeight: "bold",
-                  "&:hover": {
-                    backgroundColor: "#ffffff22",
-                  },
-                }}
-              >
-                Editar
-              </Button>
-            )}
+              ))}
 
             <Button
               variant="contained"
@@ -210,7 +214,19 @@ const CuentaPorCobrarDetalle = ({ cuenta }) => {
         </Box>
 
         <Box display="flex" justifyContent="center" mt={1}>
-          {modoEdicion ? (
+          {estaAnulada ? (
+            <Chip
+              label="FACTURA ANULADA"
+              color="error"
+              sx={{
+                fontWeight: "bold",
+                fontSize: 14,
+                px: 2,
+                backgroundColor: "#ffebee",
+                color: "#b71c1c",
+              }}
+            />
+          ) : modoEdicion ? (
             <TextField
               select
               value={estadoEditado}
@@ -286,7 +302,7 @@ const CuentaPorCobrarDetalle = ({ cuenta }) => {
                       fontSize: "1rem",
                       px: 1,
                       color: "#d32f2f",
-                      backgroundColor: "#ffffffcc", // sutil blanco para destacar
+                      backgroundColor: "#ffffffcc",
                       borderRadius: 1,
                     },
                   }}
@@ -412,7 +428,19 @@ const CuentaPorCobrarDetalle = ({ cuenta }) => {
         </Grid>
 
         <Box mt={3} display="flex" justifyContent="flex-end">
-          {estado !== "pagado" ? (
+          {estaAnulada ? (
+            <Chip
+              label="Pagos bloqueados (factura anulada)"
+              color="error"
+              icon={<MonetizationOnIcon />}
+              sx={{
+                fontWeight: "bold",
+                px: 2,
+                height: 32,
+                fontSize: 14,
+              }}
+            />
+          ) : estado !== "pagado" ? (
             <Button
               variant="contained"
               color="success"
@@ -444,7 +472,9 @@ const CuentaPorCobrarDetalle = ({ cuenta }) => {
           display="block"
           color="text.secondary"
         >
-          Esta cuenta fue generada automáticamente al emitir una factura.
+          {estaAnulada
+            ? "Esta cuenta por cobrar se encuentra ANULADA. No admite nuevos pagos ni modificaciones."
+            : "Esta cuenta fue generada automáticamente al emitir una factura."}
         </Typography>
       </Paper>
       <ModalPagoFactura

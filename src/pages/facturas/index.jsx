@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Chip, IconButton } from "@mui/material";
+import { Box, Chip, IconButton } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
 import { useGetAllCuentasPorCobrarQuery } from "../../store/services/cuentasPorCobrarApi";
 import EmptyState from "../../components/common/EmptyState";
@@ -8,12 +8,74 @@ import DataTable from "../../components/common/DataTable";
 import { useSelector } from "react-redux";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import FilterBar from "../../components/common/FilterBar";
+import StatusLegend from "../../components/common/StatusLegend";
 
 const estadoColores = {
   pendiente: "warning",
   pagado: "success",
   vencido: "error",
+  anulado: "error",
 };
+
+const ESTADO_CXC_LEGEND = [
+  {
+    id: "pendiente",
+    label: "Pendiente",
+    color: (theme) => theme.palette.warning.main,
+    description: "Factura emitida, pendiente de pago.",
+  },
+  {
+    id: "pagado",
+    label: "Pagado",
+    color: (theme) => theme.palette.success.main,
+    description: "Pago registrado y conciliado.",
+  },
+  {
+    id: "vencido",
+    label: "Vencido",
+    color: (theme) => theme.palette.error.light,
+    description: "Factura vencida sin pago.",
+  },
+  {
+    id: "anulado",
+    label: "Anulado",
+    color: (theme) => theme.palette.error.main,
+    description: "Documento anulado, sin efecto.",
+  },
+];
+
+const FILTER_CONFIG = [
+  {
+    id: "estado",
+    type: "select",
+    label: "Estado",
+    minWidth: 180,
+    options: [
+      { value: "", label: "Todos" },
+      { value: "pendiente", label: "Pendiente" },
+      { value: "pagado", label: "Pagado" },
+      { value: "vencido", label: "Vencido" },
+      { value: "anulado", label: "Anulado" },
+    ],
+  },
+  {
+    id: "cliente",
+    type: "text",
+    label: "Buscar cliente",
+    minWidth: 220,
+    adornment: "search",
+  },
+  {
+    id: "rangoEmision",
+    type: "daterange",
+    fromId: "fechaDesde",
+    toId: "fechaHasta",
+    labelFrom: "Emisión desde",
+    labelTo: "Emisión hasta",
+    colSpan: 2,
+  },
+];
 
 const getProdSucursalId = (p) =>
   Number(
@@ -46,10 +108,22 @@ const ListarCuentasPorCobrar = () => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const initialFilters = {
+    estado: "",
+    cliente: "",
+    fechaDesde: "",
+    fechaHasta: "",
+  };
+
+  const [filters, setFilters] = useState(initialFilters);
 
   useEffect(() => {
     setPage(0);
-  }, [idSucursalFiltro, mode]);
+  }, [filters.estado, filters.cliente, filters.fechaDesde, filters.fechaHasta]);
+
+  const handleFilterChange = (id, value) => {
+    setFilters((prev) => ({ ...prev, [id]: value }));
+  };
 
   const { data, isLoading, refetch } = useGetAllCuentasPorCobrarQuery(
     {
@@ -67,14 +141,48 @@ const ListarCuentasPorCobrar = () => {
   useRegisterRefresh(
     "facturas",
     async () => {
-      await refetch(); 
+      await refetch();
       return true;
     },
     [refetch]
   );
 
   const cuentas = useMemo(() => data?.data || [], [data]);
-  const totalItems = useMemo(() => data?.total?.totalItems || 0, [data]);
+  const cuentasFiltradas = useMemo(() => {
+    return cuentas.filter((c) => {
+      const estado = c.estado?.toLowerCase() || "";
+
+      if (filters.estado && estado !== filters.estado) return false;
+
+      if (filters.cliente.trim()) {
+        const nombre = (c?.documento?.cliente?.nombre || "")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/\p{Diacritic}/gu, "");
+        const buscado = filters.cliente
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/\p{Diacritic}/gu, "");
+        if (!nombre.includes(buscado)) return false;
+      }
+
+      const fechaEmision = c.fecha_emision ? new Date(c.fecha_emision) : null;
+
+      if (filters.fechaDesde) {
+        const desde = new Date(`${filters.fechaDesde}T00:00:00`);
+        if (!fechaEmision || fechaEmision < desde) return false;
+      }
+
+      if (filters.fechaHasta) {
+        const hasta = new Date(`${filters.fechaHasta}T23:59:59`);
+        if (!fechaEmision || fechaEmision > hasta) return false;
+      }
+
+      return true;
+    });
+  }, [cuentas, filters]);
+
+  //const totalItems = useMemo(() => data?.total?.totalItems || 0, [data]);
 
   const columns = [
     { id: "id_cxc", label: "ID", render: (row) => row.id_cxc },
@@ -158,8 +266,8 @@ const ListarCuentasPorCobrar = () => {
       title="Cuentas por Cobrar"
       subtitle="Gestión de facturas"
       columns={columns}
-      rows={cuentas}
-      totalItems={totalItems}
+      rows={cuentasFiltradas}
+      totalItems={cuentasFiltradas.length}
       rowsPerPage={rowsPerPage}
       page={page}
       handleChangePage={(_, newPage) => setPage(newPage)}
@@ -170,7 +278,29 @@ const ListarCuentasPorCobrar = () => {
       loading={isLoading}
       errorMessage="No se pudieron cargar las cuentas por cobrar o no existen datos disponibles."
       showBackButton={false}
-      header
+      headerAction={
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "stretch", md: "stretch" },
+            gap: 2,
+            width: "100%",
+            mb: 2,
+          }}
+        >
+          <FilterBar
+            config={FILTER_CONFIG}
+            values={filters}
+            onChange={handleFilterChange}
+            columns={3}
+            onReset={() => setFilters(initialFilters)}
+          />
+
+          <StatusLegend items={ESTADO_CXC_LEGEND} columns={2} maxWidth={420} />
+        </Box>
+      }
     />
   );
 };

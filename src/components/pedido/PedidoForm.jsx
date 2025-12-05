@@ -43,19 +43,60 @@ const PedidoForm = ({
   const empresaInvalida =
     isEmpresa && (!selectedCliente?.rut || !selectedCliente?.razon_social);
   useEffect(() => {
-    if (useClientAddress) {
-      if (selectedCliente) {
-        setFormState((prev) => ({
-          ...prev,
-          direccionEntrega: selectedCliente.direccion || "",
-        }));
-      } else {
-        setFormState((prev) => ({
-          ...prev,
-          direccionEntrega: "",
-        }));
-      }
+    if (!useClientAddress) return;
+
+    if (!selectedCliente) {
+      setFormState((prev) => ({
+        ...prev,
+        direccionEntrega: "",
+        coords: { lat: null, lng: null },
+      }));
+      return;
     }
+
+    const direccion = selectedCliente.direccion || "";
+    if (!direccion) {
+      setFormState((prev) => ({
+        ...prev,
+        direccionEntrega: "",
+        coords: { lat: null, lng: null },
+      }));
+      return;
+    }
+
+    setFormState((prev) => ({
+      ...prev,
+      direccionEntrega: direccion,
+    }));
+
+    if (!window.google?.maps?.Geocoder) return;
+
+    const geocoder = new window.google.maps.Geocoder();
+
+    geocoder
+      .geocode({
+        address: direccion,
+        componentRestrictions: { country: "CL" },
+      })
+      .then(({ results }) => {
+        const r = results?.[0];
+        if (!r?.geometry?.location) return;
+
+        setFormState((prev) => {
+          if (!useClientAddress) return prev;
+          if (prev.direccionEntrega !== direccion) return prev;
+
+          return {
+            ...prev,
+            direccionEntrega: r.formatted_address || direccion,
+            coords: {
+              lat: r.geometry.location.lat(),
+              lng: r.geometry.location.lng(),
+            },
+          };
+        });
+      })
+      .catch(() => {});
   }, [useClientAddress, selectedCliente, setFormState]);
 
   useEffect(() => {

@@ -427,8 +427,6 @@ const PedidosBoard = () => {
               Gestiona claramente la asignación de pedidos a cada chofer.
             </Typography>
           </Box>
-
-          {/* LEYENDA ESTADOS */}
           <Box
             sx={{
               display: "flex",
