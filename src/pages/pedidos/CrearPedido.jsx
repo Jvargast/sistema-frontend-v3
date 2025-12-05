@@ -28,7 +28,6 @@ import PedidoCategorias from "../../components/pedido/PedidoCategorias";
 import PedidoCarrito from "../../components/pedido/PedidoCarrito";
 import { useGetCajaAsignadaQuery } from "../../store/services/cajaApi";
 import NoCajaAsignadaDialog from "../../components/chofer/NoCajaAsignadaMessage";
-import { obtenerCoordsDesdeDireccion } from "../../utils/obtenerCords";
 import MiniCartSummary from "../../components/pedido/MiniCartSummary";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
@@ -176,32 +175,29 @@ const CrearPedido = () => {
 
   useEffect(() => {
     const cliente = formState.selectedCliente;
-    if (!cliente?.direccion) return;
+    if (!cliente) return;
 
-    const mismaDireccion = cliente.direccion === formState.direccionEntrega;
-    const sinCoords = !formState.coords.lat || !formState.coords.lng;
+    if (formState.usarDireccionCliente === false) return;
 
-    if (!mismaDireccion) {
-      setFormState((prev) => ({
+    const direccionCliente =
+      cliente.direccion_entrega ||
+      cliente.direccion_factura ||
+      cliente.direccion ||
+      "";
+
+    if (!direccionCliente) return;
+
+    setFormState((prev) => {
+      if (prev.direccionEntrega === direccionCliente) return prev;
+
+      return {
         ...prev,
-        direccionEntrega: cliente.direccion,
-      }));
-    }
+        direccionEntrega: direccionCliente,
+        coords: { lat: null, lng: null },
+      };
+    });
 
-    if (sinCoords) {
-      obtenerCoordsDesdeDireccion(cliente.direccion)
-        .then((coords) => {
-          if (coords) {
-            setFormState((prev) => ({
-              ...prev,
-              coords,
-            }));
-          }
-        })
-        .catch(() => {});
-    }
-    //eslint-disable-next-line
-  }, [formState.selectedCliente]);
+  }, [formState.selectedCliente, formState.usarDireccionCliente]);
 
   const prevSucursalIdRef = useRef(null);
 
@@ -225,11 +221,6 @@ const CrearPedido = () => {
         Number(i.id_sucursal_origen) !== currentId
     );
 
-    /* if (!formState.id_sucursal) return;
-    const otraSucursal = cart.some(
-      (i) =>
-        i.id_sucursal_origen && i.id_sucursal_origen !== formState.id_sucursal
-    ); */
 
     if (otraSucursal) {
       dispatch(clearCart());

@@ -37,7 +37,7 @@ const ModalPagoFactura = ({ open, onClose, idCxc, montoPorDefecto }) => {
   const [observaciones, setObservaciones] = useState("");
   const [referencia, setReferencia] = useState("");
   const [registrarPago, { isLoading }] = useRegistrarPagoMutation();
-  const saldoPendiente = Number(montoPorDefecto); // viene del padre
+  const saldoPendiente = Number(montoPorDefecto); 
   const montoNumerico = Number(monto);
   const montoValido =
     !isNaN(montoNumerico) &&

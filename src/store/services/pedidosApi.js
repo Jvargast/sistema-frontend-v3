@@ -159,6 +159,22 @@ export const pedidosApi = createApi({
       },
     }),
 
+    cancelarPedido: builder.mutation({
+      query: ({ id_pedido, motivo }) => ({
+        url: `/pedidos/${id_pedido}/cancelar`,
+        method: "POST",
+        body: { motivo },
+      }),
+      invalidatesTags: ["Pedidos"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Error al cancelar el pedido:", error);
+        }
+      },
+    }),
+
     deletePedido: builder.mutation({
       query: (id_pedido) => ({
         url: `/pedidos/${id_pedido}`,
@@ -244,9 +260,10 @@ export const {
   useDesasignarPedidoMutation,
   useDeletePedidoMutation,
   useRejectPedidoMutation,
+  useCancelarPedidoMutation,
   useRevertPedidoMutation,
   useGetDetalleConTotalQuery,
   useRegistrarDesdePedidoMutation,
   useRevertirEstadoPedidoMutation,
-  useToggleMostrarEnTableroMutation
+  useToggleMostrarEnTableroMutation,
 } = pedidosApi;

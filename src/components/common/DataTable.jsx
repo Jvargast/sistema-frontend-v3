@@ -79,18 +79,8 @@ const DataTable = ({
         />
       )}
       <Header title={title} subtitle={subtitle} />
-      <Box
-        sx={{
-          mb: 2,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: headerAction ? "space-between" : "center",
-          gap: 2,
-          flexWrap: "wrap",
-        }}
-      >
-        {headerAction && <Box>{headerAction}</Box>}
-      </Box>
+
+      {headerAction && <Box>{headerAction}</Box>}
 
       {isMobile ? (
         <>
