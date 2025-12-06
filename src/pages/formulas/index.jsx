@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Chip, IconButton } from "@mui/material";
+import { Box, Chip, IconButton } from "@mui/material";
 import { Visibility, Delete } from "@mui/icons-material";
 import { AddCircleOutline } from "@mui/icons-material";
 import {
@@ -13,6 +13,7 @@ import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useDispatch } from "react-redux";
 import AlertDialog from "../../components/common/AlertDialog";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import PrimaryActionButton from "../../components/common/PrimaryActionButton";
 
 const ListarFormulasProductos = () => {
   const navigate = useNavigate();
@@ -140,18 +141,20 @@ const ListarFormulasProductos = () => {
   }
 
   const botonCrear = (
-    <Button
-      variant="contained"
-      startIcon={<AddCircleOutline />}
-      onClick={() => navigate("/formulas/crear")}
+    <Box
       sx={{
-        textTransform: "none",
-        borderRadius: 2,
-        fontWeight: 600,
+        display: "flex",
+        justifyContent: "flex-end",
+        mt: 1,
+        mb: 2,
       }}
     >
-      Crear fórmula
-    </Button>
+      <PrimaryActionButton
+        label="Crear fórmula"
+        startIcon={<AddCircleOutline />}
+        onClick={() => navigate("/formulas/crear")}
+      />
+    </Box>
   );
 
   return (

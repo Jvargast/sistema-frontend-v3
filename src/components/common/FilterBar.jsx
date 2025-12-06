@@ -30,18 +30,22 @@ const FilterBar = ({
     <Box
       sx={{
         flex: { xs: "1 1 100%", md: "0 0 auto" },
-        minWidth: { xs: "100%", md: 520 },
-        p: 1,
-        borderRadius: 2,
+        minWidth: { xs: "100%", md: 560 },
+        p: 2,
+        borderRadius: 3,
         bgcolor:
           theme.palette.mode === "light"
-            ? theme.palette.grey[100]
+            ? "#F7F9FC"
             : theme.palette.background.paper,
+        border: "1px solid",
+        borderColor:
+          theme.palette.mode === "light"
+            ? theme.palette.grey[300]
+            : theme.palette.grey[700],
         boxShadow:
           theme.palette.mode === "light"
-            ? "0 1px 3px rgba(0,0,0,0.06)"
-            : "0 1px 3px rgba(0,0,0,0.4)",
-
+            ? "0 2px 6px rgba(15, 23, 42, 0.06)"
+            : "0 2px 8px rgba(0,0,0,0.6)",
         display: "grid",
         gridTemplateColumns: {
           xs: "1fr",
@@ -76,7 +80,13 @@ const FilterBar = ({
                 label={f.label}
                 value={value}
                 onChange={(e) => handleChange(f.id, e.target.value)}
-                sx={{ minWidth: f.minWidth }}
+                sx={{
+                  minWidth: f.minWidth || 180,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 999,
+                    width: "220px",
+                  },
+                }}
                 InputProps={{
                   startAdornment:
                     f.adornment === "search" ? (
@@ -101,7 +111,13 @@ const FilterBar = ({
                 label={f.label}
                 value={value}
                 onChange={(e) => handleChange(f.id, e.target.value)}
-                sx={{ minWidth: f.minWidth }}
+                sx={{
+                  minWidth: f.minWidth || 180,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 999,
+                    width: "220px",
+                  },
+                }}
               >
                 {(f.options || []).map((opt) => (
                   <MenuItem key={opt.value} value={opt.value}>
@@ -125,7 +141,12 @@ const FilterBar = ({
                 value={value}
                 onChange={(e) => handleChange(f.id, e.target.value)}
                 InputLabelProps={{ shrink: true }}
-                sx={{ minWidth: f.minWidth || 130, backgroundColor:"red" }}
+                sx={{
+                  minWidth: f.minWidth || 160,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 999,
+                  },
+                }}
               />
             </Box>
           );
@@ -143,26 +164,38 @@ const FilterBar = ({
               onChange={handleChange}
               size={size}
               variant={variant}
-              sx={cellSx}
+              sx={{
+                ...cellSx,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 999,
+                  width: "220px",
+                },
+              }}
             />
           );
         }
 
         return null;
       })}
+
       {onReset && (
         <Box
           sx={{
             gridColumn: {
               xs: "span 1",
               sm: "span 2",
-              md: `span ${columns}`, 
             },
+            mt: 0.5,
             display: "flex",
             justifyContent: "flex-end",
           }}
         >
-          <Button size="small" variant="text" onClick={onReset}>
+          <Button
+            size="small"
+            variant="text"
+            onClick={onReset}
+            sx={{ fontSize: 12, fontWeight: 500 }}
+          >
             Limpiar filtros
           </Button>
         </Box>

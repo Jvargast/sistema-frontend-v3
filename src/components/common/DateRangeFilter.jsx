@@ -56,6 +56,7 @@ const DateRangeFilter = ({
   return (
     <Box
       sx={{
+        position: "relative",
         display: "flex",
         gap: 1.5,
         flexWrap: "wrap",
@@ -89,6 +90,12 @@ const DateRangeFilter = ({
         onClick={handleOpen}
         size="small"
         aria-label="Abrir calendario"
+        sx={{
+          position: "absolute",
+          right: 0,
+          top: "50%",
+          transform: "translateY(-50%)",
+        }}
       >
         <CalendarMonthIcon fontSize="small" />
       </IconButton>

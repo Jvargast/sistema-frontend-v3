@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
-  Button,
   Chip,
   IconButton,
   Typography,
@@ -27,6 +26,8 @@ import Header from "../../components/common/Header";
 import DataGridCustomToolbar from "../../components/common/DataGridCustomToolBar";
 import { useSelector } from "react-redux";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import PrimaryActionButton from "../../components/common/PrimaryActionButton";
+import DangerActionButton from "../../components/common/DangerActionButton";
 
 const CHIP_COLOR_KEYS = ["primary", "secondary", "success", "warning", "info"];
 const hashStr = (s) =>
@@ -67,12 +68,6 @@ const Clientes = () => {
     }
     return base;
   }, [search, page, pageSize, mode, activeSucursalId]);
-
-  /*  const { data, isLoading, isError, error, refetch } = useGetAllClientesQuery({
-    search,
-    page: page + 1,
-    limit: pageSize,
-  }); */
 
   const { data, isLoading, isError, error, refetch } =
     useGetAllClientesQuery(clienteParams);
@@ -376,7 +371,6 @@ const Clientes = () => {
                 gap: 2,
               }}
             >
-              {/* Botón Eliminar */}
               <Box
                 sx={{
                   width: 48,
@@ -408,7 +402,6 @@ const Clientes = () => {
               >
                 <DeleteOutlineIcon sx={{ color: "#fff", fontSize: 28 }} />
               </Box>
-              {/* Botón Nuevo */}
               <Box
                 sx={{
                   width: 48,
@@ -437,39 +430,19 @@ const Clientes = () => {
           </>
         ) : (
           <>
-            <Button
-              variant="contained"
-              color="error"
+            <DangerActionButton
+              label="Eliminar seleccionados"
               startIcon={<DeleteOutlineIcon />}
               onClick={() => setOpenAlert(true)}
-              disabled={selectedRows.length === 0 || isDeleting}
-              sx={{
-                textTransform: "none",
-                fontWeight: "bold",
-                fontSize: "1rem",
-                padding: "0.5rem 1.5rem",
-                borderRadius: "8px",
-                boxShadow: "0 2px 8px 0 #b71c1c22",
-              }}
-            >
-              {isDeleting ? "Eliminando..." : "Eliminar Seleccionados"}
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
+              disabled={selectedRows.length === 0}
+              loading={isDeleting}
+            />
+
+            <PrimaryActionButton
+              label="Nuevo Cliente"
               startIcon={<AddCircleOutlineIcon />}
               onClick={() => navigate("/clientes/crear")}
-              sx={{
-                textTransform: "none",
-                fontWeight: "bold",
-                fontSize: "1rem",
-                padding: "0.5rem 1.5rem",
-                borderRadius: "8px",
-                boxShadow: "0 2px 8px 0 #1976d222",
-              }}
-            >
-              Nuevo Cliente
-            </Button>
+            />
           </>
         )}
       </Box>

@@ -22,7 +22,6 @@ import {
   useTheme,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import AddIcon from "@mui/icons-material/Add";
 import Header from "../../components/common/Header";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import { useDispatch } from "react-redux";
@@ -36,6 +35,8 @@ import {
 import CategoriaGastoCard from "../../components/categorias_gasto/CategoriaGastoCard";
 import CategoriaGastoDialog from "../../components/categorias_gasto/CategoriaGastoDialog";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import { AddCircleOutline } from "@mui/icons-material";
+import PrimaryActionButton from "../../components/common/PrimaryActionButton";
 
 const TIPOS_CATEGORIA = [
   { id: "", label: "Todos" },
@@ -257,14 +258,13 @@ export default function CategoriaGastoManagement() {
           />
         </Stack>
 
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
+        <PrimaryActionButton
+          label="Nueva Categoría"
+          startIcon={<AddCircleOutline />}
           onClick={openCreate}
-          sx={{ alignSelf: { xs: "stretch", md: "center" } }}
-        >
-          Nueva Categoría
-        </Button>
+          disabled={creating || updating}
+          aria-label="Nueva Categoría"
+        />
       </Stack>
 
       <Grid container spacing={2}>

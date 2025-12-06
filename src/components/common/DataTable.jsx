@@ -87,7 +87,12 @@ const DataTable = ({
           <Box display="flex" flexDirection="column" gap={2}>
             {rows.map((row, idx) => {
               const rowKey =
-                row.id ?? row.id_pedido ?? row.id_venta ?? row.uuid ?? `${idx}`;
+                row.id ??
+                row.id_pago ??
+                row.id_pedido ??
+                row.id_venta ??
+                row.uuid ??
+                `${idx}`;
               return (
                 <Box
                   key={rowKey}
@@ -203,6 +208,7 @@ const DataTable = ({
                   rows.map((row, index) => {
                     const rowKey =
                       row.id ??
+                      row.id_pago ??
                       row.id_pedido ??
                       row.id_venta ??
                       row.uuid ??

@@ -25,7 +25,7 @@ jobs:
         env:
           VITE_ENV: production
           VITE_PLATFORM: web
-          VITE_APP_VERSION: 2.5.2
+          VITE_APP_VERSION: 2.5.3
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
           VITE_API_GOOGLE_MAPS: ${{ secrets.VITE_API_GOOGLE_MAPS }}

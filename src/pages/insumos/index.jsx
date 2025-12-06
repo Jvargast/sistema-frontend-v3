@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Box, Button, Tab, Tabs, useTheme } from "@mui/material";
+import { Box, Tab, Tabs, useTheme } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { Add } from "@mui/icons-material";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -25,6 +25,8 @@ import InventarioMatrizInsumos from "../../components/insumos/InventarioMatrizIn
 import InventarioTabsInsumosPorSucursal from "../../components/insumos/InventarioTabsInsumosPorSucursal";
 import InventarioAccordionInsumosPorInsumo from "../../components/insumos/InventarioAccordionInsumosPorInsumo";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import DangerActionButton from "../../components/common/DangerActionButton";
+import PrimaryActionButton from "../../components/common/PrimaryActionButton";
 
 const Insumos = () => {
   const dispatch = useDispatch();
@@ -41,7 +43,7 @@ const Insumos = () => {
     data: tiposData,
     isLoading: isLoadingTipos,
     isError: isErrorTipos,
-    refetch: refetchTipos
+    refetch: refetchTipos,
   } = useGetAllTiposQuery();
 
   useRegisterRefresh(
@@ -64,6 +66,9 @@ const Insumos = () => {
   const [openModal, setOpenModal] = useState(false);
   const [openAlert, setOpenAlert] = useState(false);
 
+  const selectedCount = Object.values(selectedRows).flat().length;
+  const hasSelected = selectedCount > 0;
+
   const [createInsumo, { isLoading: isCreating }] = useCreateInsumoMutation();
   const [deleteInsumos, { isLoading: isDeleting }] = useDeleteInsumosMutation();
 
@@ -75,13 +80,8 @@ const Insumos = () => {
 
   const shouldFetchAll = vista === 1 || vista === 2 || vista === 3;
 
-  const [
-    triggerAll,
-    {
-      data: allInsumos = [],
-      isFetching: isLoadingAll,  
-    },
-  ] = useLazyGetAllInsumosAllQuery();
+  const [triggerAll, { data: allInsumos = [], isFetching: isLoadingAll }] =
+    useLazyGetAllInsumosAllQuery();
 
   const insumosAll = allInsumos;
 
@@ -268,23 +268,13 @@ const Insumos = () => {
               <DeleteForeverIcon sx={{ color: "#fff", fontSize: 28 }} />
             </Box>
           ) : (
-            <Button
-              color="error"
-              variant="contained"
+            <DangerActionButton
+              label="Eliminar seleccionados"
+              startIcon={<DeleteForeverIcon />}
               onClick={() => setOpenAlert(true)}
-              disabled={
-                Object.values(selectedRows).flat().length === 0 || isDeleting
-              }
-              sx={{
-                textTransform: "none",
-                fontWeight: "bold",
-                fontSize: "1rem",
-                padding: "0.5rem 1.5rem",
-                borderRadius: "8px",
-              }}
-            >
-              {isDeleting ? "Eliminando..." : "Eliminar Seleccionados"}
-            </Button>
+              disabled={!hasSelected}
+              loading={isDeleting}
+            />
           ))}
 
         {canCreateInsumo &&
@@ -313,21 +303,11 @@ const Insumos = () => {
               <Add sx={{ color: "#fff", fontSize: 28 }} />
             </Box>
           ) : (
-            <Button
-              variant="contained"
-              color="primary"
+            <PrimaryActionButton
+              label="Nuevo insumo"
               startIcon={<Add />}
               onClick={() => setOpenModal(true)}
-              sx={{
-                textTransform: "none",
-                fontWeight: "bold",
-                fontSize: "1rem",
-                padding: "0.5rem 1.5rem",
-                borderRadius: "8px",
-              }}
-            >
-              Nuevo Insumo
-            </Button>
+            />
           ))}
       </Box>
 

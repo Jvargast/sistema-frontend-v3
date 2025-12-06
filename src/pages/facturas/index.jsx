@@ -294,11 +294,11 @@ const ListarCuentasPorCobrar = () => {
             config={FILTER_CONFIG}
             values={filters}
             onChange={handleFilterChange}
-            columns={3}
+            columns={2}
             onReset={() => setFilters(initialFilters)}
           />
 
-          <StatusLegend items={ESTADO_CXC_LEGEND} columns={2} maxWidth={420} />
+          <StatusLegend items={ESTADO_CXC_LEGEND} columns={2} maxWidth={520} />
         </Box>
       }
     />

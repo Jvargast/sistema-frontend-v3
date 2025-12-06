@@ -1,7 +1,6 @@
-// ListarPagos.jsx
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { IconButton, Chip } from "@mui/material";
+import { IconButton, Chip, Box } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
 import { useGetAllPagosQuery } from "../../store/services/pagosApi";
 import DataTable from "../../components/common/DataTable";
@@ -10,13 +9,79 @@ import { useSelector } from "react-redux";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import FilterBar from "../../components/common/FilterBar";
+import StatusLegend from "../../components/common/StatusLegend";
 
 const estadoColores = {
   Pendiente: "warning",
   Pagado: "success",
-  Anulado: "default",
+  Anulado: "error",
   Rechazado: "error",
 };
+
+const ESTADO_PAGOS_LEYENDA = [
+  {
+    id: "Pendiente",
+    label: "Pendiente",
+    color: (theme) => theme.palette.warning.main,
+    description: "Pago registrado pero con saldo pendiente.",
+  },
+  {
+    id: "Pagado",
+    label: "Pagado",
+    color: (theme) => theme.palette.success.main,
+    description: "Pago confirmado, documento al día.",
+  },
+  {
+    id: "Anulado",
+    label: "Anulado",
+    color: (theme) =>
+      theme.palette.mode === "light"
+        ? theme.palette.grey[500]
+        : theme.palette.grey[400],
+    description: "Pago reversado o invalidado.",
+  },
+  {
+    id: "Rechazado",
+    label: "Rechazado",
+    color: (theme) => theme.palette.error.main,
+    description: "Pago fallido o rechazado.",
+  },
+];
+
+const ESTADO_FILTRO_OPCIONES = [
+  { value: "todos", label: "Todos" },
+  { value: "Pendiente", label: "Pendiente" },
+  { value: "Pagado", label: "Pagado" },
+  { value: "Anulado", label: "Anulado" },
+  { value: "Rechazado", label: "Rechazado" },
+];
+
+const FILTER_CONFIG = [
+  {
+    id: "estado",
+    type: "select",
+    label: "Estado de pago",
+    minWidth: 200,
+    options: ESTADO_FILTRO_OPCIONES,
+  },
+  {
+    id: "referencia",
+    type: "text",
+    label: "Buscar referencia",
+    minWidth: 200,
+    adornment: "search",
+  },
+  {
+    id: "rangoFecha",
+    type: "daterange",
+    fromId: "fechaDesde",
+    toId: "fechaHasta",
+    labelFrom: "Desde",
+    labelTo: "Hasta",
+    colSpan: 2,
+  },
+];
 
 const getPagoSucursalId = (p) =>
   Number(
@@ -57,10 +122,29 @@ const ListarPagos = () => {
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const initialFilters = {
+    estado: "todos",
+    referencia: "",
+    fechaDesde: "",
+    fechaHasta: "",
+  };
+
+  const [filters, setFilters] = useState(initialFilters);
+
+  const handleFilterChange = (id, value) => {
+    setFilters((prev) => ({ ...prev, [id]: value }));
+  };
 
   useEffect(() => {
     setPage(0);
-  }, [idSucursalFiltro, mode]);
+  }, [
+    idSucursalFiltro,
+    mode,
+    filters.estado,
+    filters.referencia,
+    filters.fechaDesde,
+    filters.fechaHasta,
+  ]);
 
   const { data, isLoading, refetch } = useGetAllPagosQuery(
     {
@@ -85,6 +169,40 @@ const ListarPagos = () => {
   }, [page, rowsPerPage, idSucursalFiltro, refetch]);
 
   const pagos = useMemo(() => data?.data || [], [data]);
+
+  const pagosFiltrados = useMemo(() => {
+    return pagos.filter((pago) => {
+      const estado = pago.estadoPago?.nombre || "Sin estado";
+
+      if (
+        filters.estado &&
+        filters.estado !== "todos" &&
+        estado !== filters.estado
+      ) {
+        return false;
+      }
+
+      if (filters.referencia.trim()) {
+        const ref = (pago.referencia || "").toLowerCase();
+        const buscado = filters.referencia.toLowerCase();
+        if (!ref.includes(buscado)) return false;
+      }
+
+      const fechaPago = pago.fecha_pago ? new Date(pago.fecha_pago) : null;
+
+      if (filters.fechaDesde) {
+        const desde = new Date(`${filters.fechaDesde}T00:00:00`);
+        if (!fechaPago || fechaPago < desde) return false;
+      }
+
+      if (filters.fechaHasta) {
+        const hasta = new Date(`${filters.fechaHasta}T23:59:59`);
+        if (!fechaPago || fechaPago > hasta) return false;
+      }
+
+      return true;
+    });
+  }, [pagos, filters]);
 
   const totalItems = useMemo(() => data?.total?.totalItems || 0, [data]);
 
@@ -179,7 +297,7 @@ const ListarPagos = () => {
       title="Listado de Pagos"
       subtitle="Gestión de Pagos"
       columns={columns}
-      rows={pagos}
+      rows={pagosFiltrados}
       totalItems={totalItems}
       rowsPerPage={rowsPerPage}
       page={page}
@@ -191,6 +309,33 @@ const ListarPagos = () => {
       loading={isLoading}
       errorMessage="No se pudieron cargar los pagos o no existen datos disponibles."
       showBackButton={false}
+      headerAction={
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "stretch", md: "stretch" },
+            gap: 2,
+            width: "100%",
+            mb: 2,
+          }}
+        >
+          <FilterBar
+            config={FILTER_CONFIG}
+            values={filters}
+            onChange={handleFilterChange}
+            columns={2}
+            onReset={() => setFilters(initialFilters)}
+          />
+
+          <StatusLegend
+            columns={2}
+            items={ESTADO_PAGOS_LEYENDA}
+            maxWidth={520}
+          />
+        </Box>
+      }
     />
   );
 };

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { Box, Typography, Button, TextField, MenuItem } from "@mui/material";
-import { Add } from "@mui/icons-material";
+import { Box, Typography, TextField, MenuItem } from "@mui/material";
+import { AddCircleOutline } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
@@ -16,6 +16,7 @@ import CamionCard from "../../components/camion/CamionCard";
 import Header from "../../components/common/Header";
 import { useSelector } from "react-redux";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import PrimaryActionButton from "../../components/common/PrimaryActionButton";
 
 const CamionesManagement = () => {
   const navigate = useNavigate();
@@ -327,33 +328,16 @@ const CamionesManagement = () => {
               ))}
             </TextField>
           )}
-          <Button
-            variant="contained"
-            color="primary"
-            disableElevation
-            startIcon={<Add />}
+          <PrimaryActionButton
+            label="Añadir camión"
+            startIcon={<AddCircleOutline />}
             onClick={() => setOpen(true)}
             disabled={isCreating || (mode === "global" && !targetSucursalId)}
-            sx={{
-              fontSize: { xs: "0.78rem", sm: "0.92rem" },
-              fontWeight: 700,
-              py: 1.1,
-              px: { xs: 2, sm: 3 },
-              borderRadius: 2,
-              minWidth: { xs: "40px", sm: "auto" },
-              boxShadow: "none",
-              transition: "background 0.15s",
-              "&:hover": {
-                backgroundColor: (theme) => theme.palette.primary.dark,
-              },
-              "& .MuiButton-startIcon": { margin: 0 },
-            }}
             aria-label="Añadir Camión"
-          >
-            <Box sx={{ display: { xs: "none", sm: "block" } }}>
-              Añadir Camión
-            </Box>
-          </Button>
+            sx={{
+              fontSize: { xs: 12, sm: 14 },
+            }}
+          />
         </Box>
 
         {mode === "global" && !targetSucursalId ? (

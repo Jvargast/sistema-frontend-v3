@@ -1,20 +1,10 @@
-import {
-  Box,
-  Typography,
-  Button,
-  Stack,
-/*   Modal,
-  Card,
-  CardContent, */
-} from "@mui/material";
-import { HomeOutlined, /* TouchApp, */ ArrowForward } from "@mui/icons-material";
+import { Box, Typography, Button, Stack } from "@mui/material";
+import { HomeOutlined, ArrowForward } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { openTab } from "../../store/reducers/tabSlice";
 import { getInitialRoute } from "../../utils/navigationUtils";
 import { useNavigate } from "react-router-dom";
-/* import { useState } from "react"; */
-/* import * as MuiIcons from "@mui/icons-material"; */
 
 const tabMap = {
   "/dashboard": {
@@ -38,7 +28,6 @@ const tabMap = {
     icon: "ProductionQuantityLimitsOutlined",
   },
 };
-/* const modulesList = Object.entries(tabMap); */
 
 const WelcomePage = () => {
   const dispatch = useDispatch();
@@ -47,8 +36,6 @@ const WelcomePage = () => {
 
   const initialRoute = getInitialRoute(rol, permisos);
   const tabInfo = tabMap[initialRoute] || tabMap["/dashboard"];
-
-/*   const [openModal, setOpenModal] = useState(false); */
 
   const handleGoToDashboard = () => {
     dispatch(
@@ -65,128 +52,112 @@ const WelcomePage = () => {
   return (
     <Box
       component={motion.div}
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
       sx={{
         display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
         justifyContent: "center",
-        height: "100%",
-        textAlign: "center",
-        p: 4,
+        alignItems: "center",
+        minHeight: {
+          xs: "calc(100vh - 140px)",
+          md: "calc(100vh - 160px)",
+        },
+        px: { xs: 2, md: 4 },
+        py: { xs: 3, md: 4 },
       }}
     >
-      <HomeOutlined sx={{ fontSize: 64, mb: 2, color: "primary.main" }} />
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
-        ¡Bienvenido a ERP Aguas Valentino!
-      </Typography>
-      <Typography variant="body1" color="text.secondary" gutterBottom>
-        Selecciona un módulo en el menú lateral para comenzar.
-        <br />
-        Disfruta una experiencia moderna y productiva.
-      </Typography>
-      <Stack direction="row" spacing={2} mt={4}>
-        <Button
-          variant="contained"
-          endIcon={<ArrowForward />}
-          component={motion.button}
-          whileHover={{ scale: 1.08, boxShadow: "0 0 24px 0 #2196f3" }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleGoToDashboard}
-        >
-          Ir a {tabInfo.label}
-        </Button>
-{/*         <Button
-          variant="outlined"
-          startIcon={<TouchApp />}
-          whileHover={{ scale: 1.08, boxShadow: "0 0 24px 0 #90caf9" }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setOpenModal(true)}
-        >
-          Explorar módulos
-        </Button> */}
-      </Stack>
-
-     {/*  <Modal
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backdropFilter: "blur(1.5px)",
-          backgroundColor: "rgba(30,30,40,0.18)",
-        }}
+      <Box
+        sx={(theme) => ({
+          maxWidth: 560,
+          width: "100%",
+          textAlign: "center",
+          px: { xs: 3, md: 4 },
+          py: { xs: 3.5, md: 4.5 },
+          borderRadius: 4,
+          bgcolor: theme.palette.background.paper,
+          boxShadow:
+            theme.palette.mode === "light"
+              ? "0 18px 45px rgba(15,23,42,0.10)"
+              : "0 20px 48px rgba(0,0,0,0.65)",
+          border: `1px solid ${
+            theme.palette.mode === "light"
+              ? theme.palette.grey[200]
+              : theme.palette.grey[800]
+          }`,
+        })}
       >
         <Box
-          sx={{
-            bgcolor: "background.paper",
-            p: { xs: 2.5, sm: 4 },
-            borderRadius: 4,
+          sx={(theme) => ({
+            width: 72,
+            height: 72,
+            borderRadius: "50%",
+            mx: "auto",
+            mb: 2.5,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background:
+              theme.palette.mode === "light"
+                ? `linear-gradient(135deg, ${theme.palette.primary.light}, ${theme.palette.primary.main})`
+                : `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
             boxShadow:
-              "0 8px 36px 0 rgba(27,41,75,.17), 0 1.5px 6px 0 rgba(0,0,0,0.10)",
-            minWidth: 300,
-            maxWidth: "92vw",
-            width: 390,
-            outline: "none",
+              theme.palette.mode === "light"
+                ? "0 10px 25px rgba(37,99,235,0.35)"
+                : "0 12px 28px rgba(0,0,0,0.7)",
+          })}
+        >
+          <HomeOutlined sx={{ fontSize: 40, color: "#fff" }} />
+        </Box>
+
+        <Typography
+          variant="h4"
+          fontWeight={800}
+          sx={{
+            mb: 1,
+            fontSize: { xs: 24, md: 28 },
           }}
         >
-          <Typography variant="h5" mb={2} fontWeight="bold">
-            Selecciona un módulo
-          </Typography>
-          <Stack spacing={2}>
-            {modulesList.map(([path, info]) => {
-              const Icon = MuiIcons[info.icon];
-              return (
-                <Card
-                  key={path}
-                  onClick={() => {
-                    dispatch(
-                      openTab({
-                        key: info.key,
-                        label: info.label,
-                        icon: info.icon,
-                        path: info.key,
-                      })
-                    );
-                    navigate(path);
-                    setOpenModal(false);
-                  }}
-                  sx={{
-                    cursor: "pointer",
-                    borderRadius: 2.5,
-                    boxShadow: "0 1.5px 8px 0 rgba(27,41,75,.06)",
-                    transition: "box-shadow 0.11s, transform 0.11s",
-                    "&:hover": {
-                      boxShadow: "0 6px 18px 0 #2196f350",
-                      transform: "translateY(-2px) scale(1.015)",
-                      background: "rgba(33,150,243,0.05)",
-                    },
-                    "&:active": {
-                      transform: "scale(0.98)",
-                    },
-                  }}
-                >
-                  <CardContent
-                    sx={{ display: "flex", alignItems: "center", py: 1.3 }}
-                  >
-                    {Icon && (
-                      <Icon
-                        sx={{ mr: 2, color: "primary.main", fontSize: 26 }}
-                      />
-                    )}
-                    <Typography variant="h6" sx={{ fontWeight: 500 }}>
-                      {info.label}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </Stack>
-        </Box>
-      </Modal> */}
+          ¡Bienvenido a ERP Aguas Valentino!
+        </Typography>
+
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ mb: 0.5, fontSize: { xs: 14.5, md: 15.5 } }}
+        >
+          Selecciona un módulo en el menú lateral para comenzar.
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mb: 3, fontSize: { xs: 13.5, md: 14.5 } }}
+        >
+          También puedes ir directamente a tu módulo principal recomendado.
+        </Typography>
+
+        <Stack direction="row" spacing={2} justifyContent="center">
+          <Button
+            variant="contained"
+            endIcon={<ArrowForward />}
+            component={motion.button}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleGoToDashboard}
+            sx={{
+              textTransform: "none",
+              borderRadius: 999,
+              px: { xs: 3, md: 3.8 },
+              py: 1,
+              fontWeight: 600,
+              fontSize: { xs: 14, md: 15 },
+              boxShadow: "0 10px 26px rgba(37,99,235,0.35)",
+            }}
+          >
+            Ir a {tabInfo.label}
+          </Button>
+        </Stack>
+      </Box>
     </Box>
   );
 };
