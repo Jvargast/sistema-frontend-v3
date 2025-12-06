@@ -2,7 +2,6 @@ import { useMemo, useState, useEffect } from "react";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Box,
-  Button,
   Pagination,
   Typography,
   useTheme,
@@ -43,6 +42,8 @@ import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { useSelector } from "react-redux";
 import ImageCell from "../../components/common/ImageCell";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import DangerActionButton from "../../components/common/DangerActionButton";
+import PrimaryActionButton from "../../components/common/PrimaryActionButton";
 
 const Productos = () => {
   const location = useLocation();
@@ -99,12 +100,17 @@ const Productos = () => {
 
   const paginacion = useMemo(() => data?.paginacion || {}, [data?.paginacion]);
 
-  const { data: categorias, refetch: refetchCategorias } = useGetAllCategoriasQuery();
+  const { data: categorias, refetch: refetchCategorias } =
+    useGetAllCategoriasQuery();
 
   useRegisterRefresh(
     "productos",
     async () => {
-      await Promise.all([refetch(), refetchAllProductos(), refetchCategorias()]);
+      await Promise.all([
+        refetch(),
+        refetchAllProductos(),
+        refetchCategorias(),
+      ]);
       return true;
     },
     [refetch, refetchAllProductos, refetchCategorias]
@@ -374,21 +380,13 @@ const Productos = () => {
               <DeleteForeverIcon sx={{ color: "#fff", fontSize: 28 }} />
             </Box>
           ) : (
-            <Button
-              variant="contained"
-              color="error"
-              disabled={selectedRows.length === 0 || isDeleting}
+            <DangerActionButton
+              label="Eliminar seleccionados"
+              startIcon={<DeleteForeverIcon />}
               onClick={() => setOpenAlert(true)}
-              sx={{
-                textTransform: "none",
-                fontWeight: "bold",
-                fontSize: "1rem",
-                padding: "0.5rem 1.5rem",
-                borderRadius: "8px",
-              }}
-            >
-              {isDeleting ? "Eliminando..." : "Eliminar Seleccionados"}
-            </Button>
+              disabled={selectedRows.length === 0}
+              loading={isDeleting}
+            />
           ))}
 
         {canCreateProducto &&
@@ -417,21 +415,11 @@ const Productos = () => {
               <Add sx={{ color: "#fff", fontSize: 28 }} />
             </Box>
           ) : (
-            <Button
-              variant="contained"
-              color="primary"
+            <PrimaryActionButton
+              label="Nuevo producto"
               startIcon={<Add />}
               onClick={() => setOpen(true)}
-              sx={{
-                textTransform: "none",
-                fontWeight: "bold",
-                fontSize: "1rem",
-                padding: "0.5rem 1.5rem",
-                borderRadius: "8px",
-              }}
-            >
-              Nuevo Producto
-            </Button>
+            />
           ))}
       </Box>
 

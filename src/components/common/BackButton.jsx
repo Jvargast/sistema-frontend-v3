@@ -7,36 +7,61 @@ const BackButton = ({ to, label }) => {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const borderColor =
-    theme.palette.mode === "dark" ? theme.palette.grey[700] : "#191919";
+  const isDark = theme.palette.mode === "dark";
 
-  const textColor = theme.palette.mode === "dark" ? "#fff" : "#191919";
+  const textColor = isDark
+    ? theme.palette.grey[100]
+    : theme.palette.text.primary;
+
+  const borderColor = isDark
+    ? theme.palette.grey[700]
+    : theme.palette.grey[300];
+
+  const hoverBorderColor = isDark
+    ? theme.palette.grey[500]
+    : theme.palette.primary.main;
+
+  const bgColor = isDark ? "transparent" : "#f9fafb"; // gris muy suave
+  const hoverBgColor = isDark ? theme.palette.grey[900] : "#eef2ff";
 
   return (
     <Button
-      startIcon={<ArrowBackIcon sx={{ color: textColor }} />}
+      startIcon={<ArrowBackIcon sx={{ fontSize: 20 }} />}
       variant="outlined"
       onClick={() => navigate(to)}
+      disableElevation
       sx={{
         mb: 2,
         textTransform: "none",
-        fontSize: "1.03rem",
+        fontSize: 14,
         fontWeight: 500,
-        borderRadius: "8px",
-        padding: "0.37rem 1.15rem",
-        border: `1.5px solid ${borderColor}`,
+        borderRadius: 999, // pill
+        px: 1.8,
+        py: 0.6,
+        alignSelf: "flex-start",
+        borderWidth: 1,
+        borderStyle: "solid",
+        borderColor,
         color: textColor,
-        background: "transparent",
-        boxShadow: "none",
-        letterSpacing: 0.1,
-        minWidth: 0,
+        backgroundColor: bgColor,
+        letterSpacing: 0.2,
+        display: "inline-flex",
+        gap: 0.5,
+        transition:
+          "background-color 0.18s ease, border-color 0.18s ease, transform 0.16s ease, box-shadow 0.16s ease",
+        boxShadow: "0 2px 6px rgba(15,23,42,0.06)",
+        "& .MuiButton-startIcon": {
+          mr: 0.5,
+        },
         "&:hover": {
-          background:
-            theme.palette.mode === "dark" ? theme.palette.grey[800] : "#f6f6f6",
-          color: textColor,
-          borderColor:
-            theme.palette.mode === "dark" ? theme.palette.grey[600] : "#111",
-          boxShadow: "0 1px 6px 0 #1111",
+          backgroundColor: hoverBgColor,
+          borderColor: hoverBorderColor,
+          transform: "translateY(-1px)",
+          boxShadow: "0 6px 18px rgba(15,23,42,0.12)",
+        },
+        "&:active": {
+          transform: "translateY(0)",
+          boxShadow: "0 2px 8px rgba(15,23,42,0.16)",
         },
       }}
     >

@@ -17,7 +17,6 @@ import {
   useTheme,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import AddIcon from "@mui/icons-material/Add";
 import Header from "../../components/common/Header";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import { useDispatch, useSelector } from "react-redux";
@@ -33,6 +32,8 @@ import CentroCostoCard from "../../components/centro_de_costos/CentroCostoCard";
 import CentroCostoDialog from "../../components/centro_de_costos/CentroCostoDialog";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import PrimaryActionButton from "../../components/common/PrimaryActionButton";
+import { AddCircleOutline } from "@mui/icons-material";
 
 export default function CentroCostoManagement() {
   const theme = useTheme();
@@ -236,15 +237,13 @@ export default function CentroCostoManagement() {
             sx={{ ml: { xs: 0, sm: 1 } }}
           />
         </Stack>
-
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
+        <PrimaryActionButton
+          label="Nuevo Centro de Costo"
+          startIcon={<AddCircleOutline />}
           onClick={(e) => openCreate(e)}
-          sx={{ alignSelf: { xs: "stretch", md: "center" } }}
-        >
-          Nuevo Centro de Costo
-        </Button>
+          disabled={creating || updating}
+          aria-label="Nuevo Centro de Costo"
+        />
       </Stack>
 
       <Grid container spacing={2}>

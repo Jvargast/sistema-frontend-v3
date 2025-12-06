@@ -1,5 +1,13 @@
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
-import { Box, Typography, Card, Grid2 } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Card,
+  Grid2,
+  TextField,
+  InputAdornment,
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   HomeOutlined,
   PointOfSaleOutlined,
@@ -22,6 +30,7 @@ import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
 import HistoryEduOutlinedIcon from "@mui/icons-material/HistoryEduOutlined";
+import { useMemo, useState } from "react";
 
 const navItems = [
   {
@@ -143,6 +152,19 @@ const navItems = [
 const Administration = () => {
   const navigate = useNavigate();
 
+  const [search, setSearch] = useState("");
+
+  const filteredNavItems = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return navItems;
+
+    return navItems.filter((item) => {
+      const text = item.text.toLowerCase();
+      const desc = item.description.toLowerCase();
+      return text.includes(q) || desc.includes(q);
+    });
+  }, [search]);
+
   return (
     <Box
       sx={{
@@ -156,6 +178,74 @@ const Administration = () => {
       }}
     >
       <Header title="Menú Administrador" subtitle="" />
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: 720,
+          mt: 3,
+          mb: 2,
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{
+            mb: 0.8,
+            color: "text.secondary",
+            textTransform: "uppercase",
+            letterSpacing: 0.8,
+            fontSize: 12,
+          }}
+        >
+          Buscar módulo
+        </Typography>
+
+        <TextField
+          fullWidth
+          size="small"
+          variant="outlined"
+          placeholder="Escribe el nombre del módulo o una palabra clave..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon
+                  sx={{
+                    fontSize: 20,
+                    color: "text.secondary",
+                  }}
+                />
+              </InputAdornment>
+            ),
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 999,
+              bgcolor: "background.paper",
+              boxShadow: "0 4px 14px rgba(15,23,42,0.06)",
+              transition: "box-shadow 0.18s ease, transform 0.18s ease",
+              "&:hover": {
+                boxShadow: "0 8px 24px rgba(15,23,42,0.12)",
+                transform: "translateY(-1px)",
+              },
+              "&.Mui-focused": {
+                boxShadow:
+                  "0 0 0 1px rgba(59,130,246,0.2), 0 10px 28px rgba(15,23,42,0.16)",
+              },
+            },
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "transparent",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "transparent",
+            },
+            "& .MuiInputBase-input": {
+              fontSize: 14,
+            },
+          }}
+        />
+      </Box>
+
       <Grid2
         container
         spacing={2}
@@ -169,7 +259,14 @@ const Administration = () => {
           margin: "0 auto",
         }}
       >
-        {navItems.map((item, index) => (
+        {filteredNavItems.length === 0 && (
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="body1" color="text.secondary" align="center">
+              No se encontraron módulos con “{search}”.
+            </Typography>
+          </Box>
+        )}
+        {filteredNavItems.map((item, index) => (
           <Grid2
             key={index}
             xs={6}
