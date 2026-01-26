@@ -64,7 +64,7 @@ const EditUser = () => {
             severity: "success",
           })
         );
-        navigate("/usuarios", { state: { refetch: true } });
+        navigate("/admin/usuarios", { state: { refetch: true } });
       } catch (err) {
         dispatch(
           showNotification({

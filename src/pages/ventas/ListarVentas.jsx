@@ -38,7 +38,7 @@ const ListaVentas = () => {
       await Promise.all([refetch()]);
       return true;
     },
-    [refetch]
+    [refetch],
   );
 
   const [deleteVenta] = useDeleteVentaMutation();
@@ -52,13 +52,19 @@ const ListaVentas = () => {
     try {
       await deleteVenta(venta.id_venta).unwrap();
       refetch();
+      dispatch(
+        showNotification({
+          message: "La venta se ha marcado como cancelada correctamente.",
+          severity: "success",
+        }),
+      );
     } catch (error) {
       console.error("Error al eliminar venta:", error);
       dispatch(
         showNotification({
           message: `Error al eliminar: ${error?.data?.error}`,
           severity: "error",
-        })
+        }),
       );
     }
   };
@@ -71,7 +77,7 @@ const ListaVentas = () => {
         showNotification({
           message: "Venta rechazada correctamente.",
           severity: "success",
-        })
+        }),
       );
     } catch (error) {
       console.error("Error al rechazar venta:", error);
@@ -79,7 +85,7 @@ const ListaVentas = () => {
         showNotification({
           message: `Error al rechazar: ${error?.data?.error}`,
           severity: "error",
-        })
+        }),
       );
     }
   };

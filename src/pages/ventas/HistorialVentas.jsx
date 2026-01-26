@@ -184,6 +184,7 @@ const HistorialVentas = ({
   const handleDeleteVentaConfirmada = () => {
     if (ventaSeleccionada) {
       onDeleteVenta(ventaSeleccionada);
+      handleCloseAlert();
     }
   };
 

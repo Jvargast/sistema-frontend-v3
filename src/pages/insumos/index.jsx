@@ -146,7 +146,7 @@ const Insumos = () => {
     try {
       const cleanData = {
         ...data,
-        codigo_barra: data.codigo_barra || "",
+        codigo_barra: data.codigo_barra ? data.codigo_barra : null,
         unidad_de_medida: data.unidad_de_medida || null,
         precio: data.precio || null,
       };
