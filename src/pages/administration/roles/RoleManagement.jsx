@@ -6,7 +6,7 @@ import {
   CardActions,
   Typography,
   Button,
-  Grid2,
+  Grid,
   Divider,
   useTheme,
 } from "@mui/material";
@@ -197,13 +197,9 @@ const RoleManagement = () => {
       </Box>
 
       {/* Tarjetas */}
-      <Grid2 container spacing={3} alignItems="stretch">
+      <Grid container spacing={3} alignItems="stretch">
         {roles?.roles?.map((role) => (
-          <Grid2
-            xs={12}
-            sm={6}
-            md={4}
-            lg={3}
+          <Grid
             key={role.id}
             sx={{
               width: "100%",
@@ -217,7 +213,7 @@ const RoleManagement = () => {
                 lg: "1 1 340px",
               },
             }}
-          >
+           size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
             <Card
               sx={{
                 borderRadius: 3,
@@ -347,9 +343,9 @@ const RoleManagement = () => {
                 )}
               </CardActions>
             </Card>
-          </Grid2>
+          </Grid>
         ))}
-      </Grid2>
+      </Grid>
 
       <AlertDialog
         openAlert={openAlert}

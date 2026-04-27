@@ -1,5 +1,5 @@
 import { Box, Paper, Typography } from "@mui/material";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import PropTypes from "prop-types";
 
 const PermissionMessage = ({ requiredPermission }) => {
@@ -14,7 +14,7 @@ const PermissionMessage = ({ requiredPermission }) => {
         borderRadius: 2,
       }}
     >
-      <ErrorOutlineIcon color="error" sx={{ mr: 2, fontSize: 32 }} />
+      <ErrorOutlineOutlinedIcon color="error" sx={{ mr: 2, fontSize: 32 }} />
       <Box>
         <Typography variant="h6" color="error" sx={{ fontWeight: "bold" }}>
           Permiso requerido

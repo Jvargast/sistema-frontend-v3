@@ -21,9 +21,9 @@ import {
 } from "@mui/material";
 import {
   Add,
-  DeleteOutline,
-  RemoveCircleOutline,
-  AddCircleOutline,
+  DeleteOutlineOutlined,
+  RemoveCircleOutlineOutlined,
+  AddCircleOutlineOutlined,
   InfoOutlined,
 } from "@mui/icons-material";
 import InsumoCell from "./InsumoCell";
@@ -75,7 +75,7 @@ function QtyStepper({ value, onChange }) {
             onClick={() => onChange(Math.max(0, v - 1))}
             disabled={v <= 0}
           >
-            <RemoveCircleOutline fontSize="small" />
+            <RemoveCircleOutlineOutlined fontSize="small" />
           </IconButton>
         </span>
       </Tooltip>
@@ -104,7 +104,7 @@ function QtyStepper({ value, onChange }) {
       />
       <Tooltip title="Sumar 1">
         <IconButton size="small" onClick={() => onChange(v + 1)}>
-          <AddCircleOutline fontSize="small" />
+          <AddCircleOutlineOutlined fontSize="small" />
         </IconButton>
       </Tooltip>
     </Stack>
@@ -322,7 +322,7 @@ const CompraItemsTable = ({ items, addItem, updateItem, removeItem }) => {
                             color="error"
                             onClick={() => removeItem(it._tid)}
                           >
-                            <DeleteOutline />
+                            <DeleteOutlineOutlined />
                           </IconButton>
                         </Tooltip>
                       </TableCell>

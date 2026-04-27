@@ -7,7 +7,7 @@ import {
   Tooltip,
   Chip,
 } from "@mui/material";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
@@ -253,7 +253,7 @@ const EditarInsumo = () => {
                     setOpenInventario(true);
                   }}
                 >
-                  <AddCircleOutlineIcon fontSize="small" />
+                  <AddCircleOutlineOutlinedIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
             </Box>

@@ -14,7 +14,7 @@ import {
 import { useGetAgendaByIdQuery } from "../../store/services/agendaCargaApi";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import BackButton from "../../components/common/BackButton";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
@@ -120,7 +120,7 @@ const VerAgendaCarga = () => {
 
           <Box flex="1 1 220px">
             <Stack direction="row" alignItems="center" spacing={1}>
-              <PersonOutlineIcon color="action" />
+              <PersonOutlineOutlinedIcon color="action" />
               <Box>
                 <Typography variant="overline" color="text.secondary">
                   Chofer

@@ -14,7 +14,7 @@ import {
   useTheme,
 } from "@mui/material";
 import EditOutlined from "@mui/icons-material/EditOutlined";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import DeleteOutlineOutlined from "@mui/icons-material/DeleteOutlineOutlined";
 import BusinessOutlined from "@mui/icons-material/BusinessOutlined";
 import CategoryOutlined from "@mui/icons-material/CategoryOutlined";
 import { alpha } from "@mui/material/styles";
@@ -158,7 +158,7 @@ export default function CentroCostoCard({
             color="error"
             size="small"
           >
-            <DeleteOutline fontSize="small" />
+            <DeleteOutlineOutlined fontSize="small" />
           </IconButton>
         </Tooltip>
       </CardActions>

@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Chip, IconButton } from "@mui/material";
 import { Visibility, Delete } from "@mui/icons-material";
-import { AddCircleOutline } from "@mui/icons-material";
+import { AddCircleOutlineOutlined } from "@mui/icons-material";
 import {
   useGetAllFormulasQuery,
   useDeleteFormulaMutation,
@@ -151,7 +151,7 @@ const ListarFormulasProductos = () => {
     >
       <PrimaryActionButton
         label="Crear fórmula"
-        startIcon={<AddCircleOutline />}
+        startIcon={<AddCircleOutlineOutlined />}
         onClick={() => navigate("/formulas/crear")}
       />
     </Box>

@@ -7,7 +7,7 @@ import {
   Typography,
   Divider,
 } from "@mui/material";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import PropTypes from "prop-types";
 
 const NoUsuarioCamionDialog = ({ open, handleClose, camionLabel }) => {
@@ -23,7 +23,7 @@ const NoUsuarioCamionDialog = ({ open, handleClose, camionLabel }) => {
         id="no-usuario-camion-dialog-title"
         sx={{ display: "flex", alignItems: "center", gap: 1 }}
       >
-        <ErrorOutlineIcon sx={{ color: "error.main", fontSize: 28 }} />
+        <ErrorOutlineOutlinedIcon sx={{ color: "error.main", fontSize: 28 }} />
         <Typography
           variant="body1"
           sx={{ color: "error.main", fontWeight: "bold" }}

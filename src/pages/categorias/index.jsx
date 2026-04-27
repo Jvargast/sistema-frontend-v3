@@ -6,7 +6,7 @@ import {
   CardActions,
   Typography,
   Button,
-  Grid2,
+  Grid,
   useTheme,
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
@@ -240,16 +240,12 @@ const CategoriaManagement = () => {
           ))}
       </Box>
 
-      <Grid2 container spacing={3} alignItems="stretch">
+      <Grid container spacing={3} alignItems="stretch">
         {categorias?.map((categoria) => (
-          <Grid2
+          <Grid
             key={categoria.id_categoria}
-            xs={12}
-            sm={6}
-            md={4}
-            lg={3}
             display="flex"
-          >
+           size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
             <Card
               sx={{
                 borderRadius: "16px",
@@ -340,9 +336,9 @@ const CategoriaManagement = () => {
                 )}
               </CardActions>
             </Card>
-          </Grid2>
+          </Grid>
         ))}
-      </Grid2>
+      </Grid>
 
       <ModalForm
         open={open}

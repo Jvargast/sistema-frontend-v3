@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import RemoveCircleOutlineOutlinedIcon from "@mui/icons-material/RemoveCircleOutlineOutlined";
 import { useState } from "react";
 import PedidoTooltip from "./PedidoToolTip";
 import { obtenerFechaChile, obtenerHoraChile } from "../../utils/formatearHora";
@@ -247,7 +247,7 @@ const PedidoCard = ({ pedido, index, onSacarDeTablero, onVerDetalle }) => {
             }}
           >
             <ListItemIcon>
-              <RemoveCircleOutlineIcon fontSize="small" />
+              <RemoveCircleOutlineOutlinedIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText primary="Sacar del tablero" />
           </MenuItem>

@@ -6,7 +6,7 @@ import {
   CardActions,
   Typography,
   Button,
-  Grid2,
+  Grid,
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -233,19 +233,15 @@ const TipoInsumoManagement = () => {
           ))}
       </Box>
 
-      <Grid2
+      <Grid
         container
         spacing={3}
         alignItems="stretch"
         /* direction={isMobile ? "column" : "row"} */
       >
         {tiposInsumos?.map((tipo) => (
-          <Grid2
+          <Grid
             key={tipo.id_tipo_insumo}
-            xs={12}
-            sm={6}
-            md={4}
-            lg={3}
             display="flex"
             sx={{
               width: "100%",
@@ -259,7 +255,7 @@ const TipoInsumoManagement = () => {
                 lg: "1 1 340px",
               },
             }}
-          >
+           size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
             <Card
               sx={{
                 borderRadius: "12px",
@@ -407,9 +403,9 @@ const TipoInsumoManagement = () => {
                   ))}
               </CardActions>
             </Card>
-          </Grid2>
+          </Grid>
         ))}
-      </Grid2>
+      </Grid>
 
       <ModalForm
         open={open}

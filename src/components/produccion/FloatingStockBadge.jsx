@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import { Box, Paper, Chip, Tooltip, CircularProgress } from "@mui/material";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import { useState } from "react";
 import MissingInsumosDialog from "./MissingInsumosDialog";
 
@@ -60,7 +60,7 @@ const FloatingStockBadge = ({
           <Inventory2OutlinedIcon color="action" fontSize="small" />
         )}
         <Chip
-          icon={<CheckCircleOutlineIcon />}
+          icon={<CheckCircleOutlineOutlinedIcon />}
           label={`${cubiertos}/${distintos}`}
           size="small"
           color="success"
@@ -89,7 +89,7 @@ const FloatingStockBadge = ({
         >
           <span>
             <Chip
-              icon={<ErrorOutlineIcon />}
+              icon={<ErrorOutlineOutlinedIcon />}
               label={faltantes}
               size="small"
               color={faltantes ? "error" : "default"}

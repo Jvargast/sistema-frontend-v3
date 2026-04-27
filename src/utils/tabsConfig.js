@@ -54,7 +54,7 @@ export const routeToTabInfo = {
   },
   viajes: { label: "Viajes", icon: "TripOriginOutlined" },
   "mis-pedidos": { label: "Mis Pedidos", icon:"ShoppingCartOutlined" },
-  misventas: { label: "Mis Ventas", icon: "PersonOutlined" },
+  misventas: { label: "Mis Ventas", icon: "PersonOutlineOutlinedd" },
   "ventas-chofer": { label: "Ventas Chofer", icon: "LocalShippingOutlined" },
   "agenda-carga": { label: "Agenda Carga", icon: "EventOutlined" },
   "compras-crear": { label: "Nueva Compra", icon: "ShoppingCartOutlined" },

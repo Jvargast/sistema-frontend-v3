@@ -12,7 +12,7 @@ import {
   Description,
   Event,
   CheckCircle,
-  ErrorOutline,
+  ErrorOutlineOutlined,
 } from "@mui/icons-material";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
@@ -110,7 +110,7 @@ const DocumentosVenta = ({ documentos, id_factura }) => {
                 {doc.estado === "emitido" ? (
                   <CheckCircle sx={{ color: "#388e3c" }} />
                 ) : (
-                  <ErrorOutline sx={{ color: "#d32f2f" }} />
+                  <ErrorOutlineOutlined sx={{ color: "#d32f2f" }} />
                 )}
                 <Typography
                   variant="body2"

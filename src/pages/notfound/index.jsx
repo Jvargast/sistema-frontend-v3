@@ -1,6 +1,6 @@
 import { Box, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import { getInitialRoute } from "../../utils/navigationUtils";
 import { useSelector } from "react-redux";
 import { useMemo } from "react";
@@ -78,7 +78,7 @@ const NotFoundPage = () => {
           },
         }}
       >
-        <ErrorOutlineIcon sx={{ fontSize: 70 }} />
+        <ErrorOutlineOutlinedIcon sx={{ fontSize: 70 }} />
       </Box>
       <Typography
         variant="h1"

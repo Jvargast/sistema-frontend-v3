@@ -12,7 +12,7 @@ import { alpha, useTheme } from "@mui/material/styles";
 import EditOutlined from "@mui/icons-material/EditOutlined";
 import SaveOutlined from "@mui/icons-material/SaveOutlined";
 import CloseOutlined from "@mui/icons-material/CloseOutlined";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import DeleteOutlineOutlined from "@mui/icons-material/DeleteOutlineOutlined";
 import CalendarMonthOutlined from "@mui/icons-material/CalendarMonthOutlined";
 import StorefrontOutlined from "@mui/icons-material/StorefrontOutlined";
 import PropTypes from "prop-types";
@@ -106,7 +106,7 @@ export default function GastoHeader({
                     color="error"
                     variant="text"
                     size="small"
-                    startIcon={<DeleteOutline />}
+                    startIcon={<DeleteOutlineOutlined />}
                     onClick={onDelete}
                     sx={{ fontWeight: 700 }}
                   >

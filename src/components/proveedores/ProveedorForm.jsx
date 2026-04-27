@@ -18,8 +18,8 @@ import {
 import {
   SaveOutlined,
   RestartAltOutlined,
-  CheckCircleOutline,
-  ErrorOutline,
+  CheckCircleOutlineOutlined,
+  ErrorOutlineOutlined,
   BusinessOutlined,
   EmailOutlined,
   LocalPhoneOutlined,
@@ -85,12 +85,12 @@ const ProveedorForm = ({
                   <InputAdornment position="end">
                     {rutState.valid === true && !isDuplicado && (
                       <Tooltip title="RUT válido">
-                        <CheckCircleOutline color="success" />
+                        <CheckCircleOutlineOutlined color="success" />
                       </Tooltip>
                     )}
                     {rutState.valid === false && (
                       <Tooltip title={rutState.msg || "RUT inválido"}>
-                        <ErrorOutline color="warning" />
+                        <ErrorOutlineOutlined color="warning" />
                       </Tooltip>
                     )}
                     {isDuplicado && (

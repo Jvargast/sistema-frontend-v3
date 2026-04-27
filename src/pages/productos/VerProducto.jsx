@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { format } from "date-fns";
 import { getImageUrl } from "../../store/services/apiBase";
 import { es } from "date-fns/locale";
@@ -373,7 +373,7 @@ const VerProducto = () => {
                             setOpenInventario(true);
                           }}
                         >
-                          <AddCircleOutlineIcon fontSize="small" />
+                          <AddCircleOutlineOutlinedIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                     </Box>

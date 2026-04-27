@@ -1,24 +1,13 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { FixedSizeList } from "react-window";
+import { List } from "react-window";
 
-const LISTBOX_PADDING = 8;
-
-const OuterElementContext = React.createContext({});
-const OuterElementType = React.forwardRef(function OuterElementType(
-  props,
-  ref
-) {
-  const outerProps = React.useContext(OuterElementContext);
-  return <div ref={ref} {...props} {...outerProps} />;
-});
-
-function renderRow({ data, index, style }) {
-  const item = data[index];
+function RowComponent({ index, style, items }) {
+  const item = items[index];
   return React.cloneElement(item, {
     style: {
+      ...item.props.style,
       ...style,
-      top: style.top + LISTBOX_PADDING,
     },
   });
 }
@@ -34,28 +23,30 @@ export const ListboxComponent = React.forwardRef(function ListboxComponent(
 
   const ITEM_SIZE = 48;
 
-  const height = Math.min(8, itemCount) * ITEM_SIZE + 2 * LISTBOX_PADDING;
+  const height = Math.min(8, itemCount) * ITEM_SIZE;
 
   return (
     <div ref={ref}>
-      <OuterElementContext.Provider value={other}>
-        <FixedSizeList
-          height={height}
-          width="100%"
-          itemSize={ITEM_SIZE}
-          itemCount={itemCount}
-          overscanCount={5}
-          itemData={items}
-          outerElementType={OuterElementType}
-          innerElementType="ul" 
-        >
-          {renderRow}
-        </FixedSizeList>
-      </OuterElementContext.Provider>
+      <List
+        {...other}
+        rowComponent={RowComponent}
+        rowCount={itemCount}
+        rowHeight={ITEM_SIZE}
+        rowProps={{ items }}
+        overscanCount={5}
+        tagName="ul"
+        style={{ height, width: "100%" }}
+      />
     </div>
   );
 });
 
 ListboxComponent.propTypes = {
   children: PropTypes.node,
+};
+
+RowComponent.propTypes = {
+  index: PropTypes.number.isRequired,
+  style: PropTypes.object.isRequired,
+  items: PropTypes.array.isRequired,
 };

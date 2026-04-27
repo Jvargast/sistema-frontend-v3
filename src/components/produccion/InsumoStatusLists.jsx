@@ -1,13 +1,13 @@
 import PropTypes from "prop-types";
 import { Box, Stack, Typography, Tooltip } from "@mui/material";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 
 const InsumoStatusList = ({ items = [] }) => (
   <Box sx={{ mt: 1 }}>
     {items.map((i) => {
       const ok = Number(i.stock) >= Number(i.requerido);
-      const InfoIcon = ok ? CheckCircleOutlineIcon : CancelOutlinedIcon;
+      const InfoIcon = ok ? CheckCircleOutlineOutlinedIcon : CancelOutlinedIcon;
       const color = ok ? "success.main" : "error.main";
 
       return (

@@ -8,8 +8,8 @@ import {
   Paper,
   useMediaQuery,
 } from "@mui/material";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import PropTypes from "prop-types";
 import CajaInfo from "../../caja/CajaInfo";
 import { useEffect } from "react";
@@ -124,9 +124,9 @@ const BarraSuperior = ({
               }}
               startIcon={
                 selectedVendedor ? (
-                  <CheckCircleOutlineIcon sx={{ color: "#fff" }} />
+                  <CheckCircleOutlineOutlinedIcon sx={{ color: "#fff" }} />
                 ) : (
-                  <PersonOutlineIcon color="primary" />
+                  <PersonOutlineOutlinedIcon color="primary" />
                 )
               }
             >
@@ -166,9 +166,9 @@ const BarraSuperior = ({
             }}
             startIcon={
               selectedCliente ? (
-                <CheckCircleOutlineIcon sx={{ color: "white" }} />
+                <CheckCircleOutlineOutlinedIcon sx={{ color: "white" }} />
               ) : (
-                <PersonOutlineIcon color="primary" />
+                <PersonOutlineOutlinedIcon color="primary" />
               )
             }
           >

@@ -14,9 +14,9 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  DeleteOutline,
-  AddCircleOutline,
-  RemoveCircleOutline,
+  DeleteOutlineOutlined,
+  AddCircleOutlineOutlined,
+  RemoveCircleOutlineOutlined,
 } from "@mui/icons-material";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
@@ -279,7 +279,7 @@ const ProductosRetornablesModal = ({
                     disabled={Number(producto.cantidad) <= 1}
                     sx={{ borderRadius: 2 }}
                   >
-                    <RemoveCircleOutline />
+                    <RemoveCircleOutlineOutlined />
                   </IconButton>
 
                   <TextField
@@ -306,7 +306,7 @@ const ProductosRetornablesModal = ({
                     }
                     sx={{ borderRadius: 2 }}
                   >
-                    <AddCircleOutline />
+                    <AddCircleOutlineOutlined />
                   </IconButton>
                 </Box>
 
@@ -375,7 +375,7 @@ const ProductosRetornablesModal = ({
                     "&:hover": { backgroundColor: "#FCC0C0" },
                   }}
                 >
-                  <DeleteOutline />
+                  <DeleteOutlineOutlined />
                 </IconButton>
               </Box>
             ))}
@@ -394,7 +394,7 @@ const ProductosRetornablesModal = ({
                 padding: "10px",
                 "&:hover": { backgroundColor: "#218838" },
               }}
-              startIcon={<AddCircleOutline />}
+              startIcon={<AddCircleOutlineOutlined />}
             >
               Agregar Producto Retornable
             </Button>

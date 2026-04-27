@@ -28,7 +28,7 @@ import DescriptionOutlined from "@mui/icons-material/DescriptionOutlined";
 import ReceiptLongOutlined from "@mui/icons-material/ReceiptLongOutlined";
 import PersonSearchOutlined from "@mui/icons-material/PersonSearchOutlined";
 import UploadFileOutlined from "@mui/icons-material/UploadFileOutlined";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import DeleteOutlineOutlined from "@mui/icons-material/DeleteOutlineOutlined";
 import PaymentIcon from "@mui/icons-material/Payment";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
@@ -581,7 +581,7 @@ export default function GastoForm({
                     key={i}
                     label={f.name}
                     onDelete={() => removeAdjunto(i)}
-                    deleteIcon={<DeleteOutline />}
+                    deleteIcon={<DeleteOutlineOutlined />}
                     variant="outlined"
                     sx={{ maxWidth: 220 }}
                   />

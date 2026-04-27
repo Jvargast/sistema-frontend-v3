@@ -27,14 +27,14 @@ import { useEffect, useMemo, useState } from "react";
 import CategoryOutlined from "@mui/icons-material/CategoryOutlined";
 import NotesOutlined from "@mui/icons-material/NotesOutlined";
 import LocalShipping from "@mui/icons-material/LocalShipping";
-import WorkOutline from "@mui/icons-material/WorkOutline";
+import WorkOutlineOutlined from "@mui/icons-material/WorkOutlineOutlined";
 import Badge from "@mui/icons-material/Badge";
 import RequestQuote from "@mui/icons-material/RequestQuote";
 import ReceiptLong from "@mui/icons-material/ReceiptLong";
 import StyleOutlined from "@mui/icons-material/StyleOutlined";
 
 const TIPOS_CATEGORIA = [
-  { id: "operativo", label: "Operativo", Icon: WorkOutline, color: "primary" },
+  { id: "operativo", label: "Operativo", Icon: WorkOutlineOutlined, color: "primary" },
   { id: "personal", label: "Personal", Icon: Badge, color: "secondary" },
   { id: "financiero", label: "Financiero", Icon: RequestQuote, color: "info" },
   { id: "impuestos", label: "Impuestos", Icon: ReceiptLong, color: "warning" },

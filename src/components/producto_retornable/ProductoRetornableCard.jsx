@@ -11,8 +11,8 @@ import {
   Button,
 } from "@mui/material";
 import {
-  AddCircleOutline,
-  DeleteOutline,
+  AddCircleOutlineOutlined,
+  DeleteOutlineOutlined,
   InfoOutlined,
   Add,
   Remove,
@@ -298,7 +298,7 @@ const ProductoRetornableCard = ({ grupo, onUpdate }) => {
                     size="small"
                     sx={{ mt: { xs: 1, sm: 0 } }}
                   >
-                    <DeleteOutline fontSize="small" />
+                    <DeleteOutlineOutlined fontSize="small" />
                   </IconButton>
                 </Tooltip>
               </Box>
@@ -321,7 +321,7 @@ const ProductoRetornableCard = ({ grupo, onUpdate }) => {
                   onClick={handleAgregarFalla}
                   size="small"
                   variant="outlined"
-                  startIcon={<AddCircleOutline />}
+                  startIcon={<AddCircleOutlineOutlined />}
                 >
                   Agregar defecto
                 </Button>

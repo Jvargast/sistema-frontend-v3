@@ -5,7 +5,7 @@ import {
   Card,
   CardContent,
   Typography,
-  Grid2,
+  Grid,
   List,
   ListItem,
   ListItemText,
@@ -278,12 +278,10 @@ const Empresa = () => {
           }}
         >
           <CardContent>
-            <Grid2 container spacing={3} alignItems="center">
-              <Grid2
-                xs={12}
-                md={3}
+            <Grid container spacing={3} alignItems="center">
+              <Grid
                 sx={{ display: "flex", justifyContent: "center" }}
-              >
+               size={{ xs: 12, md: 3 }}>
                 <Avatar
                   sx={{
                     width: 100,
@@ -298,9 +296,9 @@ const Empresa = () => {
                 >
                   {empresa?.nombre?.[0] || "E"}
                 </Avatar>
-              </Grid2>
+              </Grid>
 
-              <Grid2 xs={12} md={9}>
+              <Grid size={{ xs: 12, md: 9 }}>
                 {empresaEditando ? (
                   <Box display="flex" flexDirection="column" gap={1.5}>
                     <TextField
@@ -489,8 +487,8 @@ const Empresa = () => {
                     </Button>
                   </>
                 )}
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </CardContent>
         </Card>
 
@@ -525,11 +523,11 @@ const Empresa = () => {
           </Button>
         </Box>
 
-        <Grid2 container spacing={4}>
+        <Grid container spacing={4}>
           {sucursales
             ?.filter((sucursal) => sucursal.id_empresa === empresa?.id_empresa)
             .map((sucursal) => (
-              <Grid2 xs={12} sm={6} md={4} key={sucursal.id_sucursal}>
+              <Grid key={sucursal.id_sucursal} size={{ xs: 12, sm: 6, md: 4 }}>
                 <Card
                   sx={{
                     borderRadius: 2,
@@ -728,9 +726,9 @@ const Empresa = () => {
                     </List>
                   </CardContent>
                 </Card>
-              </Grid2>
+              </Grid>
             ))}
-        </Grid2>
+        </Grid>
       </Box>
       <CrearSucursalModal
         open={openCrearSucursal}

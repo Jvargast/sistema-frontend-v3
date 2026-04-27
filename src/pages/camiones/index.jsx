@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { Box, Typography, TextField, MenuItem } from "@mui/material";
-import { AddCircleOutline } from "@mui/icons-material";
+import { AddCircleOutlineOutlined } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
@@ -330,7 +330,7 @@ const CamionesManagement = () => {
           )}
           <PrimaryActionButton
             label="Añadir camión"
-            startIcon={<AddCircleOutline />}
+            startIcon={<AddCircleOutlineOutlined />}
             onClick={() => setOpen(true)}
             disabled={isCreating || (mode === "global" && !targetSucursalId)}
             aria-label="Añadir Camión"

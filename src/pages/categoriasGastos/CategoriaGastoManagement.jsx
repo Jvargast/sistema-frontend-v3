@@ -35,7 +35,7 @@ import {
 import CategoriaGastoCard from "../../components/categorias_gasto/CategoriaGastoCard";
 import CategoriaGastoDialog from "../../components/categorias_gasto/CategoriaGastoDialog";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
-import { AddCircleOutline } from "@mui/icons-material";
+import { AddCircleOutlineOutlined } from "@mui/icons-material";
 import PrimaryActionButton from "../../components/common/PrimaryActionButton";
 
 const TIPOS_CATEGORIA = [
@@ -260,7 +260,7 @@ export default function CategoriaGastoManagement() {
 
         <PrimaryActionButton
           label="Nueva Categoría"
-          startIcon={<AddCircleOutline />}
+          startIcon={<AddCircleOutlineOutlined />}
           onClick={openCreate}
           disabled={creating || updating}
           aria-label="Nueva Categoría"

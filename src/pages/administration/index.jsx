@@ -3,7 +3,7 @@ import {
   Box,
   Typography,
   Card,
-  Grid2,
+  Grid,
   TextField,
   InputAdornment,
 } from "@mui/material";
@@ -246,7 +246,7 @@ const Administration = () => {
         />
       </Box>
 
-      <Grid2
+      <Grid
         container
         spacing={2}
         justifyContent="center"
@@ -267,15 +267,11 @@ const Administration = () => {
           </Box>
         )}
         {filteredNavItems.map((item, index) => (
-          <Grid2
+          <Grid
             key={index}
-            xs={6}
-            sm={4}
-            md={3}
-            lg={2}
             display="flex"
             justifyContent="center"
-          >
+           size={{ xs: 6, sm: 4, md: 3, lg: 2 }}>
             <Card
               variant="outlined"
               sx={{
@@ -349,9 +345,9 @@ const Administration = () => {
                 {item.description}
               </Typography>
             </Card>
-          </Grid2>
+          </Grid>
         ))}
-      </Grid2>
+      </Grid>
     </Box>
   );
 };

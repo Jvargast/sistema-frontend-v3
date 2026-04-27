@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   Typography,
@@ -7,7 +8,7 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-import { VariableSizeList as VirtualizedList } from "react-window";
+import { List as VirtualizedList } from "react-window";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {
@@ -19,6 +20,24 @@ import { useGetAllpermisosQuery } from "../../../store/services/permisosRolesApi
 import Row from "../../../components/roles/Row";
 import { useHasPermission } from "../../../utils/useHasPermission";
 import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
+
+const PermissionRow = ({
+  index,
+  style,
+  group,
+  selectedPermisos,
+  onTogglePermiso,
+  searchTerm,
+}) => (
+  <Row
+    index={index}
+    style={style}
+    group={group}
+    selectedPermisos={selectedPermisos}
+    onTogglePermiso={onTogglePermiso}
+    searchTerm={searchTerm}
+  />
+);
 
 const EditRole = () => {
   const { id } = useParams();
@@ -71,8 +90,6 @@ const EditRole = () => {
     }
   }, [role]);
 
-  const listRef = useRef();
-
   const getItemSize = (index, group) => {
     const permiso = group[index];
 
@@ -87,12 +104,6 @@ const EditRole = () => {
 
     return Math.max(calculatedHeight, 70);
   };
-
-  useEffect(() => {
-    if (listRef.current) {
-      listRef.current.resetAfterIndex(0);
-    }
-  }, [groupedPermisos]);
 
   useEffect(() => {
     const permisosFiltrados = allPermisos.filter((permiso) => {
@@ -291,29 +302,26 @@ const EditRole = () => {
                 {category}
               </Typography>
               <VirtualizedList
-                ref={listRef}
-                height={Math.min(
-                  300,
-                  group.reduce(
-                    (acc, _, index) => acc + getItemSize(index, group),
-                    0
-                  )
-                )}
-                itemCount={group.length}
-                itemSize={(index) => getItemSize(index, group)}
-                width="100%"
-              >
-                {({ index, style }) => (
-                  <Row
-                    index={index}
-                    style={style}
-                    group={group}
-                    selectedPermisos={selectedPermisos}
-                    onTogglePermiso={handleTogglePermiso}
-                    searchTerm={searchPermiso}
-                  />
-                )}
-              </VirtualizedList>
+                rowComponent={PermissionRow}
+                rowCount={group.length}
+                rowHeight={(index) => getItemSize(index, group)}
+                rowProps={{
+                  group,
+                  selectedPermisos,
+                  onTogglePermiso: handleTogglePermiso,
+                  searchTerm: searchPermiso,
+                }}
+                style={{
+                  height: Math.min(
+                    300,
+                    group.reduce(
+                      (acc, _, index) => acc + getItemSize(index, group),
+                      0
+                    )
+                  ),
+                  width: "100%",
+                }}
+              />
             </Box>
           ))}
           {canEditPermisos && (
@@ -330,6 +338,15 @@ const EditRole = () => {
       </Card>
     </Box>
   );
+};
+
+PermissionRow.propTypes = {
+  index: PropTypes.number.isRequired,
+  style: PropTypes.object.isRequired,
+  group: PropTypes.array.isRequired,
+  selectedPermisos: PropTypes.array.isRequired,
+  onTogglePermiso: PropTypes.func.isRequired,
+  searchTerm: PropTypes.string.isRequired,
 };
 
 export default EditRole;

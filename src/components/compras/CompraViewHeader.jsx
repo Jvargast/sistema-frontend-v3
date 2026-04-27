@@ -4,7 +4,7 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import Edit from "@mui/icons-material/Edit";
 import Save from "@mui/icons-material/Save";
 import Close from "@mui/icons-material/Close";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import DeleteOutlineOutlined from "@mui/icons-material/DeleteOutlineOutlined";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import { useNavigate } from "react-router-dom";
 import { ESTADOS_COMPRA } from "../../constants/estadosCompra";
@@ -100,7 +100,7 @@ export default function CompraViewHeader({
           onClick={onDelete}
           aria-label="Eliminar compra"
         >
-          <DeleteOutline />
+          <DeleteOutlineOutlined />
         </IconButton>
       </Tooltip>
     </Stack>

@@ -17,7 +17,7 @@ import {
   IconButton,
 } from "@mui/material";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import { useDropzone } from "react-dropzone";
 import { getImageUrl } from "../../store/services/apiBase";
 
@@ -306,7 +306,7 @@ const Edition = ({
                       zIndex: 10,
                     }}
                   >
-                    <DeleteOutlineIcon fontSize="small" color="error" />
+                    <DeleteOutlineOutlinedIcon fontSize="small" color="error" />
                   </IconButton>
                 )}
               </Box>

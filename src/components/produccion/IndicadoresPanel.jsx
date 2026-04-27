@@ -8,8 +8,8 @@ import {
   Tooltip,
 } from "@mui/material";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 
 const IndicadoresPanel = ({ insumos }) => {
   const t = useTheme();
@@ -52,7 +52,7 @@ const IndicadoresPanel = ({ insumos }) => {
 
         <Box flex={1} textAlign="center">
           <Tooltip title="Insumos con stock suficiente">
-            <CheckCircleOutlineIcon color="success" sx={iconSx} />
+            <CheckCircleOutlineOutlinedIcon color="success" sx={iconSx} />
           </Tooltip>
           <Typography sx={labelSx} color="text.secondary">
             Con stock
@@ -72,7 +72,7 @@ const IndicadoresPanel = ({ insumos }) => {
 
         <Box flex={1} textAlign="center">
           <Tooltip title="Insumos con stock insuficiente">
-            <ErrorOutlineIcon
+            <ErrorOutlineOutlinedIcon
               color={faltantes === 0 ? "disabled" : "error"}
               sx={iconSx}
             />

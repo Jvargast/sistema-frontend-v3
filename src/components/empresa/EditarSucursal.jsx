@@ -5,7 +5,7 @@ import {
   CardContent,
   TextField,
   Button,
-  Grid2,
+  Grid,
 } from "@mui/material";
 import PropTypes from "prop-types";
 
@@ -36,11 +36,11 @@ const EditarSucursales = ({
           borderColor: "rgba(0, 0, 0, 0.12)",
         }}
       />
-      <Grid2 container spacing={4}>
+      <Grid container spacing={4}>
         {sucursales
           ?.filter((sucursal) => sucursal.id_empresa === parseInt(idEmpresa))
           .map((sucursal) => (
-            <Grid2 item xs={12} key={sucursal.id_sucursal}>
+            <Grid key={sucursal.id_sucursal} size={{ xs: 12 }}>
               <Card
                 sx={{
                   borderRadius: "12px",
@@ -64,8 +64,8 @@ const EditarSucursales = ({
                   >
                     {sucursal.nombre}
                   </Typography>
-                  <Grid2 container spacing={4}>
-                    <Grid2 xs={12} md={6}>
+                  <Grid container spacing={4}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                       <TextField
                         fullWidth
                         label="Nombre"
@@ -90,8 +90,8 @@ const EditarSucursales = ({
                           },
                         }}
                       />
-                    </Grid2>
-                    <Grid2 xs={12} md={6}>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 6 }}>
                       <TextField
                         fullWidth
                         label="Dirección"
@@ -116,8 +116,8 @@ const EditarSucursales = ({
                           },
                         }}
                       />
-                    </Grid2>
-                    <Grid2 xs={12} md={6}>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 6 }}>
                       <TextField
                         fullWidth
                         label="Teléfono"
@@ -142,16 +142,15 @@ const EditarSucursales = ({
                           },
                         }}
                       />
-                    </Grid2>
-                    <Grid2
-                      xs={12}
+                    </Grid>
+                    <Grid
                       sx={{
                         display: "flex",
                         justifyContent: "flex-end",
                         alignItems: "center",
                         marginTop: 2,
                       }}
-                    >
+                     size={{ xs: 12 }}>
                       <Button
                         variant="contained"
                         color="primary"
@@ -170,13 +169,13 @@ const EditarSucursales = ({
                       >
                         Guardar Cambios
                       </Button>
-                    </Grid2>
-                  </Grid2>
+                    </Grid>
+                  </Grid>
                 </CardContent>
               </Card>
-            </Grid2>
+            </Grid>
           ))}
-      </Grid2>
+      </Grid>
     </div>
   );
 };

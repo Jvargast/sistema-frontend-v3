@@ -4,7 +4,7 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import Edit from "@mui/icons-material/Edit";
 import Save from "@mui/icons-material/Save";
 import Close from "@mui/icons-material/Close";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import DeleteOutlineOutlined from "@mui/icons-material/DeleteOutlineOutlined";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 
 const ProveedorHeader = ({
@@ -81,7 +81,7 @@ const ProveedorHeader = ({
           onClick={onDelete}
           aria-label="Eliminar proveedor"
         >
-          <DeleteOutline />
+          <DeleteOutlineOutlined />
         </IconButton>
       </Tooltip>
     </Stack>

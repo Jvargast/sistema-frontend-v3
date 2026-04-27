@@ -16,7 +16,7 @@ import {
   Chip,
   Divider,
 } from "@mui/material";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 
@@ -36,7 +36,7 @@ const MissingInsumosDialog = ({
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ pb: 1.5 }}>
         <Stack direction="row" alignItems="center" spacing={1}>
-          <ErrorOutlineIcon color="error" />
+          <ErrorOutlineOutlinedIcon color="error" />
           <Typography variant="h6" fontWeight={800}>
             Faltantes de insumos
           </Typography>
@@ -72,7 +72,7 @@ const MissingInsumosDialog = ({
           <Chip
             size="small"
             color="error"
-            icon={<ErrorOutlineIcon />}
+            icon={<ErrorOutlineOutlinedIcon />}
             label={`Faltantes: ${rows.length}`}
           />
           <Chip

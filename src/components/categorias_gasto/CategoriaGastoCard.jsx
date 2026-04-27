@@ -17,7 +17,7 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   LocalShipping as LogisticaIcon,
-  WorkOutline as OperativoIcon,
+  WorkOutlineOutlined as OperativoIcon,
   Badge as PersonalIcon,
   RequestQuote as FinancieroIcon,
   ReceiptLong as ImpuestosIcon,

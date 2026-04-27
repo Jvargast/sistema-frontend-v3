@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import OpenInNew from "@mui/icons-material/OpenInNew";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import DeleteOutlineOutlined from "@mui/icons-material/DeleteOutlineOutlined";
 import PropTypes from "prop-types";
 import { iconForMime } from "../../utils/gastoUtils";
 
@@ -65,7 +65,7 @@ export default function GastoAdjuntos({
                             onClick={(e) => onDelete(a, e)}
                             disabled={removing}
                           >
-                            <DeleteOutline />
+                            <DeleteOutlineOutlined />
                           </IconButton>
                         </span>
                       </Tooltip>

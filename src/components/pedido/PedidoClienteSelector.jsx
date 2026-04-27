@@ -16,7 +16,7 @@ import PropTypes from "prop-types";
 import PersonIcon from "@mui/icons-material/Person";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { useNavigate } from "react-router-dom";
 import { useGetAllClientesQuery } from "../../store/services/clientesApi";
 import LoaderComponent from "../common/LoaderComponent";
@@ -184,7 +184,7 @@ const PedidoClienteSelector = ({
         <Box display="flex" justifyContent="flex-end" mt={1} mb={2}>
           <Button
             variant="outlined"
-            startIcon={<AddCircleOutlineIcon />}
+            startIcon={<AddCircleOutlineOutlinedIcon />}
             onClick={() => {
               onClose();
               navigate("/clientes/crear");

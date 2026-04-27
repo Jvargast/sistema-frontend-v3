@@ -17,7 +17,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -214,7 +214,7 @@ const ModalCrearClienteRapido = ({
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <PersonOutlineIcon />
+                  <PersonOutlineOutlinedIcon />
                 </InputAdornment>
               ),
             }}

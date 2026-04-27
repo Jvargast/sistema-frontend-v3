@@ -10,8 +10,8 @@ import {
 import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {
@@ -400,7 +400,7 @@ const Clientes = () => {
                 }}
                 title="Eliminar seleccionados"
               >
-                <DeleteOutlineIcon sx={{ color: "#fff", fontSize: 28 }} />
+                <DeleteOutlineOutlinedIcon sx={{ color: "#fff", fontSize: 28 }} />
               </Box>
               <Box
                 sx={{
@@ -424,7 +424,7 @@ const Clientes = () => {
                 onClick={() => navigate("/clientes/crear")}
                 title="Nuevo cliente"
               >
-                <AddCircleOutlineIcon sx={{ color: "#fff", fontSize: 28 }} />
+                <AddCircleOutlineOutlinedIcon sx={{ color: "#fff", fontSize: 28 }} />
               </Box>
             </Box>
           </>
@@ -432,7 +432,7 @@ const Clientes = () => {
           <>
             <DangerActionButton
               label="Eliminar seleccionados"
-              startIcon={<DeleteOutlineIcon />}
+              startIcon={<DeleteOutlineOutlinedIcon />}
               onClick={() => setOpenAlert(true)}
               disabled={selectedRows.length === 0}
               loading={isDeleting}
@@ -440,7 +440,7 @@ const Clientes = () => {
 
             <PrimaryActionButton
               label="Nuevo Cliente"
-              startIcon={<AddCircleOutlineIcon />}
+              startIcon={<AddCircleOutlineOutlinedIcon />}
               onClick={() => navigate("/clientes/crear")}
             />
           </>

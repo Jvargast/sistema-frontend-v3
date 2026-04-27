@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import {
   Box,
   Paper,
@@ -335,7 +335,7 @@ const VerInsumo = () => {
                               setOpenInventario(true);
                             }}
                           >
-                            <AddCircleOutlineIcon fontSize="small" />
+                            <AddCircleOutlineOutlinedIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       )}

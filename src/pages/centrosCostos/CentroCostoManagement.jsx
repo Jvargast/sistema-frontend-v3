@@ -33,7 +33,7 @@ import CentroCostoDialog from "../../components/centro_de_costos/CentroCostoDial
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 import PrimaryActionButton from "../../components/common/PrimaryActionButton";
-import { AddCircleOutline } from "@mui/icons-material";
+import { AddCircleOutlineOutlined } from "@mui/icons-material";
 
 export default function CentroCostoManagement() {
   const theme = useTheme();
@@ -239,7 +239,7 @@ export default function CentroCostoManagement() {
         </Stack>
         <PrimaryActionButton
           label="Nuevo Centro de Costo"
-          startIcon={<AddCircleOutline />}
+          startIcon={<AddCircleOutlineOutlined />}
           onClick={(e) => openCreate(e)}
           disabled={creating || updating}
           aria-label="Nuevo Centro de Costo"

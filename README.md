@@ -4,12 +4,12 @@ Frontend del sistema ERP de AguasValentino, desarrollado con **React + Vite** y 
 
 ## 🧩 Stack tecnológico
 
-- **React 18** + **Vite 6**
+- **React 19** + **Vite 8**
 - **Redux Toolkit** + RTK Query
 - **React Router 7**
-- **Material UI 6** + **TailwindCSS**
+- **Material UI 9** + **TailwindCSS 4**
 - **Socket.IO client** para notificaciones en tiempo real
-- **Capacitor** / **Electron** para empaquetar en mobile/desktop
+- **Capacitor 8** / **Electron 41** para empaquetar en mobile/desktop
 
 ## 🏗️ Scripts principales
 

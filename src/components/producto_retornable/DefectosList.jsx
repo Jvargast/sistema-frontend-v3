@@ -7,7 +7,7 @@ import {
   Divider,
   Paper,
 } from "@mui/material";
-import { AddCircleOutline, DeleteOutline } from "@mui/icons-material";
+import { AddCircleOutlineOutlined, DeleteOutlineOutlined } from "@mui/icons-material";
 import PropTypes from "prop-types";
 
 const DefectosList = ({ fallas, onChange, maxCantidad }) => {
@@ -72,7 +72,7 @@ const DefectosList = ({ fallas, onChange, maxCantidad }) => {
             />
             <Tooltip title="Eliminar este defecto">
               <IconButton onClick={() => removeFalla(idx)} color="error">
-                <DeleteOutline />
+                <DeleteOutlineOutlined />
               </IconButton>
             </Tooltip>
           </Box>
@@ -93,7 +93,7 @@ const DefectosList = ({ fallas, onChange, maxCantidad }) => {
               disabled={restante <= 0}
               color="primary"
             >
-              <AddCircleOutline />
+              <AddCircleOutlineOutlined />
             </IconButton>
           </span>
         </Tooltip>
