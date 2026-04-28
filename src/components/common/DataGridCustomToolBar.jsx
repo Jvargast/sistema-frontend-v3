@@ -1,5 +1,9 @@
-import { Search } from "@mui/icons-material";
-import { IconButton, TextField, InputAdornment, useTheme } from "@mui/material";
+import {
+  Search } from "@mui/icons-material";
+import { IconButton,
+  InputAdornment,
+  useTheme,
+} from "@mui/material";
 import {
   GridToolbarDensitySelector,
   GridToolbarContainer,
@@ -7,6 +11,7 @@ import {
 } from "@mui/x-data-grid";
 import PropTypes from "prop-types";
 import FlexBetween from "../layout/FlexBetween";
+import TextField from "./CompatTextField";
 
 const DataGridCustomToolbar = ({ searchInput, setSearchInput, setSearch }) => {
   const theme = useTheme();

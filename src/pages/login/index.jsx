@@ -1,13 +1,7 @@
-import { useEffect, useState } from "react";
 import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  IconButton,
-  InputAdornment,
-  useTheme,
-} from "@mui/material";
+  useEffect,
+  useState } from "react";
+import { Button, IconButton, InputAdornment, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import logoImage from "../../assets/images/logoLogin.png";
@@ -16,6 +10,9 @@ import { useLoginMutation } from "../../store/services/authApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { getInitialRoute } from "../../utils/navigationUtils";
 import { finishLogin } from "../../store/reducers/authSlice";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
 
 const formatRut = (value) => {
   const cleanValue = value.replace(/[^0-9kK]/gi, "");
@@ -91,23 +88,29 @@ const Login = () => {
 
   return (
     <Box
-      minHeight="100vh"
+      minHeight="100svh"
+      width="100%"
       display="flex"
       justifyContent="center"
       alignItems="center"
       flexDirection="column"
-      sx={{ backgroundColor: theme.palette.background.default }}
+      sx={{
+        backgroundColor: theme.palette.background.default,
+        overflowY: "auto",
+        px: 2,
+        py: { xs: 4, sm: 6 },
+      }}
     >
-      <Box justifyContent="center" display="flex" alignItems="center">
+      <Box justifyContent="center" display="flex" alignItems="center" mb={2}>
         <Box
-          display="flex"
-          alignItems="center"
-          gap="0.5rem"
           src={logoImage}
           alt="logo"
-          height="104.83px"
-          width="200px"
           component="img"
+          sx={{
+            width: { xs: 180, sm: 220 },
+            height: "auto",
+            display: "block",
+          }}
         />
       </Box>
       <Box
@@ -116,8 +119,9 @@ const Login = () => {
         display="flex"
         flexDirection="column"
         gap="1.5rem"
-        width="300px"
-        p="2rem"
+        width="100%"
+        maxWidth={360}
+        p={{ xs: 3, sm: 4 }}
         sx={{
           backgroundColor: theme.palette.background.paper,
           borderRadius: 3,
@@ -137,6 +141,7 @@ const Login = () => {
           name="rut"
           value={credentials.rut}
           autoComplete="username"
+          fullWidth
           onChange={(e) => {
             const raw = e.target.value.replace(/[^0-9kK.-]/g, "");
             setCredentials((prev) => ({ ...prev, rut: raw }));
@@ -155,19 +160,28 @@ const Login = () => {
           value={credentials.password}
           onChange={handleInputChange}
           fullWidth
-          InputProps={{
-            style: { fontSize: "1.2rem" },
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={togglePasswordVisibility} edge="end">
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-          InputLabelProps={{
-            shrink: true,
-            style: { fontSize: "1.2rem" },
+          slotProps={{
+            input: {
+              sx: { fontSize: "1.05rem" },
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={
+                      showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                    }
+                    onClick={togglePasswordVisibility}
+                    edge="end"
+                    type="button"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+            inputLabel: {
+              shrink: true,
+              sx: { fontSize: "1rem" },
+            },
           }}
           autoComplete="current-password"
         />

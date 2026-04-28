@@ -1,4 +1,5 @@
-import { Box, Grid } from "@mui/material";
+import Grid from "../../components/common/CompatGrid";
+
 import { useDispatch, useSelector } from "react-redux";
 import Header from "../../components/common/Header";
 import GastoForm from "../../components/gastos/GastoForm";
@@ -12,6 +13,7 @@ import {
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import SucursalPickerHeader from "../../components/common/SucursalPickerHeader";
 import { useEffect, useMemo, useState } from "react";
+import Box from "../../components/common/CompatBox";
 
 export default function RegistrarGasto() {
   const dispatch = useDispatch();

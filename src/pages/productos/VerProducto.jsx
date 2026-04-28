@@ -5,19 +5,7 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import { format } from "date-fns";
 import { getImageUrl } from "../../store/services/apiBase";
 import { es } from "date-fns/locale";
-import {
-  Box,
-  Paper,
-  Typography,
-  Grid,
-  Divider,
-  Button,
-  Chip,
-  Avatar,
-  useTheme,
-  Tooltip,
-  IconButton,
-} from "@mui/material";
+import { Paper, Divider, Button, Chip, Avatar, useTheme, Tooltip, IconButton } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { useGetProductoByIdQuery } from "../../store/services/productoApi";
 import LoaderComponent from "../../components/common/LoaderComponent";
@@ -30,6 +18,9 @@ import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { useSelector } from "react-redux";
 import { useHasPermission } from "../../utils/useHasPermission";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Typography from "../../components/common/CompatTypography";
 
 const VerProducto = () => {
   const { id } = useParams();

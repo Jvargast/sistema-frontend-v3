@@ -1,11 +1,12 @@
 import PropTypes from "prop-types";
 import { useMemo } from "react";
-import { Chip, IconButton, Tooltip, Stack } from "@mui/material";
+import { Chip, IconButton, Tooltip } from "@mui/material";
 import { Visibility, PhoneIphone, Email } from "@mui/icons-material";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import DataTable from "../../components/common/DataTable";
 import { formatRut } from "../../utils/rut";
+import Stack from "../common/CompatStack";
 
 function getId(row) {
   return row?.id_proveedor ?? row?.idProveedor ?? row?.id;

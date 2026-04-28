@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { IconButton, Chip, Box } from "@mui/material";
+import { IconButton, Chip } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
 import { useGetAllPagosQuery } from "../../store/services/pagosApi";
 import DataTable from "../../components/common/DataTable";
@@ -11,6 +11,7 @@ import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 import FilterBar from "../../components/common/FilterBar";
 import StatusLegend from "../../components/common/StatusLegend";
+import Box from "../../components/common/CompatBox";
 
 const estadoColores = {
   Pendiente: "warning",

@@ -1,22 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import PropTypes from "prop-types";
+import StepLabel from "../../components/common/CompatStepLabel";
 import {
-  Box,
-  Typography,
-  Stepper,
-  Step,
-  StepLabel,
-  Button,
-  Stack,
-  useTheme,
-  Divider,
-  TextField,
-  MenuItem,
-} from "@mui/material";
+  useEffect,
+  useMemo,
+  useRef,
+  useState } from "react";
+import PropTypes from "prop-types";
+import { Stepper, Step, Button, useTheme, Divider, MenuItem } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 import StepConnector, {
-  stepConnectorClasses,
-} from "@mui/material/StepConnector";
+  stepConnectorClasses } from
+"@mui/material/StepConnector";
 import { useSelector, useDispatch } from "react-redux";
 import { useCreatePedidoMutation } from "../../store/services/pedidosApi";
 import { addItem, clearCart } from "../../store/reducers/cartSlice";
@@ -33,57 +27,61 @@ import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import { getStockForSucursal } from "../../utils/inventoryUtils";
 import SucursalPickerHeader from "../../components/common/SucursalPickerHeader";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Stack from "../../components/common/CompatStack";
+import Typography from "../../components/common/CompatTypography";
 
 const StyledConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
-    top: 12,
+    top: 12
   },
   [`& .${stepConnectorClasses.line}`]: {
     borderColor: theme.palette.divider,
     borderTopWidth: 2,
-    borderRadius: 1,
+    borderRadius: 1
   },
   [`&.${stepConnectorClasses.active} .${stepConnectorClasses.line}`]: {
-    borderColor: theme.palette.primary.main,
+    borderColor: theme.palette.primary.main
   },
   [`&.${stepConnectorClasses.completed} .${stepConnectorClasses.line}`]: {
-    borderColor: theme.palette.primary.main,
-  },
+    borderColor: theme.palette.primary.main
+  }
 }));
 
 const StepIconRoot = styled(Box)(({ theme, ownerState }) => ({
   backgroundColor: theme.palette.background.paper,
   border: `2px solid ${
-    ownerState.active || ownerState.completed
-      ? theme.palette.primary.main
-      : theme.palette.divider
-  }`,
+  ownerState.active || ownerState.completed ?
+  theme.palette.primary.main :
+  theme.palette.divider}`,
+
   color:
-    ownerState.active || ownerState.completed
-      ? theme.palette.primary.main
-      : theme.palette.text.disabled,
+  ownerState.active || ownerState.completed ?
+  theme.palette.primary.main :
+  theme.palette.text.disabled,
   width: 30,
   height: 30,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   borderRadius: "50%",
-  fontWeight: 600,
+  fontWeight: 600
 }));
 const StepIconComponent = (props) => {
   const { active, completed, className, icon } = props;
   return (
     <StepIconRoot className={className} ownerState={{ active, completed }}>
       {icon}
-    </StepIconRoot>
-  );
+    </StepIconRoot>);
+
 };
 
 StepIconComponent.propTypes = {
   active: PropTypes.bool,
   completed: PropTypes.bool,
   className: PropTypes.string,
-  icon: PropTypes.node,
+  icon: PropTypes.node
 };
 
 const initialFormState = {
@@ -94,10 +92,11 @@ const initialFormState = {
   notas: "",
   coords: { lat: null, lng: null },
   prioridad: "normal",
-  id_sucursal: null,
+  id_sucursal: null
 };
 
 const CrearPedido = () => {
+  const navigate = useNavigate();
   const [formState, setFormState] = useState(initialFormState);
   const { rol } = useSelector((s) => s.auth);
   const { mode } = useSelector((s) => s.scope);
@@ -108,23 +107,23 @@ const CrearPedido = () => {
 
   const isAdmin = rol === "administrador" || rol?.nombre === "administrador";
   const canChooseSucursal =
-    mode === "global" || (!sucursalActiva?.id_sucursal && isAdmin);
+  mode === "global" || !sucursalActiva?.id_sucursal && isAdmin;
 
   const sucursalActual = useMemo(() => {
-    const id = canChooseSucursal
-      ? formState.id_sucursal
-      : sucursalActiva?.id_sucursal || formState.id_sucursal || null;
+    const id = canChooseSucursal ?
+    formState.id_sucursal :
+    sucursalActiva?.id_sucursal || formState.id_sucursal || null;
     if (!id) return null;
     return (
       (sucursales || []).find((s) => Number(s.id_sucursal) === Number(id)) ||
-      null
-    );
+      null);
+
   }, [
-    canChooseSucursal,
-    sucursalActiva?.id_sucursal,
-    formState.id_sucursal,
-    sucursales,
-  ]);
+  canChooseSucursal,
+  sucursalActiva?.id_sucursal,
+  formState.id_sucursal,
+  sucursales]
+  );
 
   const [openNoCajaModal, setOpenNoCajaModal] = useState(false);
   const dispatch = useDispatch();
@@ -133,7 +132,7 @@ const CrearPedido = () => {
   const auth = useSelector((state) => state.auth.user);
 
   const { data: cajaAsignada, isLoading: loadingCaja } =
-    useGetCajaAsignadaQuery({ rutUsuario: auth.id }, { skip: !auth.id });
+  useGetCajaAsignadaQuery({ rutUsuario: auth.id }, { skip: !auth.id });
 
   const [createPedido, { isLoading, error }] = useCreatePedidoMutation();
 
@@ -142,7 +141,7 @@ const CrearPedido = () => {
   const [activeStep, setActiveStep] = useState(0);
 
   const nextStep = () =>
-    setActiveStep((s) => Math.min(s + 1, steps.length - 1));
+  setActiveStep((s) => Math.min(s + 1, steps.length - 1));
   const prevStep = () => setActiveStep((s) => Math.max(s - 1, 0));
 
   useEffect(() => {
@@ -154,7 +153,7 @@ const CrearPedido = () => {
   }, [loadingCaja, cajaAsignada]);
 
   useEffect(() => {
-    const toNum = (v) => (v == null ? null : Number(v));
+    const toNum = (v) => v == null ? null : Number(v);
 
     if (mode !== "global") {
       const idFromHook = sucursalActiva?.id_sucursal || null;
@@ -180,10 +179,10 @@ const CrearPedido = () => {
     if (formState.usarDireccionCliente === false) return;
 
     const direccionCliente =
-      cliente.direccion_entrega ||
-      cliente.direccion_factura ||
-      cliente.direccion ||
-      "";
+    cliente.direccion_entrega ||
+    cliente.direccion_factura ||
+    cliente.direccion ||
+    "";
 
     if (!direccionCliente) return;
 
@@ -193,7 +192,7 @@ const CrearPedido = () => {
       return {
         ...prev,
         direccionEntrega: direccionCliente,
-        coords: { lat: null, lng: null },
+        coords: { lat: null, lng: null }
       };
     });
 
@@ -203,7 +202,7 @@ const CrearPedido = () => {
 
   useEffect(() => {
     const currentId =
-      formState.id_sucursal == null ? null : Number(formState.id_sucursal);
+    formState.id_sucursal == null ? null : Number(formState.id_sucursal);
 
     const prevId = prevSucursalIdRef.current;
     if (currentId == null) return;
@@ -217,8 +216,8 @@ const CrearPedido = () => {
 
     const otraSucursal = cart.some(
       (i) =>
-        i.id_sucursal_origen != null &&
-        Number(i.id_sucursal_origen) !== currentId
+      i.id_sucursal_origen != null &&
+      Number(i.id_sucursal_origen) !== currentId
     );
 
 
@@ -227,15 +226,15 @@ const CrearPedido = () => {
       dispatch(
         showNotification({
           message:
-            "La sucursal cambió. Se vació el carrito para evitar mezclar.",
-          severity: "info",
+          "La sucursal cambió. Se vació el carrito para evitar mezclar.",
+          severity: "info"
         })
       );
     }
     setFormState((prev) => ({
       ...prev,
       direccionEntrega: "",
-      tipoDocumento: "boleta",
+      tipoDocumento: "boleta"
     }));
   }, [formState.id_sucursal, cart, dispatch]);
 
@@ -245,7 +244,7 @@ const CrearPedido = () => {
       dispatch(
         showNotification({
           message: "Selecciona una sucursal para ver/añadir productos.",
-          severity: "info",
+          severity: "info"
         })
       );
       return;
@@ -253,31 +252,31 @@ const CrearPedido = () => {
 
     const stockDisponible = getStockForSucursal(product.inventario, idSucursal);
 
-    const qtyEnCarrito = cart
-      .filter(
-        (i) =>
-          i.id_producto === product.id_producto &&
-          i.id_sucursal_origen === idSucursal
-      )
-      .reduce((s, i) => s + i.cantidad, 0);
+    const qtyEnCarrito = cart.
+    filter(
+      (i) =>
+      i.id_producto === product.id_producto &&
+      i.id_sucursal_origen === idSucursal
+    ).
+    reduce((s, i) => s + i.cantidad, 0);
 
     if (qtyEnCarrito + 1 > stockDisponible) {
       dispatch(
         showNotification({
           message: "No hay stock suficiente en la sucursal seleccionada.",
-          severity: "warning",
+          severity: "warning"
         })
       );
       return;
     }
     const isInsumo = product.tipo === "insumo";
-    const idInsumo = isInsumo
-      ? parseInt(
-          typeof product.id_producto === "string"
-            ? product.id_producto.replace("insumo_", "")
-            : product.id_producto
-        )
-      : undefined;
+    const idInsumo = isInsumo ?
+    parseInt(
+      typeof product.id_producto === "string" ?
+      product.id_producto.replace("insumo_", "") :
+      product.id_producto
+    ) :
+    undefined;
     dispatch(
       addItem({
         id_producto: product.id_producto,
@@ -286,7 +285,7 @@ const CrearPedido = () => {
         cantidad: 1,
         tipo: product.tipo || "producto",
         ...(isInsumo && { id_insumo: idInsumo }),
-        id_sucursal_origen: idSucursal,
+        id_sucursal_origen: idSucursal
       })
     );
   };
@@ -298,7 +297,7 @@ const CrearPedido = () => {
       dispatch(
         showNotification({
           message: "Selecciona un cliente antes de continuar.",
-          severity: "warning",
+          severity: "warning"
         })
       );
       return;
@@ -308,7 +307,7 @@ const CrearPedido = () => {
       dispatch(
         showNotification({
           message: "Debes seleccionar una sucursal para el pedido.",
-          severity: "warning",
+          severity: "warning"
         })
       );
       return;
@@ -319,8 +318,8 @@ const CrearPedido = () => {
         dispatch(
           showNotification({
             message:
-              "El cliente no tiene RUT o razón social. No se puede emitir factura.",
-            severity: "error",
+            "El cliente no tiene RUT o razón social. No se puede emitir factura.",
+            severity: "error"
           })
         );
         return;
@@ -341,10 +340,10 @@ const CrearPedido = () => {
         cantidad: item.cantidad,
         tipo: item.tipo,
         precio_unitario: item.precio_unitario,
-        ...(item.tipo === "insumo"
-          ? { id_insumo: item.id_insumo }
-          : { id_producto: item.id_producto }),
-      })),
+        ...(item.tipo === "insumo" ?
+        { id_insumo: item.id_insumo } :
+        { id_producto: item.id_producto })
+      }))
     };
 
     try {
@@ -355,17 +354,21 @@ const CrearPedido = () => {
       dispatch(
         showNotification({
           message: "Éxito al crear pedido",
-          severity: "success",
+          severity: "success"
         })
       );
+      navigate("/admin-pedidos", {
+        replace: true,
+        state: { idSucursal: id_sucursal }
+      });
     } catch (err) {
       console.error("Error al crear el pedido:", err);
       dispatch(
         showNotification({
           message: `Error al crear pedido: ${
-            err?.data?.message || err.message
-          }`,
-          severity: "error",
+          err?.data?.message || err.message}`,
+
+          severity: "error"
         })
       );
     }
@@ -383,10 +386,10 @@ const CrearPedido = () => {
         idSucursal={formState.id_sucursal}
         canChoose={canChooseSucursal}
         onChange={(id) =>
-          setFormState((p) => ({ ...p, id_sucursal: Number(id) }))
+        setFormState((p) => ({ ...p, id_sucursal: Number(id) }))
         }
-        nombreSucursal={sucursalActual?.nombre}
-      />
+        nombreSucursal={sucursalActual?.nombre} />
+
       <Stepper
         activeStep={activeStep}
         alternativeLabel
@@ -396,82 +399,82 @@ const CrearPedido = () => {
           backgroundColor: theme.palette.background.paper,
           p: 2,
           borderRadius: 2,
-          border: `1px solid ${theme.palette.divider}`,
-        }}
-      >
-        {steps.map((label) => (
-          <Step key={label}>
+          border: `1px solid ${theme.palette.divider}`
+        }}>
+
+        {steps.map((label) =>
+        <Step key={label}>
             <StepLabel StepIconComponent={StepIconComponent}>{label}</StepLabel>
           </Step>
-        ))}
+        )}
       </Stepper>
-      {activeStep === 0 && (
-        <Box>
+      {activeStep === 0 &&
+      <Box>
           <PedidoForm
-            formState={formState}
-            setFormState={setFormState}
-            mostrarMetodoPago={formState.tipoDocumento !== "factura"}
-            idSucursalFiltro={formState.id_sucursal}
-            extraFields={
-              <>
+          formState={formState}
+          setFormState={setFormState}
+          mostrarMetodoPago={formState.tipoDocumento !== "factura"}
+          idSucursalFiltro={formState.id_sucursal}
+          extraFields={
+          <>
                 <TextField
-                  select
-                  fullWidth
-                  label="Prioridad del Pedido"
-                  value={formState.prioridad}
-                  onChange={(e) =>
-                    setFormState((prev) => ({
-                      ...prev,
-                      prioridad: e.target.value,
-                    }))
-                  }
-                  variant="outlined"
-                  sx={{
-                    mt: 3,
-                    backgroundColor: theme.palette.background.default,
-                    borderRadius: 1,
-                    input: { color: theme.palette.text.primary },
-                    label: { color: theme.palette.text.secondary },
-                  }}
-                >
+              select
+              fullWidth
+              label="Prioridad del Pedido"
+              value={formState.prioridad}
+              onChange={(e) =>
+              setFormState((prev) => ({
+                ...prev,
+                prioridad: e.target.value
+              }))
+              }
+              variant="outlined"
+              sx={{
+                mt: 3,
+                backgroundColor: theme.palette.background.default,
+                borderRadius: 1,
+                input: { color: theme.palette.text.primary },
+                label: { color: theme.palette.text.secondary }
+              }}>
+
                   <MenuItem value="alta">Alta</MenuItem>
                   <MenuItem value="normal">Media</MenuItem>
                   <MenuItem value="baja">Baja</MenuItem>
                 </TextField>
               </>
-            }
-            onValidationChange={setPuedeAvanzar}
-          />
+          }
+          onValidationChange={setPuedeAvanzar} />
+
 
           <Stack direction="row" justifyContent="flex-end" mt={2}>
             <Button
-              variant="contained"
-              onClick={nextStep}
-              disabled={!puedeAvanzar}
-            >
+            variant="contained"
+            onClick={nextStep}
+            disabled={!puedeAvanzar}>
+
               Siguiente
             </Button>
           </Stack>
         </Box>
-      )}
+      }
 
-      {activeStep === 1 && (
-        <Box>
+      {activeStep === 1 &&
+      <Box>
           <Typography
-            variant="h5"
-            fontWeight="bold"
-            color="primary"
-            gutterBottom
-          >
+          variant="h5"
+          fontWeight="bold"
+          color="primary"
+          gutterBottom>
+
             Productos
           </Typography>
           <Divider sx={{ mb: 3 }} />
           <PedidoCategorias onSelectCategory={setCategory} />
           <PedidoProductos
-            selectedCategory={category}
-            onAddToCart={handleAddToCart}
-            sucursalId={formState.id_sucursal}
-          />
+          selectedCategory={category}
+          onAddToCart={handleAddToCart}
+          sucursalId={formState.id_sucursal} />
+
           <MiniCartSummary onOpenCart={() => setActiveStep(2)} />
           <Stack direction="row" justifyContent="space-between" mt={2}>
             <Button variant="outlined" onClick={prevStep}>
@@ -482,50 +485,50 @@ const CrearPedido = () => {
             </Button>
           </Stack>
         </Box>
-      )}
+      }
 
-      {activeStep === 2 && (
-        <Box>
+      {activeStep === 2 &&
+      <Box>
           <PedidoCarrito />
           <Stack direction="row" justifyContent="space-between" mt={2}>
             <Button variant="outlined" onClick={prevStep}>
               Atrás
             </Button>
             <Button
-              variant="contained"
-              onClick={nextStep}
-              disabled={cart.length === 0}
-            >
+            variant="contained"
+            onClick={nextStep}
+            disabled={cart.length === 0}>
+
               Siguiente
             </Button>
           </Stack>
         </Box>
-      )}
+      }
 
-      {activeStep === 3 && (
-        <Box>
+      {activeStep === 3 &&
+      <Box>
           <PedidoResumen
-            total={total}
-            isLoading={isLoading}
-            error={error}
-            onSubmit={handleCreatePedido}
-            submitLabel="Generar Pedido"
-          />
+          total={total}
+          isLoading={isLoading}
+          error={error}
+          onSubmit={handleCreatePedido}
+          submitLabel="Generar Pedido" />
+
           <Stack direction="row" justifyContent="flex-start" mt={2}>
             <Button variant="outlined" onClick={prevStep} disabled={isLoading}>
               Atrás
             </Button>
           </Stack>
         </Box>
-      )}
+      }
 
       <NoCajaAsignadaDialog
         open={openNoCajaModal}
         handleClose={() => setOpenNoCajaModal(false)}
-        choferName={auth.nombre}
-      />
-    </Box>
-  );
+        choferName={auth.nombre} />
+
+    </Box>);
+
 };
 
 export default CrearPedido;

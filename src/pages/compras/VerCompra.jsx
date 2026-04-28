@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Box, Grid, Skeleton, Stack } from "@mui/material";
+import { Skeleton } from "@mui/material";
 import dayjs from "dayjs";
 import { useDispatch } from "react-redux";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
@@ -16,6 +16,9 @@ import CompraDetailItems from "../../components/compras/CompraDetailItems";
 import CompraEditForm from "../../components/compras/CompraEditForm";
 import CompraItemsTable from "../../components/compras/CompraItemsTable";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Stack from "../../components/common/CompatStack";
 
 export default function VerCompra() {
   const { id } = useParams();

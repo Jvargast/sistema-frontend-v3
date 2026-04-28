@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { Box } from "@mui/material";
+import Box from "./CompatBox";
+
 import ImageNotSupportedOutlinedIcon from "@mui/icons-material/ImageNotSupportedOutlined";
 
 const ImageCell = ({ url, size = 50, radius = 8 }) => {

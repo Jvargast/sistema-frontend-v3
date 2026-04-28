@@ -1,6 +1,8 @@
-import { Box, Typography } from "@mui/material";
+import Typography from "../common/CompatTypography";
+
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
+import Box from "../common/CompatBox";
 
 const SinAgendaAsignada = () => {
   return (

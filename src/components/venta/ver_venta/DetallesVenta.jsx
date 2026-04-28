@@ -1,19 +1,11 @@
-import {
-  Typography,
-  Divider,
-  Box,
-  Avatar,
-  List,
-  ListItem,
-  useMediaQuery,
-  useTheme,
-  Chip,
-} from "@mui/material";
+import { Divider, Avatar, List, ListItem, useMediaQuery, useTheme, Chip } from "@mui/material";
 import { ShoppingBag, MonetizationOn } from "@mui/icons-material";
 import { mdiBarcode } from "@mdi/js";
 import Icon from "@mdi/react";
 import PropTypes from "prop-types";
 import { getImageUrl } from "../../../store/services/apiBase";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
 
 const DetallesVenta = ({ detalles }) => {
   const theme = useTheme();

@@ -1,26 +1,22 @@
-import { useRef, useState } from "react";
+import Modal from "../common/CompatModal";
 import {
-  Box,
-  Typography,
-  Modal,
-  TextField,
-  Button,
-  Backdrop,
-  Fade,
-  Divider,
-  InputAdornment,
-} from "@mui/material";
+  useRef,
+  useState } from "react";
+import { Button, Backdrop, Fade, Divider, InputAdornment } from "@mui/material";
 import {
   Close,
   AttachMoney,
   Person,
   Store,
-  Assignment,
-} from "@mui/icons-material";
+  Assignment } from
+"@mui/icons-material";
 import PropTypes from "prop-types";
 import { cajaApi, useOpenCajaMutation } from "../../store/services/cajaApi";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const modalStyle = {
   position: "absolute",
@@ -31,7 +27,7 @@ const modalStyle = {
   bgcolor: "background.paper",
   p: 4,
   borderRadius: 3,
-  boxShadow: 24,
+  boxShadow: 24
 };
 
 function normalizeCajaForView(raw = {}, fallback = {}) {
@@ -43,33 +39,33 @@ function normalizeCajaForView(raw = {}, fallback = {}) {
 
   const id_sucursal = Number(
     r.id_sucursal ??
-      r.sucursal_id ??
-      r.idSucursal ??
-      r.sucursal?.id_sucursal ??
-      NaN
+    r.sucursal_id ??
+    r.idSucursal ??
+    r.sucursal?.id_sucursal ??
+    NaN
   );
 
   const sucursal =
-    r.sucursal ||
-    (Number.isFinite(id_sucursal)
-      ? { id_sucursal, nombre: r.sucursal_nombre ?? r.sucursalName ?? null }
-      : undefined);
+  r.sucursal || (
+  Number.isFinite(id_sucursal) ?
+  { id_sucursal, nombre: r.sucursal_nombre ?? r.sucursalName ?? null } :
+  undefined);
 
   const usuario_asignado =
-    r.usuario_asignado ?? r._vendedor?.rut ?? r.vendedor_rut ?? null;
+  r.usuario_asignado ?? r._vendedor?.rut ?? r.vendedor_rut ?? null;
 
   const saldo_inicial =
-    r.saldo_inicial == null ? null : Number(r.saldo_inicial);
+  r.saldo_inicial == null ? null : Number(r.saldo_inicial);
   const saldo_final = r.saldo_final == null ? null : Number(r.saldo_final);
 
   const estado =
-    r.estado ??
-    (r.fecha_cierre ? "cerrada" : r.fecha_apertura ? "abierta" : undefined);
+  r.estado ?? (
+  r.fecha_cierre ? "cerrada" : r.fecha_apertura ? "abierta" : undefined);
 
   const vendedor = r._vendedor ?? r.vendedor ?? null;
 
   const vendedor_nombre =
-    r.vendedor_nombre ?? vendedor?.nombre ?? r.usuario_nombre ?? null;
+  r.vendedor_nombre ?? vendedor?.nombre ?? r.usuario_nombre ?? null;
 
   const vendedor_rol = r.vendedor_rol ?? vendedor?.rol ?? r.usuario_rol ?? null;
 
@@ -85,7 +81,7 @@ function normalizeCajaForView(raw = {}, fallback = {}) {
     fecha_apertura: r.fecha_apertura ?? r.fechaApertura ?? null,
     fecha_cierre: r.fecha_cierre ?? r.fechaCierre ?? null,
     vendedor_nombre,
-    vendedor_rol,
+    vendedor_rol
   };
 }
 
@@ -108,7 +104,7 @@ const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
       dispatch(
         showNotification({
           message: "Esta caja ya está abierta.",
-          severity: "info",
+          severity: "info"
         })
       );
       onClose?.();
@@ -127,7 +123,7 @@ const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
     try {
       const resp = await openCaja({
         idCaja: caja.id_caja,
-        saldoInicial: monto,
+        saldoInicial: monto
       }).unwrap();
 
       console.log("ABRIENDO CAJA:", resp);
@@ -139,7 +135,7 @@ const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
           estado: "abierta",
           fecha_apertura: apiCaja?.fecha_apertura ?? new Date().toISOString(),
           saldo_inicial:
-            apiCaja?.saldo_inicial != null ? apiCaja.saldo_inicial : monto,
+          apiCaja?.saldo_inicial != null ? apiCaja.saldo_inicial : monto
         },
         viewCaja
       );
@@ -150,7 +146,7 @@ const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
       dispatch(
         showNotification({
           message: "Se ha abierto la caja correctamente",
-          severity: "success",
+          severity: "success"
         })
       );
       setMontoInicial("");
@@ -158,10 +154,10 @@ const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
     } catch (e) {
       console.error("Error al abrir la caja:", e);
       const msg =
-        e?.data?.error ||
-        e?.data?.message ||
-        e?.message ||
-        "No se pudo abrir la caja. Intente nuevamente.";
+      e?.data?.error ||
+      e?.data?.message ||
+      e?.message ||
+      "No se pudo abrir la caja. Intente nuevamente.";
       setError(msg);
       dispatch(showNotification({ message: msg, severity: "error" }));
     } finally {
@@ -176,8 +172,8 @@ const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
       open={open}
       onClose={onClose}
       closeAfterTransition
-      BackdropComponent={Backdrop}
-    >
+      BackdropComponent={Backdrop}>
+
       <Fade in={!!open}>
         <Box sx={modalStyle}>
           <Button
@@ -187,9 +183,9 @@ const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
               top: 10,
               right: 10,
               minWidth: 32,
-              borderRadius: "50%",
-            }}
-          >
+              borderRadius: "50%"
+            }}>
+
             <Close />
           </Button>
 
@@ -209,10 +205,10 @@ const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
               <Store sx={{ color: "#0288d1" }} />
               <Typography>
                 <strong>Sucursal:</strong>{" "}
-                {viewCaja?.sucursal?.nombre ??
-                  (Number.isFinite(viewCaja?.id_sucursal)
-                    ? `ID - ${viewCaja.id_sucursal}`
-                    : "Sin sucursal")}
+                {viewCaja?.sucursal?.nombre ?? (
+                Number.isFinite(viewCaja?.id_sucursal) ?
+                `ID - ${viewCaja.id_sucursal}` :
+                "Sin sucursal")}
               </Typography>
             </Box>
             <Box display="flex" alignItems="flex-start" gap={1}>
@@ -220,24 +216,24 @@ const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
               <Box>
                 <Typography>
                   <strong>Usuario asignado:</strong>{" "}
-                  {viewCaja?.usuario_asignado
-                    ? `${viewCaja?.vendedor_nombre || "Usuario"}${
-                        viewCaja?.vendedor_rol
-                          ? ` (${viewCaja.vendedor_rol})`
-                          : ""
-                      }`
-                    : "No asignado"}
+                  {viewCaja?.usuario_asignado ?
+                  `${viewCaja?.vendedor_nombre || "Usuario"}${
+                  viewCaja?.vendedor_rol ?
+                  ` (${viewCaja.vendedor_rol})` :
+                  ""}` :
+
+                  "No asignado"}
                 </Typography>
 
-                {viewCaja?.usuario_asignado && (
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ pl: "1.45em" }}
-                  >
+                {viewCaja?.usuario_asignado &&
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ pl: "1.45em" }}>
+
                     RUT: {viewCaja.usuario_asignado}
                   </Typography>
-                )}
+                }
               </Box>
             </Box>
           </Box>
@@ -252,37 +248,37 @@ const AperturaCajaModal = ({ open, caja, onCajaAbierta, onClose }) => {
             error={!!error}
             helperText={error}
             InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
+              startAdornment:
+              <InputAdornment position="start">
                   <AttachMoney />
                 </InputAdornment>
-              ),
-            }}
-          />
+
+            }} />
+
 
           <Button
             variant="contained"
             sx={{ width: "100%" }}
             onClick={handleAbrirCaja}
             disabled={
-              isLoading ||
-              !Number.isFinite(Number(montoInicial)) ||
-              Number(montoInicial) <= 0
-            }
-          >
+            isLoading ||
+            !Number.isFinite(Number(montoInicial)) ||
+            Number(montoInicial) <= 0
+            }>
+
             {isLoading ? "Abriendo..." : "Abrir Caja"}
           </Button>
         </Box>
       </Fade>
-    </Modal>
-  );
+    </Modal>);
+
 };
 
 AperturaCajaModal.propTypes = {
   open: PropTypes.bool,
   caja: PropTypes.object,
   onCajaAbierta: PropTypes.func,
-  onClose: PropTypes.func,
+  onClose: PropTypes.func
 };
 
 export default AperturaCajaModal;

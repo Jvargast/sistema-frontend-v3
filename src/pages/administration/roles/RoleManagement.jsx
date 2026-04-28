@@ -1,15 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  CardActions,
-  Typography,
-  Button,
-  Grid,
-  Divider,
-  useTheme,
-} from "@mui/material";
+import { Card, CardContent, CardActions, Button, Divider, IconButton, Tooltip, useTheme } from "@mui/material";
 import { Add, Edit, Delete, ArrowBack } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -23,6 +13,10 @@ import {
 } from "../../../store/services/rolesApi";
 import { useHasPermission } from "../../../utils/useHasPermission";
 import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
+import Box from "../../../components/common/CompatBox";
+import Grid from "../../../components/common/CompatGrid";
+import Typography from "../../../components/common/CompatTypography";
+import { getActionIconButtonSx } from "../../../components/common/tableStyles";
 
 const RoleManagement = () => {
   const theme = useTheme();
@@ -296,50 +290,28 @@ const RoleManagement = () => {
                 }}
               >
                 {canEditRole && (
-                  <Button
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                    startIcon={<Edit />}
-                    onClick={() => navigate(`/admin/roles/editar/${role.id}`)}
-                    sx={{
-                      borderRadius: 2,
-                      px: 2,
-                      textTransform: "none",
-                      fontWeight: 600,
-                      borderWidth: 1.3,
-                      borderColor: theme.palette.primary.main,
-                      "&:hover": {
-                        background: theme.palette.primary.light + "33",
-                        borderColor: theme.palette.primary.main,
-                      },
-                    }}
-                  >
-                    Editar
-                  </Button>
+                  <Tooltip title="Editar">
+                    <IconButton
+                      size="small"
+                      aria-label="Editar rol"
+                      onClick={() => navigate(`/admin/roles/editar/${role.id}`)}
+                      sx={getActionIconButtonSx(theme, "primary")}
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                 )}
                 {canDeleteRole && (
-                  <Button
-                    size="small"
-                    color="error"
-                    variant="outlined"
-                    startIcon={<Delete />}
-                    onClick={() => confirmDeleteRole(role.id)}
-                    sx={{
-                      borderRadius: 2,
-                      px: 2,
-                      textTransform: "none",
-                      fontWeight: 600,
-                      borderWidth: 1.3,
-                      borderColor: theme.palette.error.main,
-                      "&:hover": {
-                        background: theme.palette.error.light + "24",
-                        borderColor: theme.palette.error.main,
-                      },
-                    }}
-                  >
-                    Eliminar
-                  </Button>
+                  <Tooltip title="Eliminar">
+                    <IconButton
+                      size="small"
+                      aria-label="Eliminar rol"
+                      onClick={() => confirmDeleteRole(role.id)}
+                      sx={getActionIconButtonSx(theme, "error")}
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                 )}
               </CardActions>
             </Card>

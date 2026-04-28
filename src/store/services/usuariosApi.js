@@ -81,7 +81,7 @@ export const usuariosApi = createApi({
         method: "PUT",
         body: { newPassword },
       }),
-      invalidatesTags: ["User"], 
+      invalidatesTags: ["User"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -95,7 +95,7 @@ export const usuariosApi = createApi({
         url: `/usuarios/${rut}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["User"], 
+      invalidatesTags: ["User"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -107,7 +107,7 @@ export const usuariosApi = createApi({
     }),
     getOwnProfile: builder.query({
       query: () => "/usuarios/mi-perfil",
-      providesTags: ["User"], 
+      providesTags: ["User"],
     }),
     changePassword: builder.mutation({
       query: (updates) => ({

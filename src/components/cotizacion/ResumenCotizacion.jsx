@@ -1,5 +1,8 @@
-import { Box, Typography, TextField } from "@mui/material";
+import Typography from "../common/CompatTypography";
+
 import PropTypes from "prop-types";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
 
 const ResumenCotizacion = ({
   totalNeto,

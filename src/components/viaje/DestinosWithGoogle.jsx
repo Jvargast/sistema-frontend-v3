@@ -3,9 +3,11 @@ import {
   Polyline,
   DirectionsRenderer,
 } from "@react-google-maps/api";
-import { Box, Typography } from "@mui/material";
+import Typography from "../common/CompatTypography";
+
 import PropTypes from "prop-types";
 import { useState, useMemo, useEffect } from "react";
+import Box from "../common/CompatBox";
 /* import { convertirFechaLocal } from "../../utils/fechaUtils"; */
 import { useDirections } from "../../hooks/useDirections";
 import AdvancedMarker from "./AdvancedMarker";

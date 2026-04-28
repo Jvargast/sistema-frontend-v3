@@ -1,16 +1,5 @@
 import { useParams } from "react-router-dom";
-import {
-  Box,
-  Paper,
-  Typography,
-  CircularProgress,
-  Alert,
-  Chip,
-  Divider,
-  Stack,
-  Card,
-  CardContent,
-} from "@mui/material";
+import { Paper, CircularProgress, Alert, Chip, Divider, Card, CardContent } from "@mui/material";
 import { useGetAgendaByIdQuery } from "../../store/services/agendaCargaApi";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
@@ -18,6 +7,9 @@ import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import BackButton from "../../components/common/BackButton";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import Box from "../../components/common/CompatBox";
+import Stack from "../../components/common/CompatStack";
+import Typography from "../../components/common/CompatTypography";
 
 const estadoColores = {
   pendiente: "warning",

@@ -10,14 +10,14 @@ export default function useGastoForm() {
     id_categoria_gasto: null,
     id_proveedor: null,
     descripcion: "",
-    monto_input: "", 
-    iva_incluido: true, 
-    deducible: true, 
+    monto_input: "",
+    iva_incluido: true,
+    deducible: true,
     metodo_pago: "transferencia", // efectivo | transferencia | tarjeta | cheque | otro
     doc_tipo: "", // boleta | factura | recibo | otro
     doc_folio: "",
-    id_centro_costo: null, 
-    adjuntos: [], 
+    id_centro_costo: null,
+    adjuntos: [],
   });
 
   const montoNumber = useMemo(
@@ -37,7 +37,7 @@ export default function useGastoForm() {
   const val = {
     fecha: !!form.fecha,
     categoria: !!form.id_categoria_gasto,
-    proveedor: true, 
+    proveedor: true,
     monto: montoNumber > 0,
     metodo: !!form.metodo_pago,
   };

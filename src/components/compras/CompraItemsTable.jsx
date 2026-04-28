@@ -1,24 +1,5 @@
 import PropTypes from "prop-types";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  Divider,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  IconButton,
-  TextField,
-  Stack,
-  Button,
-  Tooltip,
-  TableContainer,
-  Typography,
-  Box,
-  Switch,
-} from "@mui/material";
+import { Card, CardHeader, CardContent, Divider, Table, TableHead, TableRow, TableCell, TableBody, IconButton, Button, Tooltip, TableContainer, Switch, useTheme } from "@mui/material";
 import {
   Add,
   DeleteOutlineOutlined,
@@ -29,6 +10,11 @@ import {
 import InsumoCell from "./InsumoCell";
 import { alpha } from "@mui/material/styles";
 import { formatCLP } from "../../utils/formatUtils";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 const onlyDigits = (s) => (s || "").toString().replace(/[^\d]/g, "");
 const toInt = (s, def = 0) => {
@@ -128,6 +114,7 @@ const EmptyState = () => (
 );
 
 const CompraItemsTable = ({ items, addItem, updateItem, removeItem }) => {
+  const theme = useTheme();
   const hasItems = Array.isArray(items) && items.length > 0;
 
   return (
@@ -319,10 +306,11 @@ const CompraItemsTable = ({ items, addItem, updateItem, removeItem }) => {
                       <TableCell align="center" sx={{ width: COL.actions }}>
                         <Tooltip title="Eliminar fila">
                           <IconButton
-                            color="error"
+                            aria-label="Eliminar fila"
                             onClick={() => removeItem(it._tid)}
+                            sx={getActionIconButtonSx(theme, "error")}
                           >
-                            <DeleteOutlineOutlined />
+                            <DeleteOutlineOutlined fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       </TableCell>

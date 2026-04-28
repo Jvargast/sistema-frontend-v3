@@ -1,5 +1,6 @@
-import { TextField, MenuItem } from "@mui/material";
+import { MenuItem } from "@mui/material";
 import PropTypes from "prop-types";
+import TextField from "../common/CompatTextField";
 
 const EntregaFormFields = ({ register, errors }) => {
   return (

@@ -1,12 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Box,
-  Chip,
-  IconButton,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
+import { Button, Chip, IconButton, useMediaQuery, useTheme } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
@@ -26,17 +20,39 @@ import Header from "../../components/common/Header";
 import DataGridCustomToolbar from "../../components/common/DataGridCustomToolBar";
 import { useSelector } from "react-redux";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
-import PrimaryActionButton from "../../components/common/PrimaryActionButton";
-import DangerActionButton from "../../components/common/DangerActionButton";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
+import { normalizeDataGridSelection } from "../../utils/dataGridSelection";
+import { getActionIconButtonSx } from "../../components/common/tableStyles";
+import { getSucursalTagSx } from "../../components/common/sucursalTagStyles";
 
-const CHIP_COLOR_KEYS = ["primary", "secondary", "success", "warning", "info"];
-const hashStr = (s) =>
-  Array.from(String(s)).reduce((a, c) => a + c.charCodeAt(0), 0);
-const getChipColorKey = (sucursal) => {
-  const base = sucursal?.nombre ?? sucursal?.id_sucursal ?? "";
-  const h = hashStr(base);
-  return CHIP_COLOR_KEYS[h % CHIP_COLOR_KEYS.length];
-};
+const getPageActionButtonSx = (theme, variant = "primary") => ({
+  borderRadius: 1,
+  textTransform: "none",
+  fontWeight: 800,
+  boxShadow: "none",
+  ...(variant === "danger"
+    ? {
+        bgcolor: theme.palette.error.main,
+        color: theme.palette.common.white,
+        "&:hover": {
+          bgcolor: theme.palette.error.dark,
+          boxShadow: "none",
+        },
+        "&.Mui-disabled": {
+          bgcolor: theme.palette.action.disabledBackground,
+          color: theme.palette.action.disabled,
+        },
+      }
+    : {
+        bgcolor: "#0F172A",
+        color: theme.palette.common.white,
+        "&:hover": {
+          bgcolor: theme.palette.common.black,
+          boxShadow: "none",
+        },
+      }),
+});
 
 const Clientes = () => {
   const theme = useTheme();
@@ -129,7 +145,18 @@ const Clientes = () => {
         const list = Array.isArray(row.Sucursales) ? row.Sucursales : [];
         if (!list.length) {
           return (
-            <Chip size="small" label="Sin sucursal" sx={{ fontWeight: 600 }} />
+            <Box sx={{ height: "100%", display: "flex", alignItems: "center" }}>
+              <Chip
+                size="small"
+                label="Sin sucursal"
+                sx={{
+                  borderRadius: 1,
+                  fontWeight: 700,
+                  bgcolor: alpha(theme.palette.warning.main, 0.12),
+                  color: theme.palette.warning.dark,
+                }}
+              />
+            </Box>
           );
         }
 
@@ -140,14 +167,16 @@ const Clientes = () => {
         return (
           <Box
             sx={{
+              height: "100%",
               display: "flex",
               flexWrap: "wrap",
+              alignItems: "center",
               gap: 0.5,
               overflow: "hidden",
+              py: 0.75,
             }}
           >
-            {shown.map((s) => {
-              const colorKey = getChipColorKey(s);
+            {shown.map((s, index) => {
               const isHighlight =
                 highlightSucursalId &&
                 Number(s.id_sucursal) === highlightSucursalId;
@@ -157,16 +186,10 @@ const Clientes = () => {
                   key={s.id_sucursal}
                   size="small"
                   label={s.nombre ?? `Sucursal ${s.id_sucursal}`}
-                  color={isHighlight ? "primary" : colorKey}
-                  variant={isHighlight ? "filled" : "outlined"}
-                  sx={{
-                    fontWeight: 700,
+                  sx={getSucursalTagSx(theme, index, {
+                    borderWidth: isHighlight ? 2 : 1,
                     maxWidth: 160,
-                    "& .MuiChip-label": {
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    },
-                  }}
+                  })}
                 />
               );
             })}
@@ -275,26 +298,39 @@ const Clientes = () => {
     },
     {
       field: "acciones",
-      headerName: "",
-      width: isMobile ? 80 : 120,
+      headerName: "Acciones",
+      width: isMobile ? 92 : 130,
       sortable: false,
+      align: "center",
+      headerAlign: "center",
       renderCell: (params) => (
-        <Box display="flex" gap={1}>
+        <Box
+          sx={{
+            height: "100%",
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 1,
+          }}
+        >
           <IconButton
-            color="info"
+            aria-label="Ver cliente"
             size={isMobile ? "small" : "medium"}
             onClick={() => navigate(`/clientes/ver/${params.row.id_cliente}`)}
+            sx={getActionIconButtonSx(theme, "info")}
           >
-            <VisibilityOutlinedIcon />
+            <VisibilityOutlinedIcon fontSize="small" />
           </IconButton>
           <IconButton
-            color="primary"
+            aria-label="Editar cliente"
             size={isMobile ? "small" : "medium"}
             onClick={() =>
               navigate(`/clientes/editar/${params.row.id_cliente}`)
             }
+            sx={getActionIconButtonSx(theme, "primary")}
           >
-            <EditRoundedIcon />
+            <EditRoundedIcon fontSize="small" />
           </IconButton>
         </Box>
       ),
@@ -363,87 +399,60 @@ const Clientes = () => {
         }}
       >
         {isMobile ? (
-          <>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <IconButton
+              aria-label="Eliminar seleccionados"
+              disabled={selectedRows.length === 0 || isDeleting}
+              onClick={() => {
+                if (selectedRows.length > 0 && !isDeleting) setOpenAlert(true);
               }}
+              sx={getActionIconButtonSx(theme, "error", {
+                width: 40,
+                height: 40,
+                minWidth: 40,
+              })}
             >
-              <Box
-                sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: "50%",
-                  background: `linear-gradient(145deg, ${theme.palette.error.light} 60%, ${theme.palette.error.main} 100%)`,
-                  boxShadow: `0 2px 12px 0 ${theme.palette.error.main}22, 0 1.5px 8px 0 #0001`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "0.16s all cubic-bezier(.4,0,.2,1)",
-                  cursor:
-                    selectedRows.length === 0 || isDeleting
-                      ? "not-allowed"
-                      : "pointer",
-                  opacity: selectedRows.length === 0 || isDeleting ? 0.6 : 1,
-                  "&:hover": {
-                    background: `linear-gradient(120deg, ${theme.palette.error.main} 70%, ${theme.palette.error.dark} 100%)`,
-                    transform: "scale(1.08)",
-                    boxShadow: `0 4px 24px 0 ${theme.palette.error.dark}33`,
-                  },
-                  userSelect: "none",
-                }}
-                onClick={() => {
-                  if (selectedRows.length > 0 && !isDeleting)
-                    setOpenAlert(true);
-                }}
-                title="Eliminar seleccionados"
-              >
-                <DeleteOutlineOutlinedIcon sx={{ color: "#fff", fontSize: 28 }} />
-              </Box>
-              <Box
-                sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: "50%",
-                  background: `linear-gradient(145deg, ${theme.palette.primary.light} 60%, ${theme.palette.primary.main} 100%)`,
-                  boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}22, 0 1.5px 8px 0 #0001`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "0.16s all cubic-bezier(.4,0,.2,1)",
-                  cursor: "pointer",
-                  "&:hover": {
-                    background: `linear-gradient(120deg, ${theme.palette.primary.main} 70%, ${theme.palette.primary.dark} 100%)`,
-                    transform: "scale(1.08)",
-                    boxShadow: `0 4px 24px 0 ${theme.palette.primary.dark}33`,
-                  },
-                  userSelect: "none",
-                }}
-                onClick={() => navigate("/clientes/crear")}
-                title="Nuevo cliente"
-              >
-                <AddCircleOutlineOutlinedIcon sx={{ color: "#fff", fontSize: 28 }} />
-              </Box>
-            </Box>
-          </>
+              <DeleteOutlineOutlinedIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              aria-label="Nuevo cliente"
+              onClick={() => navigate("/clientes/crear")}
+              sx={getActionIconButtonSx(theme, "primary", {
+                width: 40,
+                height: 40,
+                minWidth: 40,
+              })}
+            >
+              <AddCircleOutlineOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Box>
         ) : (
-          <>
-            <DangerActionButton
-              label="Eliminar seleccionados"
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+              variant="contained"
               startIcon={<DeleteOutlineOutlinedIcon />}
               onClick={() => setOpenAlert(true)}
-              disabled={selectedRows.length === 0}
-              loading={isDeleting}
-            />
+              disabled={selectedRows.length === 0 || isDeleting}
+              sx={getPageActionButtonSx(theme, "danger")}
+            >
+              {isDeleting ? "Eliminando..." : "Eliminar seleccionados"}
+            </Button>
 
-            <PrimaryActionButton
-              label="Nuevo Cliente"
+            <Button
+              variant="contained"
               startIcon={<AddCircleOutlineOutlinedIcon />}
               onClick={() => navigate("/clientes/crear")}
-            />
-          </>
+              sx={getPageActionButtonSx(theme, "primary")}
+            >
+              Nuevo cliente
+            </Button>
+          </Box>
         )}
       </Box>
       <Box
@@ -451,7 +460,13 @@ const Clientes = () => {
           width: "100%",
           flex: 1,
           overflow: "hidden",
-          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 1,
+          boxShadow:
+            theme.palette.mode === "light"
+              ? "0 10px 30px rgba(15, 23, 42, 0.06)"
+              : "0 10px 30px rgba(0, 0, 0, 0.24)",
           maxWidth: "100%",
         }}
       >
@@ -472,8 +487,13 @@ const Clientes = () => {
             setPageSize(model.pageSize);
           }}
           checkboxSelection
-          onRowSelectionModelChange={(ids) => setSelectedRows(ids)}
+          onRowSelectionModelChange={(ids) =>
+            setSelectedRows(normalizeDataGridSelection(ids))
+          }
+          disableRowSelectionExcludeModel
           pageSizeOptions={[5, 10, 25, 50]}
+          rowHeight={64}
+          columnHeaderHeight={46}
           slots={{
             toolbar: DataGridCustomToolbar,
             pagination: CustomPagination,
@@ -486,22 +506,16 @@ const Clientes = () => {
             width: "100%",
             maxWidth: "100%",
             minWidth: 0,
-            "& .MuiDataGrid-root": {
-              border: "none",
-              backgroundColor: theme.palette.background.paper,
-            },
+            border: 0,
+            bgcolor: "background.paper",
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor:
                 theme.palette.mode === "light"
-                  ? theme.palette.grey[200]
-                  : theme.palette.grey[800],
+                  ? theme.palette.grey[100]
+                  : theme.palette.grey[900],
               color: theme.palette.text.primary,
-              fontWeight: "bold",
-              borderBottom: "1px solid #d1d9e6",
-              borderColor: theme.palette.grey[300],
-              "& > div": {
-                borderRight: "1px solid #d1d9e6",
-              },
+              fontWeight: 800,
+              borderBottom: `1px solid ${theme.palette.divider}`,
             },
             '& .MuiDataGrid-cell[data-field="activo"]': {
               justifyContent: "center",
@@ -516,21 +530,26 @@ const Clientes = () => {
               textAlign: "center",
             },
             "& .MuiDataGrid-cell": {
-              borderBottom: "1px solid",
-              borderColor: theme.palette.grey[300],
+              borderBottom: `1px solid ${theme.palette.divider}`,
+              display: "flex",
+              alignItems: "center",
               "&:not(:last-child)": {
-                borderRight: "1px solid #d1d9e6",
+                borderRight: `1px solid ${theme.palette.divider}`,
               },
             },
             "& .MuiDataGrid-row:hover": {
-              backgroundColor: theme.palette.action.hover,
+              backgroundColor: alpha(theme.palette.primary.main, 0.04),
             },
             "& .MuiDataGrid-footerContainer": {
               backgroundColor:
                 theme.palette.mode === "light"
-                  ? theme.palette.grey[100]
+                  ? theme.palette.grey[50]
                   : theme.palette.grey[900],
               borderTop: `1px solid ${theme.palette.divider}`,
+            },
+            "& .MuiDataGrid-toolbarContainer": {
+              p: 1,
+              borderBottom: `1px solid ${theme.palette.divider}`,
             },
           }}
           disableColumnResize={true}
@@ -541,7 +560,7 @@ const Clientes = () => {
         openAlert={openAlert}
         onCloseAlert={() => setOpenAlert(false)}
         onConfirm={handleBulkDelete}
-        title="Confirmar Eliminación"
+        title="Confirmar eliminación"
         message={`¿Está seguro de que desea eliminar los ${selectedRows.length} clientes seleccionados?`}
       />
     </Box>

@@ -1,6 +1,10 @@
-import { useState, useEffect } from "react";
+import {
+  useState,
+  useEffect } from "react";
 import PropTypes from "prop-types";
-import { Autocomplete, TextField, Box, CircularProgress } from "@mui/material";
+import { Autocomplete, CircularProgress } from "@mui/material";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
 
 const AutocompleteGenerico = ({
   options = [],
@@ -34,21 +38,28 @@ const AutocompleteGenerico = ({
         onSelect(nuevo);
         if (!nuevo) onSelect(null);
       }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={labelInput}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {isLoading && <CircularProgress size={18} />}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
-        />
-      )}
+      renderInput={(params) => {
+        const inputSlotProps = params.slotProps?.input || {};
+
+        return (
+          <TextField
+            {...params}
+            label={labelInput}
+            slotProps={{
+              ...params.slotProps,
+              input: {
+                ...inputSlotProps,
+                endAdornment: (
+                  <>
+                    {isLoading && <CircularProgress size={18} />}
+                    {inputSlotProps.endAdornment}
+                  </>
+                ),
+              },
+            }}
+          />
+        );
+      }}
       renderOption={(muiProps, option) => {
         const { key, ...rest } = muiProps;
         return optionRenderer ? (

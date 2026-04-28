@@ -1,20 +1,12 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-  Chip,
-  Pagination,
-  CircularProgress,
-} from "@mui/material";
+import { Button, List, ListItem, ListItemText, Chip, Pagination, CircularProgress } from "@mui/material";
 import { Calendar } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "../../reactCalendarMui.css";
 import PropTypes from "prop-types";
 import { useGetHistorialPedidosQuery } from "../../store/services/pedidosApi";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const HistorialPedidos = ({ onClose }) => {
   const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());

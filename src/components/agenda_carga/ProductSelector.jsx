@@ -1,16 +1,11 @@
+import Select from "../common/CompatSelect";
 import PropTypes from "prop-types";
-import {
-  Grid,
-  IconButton,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { IconButton, FormControl, InputLabel, MenuItem, useTheme } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import TextField from "../common/CompatTextField";
+import Grid from "../common/CompatGrid";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 const ProductSelectorRow = ({
   index,
@@ -19,7 +14,7 @@ const ProductSelectorRow = ({
   onChangeProduct,
   onChangeCantidad,
   onChangeNotas,
-  onRemoveRow,
+  onRemoveRow
 }) => {
   const theme = useTheme();
   const isRetornable = !!selectedProduct?.es_retornable;
@@ -37,28 +32,28 @@ const ProductSelectorRow = ({
             sx={{
               borderRadius: 2,
               backgroundColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.background.paper
-                  : "#fff",
+              theme.palette.mode === "dark" ?
+              theme.palette.background.paper :
+              "#fff"
             }}
             MenuProps={{
               PaperProps: {
                 sx: {
                   borderRadius: 2,
                   backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? theme.palette.background.paper
-                      : "#fff",
-                },
-              },
-            }}
-          >
+                  theme.palette.mode === "dark" ?
+                  theme.palette.background.paper :
+                  "#fff"
+                }
+              }
+            }}>
+
             <MenuItem value="">-- Selecciona producto --</MenuItem>
-            {productosDisponibles?.map((prod) => (
-              <MenuItem key={prod.id_producto} value={prod.id_producto}>
+            {productosDisponibles?.map((prod) =>
+            <MenuItem key={prod.id_producto} value={prod.id_producto}>
                 {prod.nombre_producto}
               </MenuItem>
-            ))}
+            )}
           </Select>
         </FormControl>
       </Grid>
@@ -69,16 +64,16 @@ const ProductSelectorRow = ({
           sx={{
             fontWeight: 500,
             textAlign: "center",
-            color: isRetornable ? theme.palette.success.paper
-              : theme.palette.background.default,
-            bgcolor: isRetornable
-              ? theme.palette.success.light
-              : theme.palette.background.default,
+            color: isRetornable ? theme.palette.success.paper :
+            theme.palette.background.default,
+            bgcolor: isRetornable ?
+            theme.palette.success.light :
+            theme.palette.background.default,
             px: 1,
             borderRadius: 2,
-            transition: "background .3s",
-          }}
-        >
+            transition: "background .3s"
+          }}>
+
           {isRetornable ? "♻️ Retornable" : "No retornable"}
         </Typography>
       </Grid>
@@ -96,12 +91,12 @@ const ProductSelectorRow = ({
             "& .MuiOutlinedInput-root": {
               borderRadius: 2,
               backgroundColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.background.default
-                  : "#fff",
-            },
-          }}
-        />
+              theme.palette.mode === "dark" ?
+              theme.palette.background.default :
+              "#fff"
+            }
+          }} />
+
       </Grid>
 
       <Grid item xs={12} sm={3}>
@@ -115,41 +110,25 @@ const ProductSelectorRow = ({
             "& .MuiOutlinedInput-root": {
               borderRadius: 2,
               backgroundColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.background.default
-                  : "#fff",
-            },
-          }}
-        />
+              theme.palette.mode === "dark" ?
+              theme.palette.background.default :
+              "#fff"
+            }
+          }} />
+
       </Grid>
 
       <Grid item xs={12} sm={1} textAlign="center">
         <IconButton
           onClick={() => onRemoveRow(index)}
-          sx={{
-            borderRadius: "50%",
-            backgroundColor:
-              theme.palette.mode === "dark"
-                ? theme.palette.error.dark
-                : "grey.100",
-            color:
-              theme.palette.mode === "dark"
-                ? theme.palette.error.light
-                : "error.main",
-            "&:hover": {
-              backgroundColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.error.main
-                  : "grey.200",
-            },
-            transition: "background .2s",
-          }}
-        >
+          aria-label="Eliminar producto"
+          sx={getActionIconButtonSx(theme, "error")}>
+
           <DeleteIcon fontSize="small" />
         </IconButton>
       </Grid>
-    </Grid>
-  );
+    </Grid>);
+
 };
 
 export default ProductSelectorRow;
@@ -159,17 +138,17 @@ ProductSelectorRow.propTypes = {
   productosDisponibles: PropTypes.arrayOf(
     PropTypes.shape({
       id_producto: PropTypes.number.isRequired,
-      nombre_producto: PropTypes.string.isRequired,
+      nombre_producto: PropTypes.string.isRequired
     })
   ).isRequired,
   selectedProduct: PropTypes.shape({
     id_producto: PropTypes.number,
     cantidad: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     notas: PropTypes.string,
-    es_retornable: PropTypes.bool,
+    es_retornable: PropTypes.bool
   }),
   onChangeProduct: PropTypes.func.isRequired,
   onChangeCantidad: PropTypes.func.isRequired,
   onChangeNotas: PropTypes.func.isRequired,
-  onRemoveRow: PropTypes.func.isRequired,
+  onRemoveRow: PropTypes.func.isRequired
 };

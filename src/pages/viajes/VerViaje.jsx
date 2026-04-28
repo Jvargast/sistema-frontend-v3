@@ -1,17 +1,7 @@
 import { useParams } from "react-router";
 import { useEffect, useState } from "react";
 import { socket } from "../../socket";
-import {
-  Box,
-  Typography,
-  Paper,
-  Card,
-  CardContent,
-  Divider,
-  Chip,
-  Stack,
-  CircularProgress,
-} from "@mui/material";
+import { Paper, Card, CardContent, Divider, Chip, CircularProgress } from "@mui/material";
 import InfoGeneral from "../../components/viaje/InfoGeneral";
 import { convertirFechaLocal } from "../../utils/fechaUtils";
 import { useGetViajeByIdQuery } from "../../store/services/agendaViajesApi";
@@ -20,6 +10,9 @@ import DestinosWithGoogle from "../../components/viaje/DestinosWithGoogle";
 import { useUbicacionChoferTiempoReal } from "../../hooks/useUbicacionChoferSocket";
 import BackButton from "../../components/common/BackButton";
 import { useSelector } from "react-redux";
+import Box from "../../components/common/CompatBox";
+import Stack from "../../components/common/CompatStack";
+import Typography from "../../components/common/CompatTypography";
 
 const VerViaje = () => {
   const { id } = useParams();

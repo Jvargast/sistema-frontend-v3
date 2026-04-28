@@ -1,15 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  Box,
-  Typography,
-  Divider,
-  IconButton,
-  Tooltip,
-  Chip,
-} from "@mui/material";
+import { Divider, IconButton, Tooltip, Chip } from "@mui/material";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
 
 import {
   useGetInsumoByIdQuery,

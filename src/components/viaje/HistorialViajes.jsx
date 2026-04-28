@@ -1,8 +1,11 @@
-import { Box, Typography, Grid, CircularProgress } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import PropTypes from "prop-types";
 import { useGetHistorialViajesQuery } from "../../store/services/agendaViajesApi";
 import TarjetaViaje from "./TarjetaViaje";
 import Header from "../common/Header";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
+import Typography from "../common/CompatTypography";
 
 const HistorialViajes = ({ usuario }) => {
   const { data, isLoading } = useGetHistorialViajesQuery({

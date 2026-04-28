@@ -1,17 +1,9 @@
-import { useEffect, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import {
-  Box,
-  ToggleButtonGroup,
-  ToggleButton,
-  Autocomplete,
-  TextField,
-  Divider,
-  CircularProgress,
-  useTheme,
-  useMediaQuery,
-  Tooltip,
-} from "@mui/material";
+  useEffect,
+  useMemo } from "react";
+import { useDispatch,
+  useSelector } from "react-redux";
+import { ToggleButtonGroup, ToggleButton, Autocomplete, Divider, CircularProgress, useTheme, useMediaQuery, Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import PublicIcon from "@mui/icons-material/Public";
 import StorefrontIcon from "@mui/icons-material/Storefront";
@@ -21,6 +13,8 @@ import {
   setActiveSucursal,
   setScopeMode,
 } from "../../store/reducers/scopeSlice";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
 
 export default function ScopeSwitcher() {
   const theme = useTheme();
@@ -232,29 +226,36 @@ export default function ScopeSwitcher() {
             },
           },
         })}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            placeholder="Selecciona sucursal"
-            InputProps={{
-              ...params.InputProps,
-              startAdornment: (
-                <>
-                  <BusinessIcon sx={{ mr: 1, fontSize: 18, opacity: 0.75 }} />
-                  {params.InputProps.startAdornment}
-                </>
-              ),
-              endAdornment: (
-                <>
-                  {isFetching ? (
-                    <CircularProgress size={16} sx={{ mr: 1 }} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                </>
-              ),
-            }}
-          />
-        )}
+        renderInput={(params) => {
+          const inputSlotProps = params.slotProps?.input || {};
+
+          return (
+            <TextField
+              {...params}
+              placeholder="Selecciona sucursal"
+              slotProps={{
+                ...params.slotProps,
+                input: {
+                  ...inputSlotProps,
+                  startAdornment: (
+                    <>
+                      <BusinessIcon sx={{ mr: 1, fontSize: 18, opacity: 0.75 }} />
+                      {inputSlotProps.startAdornment}
+                    </>
+                  ),
+                  endAdornment: (
+                    <>
+                      {isFetching ? (
+                        <CircularProgress size={16} sx={{ mr: 1 }} />
+                      ) : null}
+                      {inputSlotProps.endAdornment}
+                    </>
+                  ),
+                },
+              }}
+            />
+          );
+        }}
         slotProps={{
           paper: {
             elevation: 0,

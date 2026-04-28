@@ -1,15 +1,4 @@
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Divider,
-  Chip,
-  Button,
-  CircularProgress,
-  TextField,
-  MenuItem,
-} from "@mui/material";
+import { Paper, Divider, Chip, Button, CircularProgress, MenuItem } from "@mui/material";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
@@ -28,6 +17,10 @@ import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useDispatch } from "react-redux";
 import BackButton from "../../components/common/BackButton";
 import PagosAsociados from "../../components/cuentas_por_cobrar/PagosAsociados";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Typography from "../../components/common/CompatTypography";
 
 const estadoColores = {
   pendiente: "warning",

@@ -31,7 +31,7 @@ const BreakdownChart = () => {
 
   const totalValue = formattedData.reduce((sum, item) => sum + item.value, 0);
 
-  const valueFormatter = (item) => 
+  const valueFormatter = (item) =>
     `$${item.value.toLocaleString()} (${((item.value / totalValue) * 100).toFixed(2)}%)`;
 
 

@@ -2,16 +2,7 @@ import { useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Divider,
-  Chip,
-  Grid,
-  useTheme,
-} from "@mui/material";
+import { Paper, Button, Divider, Chip, useTheme } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { useGetClienteByIdQuery } from "../../store/services/clientesApi";
 import LoaderComponent from "../../components/common/LoaderComponent";
@@ -19,6 +10,10 @@ import { showNotification } from "../../store/reducers/notificacionSlice";
 import BackButton from "../../components/common/BackButton";
 import { useSelector } from "react-redux";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Typography from "../../components/common/CompatTypography";
+import { getSucursalTagSx } from "../../components/common/sucursalTagStyles";
 
 const VerCliente = () => {
   const theme = useTheme();
@@ -270,12 +265,12 @@ const VerCliente = () => {
               </Typography>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 0.5 }}>
                 {formData.sucursales?.length ? (
-                  formData.sucursales.map((s) => (
+                  formData.sucursales.map((s, index) => (
                     <Chip
                       key={s.id_sucursal}
                       label={s.nombre ?? `Sucursal ${s.id_sucursal}`}
                       size="small"
-                      sx={{ fontWeight: 600 }}
+                      sx={getSucursalTagSx(theme, index)}
                     />
                   ))
                 ) : (

@@ -1,17 +1,14 @@
-import { useState, useEffect, useMemo } from "react";
+import Modal from "../common/CompatModal";
 import {
-  Typography,
-  Modal,
-  Paper,
-  Button,
-  TextField,
-  CircularProgress,
-  Grid,
-  Chip,
-  Box,
-  IconButton,
-} from "@mui/material";
+  useState,
+  useEffect,
+  useMemo } from "react";
+import { Paper, Button, CircularProgress, Chip, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
+import Typography from "../common/CompatTypography";
 
 import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
@@ -37,30 +34,30 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
 
     agendaCarga.data.detallesCarga.forEach((detalle) => {
       const isProducto = detalle.producto?.id_producto !== undefined;
-      const id = isProducto
-        ? detalle.producto.id_producto
-        : detalle.insumo.id_insumo;
-      const nombre = isProducto
-        ? detalle.producto.nombre_producto
-        : detalle.insumo.nombre_insumo;
-      const inventarios = isProducto
-        ? detalle.producto.inventariosProducto || []
-        : detalle.insumo.inventariosInsumo || [];
+      const id = isProducto ?
+      detalle.producto.id_producto :
+      detalle.insumo.id_insumo;
+      const nombre = isProducto ?
+      detalle.producto.nombre_producto :
+      detalle.insumo.nombre_insumo;
+      const inventarios = isProducto ?
+      detalle.producto.inventariosProducto || [] :
+      detalle.insumo.inventariosInsumo || [];
 
       const key = isProducto ? `producto_${id}` : `insumo_${id}`;
 
       if (!agrupados[key]) {
-        const reservados = inventarios
-          .filter(
-            (inv) =>
-              inv.estado === "En Camión - Reservado" ||
-              inv.estado === "En Camión - Reservado - Entrega"
-          )
-          .reduce((sum, inv) => sum + inv.cantidad, 0);
+        const reservados = inventarios.
+        filter(
+          (inv) =>
+          inv.estado === "En Camión - Reservado" ||
+          inv.estado === "En Camión - Reservado - Entrega"
+        ).
+        reduce((sum, inv) => sum + inv.cantidad, 0);
 
-        const disponibles = inventarios
-          .filter((inv) => inv.estado === "En Camión - Disponible")
-          .reduce((sum, inv) => sum + inv.cantidad, 0);
+        const disponibles = inventarios.
+        filter((inv) => inv.estado === "En Camión - Disponible").
+        reduce((sum, inv) => sum + inv.cantidad, 0);
 
         agrupados[key] = {
           id_producto: isProducto ? id : null,
@@ -69,7 +66,7 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
           nombre_insumo: !isProducto ? nombre : null,
           cantidadTotal: 0,
           cantidadReservada: reservados,
-          cantidadDisponible: disponibles,
+          cantidadDisponible: disponibles
         };
       }
 
@@ -82,9 +79,9 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
   const productosCargadosInicial = useMemo(() => {
     const inicial = {};
     productosAgrupados.forEach((prod) => {
-      const key = prod.id_producto
-        ? `producto_${prod.id_producto}`
-        : `insumo_${prod.id_insumo}`;
+      const key = prod.id_producto ?
+      `producto_${prod.id_producto}` :
+      `insumo_${prod.id_insumo}`;
       inicial[key] = prod.cantidadTotal;
     });
     return inicial;
@@ -97,7 +94,7 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
   const handleChangeCantidad = (key, cantidad) => {
     setProductosCargados((prev) => ({
       ...prev,
-      [key]: cantidad,
+      [key]: cantidad
     }));
   };
 
@@ -112,8 +109,8 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
       dispatch(
         showNotification({
           message:
-            "Debes seleccionar el punto de origen en el mapa o buscar una dirección.",
-          severity: "warning",
+          "Debes seleccionar el punto de origen en el mapa o buscar una dirección.",
+          severity: "warning"
         })
       );
       return;
@@ -126,13 +123,13 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
           ([key, cantidad]) => {
             const item = productosAgrupados.find(
               (p) =>
-                `producto_${p.id_producto}` === key ||
-                `insumo_${p.id_insumo}` === key
+              `producto_${p.id_producto}` === key ||
+              `insumo_${p.id_insumo}` === key
             );
             return {
               id_producto: item?.id_producto || null,
               id_insumo: item?.id_insumo || null,
-              cantidad: Number(cantidad),
+              cantidad: Number(cantidad)
             };
           }
         ),
@@ -140,15 +137,15 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
         origen_inicial: {
           lat: origen.lat,
           lng: origen.lng,
-          direccion: direccion || "",
-        },
+          direccion: direccion || ""
+        }
       };
 
       await confirmarCarga(payload).unwrap();
       dispatch(
         showNotification({
           message: "Carga confirmada con éxito.",
-          severity: "success",
+          severity: "success"
         })
       );
       handleClose();
@@ -158,9 +155,9 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
       dispatch(
         showNotification({
           message: `Error al confirmar la carga: ${
-            error.data?.error || error.message
-          }`,
-          severity: "error",
+          error.data?.error || error.message}`,
+
+          severity: "error"
         })
       );
     }
@@ -181,9 +178,9 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
           alignItems: "center",
           justifyContent: "center",
           outline: "none",
-          p: 0,
-        }}
-      >
+          p: 0
+        }}>
+
         <Paper
           sx={{
             width: "100%",
@@ -196,24 +193,24 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
             borderRadius: { xs: 0, sm: 3 },
             boxShadow: 6,
             overflow: "hidden",
-            position: "relative",
-          }}
-        >
+            position: "relative"
+          }}>
+
           <Box
             sx={{
               p: 2,
               borderBottom: "1px solid #eee",
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
+              justifyContent: "space-between"
+            }}>
+
             <Typography
               variant="h5"
               fontWeight="bold"
               textAlign="center"
-              color="text.primary"
-            >
+              color="text.primary">
+
               Confirmar Carga del Camión
             </Typography>
             <IconButton onClick={handleClose} size="small">
@@ -228,59 +225,59 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
               overflowY: "auto",
               px: { xs: 1.5, sm: 3 },
               pt: 2,
-              pb: 2,
-            }}
-          >
+              pb: 2
+            }}>
+
             <AutocompleteDireccion
               direccion={direccion}
               setDireccion={setDireccion}
-              setCoords={setOrigen}
-            />
+              setCoords={setOrigen} />
+
             <Box
               sx={{
                 height: 250,
                 borderRadius: 2,
                 overflow: "hidden",
                 mb: 2,
-                position: "relative",
-              }}
-            >
-              {origen ? (
-                <GoogleOrigenSelector origen={origen} setOrigen={setOrigen} />
-              ) : (
-                <Box
-                  sx={{
-                    height: 250,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    bgcolor: "grey.100",
-                    borderRadius: 2,
-                  }}
-                >
+                position: "relative"
+              }}>
+
+              {origen ?
+              <GoogleOrigenSelector origen={origen} setOrigen={setOrigen} /> :
+
+              <Box
+                sx={{
+                  height: 250,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  bgcolor: "grey.100",
+                  borderRadius: 2
+                }}>
+
                   <CircularProgress />
                   <Typography ml={2}>Cargando mapa...</Typography>
                 </Box>
-              )}
+              }
             </Box>
             <Typography variant="body2" mt={1} color="text.secondary">
               Dirección seleccionada: {direccion}
             </Typography>
             {/*             <Box
-              sx={{
-                px: { xs: 1.5, sm: 3 },
-                pt: 2,
-                pb: 0,
-                overflowY: "hidden",
-                flex: "1 1 auto",
-                minHeight: 0,
-              }}
-            > */}
+               sx={{
+                 px: { xs: 1.5, sm: 3 },
+                 pt: 2,
+                 pb: 0,
+                 overflowY: "hidden",
+                 flex: "1 1 auto",
+                 minHeight: 0,
+               }}
+              > */}
             <Box>
               {productosAgrupados.map((producto) => {
-                const key = producto.id_producto
-                  ? `producto_${producto.id_producto}`
-                  : `insumo_${producto.id_insumo}`;
+                const key = producto.id_producto ?
+                `producto_${producto.id_producto}` :
+                `insumo_${producto.id_insumo}`;
                 const cantidadMaxima = producto.cantidadTotal;
                 const deshabilitado = cantidadMaxima === 0;
 
@@ -294,34 +291,34 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
                       border: "1px solid",
                       borderColor: (theme) => theme.palette.background.paper,
                       backgroundColor: (theme) =>
-                        theme.palette.background.paper,
-                    }}
-                  >
+                      theme.palette.background.paper
+                    }}>
+
                     <Box
                       display="flex"
                       justifyContent="space-between"
                       alignItems="center"
-                      mb={1}
-                    >
+                      mb={1}>
+
                       <Typography
                         variant="subtitle1"
                         fontWeight="medium"
-                        color="text.primary"
-                      >
+                        color="text.primary">
+
                         {producto.nombre_producto || producto.nombre_insumo}
                       </Typography>
                       <Chip
                         label={producto.id_producto ? "Producto" : "Insumo"}
                         color={producto.id_producto ? "primary" : "secondary"}
                         size="small"
-                        sx={{ fontWeight: "bold" }}
-                      />
+                        sx={{ fontWeight: "bold" }} />
+
                     </Box>
                     <Grid
                       container
                       spacing={2}
-                      sx={{ mt: 1.5, px: 1, py: 1, margin: 0 }}
-                    >
+                      sx={{ mt: 1.5, px: 1, py: 1, margin: 0 }}>
+
                       <Grid item xs={12} sm={4}>
                         <Typography variant="inherit" sx={{ fontWeight: 500 }}>
                           Planificado
@@ -341,8 +338,8 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
                       <Grid item xs={12} sm={4}>
                         <Typography
                           variant="subtitle2"
-                          sx={{ fontWeight: 500 }}
-                        >
+                          sx={{ fontWeight: 500 }}>
+
                           Disponible
                         </Typography>
                         <Typography variant="inherit" fontWeight="bold">
@@ -358,36 +355,36 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
                       sx={{ mt: 2 }}
                       disabled={deshabilitado}
                       value={
-                        productosCargados[key] !== undefined
-                          ? productosCargados[key]
-                          : producto.cantidadTotal
+                      productosCargados[key] !== undefined ?
+                      productosCargados[key] :
+                      producto.cantidadTotal
                       }
                       inputProps={{
                         min: 0,
-                        max: cantidadMaxima,
+                        max: cantidadMaxima
                       }}
                       onChange={(e) =>
-                        handleChangeCantidad(key, e.target.value)
-                      }
-                    />
+                      handleChangeCantidad(key, e.target.value)
+                      } />
+
                     <Typography
                       variant="caption"
                       color="text.secondary"
-                      sx={{ mt: 0.5 }}
-                    >
+                      sx={{ mt: 0.5 }}>
+
                       Máximo permitido: {cantidadMaxima}
                     </Typography>
-                    {deshabilitado && (
-                      <Typography
-                        variant="caption"
-                        color="success"
-                        sx={{ display: "block", mt: 1 }}
-                      >
+                    {deshabilitado &&
+                    <Typography
+                      variant="caption"
+                      color="success"
+                      sx={{ display: "block", mt: 1 }}>
+
                         Ya se encuentra completamente cargado.
                       </Typography>
-                    )}
-                  </Paper>
-                );
+                    }
+                  </Paper>);
+
               })}
             </Box>
 
@@ -398,8 +395,8 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
               fullWidth
               sx={{ mt: 3 }}
               value={notasChofer}
-              onChange={(e) => setNotasChofer(e.target.value)}
-            />
+              onChange={(e) => setNotasChofer(e.target.value)} />
+
 
             <Box
               sx={{
@@ -410,9 +407,9 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
                 p: { xs: 1.5, sm: 2 },
                 bgcolor: "background.paper",
                 borderTop: "1px solid #eee",
-                zIndex: 10,
-              }}
-            >
+                zIndex: 10
+              }}>
+
               <Button
                 variant="contained"
                 color="success"
@@ -422,11 +419,11 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
                   fontSize: "1rem",
                   py: 1.2,
                   borderRadius: 2,
-                  textTransform: "none",
+                  textTransform: "none"
                 }}
                 onClick={handleConfirmar}
-                disabled={isLoading}
-              >
+                disabled={isLoading}>
+
                 {isLoading ? <CircularProgress size={22} /> : "Confirmar Carga"}
               </Button>
             </Box>
@@ -434,14 +431,14 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
           </Box>
         </Paper>
       </Box>
-    </Modal>
-  );
+    </Modal>);
+
 };
 
 ConfirmarCargaModal.propTypes = {
   open: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
-  agendaCarga: PropTypes.object,
+  agendaCarga: PropTypes.object
 };
 
 export default ConfirmarCargaModal;

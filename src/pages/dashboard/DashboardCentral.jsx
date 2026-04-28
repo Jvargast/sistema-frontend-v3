@@ -2,13 +2,9 @@ import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { createSwapy } from "swapy";
 import {
-  Box,
-  Grid,
-  /*   Typography,
-  Button, */
-  Card,
-  CardContent,
-} from "@mui/material";
+/*   Typography,
+Button, */
+Card, CardContent } from "@mui/material";
 import SalesChart from "../../components/dashboard/paneles/SalesChart";
 import OrdersPieChart from "../../components/dashboard/paneles/OrdersPieChart";
 import RevenueTrendChart from "../../components/dashboard/paneles/RevenueTrendChart";
@@ -23,6 +19,8 @@ import { useSelector } from "react-redux";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
 import DashboardHeader from "../../components/dashboard/paneles/DashboardHeader";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
 
 const DashboardCentral = () => {
   const { mode, activeSucursalId } = useSelector((s) => s.scope || {});

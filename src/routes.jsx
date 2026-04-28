@@ -127,7 +127,10 @@ const router = createHashRouter([
             element: (
               <RoleBasedRoute requiredPermission="vistas.adminpedidos.ver" />
             ),
-            children: [{ path: "", element: <PedidosBoard /> }],
+            children: [
+              { path: "", element: <PedidosBoard /> },
+              { path: "ver/:id", element: <VerPedido /> },
+            ],
           },
           // mis-pedidos
           {

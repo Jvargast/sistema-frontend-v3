@@ -1,5 +1,7 @@
-import { Box, Button, Grid } from "@mui/material";
+import { Button } from "@mui/material";
 import PropTypes from "prop-types";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
 
 const SimpleNumPad = ({ value, onChange, onClose }) => {
   const handleClick = (val) => {

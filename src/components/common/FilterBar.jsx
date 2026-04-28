@@ -1,14 +1,9 @@
 import PropTypes from "prop-types";
-import {
-  Box,
-  TextField,
-  MenuItem,
-  InputAdornment,
-  useTheme,
-  Button,
-} from "@mui/material";
+import { MenuItem, InputAdornment, useTheme, Button } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import DateRangeFilter from "./DateRangeFilter";
+import TextField from "./CompatTextField";
+import Box from "./CompatBox";
 
 const FilterBar = ({
   config,

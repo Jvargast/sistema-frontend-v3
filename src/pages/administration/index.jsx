@@ -1,12 +1,5 @@
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
-import {
-  Box,
-  Typography,
-  Card,
-  Grid,
-  TextField,
-  InputAdornment,
-} from "@mui/material";
+import { Card, InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   HomeOutlined,
@@ -31,6 +24,10 @@ import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined
 import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
 import HistoryEduOutlinedIcon from "@mui/icons-material/HistoryEduOutlined";
 import { useMemo, useState } from "react";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Typography from "../../components/common/CompatTypography";
 
 const navItems = [
   {

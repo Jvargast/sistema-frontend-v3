@@ -1,12 +1,7 @@
-import {
-  Paper,
-  Typography,
-  CircularProgress,
-  Divider,
-  Chip,
-} from "@mui/material";
+import { Paper, CircularProgress, Divider, Chip } from "@mui/material";
 import { useGetPedidoByIdQuery } from "../../store/services/pedidosApi";
 import PropTypes from "prop-types";
+import Typography from "../common/CompatTypography";
 
 const PedidoTooltip = ({ idPedido }) => {
   const { data: pedido, isLoading, isError } = useGetPedidoByIdQuery(idPedido);

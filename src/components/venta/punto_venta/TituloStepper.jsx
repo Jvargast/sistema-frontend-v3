@@ -1,5 +1,6 @@
-import { Typography, Divider, useTheme } from "@mui/material";
+import { Divider, useTheme } from "@mui/material";
 import PropTypes from "prop-types";
+import Typography from "../../common/CompatTypography";
 
 const TituloStepper = ({ texto }) => {
   const theme = useTheme();

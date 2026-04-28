@@ -1,18 +1,12 @@
-import {
-  Box,
-  Typography,
-  Button,
-  MenuItem,
-  TextField,
-  Checkbox,
-  Paper,
-  useMediaQuery,
-} from "@mui/material";
+import { Button, MenuItem, Checkbox, Paper, useMediaQuery } from "@mui/material";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import PropTypes from "prop-types";
 import CajaInfo from "../../caja/CajaInfo";
 import { useEffect } from "react";
+import TextField from "../../common/CompatTextField";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
 
 const BarraSuperior = ({
   selectedVendedor,

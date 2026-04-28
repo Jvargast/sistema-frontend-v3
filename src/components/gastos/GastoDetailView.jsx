@@ -1,12 +1,4 @@
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  Divider,
-  Grid,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Card, CardHeader, CardContent, Divider } from "@mui/material";
 import PaidOutlined from "@mui/icons-material/PaidOutlined";
 import ReceiptLongOutlined from "@mui/icons-material/ReceiptLongOutlined";
 import AccountTreeOutlined from "@mui/icons-material/AccountTreeOutlined";
@@ -16,6 +8,9 @@ import PropTypes from "prop-types";
 import { formatCLP } from "../../utils/formatUtils";
 import { formatearFechaSistemaUTC } from "../../utils/fechaUtils";
 import { getMetodoPagoLabel } from "../../constants/metodosPago";
+import Grid from "../common/CompatGrid";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 function InfoItem({ icon: Icon, label, value, hint }) {
   return (

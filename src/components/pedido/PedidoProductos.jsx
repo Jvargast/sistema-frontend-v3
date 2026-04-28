@@ -1,9 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
-import { Box, Grid, Typography, Pagination } from "@mui/material";
+import { Pagination } from "@mui/material";
 import { useGetAvailabreProductosQuery } from "../../store/services/productoApi";
 import ProductCard from "../venta/ProductCard";
 import { getStockForSucursal } from "../../utils/inventoryUtils";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
+import Typography from "../common/CompatTypography";
 
 const PedidoProductos = ({ selectedCategory, onAddToCart, sucursalId }) => {
   const [page, setPage] = useState(1);
@@ -41,7 +44,7 @@ const PedidoProductos = ({ selectedCategory, onAddToCart, sucursalId }) => {
   const productos = productosData?.productos ?? [];
   const totalItems =
     productosData?.paginacion?.totalItems ??
-    productosData?.totalItems ?? 
+    productosData?.totalItems ??
     0;
 
   const totalPages =
@@ -86,7 +89,7 @@ const PedidoProductos = ({ selectedCategory, onAddToCart, sucursalId }) => {
           {showPagination && (
             <Box display="flex" justifyContent="center" mt={2}>
               <Pagination
-                count={Math.max(1, totalPages)} 
+                count={Math.max(1, totalPages)}
                 page={page}
                 onChange={(_, value) => setPage(value)}
                 color="primary"

@@ -1,7 +1,9 @@
 import PropTypes from "prop-types";
-import { Box, Switch, Typography, Tooltip, IconButton } from "@mui/material";
+import { Switch, Tooltip, IconButton } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import Highlighter from "react-highlight-words";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const Row = ({
   index,

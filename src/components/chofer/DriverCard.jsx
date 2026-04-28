@@ -1,13 +1,10 @@
 import PropTypes from "prop-types";
-import {
-  Grid,
-  Card,
-  CardActionArea,
-  CardContent,
-  Typography,
-  Avatar,
-  Box,
-} from "@mui/material";
+import { Card, CardActionArea, CardContent, Avatar } from "@mui/material";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
+import Typography from "../common/CompatTypography";
+
+// Tarjeta individual para cada chofer
 
 // Tarjeta individual para cada chofer
 const DriverCard = ({ driver, isSelected, onSelect }) => {

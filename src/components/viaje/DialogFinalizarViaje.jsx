@@ -1,17 +1,8 @@
+import Dialog from "../common/CompatDialog";
 import PropTypes from "prop-types";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControlLabel,
-  Checkbox,
-  Button,
-  Typography,
-  Box,
-  useTheme,
-  useMediaQuery,
-} from "@mui/material";
+import { DialogTitle, DialogContent, DialogActions, FormControlLabel, Checkbox, Button, useTheme, useMediaQuery } from "@mui/material";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const DialogFinalizarViaje = ({
   open,
@@ -22,7 +13,7 @@ const DialogFinalizarViaje = ({
   descargarAuto,
   setDescargarAuto,
   descargarDisponibles,
-  setDescargarDisponibles,
+  setDescargarDisponibles
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -41,34 +32,34 @@ const DialogFinalizarViaje = ({
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}>
           <FormControlLabel
             control={
-              <Checkbox
-                checked={descargarAuto}
-                onChange={(e) => setDescargarAuto(e.target.checked)}
-              />
+            <Checkbox
+              checked={descargarAuto}
+              onChange={(e) => setDescargarAuto(e.target.checked)} />
+
             }
-            label="¿Descargar automáticamente el camión?"
-          />
+            label="¿Descargar automáticamente el camión?" />
+
 
           <FormControlLabel
             control={
-              <Checkbox
-                checked={descargarDisponibles}
-                onChange={(e) => setDescargarDisponibles(e.target.checked)}
-                disabled={!descargarAuto}
-              />
+            <Checkbox
+              checked={descargarDisponibles}
+              onChange={(e) => setDescargarDisponibles(e.target.checked)}
+              disabled={!descargarAuto} />
+
             }
-            label="Descargar productos disponibles (stock)"
-          />
+            label="Descargar productos disponibles (stock)" />
+
 
           <FormControlLabel
             control={
-              <Checkbox
-                checked={dejaRetornables}
-                onChange={(e) => setDejaRetornables(e.target.checked)}
-              />
+            <Checkbox
+              checked={dejaRetornables}
+              onChange={(e) => setDejaRetornables(e.target.checked)} />
+
             }
-            label="Dejé los botellones retornables en planta"
-          />
+            label="Dejé los botellones retornables en planta" />
+
         </Box>
       </DialogContent>
 
@@ -78,13 +69,13 @@ const DialogFinalizarViaje = ({
           onClick={onConfirm}
           variant="contained"
           color="primary"
-          sx={{ fontWeight: "bold" }}
-        >
+          sx={{ fontWeight: "bold" }}>
+
           Finalizar Viaje
         </Button>
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 
 DialogFinalizarViaje.propTypes = {
@@ -96,7 +87,7 @@ DialogFinalizarViaje.propTypes = {
   descargarAuto: PropTypes.bool.isRequired,
   setDescargarAuto: PropTypes.func.isRequired,
   descargarDisponibles: PropTypes.bool.isRequired,
-  setDescargarDisponibles: PropTypes.func.isRequired,
+  setDescargarDisponibles: PropTypes.func.isRequired
 };
 
 export default DialogFinalizarViaje;

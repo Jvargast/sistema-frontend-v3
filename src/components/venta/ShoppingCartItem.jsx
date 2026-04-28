@@ -1,7 +1,11 @@
-import { Box, Typography, IconButton, TextField, Stack } from "@mui/material";
+import { IconButton } from "@mui/material";
 import { Add, Remove, Delete } from "@mui/icons-material";
 import PropTypes from "prop-types";
 import { useState } from "react";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const ShoppingCartItem = ({
   item,

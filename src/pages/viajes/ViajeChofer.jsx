@@ -1,19 +1,14 @@
+import Dialog from "../../components/common/CompatDialog";
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
-import {
-  useTheme,
-  useMediaQuery,
-  Typography,
-  Box,
-  IconButton,
-  Dialog,
-  DialogTitle,
-} from "@mui/material";
+import { useTheme, useMediaQuery, IconButton, DialogTitle } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { Container } from "@mui/material";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import CloseIcon from "@mui/icons-material/Close";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
 
 import InventarioCargado from "../../components/viaje/InventarioCargado";
 import ListaDestinos from "../../components/viaje/ListaDestinos";
@@ -30,8 +25,8 @@ import SpeedDialAction from "@mui/material/SpeedDialAction";
 import SpeedDialIcon from "@mui/material/SpeedDialIcon";
 import {
   emitRefetchAgendaViajes,
-  onRefetchAgendaViajes,
-} from "../../utils/eventBus";
+  onRefetchAgendaViajes } from
+"../../utils/eventBus";
 import { useGetPedidoByIdQuery } from "../../store/services/pedidosApi";
 import { useGetEntregasByAgendaIdQuery } from "../../store/services/entregasApi";
 import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
@@ -63,7 +58,7 @@ const ViajeChofer = ({ viaje }) => {
 
   useChoferTracking({
     viajeActivo: viaje?.estado === "En Tránsito",
-    rut: user?.id,
+    rut: user?.id
   });
 
   useEffect(() => {
@@ -92,9 +87,9 @@ const ViajeChofer = ({ viaje }) => {
         tooltipTitle={titulo}
         onClick={onClick}
         tabIndex={0}
-        aria-hidden={false}
-      />
-    );
+        aria-hidden={false} />);
+
+
   };
 
   useEffect(() => {
@@ -116,10 +111,10 @@ const ViajeChofer = ({ viaje }) => {
   const {
     data: entregasData,
     refetch: refetchEntregas,
-    error: errorEntregas,
+    error: errorEntregas
   } = useGetEntregasByAgendaIdQuery(
     {
-      id_agenda_viaje: viaje?.id_agenda_viaje,
+      id_agenda_viaje: viaje?.id_agenda_viaje
     },
     { skip: !viaje?.id_agenda_viaje }
   );
@@ -128,9 +123,9 @@ const ViajeChofer = ({ viaje }) => {
     data: inventarioCamion,
     isLoading: cargandoInventario,
     refetch: refetchInventario,
-    error: errorInventario,
+    error: errorInventario
   } = useGetEstadoInventarioCamionQuery(viaje?.id_camion, {
-    skip: !viaje?.id_camion,
+    skip: !viaje?.id_camion
   });
 
   useRegisterRefresh(
@@ -178,20 +173,20 @@ const ViajeChofer = ({ viaje }) => {
       console.log("🔄 Refetch ejecutado en ViajeChofer");
 
       if (
-        isMounted.current &&
-        isInventarioReady.current &&
-        typeof refetchInventarioRef.current === "function"
-      ) {
+      isMounted.current &&
+      isInventarioReady.current &&
+      typeof refetchInventarioRef.current === "function")
+      {
         refetchInventarioRef.current();
       } else {
         console.warn("⚠️ Inventario no listo para refetch.");
       }
 
       if (
-        isMounted.current &&
-        isEntregasReady.current &&
-        typeof refetchEntregasRef.current === "function"
-      ) {
+      isMounted.current &&
+      isEntregasReady.current &&
+      typeof refetchEntregasRef.current === "function")
+      {
         refetchEntregasRef.current();
       } else {
         console.warn("⚠️ Entregas no listas para refetch.");
@@ -213,9 +208,9 @@ const ViajeChofer = ({ viaje }) => {
     data: pedidoCompleto,
     isFetching: loadingPedido,
     isSuccess: successPedido,
-    error: errorPedido,
+    error: errorPedido
   } = useGetPedidoByIdQuery(pedidoSeleccionadoId, {
-    skip: !pedidoSeleccionadoId,
+    skip: !pedidoSeleccionadoId
   });
 
   useEffect(() => {
@@ -224,16 +219,16 @@ const ViajeChofer = ({ viaje }) => {
       if (!errorEntregas && entregasData?.data?.length > 0) {
         entregasData.data.forEach((entrega) => {
           if (
-            entrega?.estado_entrega &&
-            entrega.estado_entrega.toLowerCase() === "anulada"
-          ) {
+          entrega?.estado_entrega &&
+          entrega.estado_entrega.toLowerCase() === "anulada")
+          {
             return;
           }
           const idPedido = entrega?.pedido?.id_pedido;
           if (idPedido) {
             entregasMap[idPedido] = {
               entregado: true,
-              entrega,
+              entrega
             };
           }
         });
@@ -242,7 +237,7 @@ const ViajeChofer = ({ viaje }) => {
       const estadoInicial = viaje.destinos.reduce((acc, destino) => {
         acc[destino.id_pedido] = entregasMap[destino.id_pedido] || {
           entregado: false,
-          entrega: null,
+          entrega: null
         };
         return acc;
       }, {});
@@ -258,7 +253,7 @@ const ViajeChofer = ({ viaje }) => {
   const handleEntregaExitosa = (idPedido, entregaData) => {
     setEntregas((prev) => ({
       ...prev,
-      [idPedido]: { entregado: true, entrega: entregaData },
+      [idPedido]: { entregado: true, entrega: entregaData }
     }));
 
     const destinoEntregado = viaje.destinos.find(
@@ -277,25 +272,25 @@ const ViajeChofer = ({ viaje }) => {
         id_agenda_viaje: viaje.id_agenda_viaje,
         descargarAuto,
         descargarDisponibles,
-        dejaRetornables,
+        dejaRetornables
       });
       await finalizarViaje({
         id_agenda_viaje: viaje.id_agenda_viaje,
         descargarAuto,
         descargarDisponibles,
-        dejaRetornables,
+        dejaRetornables
       }).unwrap();
       dispatch(
         showNotification({
           message: "¡Viaje finalizado con éxito!",
-          severity: "success",
+          severity: "success"
         })
       );
     } catch {
       dispatch(
         showNotification({
           message: "Error al finalizar el viaje",
-          severity: "error",
+          severity: "error"
         })
       );
     }
@@ -310,8 +305,8 @@ const ViajeChofer = ({ viaje }) => {
   ).length;
 
   const todasEntregasCompletadas =
-    viaje?.destinos?.length > 0 &&
-    entregasCompletadas === viaje.destinos.length;
+  viaje?.destinos?.length > 0 &&
+  entregasCompletadas === viaje.destinos.length;
 
   const relevantError = useErrorChecker(
     errorEntregas,
@@ -329,44 +324,44 @@ const ViajeChofer = ({ viaje }) => {
       <InfoGeneral viaje={viaje} />
       <ResumenDelDia
         totalDestinos={viaje.destinos.length}
-        entregasCompletadas={entregasCompletadas}
-      />
+        entregasCompletadas={entregasCompletadas} />
+
       <ListaDestinos
         destinos={viaje.destinos}
         entregas={entregas}
         origen={origenActual}
         origenInicial={origenInicial}
         onOpenEntrega={handleOpenEntrega}
-        onVerDetallePedido={handleVerDetallePedido}
-      />
+        onVerDetallePedido={handleVerDetallePedido} />
+
       <InventarioCargado
         inventario={inventarioCamion?.data}
-        isLoading={cargandoInventario}
-      />
-      {modalOpen && destinoSeleccionado && (
-        <FormularioEntregaModal
-          open={modalOpen}
-          onClose={() => {
-            setModalOpen(false);
-            refetchEntregas();
-          }}
-          destino={destinoSeleccionado}
-          id_agenda_viaje={viaje.id_agenda_viaje}
-          onSuccess={handleEntregaExitosa}
-        />
-      )}
+        isLoading={cargandoInventario} />
 
-      {detallePedidoOpen && successPedido && (
-        <DetallePedidoModal
-          open={detallePedidoOpen}
-          onClose={() => {
-            setDetallePedidoOpen(false);
-            setPedidoSeleccionadoId(null);
-          }}
-          pedido={pedidoCompleto}
-          loading={loadingPedido}
-        />
-      )}
+      {modalOpen && destinoSeleccionado &&
+      <FormularioEntregaModal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          refetchEntregas();
+        }}
+        destino={destinoSeleccionado}
+        id_agenda_viaje={viaje.id_agenda_viaje}
+        onSuccess={handleEntregaExitosa} />
+
+      }
+
+      {detallePedidoOpen && successPedido &&
+      <DetallePedidoModal
+        open={detallePedidoOpen}
+        onClose={() => {
+          setDetallePedidoOpen(false);
+          setPedidoSeleccionadoId(null);
+        }}
+        pedido={pedidoCompleto}
+        loading={loadingPedido} />
+
+      }
 
       <SpeedDial
         ref={fabRef}
@@ -377,15 +372,15 @@ const ViajeChofer = ({ viaje }) => {
           right: 24,
           zIndex: 1200,
           "& .MuiSpeedDialAction-fab": {
-            transition: "none !important",
-          },
+            transition: "none !important"
+          }
         }}
         icon={<SpeedDialIcon onClick={toggleFab} />}
         direction="up"
         open={fabOpen}
         onClose={() => setFabOpen(false)}
-        onOpen={() => setFabOpen(true)}
-      >
+        onOpen={() => setFabOpen(true)}>
+
         {renderSpeedDialAction(
           fabOpen,
           <Inventory2Icon />,
@@ -401,30 +396,30 @@ const ViajeChofer = ({ viaje }) => {
         )}
 
         {renderSpeedDialAction(
-          fabOpen &&
-            (viaje?.destinos?.length === 0 || todasEntregasCompletadas),
+          fabOpen && (
+          viaje?.destinos?.length === 0 || todasEntregasCompletadas),
           <DoneIcon />,
           "Finalizar Viaje",
           handleAbrirDialogoFinalizar
         )}
       </SpeedDial>
 
-      {modalVentaRapidaOpen && (
-        <ModalVentaRapida
-          open={modalVentaRapidaOpen}
-          onClose={() => setModalVentaRapidaOpen(false)}
-          viaje={viaje}
-          onSuccess={() => {
-            dispatch(
-              showNotification({
-                message: "¡Venta rápida registrada!",
-                severity: "success",
-              })
-            );
-            refetchInventario();
-          }}
-        />
-      )}
+      {modalVentaRapidaOpen &&
+      <ModalVentaRapida
+        open={modalVentaRapidaOpen}
+        onClose={() => setModalVentaRapidaOpen(false)}
+        viaje={viaje}
+        onSuccess={() => {
+          dispatch(
+            showNotification({
+              message: "¡Venta rápida registrada!",
+              severity: "success"
+            })
+          );
+          refetchInventario();
+        }} />
+
+      }
       <Dialog
         fullScreen={isTabletOrMobile}
         hideBackdrop
@@ -437,17 +432,17 @@ const ViajeChofer = ({ viaje }) => {
           setFabOpen(false);
           document.activeElement.blur();
         }}
-        keepMounted={false}
-      >
+        keepMounted={false}>
+
         <DialogTitle
           sx={(theme) => ({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             bgcolor:
-              theme.palette.mode === "dark"
-                ? theme.palette.primary.dark + "22"
-                : theme.palette.primary.light + "44",
+            theme.palette.mode === "dark" ?
+            theme.palette.primary.dark + "22" :
+            theme.palette.primary.light + "44",
             color: theme.palette.primary.main,
             fontWeight: "bold",
             fontSize: { xs: 18, sm: 22 },
@@ -456,12 +451,12 @@ const ViajeChofer = ({ viaje }) => {
             px: { xs: 2, sm: 4 },
             py: { xs: 1.5, sm: 2 },
             borderBottom: `1.5px solid ${
-              theme.palette.mode === "dark"
-                ? theme.palette.primary.dark
-                : theme.palette.primary.light
-            }`,
-          })}
-        >
+            theme.palette.mode === "dark" ?
+            theme.palette.primary.dark :
+            theme.palette.primary.light}`
+
+          })}>
+
           Detalle Visual del Inventario del Camión
           <IconButton
             onClick={() => {
@@ -474,12 +469,12 @@ const ViajeChofer = ({ viaje }) => {
               color: (theme) => theme.palette.primary.main,
               "&:hover": {
                 backgroundColor: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? theme.palette.primary.dark + "1A"
-                    : theme.palette.primary.light + "1A",
-              },
-            }}
-          >
+                theme.palette.mode === "dark" ?
+                theme.palette.primary.dark + "1A" :
+                theme.palette.primary.light + "1A"
+              }
+            }}>
+
             <CloseIcon />
           </IconButton>
         </DialogTitle>
@@ -488,8 +483,8 @@ const ViajeChofer = ({ viaje }) => {
           <InventarioCamion
             idCamion={viaje.id_camion}
             modo="visual"
-            inventarioData={inventarioCamion?.data}
-          />
+            inventarioData={inventarioCamion?.data} />
+
         </Box>
       </Dialog>
       <DialogFinalizarViaje
@@ -501,14 +496,14 @@ const ViajeChofer = ({ viaje }) => {
         descargarAuto={descargarAuto}
         setDescargarAuto={setDescargarAuto}
         descargarDisponibles={descargarDisponibles}
-        setDescargarDisponibles={setDescargarDisponibles}
-      />
-    </Container>
-  );
+        setDescargarDisponibles={setDescargarDisponibles} />
+
+    </Container>);
+
 };
 
 ViajeChofer.propTypes = {
-  viaje: PropTypes.object.isRequired,
+  viaje: PropTypes.object.isRequired
 };
 
 export default ViajeChofer;

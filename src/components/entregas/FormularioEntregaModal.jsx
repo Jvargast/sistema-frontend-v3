@@ -1,21 +1,6 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  CircularProgress,
-  Box,
-  Chip,
-  Divider,
-  Paper,
-  IconButton,
-  Stepper,
-  Step,
-  StepLabel,
-  useTheme,
-} from "@mui/material";
+import Dialog from "../common/CompatDialog";
+import StepLabel from "../common/CompatStepLabel";
+import { DialogTitle, DialogContent, DialogActions, Button, CircularProgress, Chip, Divider, Paper, IconButton, Stepper, Step, useTheme } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
@@ -25,27 +10,29 @@ import PropTypes from "prop-types";
 import useEntregaFormLogic from "../../utils/useEntregaFormLogic";
 import EntregaPagoStep from "./EntregaPagoStep";
 import EntregaBotellonesStep from "./EntregaBotellonesStep";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
-const PagoStepIcon = ({ active, completed, className }) => (
-  <CreditCardIcon
-    className={className}
-    fontSize="small"
-    color={completed ? "success" : active ? "primary" : "disabled"}
-  />
-);
+const PagoStepIcon = ({ active, completed, className }) =>
+<CreditCardIcon
+  className={className}
+  fontSize="small"
+  color={completed ? "success" : active ? "primary" : "disabled"} />;
 
-const RetornablesStepIcon = ({ active, completed, className }) => (
-  <AutorenewIcon
-    className={className}
-    fontSize="small"
-    color={completed ? "success" : active ? "primary" : "disabled"}
-  />
-);
+
+
+const RetornablesStepIcon = ({ active, completed, className }) =>
+<AutorenewIcon
+  className={className}
+  fontSize="small"
+  color={completed ? "success" : active ? "primary" : "disabled"} />;
+
+
 
 PagoStepIcon.propTypes = RetornablesStepIcon.propTypes = {
   active: PropTypes.bool,
   completed: PropTypes.bool,
-  className: PropTypes.string,
+  className: PropTypes.string
 };
 
 const FormularioEntregaModal = ({
@@ -53,7 +40,7 @@ const FormularioEntregaModal = ({
   onClose,
   destino,
   id_agenda_viaje,
-  onSuccess,
+  onSuccess
 }) => {
   const theme = useTheme();
 
@@ -70,19 +57,19 @@ const FormularioEntregaModal = ({
     onSubmit,
     clienteTrae,
     setClienteTrae,
-    setProductosSeleccionados,
+    setProductosSeleccionados
   } = useEntregaFormLogic({
     open,
     destino,
     id_agenda_viaje,
     onClose,
-    onSuccess,
+    onSuccess
   });
 
   const montoFmt = (n) =>
-    typeof n === "number"
-      ? n.toLocaleString("es-CL", { style: "currency", currency: "CLP" })
-      : "-";
+  typeof n === "number" ?
+  n.toLocaleString("es-CL", { style: "currency", currency: "CLP" }) :
+  "-";
 
   const pagado = Boolean(detallePedido?.pagado);
 
@@ -97,10 +84,10 @@ const FormularioEntregaModal = ({
         sx: {
           borderRadius: 3,
           overflow: "hidden",
-          boxShadow: 24,
-        },
-      }}
-    >
+          boxShadow: 24
+        }
+      }}>
+
       {/* Header con gradiente e icono */}
       <DialogTitle sx={{ p: 0 }}>
         <Box
@@ -112,11 +99,11 @@ const FormularioEntregaModal = ({
             justifyContent: "space-between",
             color: "#fff",
             background:
-              theme.palette.mode === "dark"
-                ? "linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)"
-                : "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
-          }}
-        >
+            theme.palette.mode === "dark" ?
+            "linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)" :
+            "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)"
+          }}>
+
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <LocalShippingIcon sx={{ fontSize: 28 }} />
             <Box>
@@ -125,8 +112,8 @@ const FormularioEntregaModal = ({
               </Typography>
               <Typography
                 variant="caption"
-                sx={{ opacity: 0.9, display: "block" }}
-              >
+                sx={{ opacity: 0.9, display: "block" }}>
+
                 Cliente: <strong>{destino?.nombre_cliente || "-"}</strong>
               </Typography>
             </Box>
@@ -138,9 +125,9 @@ const FormularioEntregaModal = ({
             sx={{
               color: "#fff",
               bgcolor: "rgba(255,255,255,.12)",
-              "&:hover": { bgcolor: "rgba(255,255,255,.2)" },
-            }}
-          >
+              "&:hover": { bgcolor: "rgba(255,255,255,.2)" }
+            }}>
+
             <CloseIcon fontSize="small" />
           </IconButton>
         </Box>
@@ -148,9 +135,9 @@ const FormularioEntregaModal = ({
 
       <DialogContent
         sx={{
-          pb: 0,
-        }}
-      >
+          pb: 0
+        }}>
+
         {/* Resumen pedido */}
         <Paper
           variant="outlined"
@@ -165,15 +152,15 @@ const FormularioEntregaModal = ({
             justifyContent: "space-between",
             gap: 2,
             backgroundColor:
-              theme.palette.mode === "dark"
-                ? "rgba(59,130,246,.08)"
-                : "rgba(59,130,246,.06)",
+            theme.palette.mode === "dark" ?
+            "rgba(59,130,246,.08)" :
+            "rgba(59,130,246,.06)",
             borderColor:
-              theme.palette.mode === "dark"
-                ? "rgba(59,130,246,.3)"
-                : "rgba(59,130,246,.25)",
-          }}
-        >
+            theme.palette.mode === "dark" ?
+            "rgba(59,130,246,.3)" :
+            "rgba(59,130,246,.25)"
+          }}>
+
           <Box>
             <Typography variant="body2" color="text.secondary">
               Monto total del pedido
@@ -187,8 +174,8 @@ const FormularioEntregaModal = ({
             color={pagado ? "success" : "warning"}
             variant={pagado ? "filled" : "outlined"}
             size="small"
-            sx={{ fontWeight: 700 }}
-          />
+            sx={{ fontWeight: 700 }} />
+
         </Paper>
 
         {/* Stepper */}
@@ -207,25 +194,25 @@ const FormularioEntregaModal = ({
 
         {/* Form */}
         <form id="entrega-form" onSubmit={handleSubmit(onSubmit)}>
-          {paso === 1 && (
-            <EntregaPagoStep
-              detallePedido={detallePedido}
-              register={register}
-              errors={errors}
-              watch={watch}
-            />
-          )}
+          {paso === 1 &&
+          <EntregaPagoStep
+            detallePedido={detallePedido}
+            register={register}
+            errors={errors}
+            watch={watch} />
 
-          {paso === 2 && (
-            <EntregaBotellonesStep
-              productos={productosRetornables}
-              onChange={setProductosSeleccionados}
-              clienteTrae={clienteTrae}
-              setClienteTrae={setClienteTrae}
-              detallePedido={detallePedido}
-              watch={watch}
-            />
-          )}
+          }
+
+          {paso === 2 &&
+          <EntregaBotellonesStep
+            productos={productosRetornables}
+            onChange={setProductosSeleccionados}
+            clienteTrae={clienteTrae}
+            setClienteTrae={setClienteTrae}
+            detallePedido={detallePedido}
+            watch={watch} />
+
+          }
         </form>
       </DialogContent>
 
@@ -237,39 +224,39 @@ const FormularioEntregaModal = ({
           bgcolor: "background.paper",
           borderTop: `1px solid ${theme.palette.divider}`,
           py: 1.5,
-          px: 2,
-        }}
-      >
+          px: 2
+        }}>
+
         <Button onClick={onClose} sx={{ textTransform: "none" }}>
           Cancelar
         </Button>
 
-        {paso === 1 && !pagado && (
-          <Button
-            onClick={() => setPaso(2)}
-            variant="contained"
-            endIcon={<ArrowForwardIcon />}
-            sx={{ textTransform: "none", fontWeight: 700 }}
-          >
+        {paso === 1 && !pagado &&
+        <Button
+          onClick={() => setPaso(2)}
+          variant="contained"
+          endIcon={<ArrowForwardIcon />}
+          sx={{ textTransform: "none", fontWeight: 700 }}>
+
             Siguiente
           </Button>
-        )}
+        }
 
-        {paso === 2 && (
-          <Button
-            type="submit"
-            form="entrega-form"
-            variant="contained"
-            loading={isLoading}
-            loadingIndicator={<CircularProgress size={20} />}
-            sx={{ textTransform: "none", fontWeight: 700 }}
-          >
+        {paso === 2 &&
+        <Button
+          type="submit"
+          form="entrega-form"
+          variant="contained"
+          loading={isLoading}
+          loadingIndicator={<CircularProgress size={20} />}
+          sx={{ textTransform: "none", fontWeight: 700 }}>
+
             Registrar
           </Button>
-        )}
+        }
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 
 FormularioEntregaModal.propTypes = {
@@ -277,7 +264,7 @@ FormularioEntregaModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   destino: PropTypes.object.isRequired,
   id_agenda_viaje: PropTypes.number.isRequired,
-  onSuccess: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func.isRequired
 };
 
 export default FormularioEntregaModal;

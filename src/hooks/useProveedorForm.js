@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLazyGetAllProveedoresQuery } from "../store/services/proveedorApi";
 import { cleanRut, formatRut, validateRut } from "../utils/rut";
-import { formatPhoneCL, validatePhoneCL } from "../utils/phoneCl";
+import {
+  formatPhoneInputCL,
+  isPhonePrefixOnlyCL,
+  validatePhoneCL,
+} from "../utils/phoneCl";
 
 export const GIROS_SUGERIDOS = [
   "Comercio Minorista",
@@ -49,7 +53,7 @@ const useProveedorForm = () => {
   }, [form.rut, triggerBuscar]);
 
   useEffect(() => {
-    if (!form.telefono) {
+    if (!form.telefono || isPhonePrefixOnlyCL(form.telefono)) {
       setTelState({ valid: null, msg: "" });
       return;
     }
@@ -73,7 +77,10 @@ const useProveedorForm = () => {
       return;
     }
     if (field === "telefono") {
-      setForm((s) => ({ ...s, telefono: formatPhoneCL(raw) }));
+      setForm((s) => ({
+        ...s,
+        telefono: formatPhoneInputCL(raw, { keepPrefix: true }),
+      }));
       return;
     }
     if (field === "giro") {
@@ -81,7 +88,7 @@ const useProveedorForm = () => {
       setForm((s) => ({ ...s, giro: val.trimStart() }));
       return;
     }
-    if (typeof value === "string") {
+    if (typeof raw === "string") {
       setForm((s) => ({ ...s, [field]: raw.trimStart() }));
     } else {
       setForm((s) => ({ ...s, [field]: raw }));
@@ -107,7 +114,9 @@ const useProveedorForm = () => {
     !!form.rut &&
     rutState.valid === true &&
     !isDuplicado &&
-    (form.telefono ? telState.valid === true : true);
+    form.telefono && !isPhonePrefixOnlyCL(form.telefono)
+      ? telState.valid === true
+      : true;
 
   return {
     form,

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import ResizeObserver from "resize-observer-polyfill";
-import { Box, useMediaQuery } from "@mui/material";
+import { useMediaQuery } from "@mui/material";
 import { useSelector } from "react-redux";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import LoaderComponent from "../../components/common/LoaderComponent";
@@ -10,6 +10,7 @@ import { LayoutContext } from "../../context/LayoutContext";
 import Footer from "../../components/common/Footer";
 import DynamicTabsBar from "../../components/layout/DynamicTabsBar";
 import WelcomePage from "../../components/common/WelcomePage";
+import Box from "../../components/common/CompatBox";
 
 import { shouldUseRouterPath } from "../../utils/tabsConfig";
 import { isNativeApp } from "../../utils/isNativeApp";

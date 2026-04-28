@@ -1,25 +1,17 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Select,
-  MenuItem,
-  TextField,
-  Box,
-  IconButton,
-  FormControlLabel,
-  Switch,
-  Typography,
-} from "@mui/material";
+import Dialog from "../common/CompatDialog";
+import Select from "../common/CompatSelect";
+import { DialogTitle, DialogContent, DialogActions, Button, MenuItem, IconButton, FormControlLabel, Switch, useTheme } from "@mui/material";
 import {
   DeleteOutlineOutlined,
   AddCircleOutlineOutlined,
-  RemoveCircleOutlineOutlined,
-} from "@mui/icons-material";
+  RemoveCircleOutlineOutlined } from
+"@mui/icons-material";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
 
@@ -28,8 +20,9 @@ const ProductosRetornablesModal = ({
   onClose,
   productos,
   onConfirm,
-  isFactura,
+  isFactura
 }) => {
+  const theme = useTheme();
   const [productosRet, setProductosRet] = useState([]);
   const [inspeccionarAhora, setInspeccionarAhora] = useState(true);
   const [clienteTraeRetornable, setClienteTraeRetornable] = useState(true);
@@ -42,7 +35,7 @@ const ProductosRetornablesModal = ({
   }, [productos]);
 
   const toId = (v) =>
-    v === undefined || v === null || v === "" ? "" : String(v);
+  v === undefined || v === null || v === "" ? "" : String(v);
 
   useEffect(() => {
     if (!open) return;
@@ -56,7 +49,7 @@ const ProductosRetornablesModal = ({
         cantidad: initialCantidad,
         estado: "reutilizable",
         tipo_defecto: "",
-        id_insumo_destino: prod.id_insumo_retorno || "",
+        id_insumo_destino: prod.id_insumo_retorno || ""
       };
     });
 
@@ -70,7 +63,7 @@ const ProductosRetornablesModal = ({
           ...b,
           cantidad,
           estado: old.estado || "reutilizable",
-          tipo_defecto: old.tipo_defecto || "",
+          tipo_defecto: old.tipo_defecto || ""
         };
       });
       return merged;
@@ -80,10 +73,10 @@ const ProductosRetornablesModal = ({
   useEffect(() => {
     if (!open) return;
     setProductosRet((prev) =>
-      prev.map((p) => ({
-        ...p,
-        cantidad: clienteTraeRetornable ? p.esperado : 1,
-      }))
+    prev.map((p) => ({
+      ...p,
+      cantidad: clienteTraeRetornable ? p.esperado : 1
+    }))
     );
   }, [clienteTraeRetornable, open]);
 
@@ -99,16 +92,16 @@ const ProductosRetornablesModal = ({
 
   const handleAgregarProducto = () => {
     setProductosRet((curr) => [
-      ...curr,
-      {
-        id_producto: "",
-        nombre_producto: "",
-        esperado: 1,
-        cantidad: 1,
-        estado: "reutilizable",
-        tipo_defecto: "",
-      },
-    ]);
+    ...curr,
+    {
+      id_producto: "",
+      nombre_producto: "",
+      esperado: 1,
+      cantidad: 1,
+      estado: "reutilizable",
+      tipo_defecto: ""
+    }]
+    );
   };
 
   const handleChange = (index, field, value) => {
@@ -144,7 +137,7 @@ const ProductosRetornablesModal = ({
       const max = item.esperado || 1;
       const current = Number(item.cantidad) || 1;
       item.cantidad =
-        dir === "up" ? clamp(current + 1, 1, max) : clamp(current - 1, 1, max);
+      dir === "up" ? clamp(current + 1, 1, max) : clamp(current - 1, 1, max);
       next[index] = item;
       return next;
     });
@@ -167,9 +160,9 @@ const ProductosRetornablesModal = ({
         estado: p.estado || "reutilizable",
         tipo_defecto: p.estado === "defectuoso" ? p.tipo_defecto || "" : "",
       }));
-
-    onConfirm(normalizados);
+     onConfirm(normalizados);
   }; */
+
 
   return (
     <Dialog
@@ -180,10 +173,10 @@ const ProductosRetornablesModal = ({
       sx={{
         "& .MuiDialog-paper": {
           borderRadius: "12px",
-          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-        },
-      }}
-    >
+          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)"
+        }
+      }}>
+
       <DialogTitle
         sx={{
           fontSize: "1.6rem",
@@ -192,9 +185,9 @@ const ProductosRetornablesModal = ({
           background: "linear-gradient(90deg, #007AFF, #0052D4)",
           color: "white",
           padding: "16px",
-          borderRadius: "10px 10px 0 0",
-        }}
-      >
+          borderRadius: "10px 10px 0 0"
+        }}>
+
         Productos Retornables
       </DialogTitle>
 
@@ -202,209 +195,207 @@ const ProductosRetornablesModal = ({
         <Box mb={2}>
           <FormControlLabel
             control={
-              <Switch
-                checked={clienteTraeRetornable}
-                onChange={() => setClienteTraeRetornable((prev) => !prev)}
-              />
+            <Switch
+              checked={clienteTraeRetornable}
+              onChange={() => setClienteTraeRetornable((prev) => !prev)} />
+
             }
-            label="¿Cliente trae retornable? (prefijar cantidades)"
-          />
+            label="¿Cliente trae retornable? (prefijar cantidades)" />
+
         </Box>
-        {clienteTraeRetornable ? (
-          <>
+        {clienteTraeRetornable ?
+        <>
             <Box mb={2}>
               <FormControlLabel
-                control={
-                  <Switch
-                    checked={inspeccionarAhora}
-                    onChange={() => setInspeccionarAhora((prev) => !prev)}
-                  />
-                }
-                label="Inspeccionar ahora en POS (si lo apagas, se registran como pendientes)"
-              />
+              control={
+              <Switch
+                checked={inspeccionarAhora}
+                onChange={() => setInspeccionarAhora((prev) => !prev)} />
+
+              }
+              label="Inspeccionar ahora en POS (si lo apagas, se registran como pendientes)" />
+
             </Box>
 
-            {productosRet.map((producto, index) => (
-              <Box
-                key={`${producto.id_producto || "nuevo"}-${index}`}
-                display="flex"
-                gap={2}
-                alignItems="center"
-                mb={2}
-                sx={{
-                  padding: "10px 8px",
-                  borderRadius: "16px",
-                  boxShadow: "0 1px 4px 0 rgba(36,198,220,0.06)",
-                  border: "1px solid #E5E7EB",
-                  minHeight: 60,
-                  flexWrap: "wrap",
-                  flexDirection: { xs: "column", sm: "row" },
-                  alignItems: { xs: "stretch", sm: "center" },
-                  gap: { xs: 1.5, sm: 2 },
-                }}
-              >
+            {productosRet.map((producto, index) =>
+          <Box
+            key={`${producto.id_producto || "nuevo"}-${index}`}
+            display="flex"
+            gap={2}
+            alignItems="center"
+            mb={2}
+            sx={{
+              padding: "10px 8px",
+              borderRadius: "16px",
+              boxShadow: "0 1px 4px 0 rgba(36,198,220,0.06)",
+              border: "1px solid #E5E7EB",
+              minHeight: 60,
+              flexWrap: "wrap",
+              flexDirection: { xs: "column", sm: "row" },
+              alignItems: { xs: "stretch", sm: "center" },
+              gap: { xs: 1.5, sm: 2 }
+            }}>
+
                 {/* Producto */}
                 <Select
-                  fullWidth
-                  value={opciones.length ? toId(producto.id_producto) : ""}
-                  onChange={(e) =>
-                    handleChange(index, "id_producto", toId(e.target.value))
-                  }
-                  displayEmpty
-                  sx={{
-                    fontSize: "1rem",
-                    fontWeight: "bold",
-                    borderRadius: "8px",
-                    minWidth: { xs: "100%", sm: 220 },
-                    flex: 1,
-                  }}
-                >
+              fullWidth
+              value={opciones.length ? toId(producto.id_producto) : ""}
+              onChange={(e) =>
+              handleChange(index, "id_producto", toId(e.target.value))
+              }
+              displayEmpty
+              sx={{
+                fontSize: "1rem",
+                fontWeight: "bold",
+                borderRadius: "8px",
+                minWidth: { xs: "100%", sm: 220 },
+                flex: 1
+              }}>
+
                   <MenuItem value="" disabled>
                     Selecciona un producto
                   </MenuItem>
-                  {(opciones || []).map((prod) => (
-                    <MenuItem
-                      key={prod.id_producto}
-                      value={toId(prod.id_producto)}
-                    >
+                  {(opciones || []).map((prod) =>
+              <MenuItem
+                key={prod.id_producto}
+                value={toId(prod.id_producto)}>
+
                       {prod.nombre_producto || prod.nombre}
                     </MenuItem>
-                  ))}
+              )}
                 </Select>
 
                 {/* Cantidad con stepper */}
                 <Box display="flex" alignItems="center" gap={1}>
                   <IconButton
-                    onClick={() => stepCantidad(index, "down")}
-                    disabled={Number(producto.cantidad) <= 1}
-                    sx={{ borderRadius: 2 }}
-                  >
+                onClick={() => stepCantidad(index, "down")}
+                disabled={Number(producto.cantidad) <= 1}
+                sx={{ borderRadius: 2 }}>
+
                     <RemoveCircleOutlineOutlined />
                   </IconButton>
 
                   <TextField
-                    type="number"
-                    label="Cantidad"
-                    value={producto.cantidad}
-                    onChange={(e) =>
-                      handleChange(index, "cantidad", e.target.value)
-                    }
-                    onBlur={(e) =>
-                      handleChange(index, "cantidad", e.target.value)
-                    }
-                    inputProps={{ min: 1, max: producto.esperado }}
-                    sx={{
-                      width: 110,
-                      "& input": { textAlign: "center", fontWeight: 700 },
-                    }}
-                  />
+                type="number"
+                label="Cantidad"
+                value={producto.cantidad}
+                onChange={(e) =>
+                handleChange(index, "cantidad", e.target.value)
+                }
+                onBlur={(e) =>
+                handleChange(index, "cantidad", e.target.value)
+                }
+                inputProps={{ min: 1, max: producto.esperado }}
+                sx={{
+                  width: 110,
+                  "& input": { textAlign: "center", fontWeight: 700 }
+                }} />
+
 
                   <IconButton
-                    onClick={() => stepCantidad(index, "up")}
-                    disabled={
-                      Number(producto.cantidad) >= Number(producto.esperado)
-                    }
-                    sx={{ borderRadius: 2 }}
-                  >
+                onClick={() => stepCantidad(index, "up")}
+                disabled={
+                Number(producto.cantidad) >= Number(producto.esperado)
+                }
+                sx={{ borderRadius: 2 }}>
+
                     <AddCircleOutlineOutlined />
                   </IconButton>
                 </Box>
 
                 <Typography
-                  variant="body2"
-                  sx={{ opacity: 0.8, minWidth: 120 }}
-                >
+              variant="body2"
+              sx={{ opacity: 0.8, minWidth: 120 }}>
+
                   Esperados: <b>{producto.esperado}</b>
                 </Typography>
 
                 {/* Estado */}
                 <Select
-                  value={producto.estado}
-                  onChange={(e) =>
-                    handleChange(index, "estado", e.target.value)
-                  }
-                  sx={{
-                    minWidth: { xs: "100%", sm: 160 },
-                    fontSize: "1rem",
-                    fontWeight: "bold",
-                    borderRadius: "8px",
-                  }}
-                  disabled={!inspeccionarAhora}
-                >
+              value={producto.estado}
+              onChange={(e) =>
+              handleChange(index, "estado", e.target.value)
+              }
+              sx={{
+                minWidth: { xs: "100%", sm: 160 },
+                fontSize: "1rem",
+                fontWeight: "bold",
+                borderRadius: "8px"
+              }}
+              disabled={!inspeccionarAhora}>
+
                   <MenuItem value="reutilizable">♻️ Reutilizable</MenuItem>
                   <MenuItem value="defectuoso">⚠️ Defectuoso</MenuItem>
                   <MenuItem value="pendiente_inspeccion">🕒 Pendiente</MenuItem>
                 </Select>
 
-                {producto.estado === "defectuoso" && (
-                  <TextField
-                    label="Tipo de defecto"
-                    value={producto.tipo_defecto}
-                    onChange={(e) =>
-                      handleChange(index, "tipo_defecto", e.target.value)
-                    }
-                    sx={{
-                      minWidth: { xs: "100%", sm: 180 },
-                      width: { xs: "100%", sm: 200 },
-                    }}
-                  />
-                )}
+                {producto.estado === "defectuoso" &&
+            <TextField
+              label="Tipo de defecto"
+              value={producto.tipo_defecto}
+              onChange={(e) =>
+              handleChange(index, "tipo_defecto", e.target.value)
+              }
+              sx={{
+                minWidth: { xs: "100%", sm: 180 },
+                width: { xs: "100%", sm: 200 }
+              }} />
+
+            }
 
                 {producto.estado === "reutilizable" &&
-                  inspeccionarAhora &&
-                  (producto.id_insumo_destino ? (
-                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
+            inspeccionarAhora && (
+            producto.id_insumo_destino ?
+            <Typography variant="body2" sx={{ opacity: 0.8 }}>
                       Destino: #{producto.id_insumo_destino}
-                    </Typography>
-                  ) : (
-                    <TextField
-                      label="ID insumo destino (si no está configurado)"
-                      value={producto.id_insumo_destino}
-                      onChange={(e) =>
-                        handleChange(index, "id_insumo_destino", e.target.value)
-                      }
-                    />
-                  ))}
+                    </Typography> :
+
+            <TextField
+              label="ID insumo destino (si no está configurado)"
+              value={producto.id_insumo_destino}
+              onChange={(e) =>
+              handleChange(index, "id_insumo_destino", e.target.value)
+              } />)
+
+            }
 
                 <IconButton
-                  onClick={() => handleEliminarProducto(index)}
-                  color="error"
-                  sx={{
-                    borderRadius: "8px",
-                    alignSelf: { xs: "flex-end", sm: "center" },
-                    "&:hover": { backgroundColor: "#FCC0C0" },
-                  }}
-                >
-                  <DeleteOutlineOutlined />
+              onClick={() => handleEliminarProducto(index)}
+              aria-label="Eliminar producto retornable"
+              sx={getActionIconButtonSx(theme, "error", {
+                alignSelf: { xs: "flex-end", sm: "center" },
+              })}>
+
+                  <DeleteOutlineOutlined fontSize="small" />
                 </IconButton>
               </Box>
-            ))}
+          )}
 
             <Button
-              onClick={handleAgregarProducto}
-              variant="contained"
-              fullWidth
-              sx={{
-                mt: 2,
-                backgroundColor: "#28A745",
-                color: "white",
-                fontSize: "1.1rem",
-                fontWeight: "bold",
-                borderRadius: "8px",
-                padding: "10px",
-                "&:hover": { backgroundColor: "#218838" },
-              }}
-              startIcon={<AddCircleOutlineOutlined />}
-            >
+            onClick={handleAgregarProducto}
+            variant="contained"
+            fullWidth
+            sx={{
+              mt: 2,
+              backgroundColor: "#28A745",
+              color: "white",
+              fontSize: "1.1rem",
+              fontWeight: "bold",
+              borderRadius: "8px",
+              padding: "10px",
+              "&:hover": { backgroundColor: "#218838" }
+            }}
+            startIcon={<AddCircleOutlineOutlined />}>
+
               Agregar Producto Retornable
             </Button>
-          </>
-        ) : (
-          <Typography sx={{ mb: 2, opacity: 0.8 }}>
+          </> :
+
+        <Typography sx={{ mb: 2, opacity: 0.8 }}>
             El cliente <b>no</b> trae retornables. La venta continuará sin
             retornos.
           </Typography>
-        )}
+        }
       </DialogContent>
 
       <DialogActions
@@ -412,9 +403,9 @@ const ProductosRetornablesModal = ({
           display: "flex",
           justifyContent: "center",
           gap: "10px",
-          padding: "16px",
-        }}
-      >
+          padding: "16px"
+        }}>
+
         <Button
           onClick={onClose}
           color="error"
@@ -423,9 +414,9 @@ const ProductosRetornablesModal = ({
             fontSize: "1.1rem",
             fontWeight: "bold",
             padding: "10px 20px",
-            borderRadius: "8px",
-          }}
-        >
+            borderRadius: "8px"
+          }}>
+
           Cancelar
         </Button>
 
@@ -438,46 +429,46 @@ const ProductosRetornablesModal = ({
             if (inspeccionarAhora) {
               const faltanDefectos = productosRet.some(
                 (p) =>
-                  p.estado === "defectuoso" &&
-                  !String(p.tipo_defecto || "").trim()
+                p.estado === "defectuoso" &&
+                !String(p.tipo_defecto || "").trim()
               );
               if (faltanDefectos) {
                 alert("Indica el tipo de defecto en los items defectuosos.");
                 return;
               }
             }
-            const normalizados = productosRet
-              .filter((p) => p.id_producto)
-              .map((p) => {
-                const base = {
-                  id_producto: Number(p.id_producto), // <- NUMÉRICO
-                  cantidad: clamp(Number(p.cantidad) || 1, 1, p.esperado || 1),
-                };
+            const normalizados = productosRet.
+            filter((p) => p.id_producto).
+            map((p) => {
+              const base = {
+                id_producto: Number(p.id_producto), // <- NUMÉRICO
+                cantidad: clamp(Number(p.cantidad) || 1, 1, p.esperado || 1)
+              };
 
-                if (!inspeccionarAhora) {
-                  return { ...base, estado: "pendiente_inspeccion" };
-                }
-
-                if (p.estado === "reutilizable") {
-                  return {
-                    ...base,
-                    estado: "reutilizable",
-                    ...(p.id_insumo_destino
-                      ? { id_insumo_destino: Number(p.id_insumo_destino) }
-                      : {}),
-                  };
-                }
-
-                if (p.estado === "defectuoso") {
-                  return {
-                    ...base,
-                    estado: "defectuoso",
-                    tipo_defecto: (p.tipo_defecto || "").trim(),
-                  };
-                }
-
+              if (!inspeccionarAhora) {
                 return { ...base, estado: "pendiente_inspeccion" };
-              });
+              }
+
+              if (p.estado === "reutilizable") {
+                return {
+                  ...base,
+                  estado: "reutilizable",
+                  ...(p.id_insumo_destino ?
+                  { id_insumo_destino: Number(p.id_insumo_destino) } :
+                  {})
+                };
+              }
+
+              if (p.estado === "defectuoso") {
+                return {
+                  ...base,
+                  estado: "defectuoso",
+                  tipo_defecto: (p.tipo_defecto || "").trim()
+                };
+              }
+
+              return { ...base, estado: "pendiente_inspeccion" };
+            });
 
             onConfirm(normalizados);
           }}
@@ -489,14 +480,14 @@ const ProductosRetornablesModal = ({
             padding: "10px 20px",
             borderRadius: "8px",
             backgroundColor: "#007AFF",
-            "&:hover": { backgroundColor: "#005BB5" },
-          }}
-        >
+            "&:hover": { backgroundColor: "#005BB5" }
+          }}>
+
           {isFactura ? "Confirmar venta" : "Continuar al pago"}
         </Button>
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 
 ProductosRetornablesModal.propTypes = {
@@ -504,7 +495,7 @@ ProductosRetornablesModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   productos: PropTypes.array.isRequired,
   onConfirm: PropTypes.func.isRequired,
-  isFactura: PropTypes.bool,
+  isFactura: PropTypes.bool
 };
 
 export default ProductosRetornablesModal;

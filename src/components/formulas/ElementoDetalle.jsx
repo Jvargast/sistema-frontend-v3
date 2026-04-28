@@ -1,15 +1,12 @@
-import {
-  Typography,
-  Paper,
-  Box,
-  useTheme,
-  TextField,
-  IconButton,
-} from "@mui/material";
+import { Paper, useTheme, IconButton } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 import PropTypes from "prop-types";
 import SelectorProducto from "./SelectorProducto";
 import SelectorInsumo from "./SelectorInsumo";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 const ElementoDetalle = ({
   editable = false,
@@ -147,9 +144,10 @@ const ElementoDetalle = ({
           {!isProducto && (
             <IconButton
               aria-label="eliminar"
-              color="error"
               onClick={onDelete}
-              sx={{ alignSelf: "flex-end" }}
+              sx={getActionIconButtonSx(theme, "error", {
+                alignSelf: "flex-end",
+              })}
             >
               <Delete fontSize="small" />
             </IconButton>

@@ -1,3 +1,4 @@
+import Select from "../../common/CompatSelect";
 import {
   LineChart,
   Line,
@@ -5,22 +6,16 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
+  CartesianGrid } from
+"recharts";
+import { CircularProgress, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { useState } from "react";
 import { useGetVentasTendenciaMensualQuery } from "../../../store/services/ventasEstadisticasApi";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
 
 const RevenueTrendChart = ({ idSucursal }) => {
   const { t, i18n } = useTranslation();
@@ -29,7 +24,7 @@ const RevenueTrendChart = ({ idSucursal }) => {
 
   const { data, isLoading, isError, refetch } = useGetVentasTendenciaMensualQuery({
     anio,
-    ...(idSucursal != null ? { id_sucursal: idSucursal } : {}),
+    ...(idSucursal != null ? { id_sucursal: idSucursal } : {})
   });
 
   useRegisterRefresh(
@@ -58,7 +53,7 @@ const RevenueTrendChart = ({ idSucursal }) => {
     {
       style: "currency",
       currency: i18n.language === "es" ? "CLP" : "USD",
-      maximumFractionDigits: 0,
+      maximumFractionDigits: 0
     }
   );
 
@@ -69,13 +64,13 @@ const RevenueTrendChart = ({ idSucursal }) => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 2,
-        }}
-      >
+          mb: 2
+        }}>
+
         <Typography
           variant="subtitle1"
-          sx={{ fontWeight: 600, color: (theme) => theme.palette.text.primary }}
-        >
+          sx={{ fontWeight: 600, color: (theme) => theme.palette.text.primary }}>
+
           📈 {t("dashboard.monthly_revenue_trend")}
         </Typography>
 
@@ -85,52 +80,52 @@ const RevenueTrendChart = ({ idSucursal }) => {
             value={anio}
             onChange={handleChange}
             label={t("general.year")}
-            sx={{ minWidth: 100 }}
-          >
-            {[currentYear, currentYear - 1, currentYear - 2].map((year) => (
-              <MenuItem key={year} value={year}>
+            sx={{ minWidth: 100 }}>
+
+            {[currentYear, currentYear - 1, currentYear - 2].map((year) =>
+            <MenuItem key={year} value={year}>
                 {year}
               </MenuItem>
-            ))}
+            )}
           </Select>
         </FormControl>
       </Box>
 
-      {isLoading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      {isLoading ?
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
           <CircularProgress size={28} />
-        </Box>
-      ) : isError ? (
-        <Typography variant="body2" color="error">
+        </Box> :
+      isError ?
+      <Typography variant="body2" color="error">
           {t("dashboard.error_loading_data")}
-        </Typography>
-      ) : (
-        <ResponsiveContainer width="100%" height={260}>
+        </Typography> :
+
+      <ResponsiveContainer width="100%" height={260}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" tick={{ fontSize: 12 }} />
             <YAxis
-              tickFormatter={(value) => currencyFormatter.format(value)}
-              tick={{ fontSize: 12 }}
-            />
+            tickFormatter={(value) => currencyFormatter.format(value)}
+            tick={{ fontSize: 12 }} />
+
             <Tooltip
-              formatter={(value) =>
-                new Intl.NumberFormat("es-CL", {
-                  style: "currency",
-                  currency: "CLP",
-                  maximumFractionDigits: 0,
-                }).format(value)
-              }
-              labelFormatter={(label) => `${t("dashboard.month")}: ${label}`}
-            />
+            formatter={(value) =>
+            new Intl.NumberFormat("es-CL", {
+              style: "currency",
+              currency: "CLP",
+              maximumFractionDigits: 0
+            }).format(value)
+            }
+            labelFormatter={(label) => `${t("dashboard.month")}: ${label}`} />
+
             <Line
-              type="monotone"
-              dataKey="revenue"
-              stroke="url(#colorRevenue)"
-              strokeWidth={3}
-              dot={{ r: 5, fill: "#3f51b5", strokeWidth: 2, stroke: "white" }}
-              activeDot={{ r: 8, fill: "#303f9f" }}
-            />
+            type="monotone"
+            dataKey="revenue"
+            stroke="url(#colorRevenue)"
+            strokeWidth={3}
+            dot={{ r: 5, fill: "#3f51b5", strokeWidth: 2, stroke: "white" }}
+            activeDot={{ r: 8, fill: "#303f9f" }} />
+
             <defs>
               <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#3f51b5" stopOpacity={0.9} />
@@ -139,9 +134,9 @@ const RevenueTrendChart = ({ idSucursal }) => {
             </defs>
           </LineChart>
         </ResponsiveContainer>
-      )}
-    </Box>
-  );
+      }
+    </Box>);
+
 };
 
 RevenueTrendChart.propTypes = { idSucursal: PropTypes.number };

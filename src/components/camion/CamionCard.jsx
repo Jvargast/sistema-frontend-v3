@@ -1,16 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardActions,
-  Typography,
-  Button,
-  Chip,
-  Box,
-  Divider,
-  IconButton,
-  Tooltip,
-  useTheme,
-} from "@mui/material";
+import { Card, CardContent, CardActions, Button, Chip, Divider, IconButton, Tooltip, useTheme } from "@mui/material";
 import {
   Edit,
   Delete,
@@ -30,6 +18,9 @@ import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useDesasignarChoferMutation } from "../../store/services/camionesApi";
 import ModalInventarioCamion from "../inventario/ModalInventarioCamion";
 import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
   const theme = useTheme();
@@ -257,9 +248,10 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
       <CardActions
         disableSpacing
         sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-          gap: 1.5,
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          gap: 1,
           background:
             theme.palette.mode === "dark"
               ? theme.palette.grey[900]
@@ -273,69 +265,30 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
           boxShadow: "none",
         }}
       >
-        {/* Botón Editar */}
-        <Button
-          size="medium"
-          variant="outlined"
-          color="primary"
-          sx={{
-            fontSize: { xs: "0.9rem", sm: "1rem" },
-            fontWeight: 700,
-            py: { xs: 1, sm: 1.1 },
-            px: { xs: 1.5, sm: 2 },
-            width: "100%",
-            borderRadius: 2,
-            boxShadow: "none",
-            textTransform: "none",
-            letterSpacing: 0.3,
-            transition: "all 0.18s",
-            "&:hover": {
-              background: theme.palette.primary.light + "33",
-              borderColor: theme.palette.primary.main,
-            },
-            "& .MuiButton-startIcon": {
-              marginLeft: 0,
-              marginRight: 0.5,
-            },
-          }}
-          startIcon={<Edit />}
-          onClick={() => setOpenEdit(true)}
-          aria-label="Editar camión"
-        >
-          Editar
-        </Button>
+        <Tooltip title="Editar">
+          <IconButton
+            size="small"
+            onClick={() => setOpenEdit(true)}
+            aria-label="Editar camión"
+            sx={getActionIconButtonSx(theme, "primary")}
+          >
+            <Edit fontSize="small" />
+          </IconButton>
+        </Tooltip>
 
-        {/* Botón Eliminar */}
-        <Button
-          size="medium"
-          variant="contained"
-          color="error"
-          sx={{
-            fontSize: { xs: "0.9rem", sm: "1rem" },
-            fontWeight: 700,
-            py: { xs: 1, sm: 1.1 },
-            px: { xs: 1.5, sm: 2 },
-            width: "100%",
-            borderRadius: 2,
-            textTransform: "none",
-            letterSpacing: 0.3,
-            boxShadow: "none",
-            transition: "all 0.18s",
-            "&:hover": {
-              backgroundColor: theme.palette.error.dark,
-            },
-            "& .MuiButton-startIcon": {
-              marginLeft: 0,
-              marginRight: 0.5,
-            },
-          }}
-          startIcon={<Delete />}
-          onClick={() => onDelete(camion.id_camion)}
-          aria-label="Eliminar camión"
-          disabled={isDeleting}
-        >
-          {isDeleting ? "Eliminando..." : "Eliminar"}
-        </Button>
+        <Tooltip title={isDeleting ? "Eliminando..." : "Eliminar"}>
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => onDelete(camion.id_camion)}
+              aria-label="Eliminar camión"
+              disabled={isDeleting}
+              sx={getActionIconButtonSx(theme, "error")}
+            >
+              <Delete fontSize="small" />
+            </IconButton>
+          </span>
+        </Tooltip>
       </CardActions>
 
       <AsignarChoferModal

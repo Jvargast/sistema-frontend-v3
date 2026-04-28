@@ -1,31 +1,16 @@
-import {
-  Box,
-  Button,
-  Checkbox,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  FormControlLabel,
-  FormHelperText,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
-  Slide,
-  TextField,
-  Typography,
-} from "@mui/material";
+import Dialog from "./CompatDialog";
+import Select from "./CompatSelect";
+import { Button, Checkbox, CircularProgress, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormHelperText, IconButton, InputAdornment, InputLabel, MenuItem, Slide } from "@mui/material";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import ReactSelect from "react-select";
 import { useNavigate } from "react-router-dom";
 import ProductDetails from "../venta/ProductDetails";
 import PropTypes from "prop-types";
 import { Close, Visibility, VisibilityOff } from "@mui/icons-material";
+import TextField from "./CompatTextField";
+import Box from "./CompatBox";
+import Grid from "./CompatGrid";
+import Typography from "./CompatTypography";
 
 const formatRut = (value) => {
   const cleanValue = value.replace(/[^0-9kK]/gi, "");
@@ -53,11 +38,11 @@ const SlideUp = forwardRef(function SlideUp(props, ref) {
 });
 
 const buildDefaults = (fields) =>
-  fields.reduce((acc, field) => {
-    const def = field.defaultValue ?? (field.type === "checkbox" ? false : "");
-    acc[field.name] = field.type === "checkbox" ? Boolean(def) : def;
-    return acc;
-  }, {});
+fields.reduce((acc, field) => {
+  const def = field.defaultValue ?? (field.type === "checkbox" ? false : "");
+  acc[field.name] = field.type === "checkbox" ? Boolean(def) : def;
+  return acc;
+}, {});
 
 const mergeInitial = (fields, initialData) => {
   const base = buildDefaults(fields);
@@ -67,7 +52,7 @@ const mergeInitial = (fields, initialData) => {
     const field = fields.find((f) => f.name === key);
     if (!field) continue;
     base[key] =
-      field.type === "checkbox" ? Boolean(initialData[key]) : initialData[key];
+    field.type === "checkbox" ? Boolean(initialData[key]) : initialData[key];
   }
   return base;
 };
@@ -79,7 +64,7 @@ const ModalForm = ({
   fields,
   title,
   initialData,
-  isLoading,
+  isLoading
 }) => {
   const [errors, setErrors] = useState({});
 
@@ -87,26 +72,26 @@ const ModalForm = ({
 
   const validateField = (field, value, allValues) => {
     if (
-      field.required &&
-      (value === "" || value === null || value === undefined)
-    ) {
+    field.required && (
+    value === "" || value === null || value === undefined))
+    {
       return field.requiredMessage || "Este campo es obligatorio";
     }
     if (
-      field.minLength &&
-      typeof value === "string" &&
-      value.length < field.minLength
-    ) {
+    field.minLength &&
+    typeof value === "string" &&
+    value.length < field.minLength)
+    {
       return (
         field.minLengthMessage ||
-        `Debe tener al menos ${field.minLength} caracteres`
-      );
+        `Debe tener al menos ${field.minLength} caracteres`);
+
     }
     if (field.pattern) {
       const re =
-        field.pattern instanceof RegExp
-          ? field.pattern
-          : new RegExp(field.pattern);
+      field.pattern instanceof RegExp ?
+      field.pattern :
+      new RegExp(field.pattern);
       if (typeof value === "string" && !re.test(value)) {
         return field.patternMessage || "Formato inválido";
       }
@@ -114,8 +99,8 @@ const ModalForm = ({
     if ((field.name === "email" || field.format === "email") && value) {
       if (!emailRegex.test(String(value))) {
         return (
-          field.formatMessage || "Correo inválido (ej: usuario@dominio.com)"
-        );
+          field.formatMessage || "Correo inválido (ej: usuario@dominio.com)");
+
       }
     }
 
@@ -146,11 +131,11 @@ const ModalForm = ({
   }, [fields, initialData]);
 
   const isFieldDisabled = (name) =>
-    !!fields.find((f) => f.name === name)?.disabled;
+  !!fields.find((f) => f.name === name)?.disabled;
 
   const isNumericSelect = (field) =>
-    Array.isArray(field.options) &&
-    field.options.some((o) => typeof o.value === "number");
+  Array.isArray(field.options) &&
+  field.options.some((o) => typeof o.value === "number");
 
   const coerceSelectValue = (field, cur) => {
     const opts = field.options ?? [];
@@ -168,7 +153,7 @@ const ModalForm = ({
     if (isFieldDisabled(name)) return;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? Boolean(checked) : value,
+      [name]: type === "checkbox" ? Boolean(checked) : value
     }));
   };
 
@@ -180,7 +165,7 @@ const ModalForm = ({
   const handleDetailsChange = (details) => {
     setFormData((prev) => ({
       ...prev,
-      detalles: details,
+      detalles: details
     }));
   };
 
@@ -206,22 +191,22 @@ const ModalForm = ({
         borderRadius: 12,
         borderColor: state.isFocused ? "#1976d2" : "#e0e0e0",
         boxShadow: state.isFocused ? "0 0 0 3px rgba(25,118,210,0.12)" : "none",
-        ":hover": { borderColor: "#1976d2" },
+        ":hover": { borderColor: "#1976d2" }
       }),
       menu: (base) => ({
         ...base,
         borderRadius: 12,
         overflow: "hidden",
-        boxShadow: "0 12px 32px rgba(0,0,0,0.12)",
+        boxShadow: "0 12px 32px rgba(0,0,0,0.12)"
       }),
       option: (base, state) => ({
         ...base,
         padding: "10px 12px",
         backgroundColor: state.isFocused ? "rgba(25,118,210,0.08)" : "white",
-        color: "#1f2937",
+        color: "#1f2937"
       }),
       placeholder: (base) => ({ ...base, color: "#9aa0a6" }),
-      singleValue: (base) => ({ ...base, color: "#1f2937" }),
+      singleValue: (base) => ({ ...base, color: "#1f2937" })
     }),
     []
   );
@@ -238,10 +223,10 @@ const ModalForm = ({
         sx: {
           borderRadius: 3,
           overflow: "hidden",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.22)",
-        },
-      }}
-    >
+          boxShadow: "0 20px 60px rgba(0,0,0,0.22)"
+        }
+      }}>
+
       <DialogTitle
         id="modal-form-title"
         sx={{
@@ -253,9 +238,9 @@ const ModalForm = ({
           background: "linear-gradient(135deg, #1976d2 0%, #0d47a1 100%)",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
+          justifyContent: "space-between"
+        }}>
+
         {title}
         <IconButton
           onClick={onClose}
@@ -263,10 +248,10 @@ const ModalForm = ({
           sx={{
             color: "common.white",
             bgcolor: "rgba(255,255,255,0.12)",
-            "&:hover": { bgcolor: "rgba(255,255,255,0.22)" },
+            "&:hover": { bgcolor: "rgba(255,255,255,0.22)" }
           }}
-          aria-label="Cerrar"
-        >
+          aria-label="Cerrar">
+
           <Close />
         </IconButton>
       </DialogTitle>
@@ -279,18 +264,18 @@ const ModalForm = ({
           pt: 3,
           pb: 1,
           backgroundColor: (t) =>
-            t.palette.mode === "light" ? "#fafafa" : "background.default",
-        }}
-      >
+          t.palette.mode === "light" ? "#fafafa" : "background.default"
+        }}>
+
         <Box
           sx={{
             p: 2,
             borderRadius: 3,
             bgcolor: "background.paper",
             border: "1px solid",
-            borderColor: "divider",
-          }}
-        >
+            borderColor: "divider"
+          }}>
+
           <Grid container spacing={2}>
             {fields.map((field) => {
               if (field.name === "detalles") {
@@ -298,18 +283,18 @@ const ModalForm = ({
                   <Grid item xs={12} key={field.name}>
                     <Typography
                       variant="subtitle2"
-                      sx={{ mb: 1.5, color: "text.secondary" }}
-                    >
+                      sx={{ mb: 1.5, color: "text.secondary" }}>
+
                       {field.label ?? "Detalles"}
                     </Typography>
                     <ProductDetails
                       value={formData.detalles}
                       onChange={handleDetailsChange}
                       productos={field.productos}
-                      setSearchTerm={field.setSearchTerm}
-                    />
-                  </Grid>
-                );
+                      setSearchTerm={field.setSearchTerm} />
+
+                  </Grid>);
+
               }
 
               switch (field.type) {
@@ -320,8 +305,8 @@ const ModalForm = ({
                       item
                       xs={12}
                       sm={field.fullWidth ? 12 : 6}
-                      key={field.name}
-                    >
+                      key={field.name}>
+
                       <TextField
                         fullWidth
                         size="small"
@@ -334,7 +319,7 @@ const ModalForm = ({
                           const raw = value.replace(/[^0-9kK.-]/g, "");
                           setFormData((prev) => ({
                             ...prev,
-                            [field.name]: field.name === "rut" ? raw : value,
+                            [field.name]: field.name === "rut" ? raw : value
                           }));
                         }}
                         onBlur={() => {
@@ -343,21 +328,21 @@ const ModalForm = ({
                               ...prev,
                               [field.name]: formatRut(
                                 prev[field.name]?.replace(/[^0-9kK]/gi, "") ||
-                                  ""
-                              ),
+                                ""
+                              )
                             }));
                           }
                         }}
                         disabled={field.disabled}
                         autoComplete={field.name === "rut" ? "username" : "off"}
                         sx={{
-                          "& .MuiOutlinedInput-root": { borderRadius: 2 },
+                          "& .MuiOutlinedInput-root": { borderRadius: 2 }
                         }}
                         error={Boolean(errors[field.name])}
-                        helperText={errors[field.name] || field.helperText}
-                      />
-                    </Grid>
-                  );
+                        helperText={errors[field.name] || field.helperText} />
+
+                    </Grid>);
+
 
                 case "password":
                   return (
@@ -374,26 +359,26 @@ const ModalForm = ({
                         disabled={field.disabled}
                         sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
                         InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
+                          endAdornment:
+                          <InputAdornment position="end">
                               <IconButton
-                                onClick={togglePasswordVisibility}
-                                edge="end"
-                              >
-                                {showPassword ? (
-                                  <Visibility />
-                                ) : (
-                                  <VisibilityOff />
-                                )}
+                              onClick={togglePasswordVisibility}
+                              edge="end">
+
+                                {showPassword ?
+                              <Visibility /> :
+
+                              <VisibilityOff />
+                              }
                               </IconButton>
                             </InputAdornment>
-                          ),
+
                         }}
                         error={Boolean(errors[field.name])}
-                        helperText={errors[field.name] || field.helperText}
-                      />
-                    </Grid>
-                  );
+                        helperText={errors[field.name] || field.helperText} />
+
+                    </Grid>);
+
 
                 case "select":
                   if (field.searchable) {
@@ -402,35 +387,35 @@ const ModalForm = ({
                         item
                         xs={12}
                         sm={field.fullWidth ? 12 : 6}
-                        key={field.name}
-                      >
+                        key={field.name}>
+
                         <Typography
                           variant="caption"
-                          sx={{ mb: 0.75, display: "block", fontWeight: 600 }}
-                        >
+                          sx={{ mb: 0.75, display: "block", fontWeight: 600 }}>
+
                           {field.label}
                         </Typography>
                         <ReactSelect
                           options={[
-                            ...field.options,
-                            { value: "create", label: field.searchOption },
-                          ]}
+                          ...field.options,
+                          { value: "create", label: field.searchOption }]
+                          }
                           placeholder="Buscar..."
                           value={field.options.find(
                             (o) => o.value === formData[field.name]
                           )}
                           onChange={(opt) => {
                             if (field.disabled) return;
-                            if (opt?.value === "create") navigate(field.route);
-                            else handleSelectChange(field.name, opt.value);
+                            if (opt?.value === "create") navigate(field.route);else
+                            handleSelectChange(field.name, opt.value);
                           }}
                           isDisabled={!!field.disabled}
                           isSearchable
                           menuPortalTarget={document.body}
-                          styles={rsStyles}
-                        />
-                      </Grid>
-                    );
+                          styles={rsStyles} />
+
+                      </Grid>);
+
                   }
                   // Select normal
                   return (
@@ -438,8 +423,8 @@ const ModalForm = ({
                       item
                       xs={12}
                       sm={field.fullWidth ? 12 : 6}
-                      key={field.name}
-                    >
+                      key={field.name}>
+
                       <FormControl fullWidth size="small">
                         <InputLabel>{field.label}</InputLabel>
                         <Select
@@ -451,41 +436,41 @@ const ModalForm = ({
                           sx={{ borderRadius: 2 }}
                           MenuProps={{
                             PaperProps: {
-                              sx: { borderRadius: 2, boxShadow: 8 },
-                            },
-                          }}
-                        >
-                          {field.options.map((option, idx) => (
-                            <MenuItem
-                              key={option.value ?? idx}
-                              value={option.value}
-                            >
+                              sx: { borderRadius: 2, boxShadow: 8 }
+                            }
+                          }}>
+
+                          {field.options.map((option, idx) =>
+                          <MenuItem
+                            key={option.value ?? idx}
+                            value={option.value}>
+
                               {option.label}
                             </MenuItem>
-                          ))}
+                          )}
                         </Select>
                         <FormHelperText>
                           {errors[field.name] || field.helperText}
                         </FormHelperText>
                       </FormControl>
-                    </Grid>
-                  );
+                    </Grid>);
+
 
                 case "checkbox":
                   return (
                     <Grid item xs={12} key={field.name}>
                       <FormControlLabel
                         control={
-                          <Checkbox
-                            name={field.name}
-                            checked={!!formData[field.name]}
-                            onChange={handleChange}
-                          />
+                        <Checkbox
+                          name={field.name}
+                          checked={!!formData[field.name]}
+                          onChange={handleChange} />
+
                         }
-                        label={field.label}
-                      />
-                    </Grid>
-                  );
+                        label={field.label} />
+
+                    </Grid>);
+
 
                 default:
                   return null;
@@ -500,16 +485,16 @@ const ModalForm = ({
           py: 2,
           px: 3,
           bgcolor: (t) =>
-            t.palette.mode === "light"
-              ? "rgba(250,250,250,0.9)"
-              : "background.paper",
+          t.palette.mode === "light" ?
+          "rgba(250,250,250,0.9)" :
+          "background.paper",
           borderTop: "1px solid",
           borderColor: "divider",
           position: "sticky",
           bottom: 0,
-          zIndex: 1,
-        }}
-      >
+          zIndex: 1
+        }}>
+
         <Button onClick={onClose} color="inherit" sx={{ fontWeight: 600 }}>
           Cancelar
         </Button>
@@ -519,13 +504,13 @@ const ModalForm = ({
           disableElevation
           sx={{ borderRadius: 2, px: 2.5, fontWeight: 700 }}
           disabled={isLoading}
-          startIcon={isLoading ? <CircularProgress size={16} /> : null}
-        >
+          startIcon={isLoading ? <CircularProgress size={16} /> : null}>
+
           {isLoading ? "Guardando..." : "Guardar"}
         </Button>
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 ModalForm.propTypes = {
   open: PropTypes.bool.isRequired,
@@ -541,19 +526,19 @@ ModalForm.propTypes = {
       options: PropTypes.arrayOf(
         PropTypes.shape({
           value: PropTypes.any.isRequired,
-          label: PropTypes.string.isRequired,
+          label: PropTypes.string.isRequired
         })
       ),
       searchable: PropTypes.bool,
       searchOption: PropTypes.string,
       route: PropTypes.string,
       productos: PropTypes.array,
-      setSearchTerm: PropTypes.func,
+      setSearchTerm: PropTypes.func
     })
   ).isRequired,
   title: PropTypes.string.isRequired,
   initialData: PropTypes.object,
-  isLoading: PropTypes.bool,
+  isLoading: PropTypes.bool
 };
 
 export default ModalForm;

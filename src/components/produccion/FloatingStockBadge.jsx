@@ -1,10 +1,11 @@
 import PropTypes from "prop-types";
-import { Box, Paper, Chip, Tooltip, CircularProgress } from "@mui/material";
+import { Paper, Chip, Tooltip, CircularProgress } from "@mui/material";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import { useState } from "react";
 import MissingInsumosDialog from "./MissingInsumosDialog";
+import Box from "../common/CompatBox";
 
 const FloatingStockBadge = ({
   insumos = [],

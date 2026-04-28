@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  IconButton,
-} from "@mui/material";
+import { Card, CardContent, Button, IconButton, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
@@ -31,8 +24,12 @@ import MobileUserManagement from "./MobileUserManagement";
 import { useIsMobile } from "../../../utils/useIsMobile";
 import { useSelector } from "react-redux";
 import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
+import Box from "../../../components/common/CompatBox";
+import Typography from "../../../components/common/CompatTypography";
+import { getActionIconButtonSx } from "../../../components/common/tableStyles";
 
 const UserManagement = () => {
+  const theme = useTheme();
   const { mode, activeSucursalId } = useSelector((s) => s.scope);
   const isSucursalScope = mode !== "global" && Number(activeSucursalId);
 
@@ -115,8 +112,13 @@ const UserManagement = () => {
       flex: 0.2,
       sortable: false,
       renderCell: (params) => (
-        <IconButton color="primary" onClick={() => handleEdit(params.row)}>
-          <EditIcon />
+        <IconButton
+          aria-label="Editar usuario"
+          size="small"
+          onClick={() => handleEdit(params.row)}
+          sx={getActionIconButtonSx(theme, "primary")}
+        >
+          <EditIcon fontSize="small" />
         </IconButton>
       ),
     },

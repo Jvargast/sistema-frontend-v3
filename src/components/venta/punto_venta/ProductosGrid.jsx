@@ -1,7 +1,9 @@
-import { Box, Typography, CircularProgress, Pagination } from "@mui/material";
+import { CircularProgress, Pagination } from "@mui/material";
 import PropTypes from "prop-types";
 import ProductCard from "../ProductCard";
 import { getStockForSucursal } from "../../../utils/inventoryUtils";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
 
 const ProductosGrid = ({
   productos,
@@ -51,7 +53,7 @@ const ProductosGrid = ({
                   ...product,
                   precio: parseFloat(product.precio || 0),
                 }}
-                stock={stock} 
+                stock={stock}
                 onAddToCart={onAddToCart}
                 sx={{ width: { xs: "90%", md: "100%" }, maxWidth: 320 }}
               />

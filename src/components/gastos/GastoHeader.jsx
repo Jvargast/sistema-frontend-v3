@@ -1,13 +1,4 @@
-import {
-  Card,
-  CardHeader,
-  Chip,
-  Stack,
-  Typography,
-  Tooltip,
-  Button,
-  CircularProgress,
-} from "@mui/material";
+import { Card, CardHeader, Chip, Tooltip, Button, CircularProgress, IconButton } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import EditOutlined from "@mui/icons-material/EditOutlined";
 import SaveOutlined from "@mui/icons-material/SaveOutlined";
@@ -17,6 +8,9 @@ import CalendarMonthOutlined from "@mui/icons-material/CalendarMonthOutlined";
 import StorefrontOutlined from "@mui/icons-material/StorefrontOutlined";
 import PropTypes from "prop-types";
 import dayjs from "dayjs";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 export default function GastoHeader({
   gasto,
@@ -89,29 +83,26 @@ export default function GastoHeader({
             <Stack direction="row" spacing={1}>
               <Tooltip title="Editar">
                 <span>
-                  <Button
+                  <IconButton
                     onClick={onToggleEdit}
-                    variant="outlined"
                     size="small"
-                    startIcon={<EditOutlined />}
-                    sx={{ fontWeight: 700 }}
+                    aria-label="Editar gasto"
+                    sx={getActionIconButtonSx(theme, "primary")}
                   >
-                    Editar
-                  </Button>
+                    <EditOutlined fontSize="small" />
+                  </IconButton>
                 </span>
               </Tooltip>
               <Tooltip title="Eliminar">
                 <span>
-                  <Button
-                    color="error"
-                    variant="text"
+                  <IconButton
                     size="small"
-                    startIcon={<DeleteOutlineOutlined />}
                     onClick={onDelete}
-                    sx={{ fontWeight: 700 }}
+                    aria-label="Eliminar gasto"
+                    sx={getActionIconButtonSx(theme, "error")}
                   >
-                    Eliminar
-                  </Button>
+                    <DeleteOutlineOutlined fontSize="small" />
+                  </IconButton>
                 </span>
               </Tooltip>
             </Stack>

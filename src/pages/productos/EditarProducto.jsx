@@ -1,23 +1,8 @@
-import { useEffect, useState } from "react";
+import Select from "../../components/common/CompatSelect";
 import {
-  Box,
-  Button,
-  TextField,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Typography,
-  CircularProgress,
-  Divider,
-  FormControlLabel,
-  Switch,
-  useTheme,
-  Grid,
-  IconButton,
-  createFilterOptions,
-  Autocomplete,
-} from "@mui/material";
+  useEffect,
+  useState } from "react";
+import { Button, MenuItem, InputLabel, FormControl, CircularProgress, Divider, FormControlLabel, Switch, useTheme, IconButton, createFilterOptions, Autocomplete } from "@mui/material";
 import { useDropzone } from "react-dropzone";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
@@ -25,12 +10,16 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {
   useGetProductoByIdQuery,
-  useUpdateProductoMutation,
-} from "../../store/services/productoApi";
+  useUpdateProductoMutation } from
+"../../store/services/productoApi";
 import { useGetAllCategoriasQuery } from "../../store/services/categoriaApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { getImageUrl } from "../../store/services/apiBase";
 import { useGetAllInsumosQuery } from "../../store/services/insumoApi";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Typography from "../../components/common/CompatTypography";
 
 const EditarProducto = () => {
   const { id } = useParams();
@@ -41,31 +30,31 @@ const EditarProducto = () => {
 
   const { data, isLoading, isError, refetch } = useGetProductoByIdQuery(id);
   const { data: insumosResp, isLoading: loadingInsumos } =
-    useGetAllInsumosQuery(
-      { page: 1, limit: 500, activo: true },
-      { refetchOnMountOrArgChange: true }
-    );
+  useGetAllInsumosQuery(
+    { page: 1, limit: 500, activo: true },
+    { refetchOnMountOrArgChange: true }
+  );
   const { data: categorias, isLoading: isLoadingCategorias } =
-    useGetAllCategoriasQuery();
+  useGetAllCategoriasQuery();
   const [updateProducto, { isLoading: isUpdating }] =
-    useUpdateProductoMutation();
+  useUpdateProductoMutation();
 
-  const insumos = Array.isArray(insumosResp?.data?.items)
-    ? insumosResp.data.items
-    : Array.isArray(insumosResp?.data)
-    ? insumosResp.data
-    : Array.isArray(insumosResp)
-    ? insumosResp
-    : [];
+  const insumos = Array.isArray(insumosResp?.data?.items) ?
+  insumosResp.data.items :
+  Array.isArray(insumosResp?.data) ?
+  insumosResp.data :
+  Array.isArray(insumosResp) ?
+  insumosResp :
+  [];
 
   const rawOptions = insumos.map((i) => ({
     id: Number(i.id_insumo),
     label: `${i.nombre_insumo}${
-      i.unidad_de_medida ? ` (${i.unidad_de_medida})` : ""
-    }`,
+    i.unidad_de_medida ? ` (${i.unidad_de_medida})` : ""}`,
+
     grupo: (i?.tipo_insumo?.nombre_tipo || "Otros").trim(),
     inventario: Array.isArray(i.inventario) ? i.inventario : [],
-    codigo_barra: i.codigo_barra || "",
+    codigo_barra: i.codigo_barra || ""
   }));
 
   const insumoOptions = [...rawOptions].sort(
@@ -73,7 +62,7 @@ const EditarProducto = () => {
   );
 
   const baseFilter = createFilterOptions({
-    stringify: (opt) => `${opt.label} ${opt.codigo_barra}`.toLowerCase(),
+    stringify: (opt) => `${opt.label} ${opt.codigo_barra}`.toLowerCase()
   });
   const filterOptions = (opts, state) => {
     const res = baseFilter(opts, state);
@@ -95,20 +84,20 @@ const EditarProducto = () => {
     es_para_venta: true,
     activo: true,
     es_retornable: false,
-    id_insumo_retorno: "",
+    id_insumo_retorno: ""
   });
   const selectedInsumo =
-    insumoOptions.find(
-      (o) => o.id === Number(formData.id_insumo_retorno || 0)
-    ) || null;
+  insumoOptions.find(
+    (o) => o.id === Number(formData.id_insumo_retorno || 0)
+  ) || null;
   const [imagePreview, setImagePreview] = useState("");
 
-  const categoriaOptions = categorias
-    ? categorias.map((categoria) => ({
-        value: categoria.id_categoria,
-        label: categoria.nombre_categoria,
-      }))
-    : [];
+  const categoriaOptions = categorias ?
+  categorias.map((categoria) => ({
+    value: categoria.id_categoria,
+    label: categoria.nombre_categoria
+  })) :
+  [];
 
   useEffect(() => {
     if (data) {
@@ -124,7 +113,7 @@ const EditarProducto = () => {
         es_para_venta: data.es_para_venta || false,
         activo: data.activo || false,
         es_retornable: data.es_retornable || false,
-        id_insumo_retorno: data.id_insumo_retorno || "",
+        id_insumo_retorno: data.id_insumo_retorno || ""
       });
       setImagePreview(data.image_url || "");
     }
@@ -141,20 +130,20 @@ const EditarProducto = () => {
 
   useEffect(() => {
     if (
-      formData.es_retornable &&
-      !formData.id_insumo_retorno &&
-      insumoOptions.length
-    ) {
+    formData.es_retornable &&
+    !formData.id_insumo_retorno &&
+    insumoOptions.length)
+    {
       const match = insumoOptions.find((o) => /botellón|envase/i.test(o.label));
       if (match)
-        setFormData((p) => ({ ...p, id_insumo_retorno: Number(match.id) }));
+      setFormData((p) => ({ ...p, id_insumo_retorno: Number(match.id) }));
     }
   }, [formData.es_retornable, formData.id_insumo_retorno, insumoOptions]);
 
   const idRet =
-    formData.es_retornable && formData.id_insumo_retorno !== ""
-      ? String(Number(formData.id_insumo_retorno))
-      : "";
+  formData.es_retornable && formData.id_insumo_retorno !== "" ?
+  String(Number(formData.id_insumo_retorno)) :
+  "";
 
   /**
    * Carga de archivo
@@ -166,7 +155,7 @@ const EditarProducto = () => {
     getInputProps,
     isDragActive,
     /*  acceptedFiles, */
-    fileRejections,
+    fileRejections
   } = useDropzone({
     accept: { "image/*": [] },
     maxFiles: 1,
@@ -176,7 +165,7 @@ const EditarProducto = () => {
         setFormData((prev) => ({ ...prev, imageFile: acceptedFiles[0] }));
         setImagePreview(URL.createObjectURL(acceptedFiles[0]));
       }
-    },
+    }
   });
 
   const fileError = fileRejections.length > 0;
@@ -199,7 +188,7 @@ const EditarProducto = () => {
     setFormData((prev) => ({
       ...prev,
       image_url: "",
-      imageFile: undefined,
+      imageFile: undefined
     }));
     setImagePreview("");
   };
@@ -234,7 +223,7 @@ const EditarProducto = () => {
       dispatch(
         showNotification({
           message: "Producto actualizado correctamente.",
-          severity: "success",
+          severity: "success"
         })
       );
       refetch();
@@ -244,122 +233,122 @@ const EditarProducto = () => {
       dispatch(
         showNotification({
           message: `Error al actualizar producto: ${error.data?.error}`,
-          severity: "error",
+          severity: "error"
         })
       );
     }
   };
 
   const renderTextField = (
-    label,
-    name,
-    type = "text",
-    multiline = false,
-    rows = 1
-  ) => (
-    <TextField
-      fullWidth
-      label={label}
-      name={name}
-      type={type}
-      value={formData[name] || ""}
-      onChange={handleChange}
-      multiline={multiline}
-      rows={rows}
-      variant="outlined"
-      sx={{
-        mb: 4,
-        "& .MuiOutlinedInput-root": {
-          borderRadius: 2,
-          backgroundColor: (theme) =>
-            theme.palette.mode === "light"
-              ? theme.palette.background.paper
-              : theme.palette.background.default,
-          "& fieldset": {
-            borderColor: theme.palette.divider,
-          },
-          "&:hover fieldset": {
-            borderColor: theme.palette.primary.main,
-          },
-          "&.Mui-focused fieldset": {
-            borderColor: theme.palette.primary.main,
-            boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}33`,
-          },
-          transition: "border-color 0.3s, box-shadow 0.3s",
-        },
-        "& input, & textarea": {
-          padding: "12px",
-        },
-      }}
-      aria-label={label}
-    />
-  );
+  label,
+  name,
+  type = "text",
+  multiline = false,
+  rows = 1) =>
 
-  const renderSwitchField = (label, name) => (
-    <FormControlLabel
-      control={
-        <Switch
-          checked={Boolean(formData[name])}
-          onChange={handleChange}
-          name={name}
-          color="primary"
-          sx={{
-            "& .MuiSwitch-thumb": {
-              boxShadow: (theme) => theme.shadows[2],
-            },
-          }}
-        />
-      }
-      label={label}
-      sx={{ mb: 2 }}
-    />
-  );
-
-  const renderSelectField = (label, name, options) => (
-    <FormControl
-      fullWidth
-      variant="outlined"
-      sx={{
-        mb: 2,
-        backgroundColor: (theme) =>
-          theme.palette.mode === "light"
-            ? theme.palette.grey[50]
-            : theme.palette.grey[900],
+  <TextField
+    fullWidth
+    label={label}
+    name={name}
+    type={type}
+    value={formData[name] || ""}
+    onChange={handleChange}
+    multiline={multiline}
+    rows={rows}
+    variant="outlined"
+    sx={{
+      mb: 4,
+      "& .MuiOutlinedInput-root": {
         borderRadius: 2,
-        boxShadow: (theme) => theme.shadows[1],
-        "& .MuiOutlinedInput-root": {
-          borderRadius: 2,
-          transition: "box-shadow 0.3s",
-          "& fieldset": {
-            borderColor: theme.palette.divider,
-          },
-          "&:hover fieldset": {
-            borderColor: theme.palette.primary.main,
-          },
-          "&.Mui-focused fieldset": {
-            borderColor: theme.palette.primary.main,
-            boxShadow: (theme) => theme.shadows[4],
-          },
+        backgroundColor: (theme) =>
+        theme.palette.mode === "light" ?
+        theme.palette.background.paper :
+        theme.palette.background.default,
+        "& fieldset": {
+          borderColor: theme.palette.divider
         },
-      }}
-    >
+        "&:hover fieldset": {
+          borderColor: theme.palette.primary.main
+        },
+        "&.Mui-focused fieldset": {
+          borderColor: theme.palette.primary.main,
+          boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}33`
+        },
+        transition: "border-color 0.3s, box-shadow 0.3s"
+      },
+      "& input, & textarea": {
+        padding: "12px"
+      }
+    }}
+    aria-label={label} />;
+
+
+
+  const renderSwitchField = (label, name) =>
+  <FormControlLabel
+    control={
+    <Switch
+      checked={Boolean(formData[name])}
+      onChange={handleChange}
+      name={name}
+      color="primary"
+      sx={{
+        "& .MuiSwitch-thumb": {
+          boxShadow: (theme) => theme.shadows[2]
+        }
+      }} />
+
+    }
+    label={label}
+    sx={{ mb: 2 }} />;
+
+
+
+  const renderSelectField = (label, name, options) =>
+  <FormControl
+    fullWidth
+    variant="outlined"
+    sx={{
+      mb: 2,
+      backgroundColor: (theme) =>
+      theme.palette.mode === "light" ?
+      theme.palette.grey[50] :
+      theme.palette.grey[900],
+      borderRadius: 2,
+      boxShadow: (theme) => theme.shadows[1],
+      "& .MuiOutlinedInput-root": {
+        borderRadius: 2,
+        transition: "box-shadow 0.3s",
+        "& fieldset": {
+          borderColor: theme.palette.divider
+        },
+        "&:hover fieldset": {
+          borderColor: theme.palette.primary.main
+        },
+        "&.Mui-focused fieldset": {
+          borderColor: theme.palette.primary.main,
+          boxShadow: (theme) => theme.shadows[4]
+        }
+      }
+    }}>
+
       <InputLabel>{label}</InputLabel>
       <Select
-        labelId={`${name}-label`}
-        name={name}
-        value={formData[name] || ""}
-        onChange={handleChange}
-        label={label}
-        required
-      >
-        {options.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
+      labelId={`${name}-label`}
+      name={name}
+      value={formData[name] || ""}
+      onChange={handleChange}
+      label={label}
+      required>
+
+        {options.map((option) =>
+      <MenuItem key={option.value} value={option.value}>
             {option.label}
           </MenuItem>
-        ))}
+      )}
       </Select>
-    </FormControl>
-  );
+    </FormControl>;
+
 
   if (isLoading || isLoadingCategorias) {
     return (
@@ -367,11 +356,11 @@ const EditarProducto = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        height="100vh"
-      >
+        height="100vh">
+
         <CircularProgress />
-      </Box>
-    );
+      </Box>);
+
   }
 
   if (isError) {
@@ -380,13 +369,13 @@ const EditarProducto = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        height="100vh"
-      >
+        height="100vh">
+
         <Typography variant="h6" color="error">
           Error al cargar el producto.
         </Typography>
-      </Box>
-    );
+      </Box>);
+
   }
 
   return (
@@ -397,14 +386,14 @@ const EditarProducto = () => {
         py: 4,
         px: 3,
         backgroundColor: theme.palette.background.default,
-        minHeight: "100vh",
-      }}
-    >
+        minHeight: "100vh"
+      }}>
+
       <Box>
         <Typography
           variant="h4"
-          sx={{ color: theme.palette.text.primary, fontWeight: "bold", mb: 2 }}
-        >
+          sx={{ color: theme.palette.text.primary, fontWeight: "bold", mb: 2 }}>
+
           Editar Producto
         </Typography>
 
@@ -416,9 +405,9 @@ const EditarProducto = () => {
             display: "flex",
             flexDirection: "column",
             gap: "2rem",
-            minHeight: "calc(100vh - 120px)",
-          }}
-        >
+            minHeight: "calc(100vh - 120px)"
+          }}>
+
           <Grid container spacing={2} alignItems="flex-start">
             <Grid item xs={12} md={8}>
               <Typography
@@ -426,9 +415,9 @@ const EditarProducto = () => {
                 sx={{
                   color: theme.palette.text.secondary,
                   fontWeight: "bold",
-                  mb: 1,
-                }}
-              >
+                  mb: 1
+                }}>
+
                 Información General
               </Typography>
 
@@ -444,9 +433,9 @@ const EditarProducto = () => {
                 sx={{
                   color: theme.palette.text.secondary,
                   fontWeight: "bold",
-                  mb: 1,
-                }}
-              >
+                  mb: 1
+                }}>
+
                 Imagen del Producto
               </Typography>
               <Box
@@ -465,145 +454,145 @@ const EditarProducto = () => {
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  minHeight: 120,
-                }}
-              >
+                  minHeight: 120
+                }}>
+
                 <input {...getInputProps()} />
                 <ImageOutlinedIcon
-                  sx={{ fontSize: 40, color: "grey.400", mb: 1 }}
-                />
+                  sx={{ fontSize: 40, color: "grey.400", mb: 1 }} />
+
                 <Typography
                   variant="body2"
                   color="text.secondary"
-                  sx={{ fontWeight: 500 }}
-                >
-                  {isDragActive
-                    ? "Suelta aquí tu imagen..."
-                    : "Arrastra una imagen aquí, o haz clic para buscar en tu dispositivo"}
+                  sx={{ fontWeight: 500 }}>
+
+                  {isDragActive ?
+                  "Suelta aquí tu imagen..." :
+                  "Arrastra una imagen aquí, o haz clic para buscar en tu dispositivo"}
                 </Typography>
                 <Typography variant="caption" color="text.disabled">
                   Solo archivos .jpg, .jpeg, .png. Máx. 5MB.
                 </Typography>
-                {fileError && (
-                  <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                {fileError &&
+                <Typography variant="body2" color="error" sx={{ mt: 1 }}>
                     Archivo no permitido o demasiado grande.
                   </Typography>
-                )}
+                }
               </Box>
-              {imagePreview ? (
-                <Box
-                  sx={{
-                    mt: 1,
-                    width: "100%",
-                    minHeight: 180,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 1,
-                    borderRadius: 2,
-                    background:
-                      theme.palette.mode === "light"
-                        ? theme.palette.grey[50]
-                        : theme.palette.grey[900],
-                    boxShadow: theme.shadows[1],
-                    p: 1,
-                    position: "relative",
-                  }}
-                >
+              {imagePreview ?
+              <Box
+                sx={{
+                  mt: 1,
+                  width: "100%",
+                  minHeight: 180,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 1,
+                  borderRadius: 2,
+                  background:
+                  theme.palette.mode === "light" ?
+                  theme.palette.grey[50] :
+                  theme.palette.grey[900],
+                  boxShadow: theme.shadows[1],
+                  p: 1,
+                  position: "relative"
+                }}>
+
                   <img
-                    src={getImageUrl(imagePreview)}
-                    alt="Vista previa"
-                    style={{
-                      width: "100%",
-                      maxWidth: "100%",
-                      maxHeight: 220,
-                      objectFit: "contain",
-                      borderRadius: 12,
-                      boxShadow: "0 2px 16px 0 #0001",
-                      background: "#f6f8fa",
-                      margin: "0 auto",
-                      transition: "box-shadow 0.3s",
-                    }}
-                  />
-                  {formData.imageFile && (
-                    <IconButton
-                      onClick={handleRemoveImage}
-                      size="small"
-                      sx={{
-                        position: "absolute",
-                        top: 8,
-                        right: 8,
-                        background: "#fff",
-                        boxShadow: 1,
-                        "&:hover": { background: theme.palette.error.light },
-                        zIndex: 10,
-                      }}
-                    >
+                  src={getImageUrl(imagePreview)}
+                  alt="Vista previa"
+                  style={{
+                    width: "100%",
+                    maxWidth: "100%",
+                    maxHeight: 220,
+                    objectFit: "contain",
+                    borderRadius: 12,
+                    boxShadow: "0 2px 16px 0 #0001",
+                    background: "#f6f8fa",
+                    margin: "0 auto",
+                    transition: "box-shadow 0.3s"
+                  }} />
+
+                  {formData.imageFile &&
+                <IconButton
+                  onClick={handleRemoveImage}
+                  size="small"
+                  sx={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    background: "#fff",
+                    boxShadow: 1,
+                    "&:hover": { background: theme.palette.error.light },
+                    zIndex: 10
+                  }}>
+
                       <DeleteOutlineOutlinedIcon fontSize="small" color="error" />
                     </IconButton>
-                  )}
+                }
                   <Typography
-                    variant="body2"
-                    sx={{
-                      mt: 1,
-                      width: "100%",
-                      textAlign: "center",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      color: "text.secondary",
-                      fontSize: 13,
-                    }}
-                    noWrap
-                  >
-                    {formData.imageFile
-                      ? formData.imageFile.name
-                      : "Imagen actual"}
-                  </Typography>
-                </Box>
-              ) : (
-                <Box
+                  variant="body2"
                   sx={{
                     mt: 1,
                     width: "100%",
-                    minHeight: 180,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 1,
-                    borderRadius: 2,
-                    background:
-                      theme.palette.mode === "light"
-                        ? theme.palette.grey[50]
-                        : theme.palette.grey[900],
-                    boxShadow: theme.shadows[1],
-                    p: 1,
+                    textAlign: "center",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    color: "text.secondary",
+                    fontSize: 13
                   }}
-                >
+                  noWrap>
+
+                    {formData.imageFile ?
+                  formData.imageFile.name :
+                  "Imagen actual"}
+                  </Typography>
+                </Box> :
+
+              <Box
+                sx={{
+                  mt: 1,
+                  width: "100%",
+                  minHeight: 180,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 1,
+                  borderRadius: 2,
+                  background:
+                  theme.palette.mode === "light" ?
+                  theme.palette.grey[50] :
+                  theme.palette.grey[900],
+                  boxShadow: theme.shadows[1],
+                  p: 1
+                }}>
+
                   <ImageOutlinedIcon
-                    sx={{
-                      fontSize: 48,
-                      color: theme.palette.grey[400],
-                      mb: 1,
-                    }}
-                  />
+                  sx={{
+                    fontSize: 48,
+                    color: theme.palette.grey[400],
+                    mb: 1
+                  }} />
+
                   <Typography
-                    variant="body2"
-                    sx={{ color: "text.disabled", fontStyle: "italic" }}
-                  >
+                  variant="body2"
+                  sx={{ color: "text.disabled", fontStyle: "italic" }}>
+
                     Sin imagen seleccionada
                   </Typography>
                 </Box>
-              )}
+              }
             </Grid>
           </Grid>
 
           <Typography
             variant="h6"
-            sx={{ color: theme.palette.text.secondary, fontWeight: "bold" }}
-          >
+            sx={{ color: theme.palette.text.secondary, fontWeight: "bold" }}>
+
             Detalles del Producto
           </Typography>
           <Grid container spacing={2}>
@@ -615,16 +604,16 @@ const EditarProducto = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               {renderSelectField("Estado", "id_estado_producto", [
-                { value: 1, label: "Disponible - Bodega" },
-                { value: 2, label: "En tránsito" },
-              ])}
+              { value: 1, label: "Disponible - Bodega" },
+              { value: 2, label: "En tránsito" }]
+              )}
             </Grid>
           </Grid>
 
           <Typography
             variant="h6"
-            sx={{ color: theme.palette.text.secondary, fontWeight: "bold" }}
-          >
+            sx={{ color: theme.palette.text.secondary, fontWeight: "bold" }}>
+
             Opciones de Producto
           </Typography>
           <Grid container spacing={2}>
@@ -637,73 +626,80 @@ const EditarProducto = () => {
             <Grid item xs={12} md={6}>
               {renderSwitchField("¿Es retornable?", "es_retornable")}
             </Grid>
-            {formData.es_retornable && (
-              <Grid item xs={12} md={6}>
+            {formData.es_retornable &&
+            <Grid item xs={12} md={6}>
                 <Autocomplete
-                  options={insumoOptions}
-                  groupBy={(opt) => opt.grupo}
-                  getOptionLabel={(opt) => opt.label}
-                  value={selectedInsumo}
-                  onChange={(_, newVal) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      id_insumo_retorno: newVal ? Number(newVal.id) : "",
-                    }))
-                  }
-                  filterOptions={filterOptions}
-                  loading={loadingInsumos}
-                  isOptionEqualToValue={(opt, val) => opt.id === val.id}
-                  renderOption={(props, option) => {
-                    const stockTotal = option.inventario.reduce(
-                      (acc, it) => acc + (Number(it.cantidad) || 0),
-                      0
-                    );
-                    return (
-                      <li {...props} key={option.id}>
+                options={insumoOptions}
+                groupBy={(opt) => opt.grupo}
+                getOptionLabel={(opt) => opt.label}
+                value={selectedInsumo}
+                onChange={(_, newVal) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  id_insumo_retorno: newVal ? Number(newVal.id) : ""
+                }))
+                }
+                filterOptions={filterOptions}
+                loading={loadingInsumos}
+                isOptionEqualToValue={(opt, val) => opt.id === val.id}
+                renderOption={(props, option) => {
+                  const stockTotal = option.inventario.reduce(
+                    (acc, it) => acc + (Number(it.cantidad) || 0),
+                    0
+                  );
+                  return (
+                    <li {...props} key={option.id}>
                         <Box sx={{ display: "flex", flexDirection: "column" }}>
                           <Typography fontWeight={600}>
                             {option.label}
                           </Typography>
                           <Typography variant="caption" sx={{ opacity: 0.7 }}>
                             Stock total: {stockTotal}
-                            {option.codigo_barra
-                              ? ` • Código: ${option.codigo_barra}`
-                              : ""}
+                            {option.codigo_barra ?
+                          ` • Código: ${option.codigo_barra}` :
+                          ""}
                           </Typography>
                         </Box>
-                      </li>
-                    );
-                  }}
-                  renderInput={(params) => (
+                      </li>);
+
+                }}
+                renderInput={(params) => {
+                  const inputSlotProps = params.slotProps?.input || {};
+
+                  return (
                     <TextField
                       {...params}
                       label="Insumo destino (envase vacío)"
                       required={formData.es_retornable}
-                      InputProps={{
-                        ...params.InputProps,
-                        endAdornment: (
+                      slotProps={{
+                        ...params.slotProps,
+                        input: {
+                          ...inputSlotProps,
+                          endAdornment:
                           <>
-                            {loadingInsumos ? (
-                              <CircularProgress size={18} />
-                            ) : null}
-                            {params.InputProps.endAdornment}
-                          </>
-                        ),
+                                {loadingInsumos ?
+                            <CircularProgress size={18} /> :
+                            null}
+                                {inputSlotProps.endAdornment}
+                              </>
+
+                        }
                       }}
-                      placeholder="Buscar por nombre o código"
-                    />
-                  )}
-                />
+                      placeholder="Buscar por nombre o código" />);
+
+
+                }} />
+
               </Grid>
-            )}
+            }
           </Grid>
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
             <Button
               variant="outlined"
               color="inherit"
               onClick={() => navigate("/productos")}
-              sx={{ borderRadius: 2, textTransform: "none" }}
-            >
+              sx={{ borderRadius: 2, textTransform: "none" }}>
+
               Cancelar
             </Button>
             <Button
@@ -711,15 +707,15 @@ const EditarProducto = () => {
               type="submit"
               color="primary"
               disabled={isUpdating}
-              sx={{ borderRadius: 2, textTransform: "none" }}
-            >
+              sx={{ borderRadius: 2, textTransform: "none" }}>
+
               {isUpdating ? "Guardando..." : "Guardar Cambios"}
             </Button>
           </Box>
         </form>
       </Box>
-    </Box>
-  );
+    </Box>);
+
 };
 
 export default EditarProducto;

@@ -1,13 +1,5 @@
 import { useSelector } from "react-redux";
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Button,
-  Paper,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
+import { CircularProgress, Button, Paper, useMediaQuery, useTheme } from "@mui/material";
 import { DirectionsBus, History } from "@mui/icons-material";
 import {
   agendaViajesApi,
@@ -20,6 +12,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { socket } from "../../socket";
 import { useDispatch } from "react-redux";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
 
 const PanelViajeChofer = () => {
   const usuario = useSelector((state) => state.auth.user);
@@ -81,7 +75,7 @@ const PanelViajeChofer = () => {
       <Box
         display="flex"
         justifyContent="center"
-        alignItems="start"
+        alignItems="flex-start"
         flexDirection="column"
         minHeight="80vh"
         px={isMobile ? 2 : 6}

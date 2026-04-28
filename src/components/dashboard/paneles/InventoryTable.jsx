@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Typography, Box, CircularProgress } from "@mui/material";
+import { CircularProgress } from "@mui/material";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
+
+// 📋 Definir columnas de la tabla
 
 // 📋 Definir columnas de la tabla
 const columns = [

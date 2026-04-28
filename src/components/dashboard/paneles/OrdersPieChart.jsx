@@ -6,12 +6,14 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { Box, Typography, CircularProgress, useTheme } from "@mui/material";
+import { CircularProgress, useTheme } from "@mui/material";
 import { useGetResumenVentasPorTipoEntregaQuery } from "../../../store/services/ventasEstadisticasApi";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
 
 const COLORS = ["#A3C4F3", "#BFD8AF", "#FCD5CE", "#FFE5B4", "#D5AAFF"];
 

@@ -1,5 +1,5 @@
 import { Capacitor } from "@capacitor/core";
 
 export function isNativeApp() {
-  return Capacitor.isNativePlatform(); 
+  return Capacitor.isNativePlatform();
 }

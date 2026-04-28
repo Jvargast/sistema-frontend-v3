@@ -207,7 +207,7 @@ export const tabComponents = {
     <RoleBasedRoute requiredPermission="vistas.productos.ver">
       <HistorialProduccion />
     </RoleBasedRoute>
-  ), 
+  ),
   // Perfil y otros módulos extra
   miperfil: (
     <RoleBasedRoute requiredPermission="vistas.perfil.ver">

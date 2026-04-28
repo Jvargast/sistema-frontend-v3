@@ -1,7 +1,11 @@
-import { useState } from "react";
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Typography, IconButton, InputAdornment } from "@mui/material";
+import Dialog from "../common/CompatDialog";
+import {
+  useState } from "react";
+import { DialogActions, DialogContent, DialogTitle, Button, IconButton, InputAdornment } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import PropTypes from "prop-types";
+import TextField from "../common/CompatTextField";
+import Typography from "../common/CompatTypography";
 
 const PasswordModal = ({ open, onClose, onSave }) => {
   const [password, setPassword] = useState("");
@@ -9,9 +13,9 @@ const PasswordModal = ({ open, onClose, onSave }) => {
 
   const handleSave = () => {
     if (password.trim() === "") return;
-    console.log("Contraseña enviada:", password); 
+    console.log("Contraseña enviada:", password);
     onSave(password);
-    setPassword(""); 
+    setPassword("");
   };
 
   return (
@@ -22,9 +26,9 @@ const PasswordModal = ({ open, onClose, onSave }) => {
           color: "white",
           textAlign: "center",
           py: 2,
-          background: "linear-gradient(90deg, #4A90E2 0%, #6A5ACD 100%)",
-        }}
-      >
+          background: "linear-gradient(90deg, #4A90E2 0%, #6A5ACD 100%)"
+        }}>
+
         <Typography variant="h5" fontWeight="bold">Cambiar Contraseña</Typography>
       </DialogTitle>
       <DialogContent sx={{ px: 4, py: 3 }}>
@@ -41,13 +45,13 @@ const PasswordModal = ({ open, onClose, onSave }) => {
           onChange={(e) => setPassword(e.target.value)}
           variant="outlined"
           InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
+            endAdornment:
+            <InputAdornment position="end">
                 <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
                   {showPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
               </InputAdornment>
-            ),
+
           }}
           sx={{
             mt: 1,
@@ -55,10 +59,10 @@ const PasswordModal = ({ open, onClose, onSave }) => {
               borderRadius: "10px",
               transition: "0.3s",
               "&:hover fieldset": { borderColor: "#3498db" },
-              "&.Mui-focused fieldset": { borderColor: "#2980b9" },
-            },
-          }}
-        />
+              "&.Mui-focused fieldset": { borderColor: "#2980b9" }
+            }
+          }} />
+
       </DialogContent>
       <DialogActions sx={{ justifyContent: "center", pb: 3, gap: 2 }}>
         <Button
@@ -70,10 +74,10 @@ const PasswordModal = ({ open, onClose, onSave }) => {
             textTransform: "none",
             px: 3,
             py: 1,
-            "&:hover": { backgroundColor: "#fdecea" },
+            "&:hover": { backgroundColor: "#fdecea" }
           }}
-          onClick={onClose}
-        >
+          onClick={onClose}>
+
           Cancelar
         </Button>
         <Button
@@ -85,21 +89,21 @@ const PasswordModal = ({ open, onClose, onSave }) => {
             textTransform: "none",
             px: 3,
             py: 1,
-            "&:hover": { backgroundColor: "#2980b9" },
+            "&:hover": { backgroundColor: "#2980b9" }
           }}
-          onClick={handleSave}
-        >
+          onClick={handleSave}>
+
           Guardar
         </Button>
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 
 PasswordModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired
 };
 
 export default PasswordModal;

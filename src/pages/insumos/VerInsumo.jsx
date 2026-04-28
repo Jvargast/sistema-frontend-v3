@@ -2,19 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import {
-  Box,
-  Paper,
-  Typography,
-  Grid,
-  Divider,
-  Button,
-  Chip,
-  Avatar,
-  useTheme,
-  Tooltip,
-  IconButton,
-} from "@mui/material";
+import { Paper, Divider, Button, Chip, Avatar, useTheme, Tooltip, IconButton } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { useGetInsumoByIdQuery } from "../../store/services/insumoApi";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
@@ -27,6 +15,9 @@ import BackButton from "../../components/common/BackButton";
 import ModalForm from "../../components/common/ModalForm";
 import { Info } from "../../components/productos/Info";
 import { getImageUrl } from "../../store/services/apiBase";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Typography from "../../components/common/CompatTypography";
 
 const getInvSucursalId = (inv) =>
   inv?.id_sucursal ?? inv?.sucursal?.id_sucursal ?? null;

@@ -1,18 +1,9 @@
 import PropTypes from "prop-types";
-import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Box,
-  Chip,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  Typography,
- /*  useTheme, */
-} from "@mui/material";
+import { Accordion, AccordionSummary, AccordionDetails, Chip, Divider, List, ListItem, ListItemText, useTheme } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
+import { getStandardTablePaperSx } from "../common/tableStyles";
 
 function getCantidadEnSucursal(inventario, id_sucursal) {
   if (!Array.isArray(inventario)) {
@@ -28,31 +19,54 @@ function getTotal(inventario) {
   return typeof inventario?.cantidad === "number" ? inventario.cantidad : 0;
 }
 
+const StockChip = ({ value }) => {
+  const v = value ?? 0;
+  return v === 0 ? (
+    <Chip label="0" color="error" size="small" sx={{ fontWeight: 700 }} />
+  ) : v < 10 ? (
+    <Chip label={v} color="warning" size="small" sx={{ fontWeight: 700 }} />
+  ) : (
+    <Chip label={v} color="success" size="small" sx={{ fontWeight: 700 }} />
+  );
+};
+
+StockChip.propTypes = {
+  value: PropTypes.number,
+};
+
 export default function InventarioAccordionInsumosPorInsumo({
   insumos = [],
   sucursales = [],
 }) {
-  /* const theme = useTheme(); */
-
-  const StockChip = ({ value }) => {
-    const v = value ?? 0;
-    return v === 0 ? (
-      <Chip label="0" color="error" size="small" sx={{ fontWeight: 700 }} />
-    ) : v < 10 ? (
-      <Chip label={v} color="warning" size="small" sx={{ fontWeight: 700 }} />
-    ) : (
-      <Chip label={v} color="success" size="small" sx={{ fontWeight: 700 }} />
-    );
-  };
+  const theme = useTheme();
 
   return (
-    <Box sx={{ display: "grid", gap: 1.5 }}>
+    <Box sx={getStandardTablePaperSx(theme, { display: "grid", gap: 1.5 })}>
       {(insumos || []).map((ins) => {
         const total = getTotal(ins.inventario);
 
         return (
-          <Accordion key={ins.id_insumo} disableGutters>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Accordion
+            key={ins.id_insumo}
+            disableGutters
+            sx={{
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 1,
+              boxShadow: "none",
+              overflow: "hidden",
+              "&:before": { display: "none" },
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              sx={{
+                bgcolor:
+                  theme.palette.mode === "light"
+                    ? theme.palette.grey[100]
+                    : theme.palette.grey[900],
+              }}
+            >
               <Box
                 sx={{
                   display: "flex",

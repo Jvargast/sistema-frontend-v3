@@ -1,15 +1,7 @@
-import { useNavigate, useParams } from "react-router-dom";
 import {
-  Box,
-  Typography,
-  Divider,
-  Button,
-  CircularProgress,
-  Stack,
-  TextField,
-  useTheme,
-  Alert,
-} from "@mui/material";
+  useNavigate,
+  useParams } from "react-router-dom";
+import { Divider, Button, CircularProgress, useTheme, Alert } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
@@ -23,6 +15,10 @@ import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import FormulaDisplay from "../../components/formulas/FormulaDisplay";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Stack from "../../components/common/CompatStack";
+import Typography from "../../components/common/CompatTypography";
 
 const VerFormula = () => {
   const { id } = useParams();

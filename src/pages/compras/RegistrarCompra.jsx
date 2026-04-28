@@ -1,4 +1,4 @@
-import { Box, Grid, Stack, Button } from "@mui/material";
+import { Button } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import Header from "../../components/common/Header";
 import { showNotification } from "../../store/reducers/notificacionSlice";
@@ -14,6 +14,9 @@ import CompraItemsTable from "../../components/compras/CompraItemsTable";
 import CompraTotals from "../../components/compras/CompraTotals";
 import { useCreateCompraMutation } from "../../store/services/compraApi";
 import { useEffect } from "react";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Stack from "../../components/common/CompatStack";
 
 export default function RegistrarCompra() {
   const dispatch = useDispatch();

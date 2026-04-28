@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Box, CircularProgress } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import PropTypes from "prop-types";
+import Box from "./CompatBox";
 
 const THRESHOLD = 70;
 const MAX_PULL = 120;
@@ -33,7 +34,7 @@ export default function PullToRefresh({
       if (el.scrollTop !== 0) return;
       const dy = e.touches[0].clientY - startYRef.current;
       if (dy > 0) {
-        e.preventDefault(); 
+        e.preventDefault();
         const d = Math.min(dy, MAX_PULL);
         setPull(d);
       } else {

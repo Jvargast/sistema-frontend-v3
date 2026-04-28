@@ -1,15 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Button,
-  Fade,
-  ToggleButton,
-  ToggleButtonGroup,
-  Stack,
-  Grid,
-} from "@mui/material";
+import { CircularProgress, Button, Fade, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
   useGetPendientesQuery,
@@ -23,6 +13,10 @@ import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import SucursalPickerHeader from "../../components/common/SucursalPickerHeader";
 import { InfoOutlined, StorefrontOutlined } from "@mui/icons-material";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import Box from "../../components/common/CompatBox";
+import Stack from "../../components/common/CompatStack";
+import Grid from "../../components/common/CompatGrid";
+import Typography from "../../components/common/CompatTypography";
 
 const InspeccionRetornables = () => {
   const dispatch = useDispatch();

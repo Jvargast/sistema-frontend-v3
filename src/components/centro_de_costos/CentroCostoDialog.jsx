@@ -1,33 +1,24 @@
+import Dialog from "../common/CompatDialog";
 import * as React from "react";
 import PropTypes from "prop-types";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  Stack,
-  Switch,
-  FormControlLabel,
-  Autocomplete,
-  CircularProgress,
-  Box,
-  Typography,
-} from "@mui/material";
+import { DialogTitle, DialogContent, DialogActions, Button, Switch, FormControlLabel, Autocomplete, CircularProgress } from "@mui/material";
 import AccountTreeOutlined from "@mui/icons-material/AccountTreeOutlined";
 import CloseRounded from "@mui/icons-material/CloseRounded";
 import SaveRounded from "@mui/icons-material/SaveRounded";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const TIPOS_CC = [
-  "Operativo",
-  "Producción",
-  "Ventas",
-  "Administración",
-  "Logística",
-  "Finanzas",
-  "Otros",
-];
+"Operativo",
+"Producción",
+"Ventas",
+"Administración",
+"Logística",
+"Finanzas",
+"Otros"];
+
 
 export default function CentroCostoDialog({
   open,
@@ -47,7 +38,7 @@ export default function CentroCostoDialog({
     nombre: "",
     tipo: "",
     id_sucursal: null,
-    activo: true,
+    activo: true
   });
 
   React.useEffect(() => {
@@ -56,17 +47,17 @@ export default function CentroCostoDialog({
         nombre: "",
         tipo: "",
         id_sucursal:
-          !isGlobal && activeSucursalId != null
-            ? Number(activeSucursalId)
-            : null,
-        activo: true,
+        !isGlobal && activeSucursalId != null ?
+        Number(activeSucursalId) :
+        null,
+        activo: true
       });
     } else {
       setForm({
         nombre: initialData.nombre || "",
         tipo: initialData.tipo || "",
         id_sucursal: initialData.id_sucursal ?? null,
-        activo: initialData.activo !== false,
+        activo: initialData.activo !== false
       });
     }
   }, [initialData, isGlobal, activeSucursalId]);
@@ -90,29 +81,29 @@ export default function CentroCostoDialog({
     const payload = {
       nombre: form.nombre.trim(),
       tipo: form.tipo || null,
-      id_sucursal: isGlobal
-        ? form.id_sucursal == null
-          ? null
-          : Number(form.id_sucursal)
-        : activeSucursalId != null
-        ? Number(activeSucursalId)
-        : null,
-      activo: !!form.activo,
+      id_sucursal: isGlobal ?
+      form.id_sucursal == null ?
+      null :
+      Number(form.id_sucursal) :
+      activeSucursalId != null ?
+      Number(activeSucursalId) :
+      null,
+      activo: !!form.activo
     };
     onSubmit(payload);
   };
 
   const sucursalValue = React.useMemo(
     () =>
-      sucursales.find(
-        (s) => Number(s.id_sucursal) === Number(form.id_sucursal)
-      ) || null,
+    sucursales.find(
+      (s) => Number(s.id_sucursal) === Number(form.id_sucursal)
+    ) || null,
     [sucursales, form.id_sucursal]
   );
 
   const handleClose = (_, reason) => {
     if (isSaving && (reason === "backdropClick" || reason === "escapeKeyDown"))
-      return;
+    return;
     onClose();
   };
 
@@ -137,20 +128,20 @@ export default function CentroCostoDialog({
           borderRadius: 3,
           border: `1px solid ${theme.palette.divider}`,
           boxShadow:
-            theme.palette.mode === "dark"
-              ? "0 10px 30px rgba(0,0,0,.6)"
-              : "0 10px 30px rgba(0,0,0,.15)",
-          overflow: "hidden",
-        }),
+          theme.palette.mode === "dark" ?
+          "0 10px 30px rgba(0,0,0,.6)" :
+          "0 10px 30px rgba(0,0,0,.15)",
+          overflow: "hidden"
+        })
       }}
       TransitionProps={{
         onEntered: (node) => {
           const el = node.querySelector('input, button, [tabindex="0"]');
           el?.focus();
         },
-        onExited: () => { onExited?.(); },
-      }}
-    >
+        onExited: () => {onExited?.();}
+      }}>
+
       <DialogTitle
         sx={(theme) => ({
           px: 3,
@@ -159,9 +150,9 @@ export default function CentroCostoDialog({
           alignItems: "center",
           gap: 1.5,
           color: theme.palette.getContrastText(theme.palette.primary.main),
-          background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-        })}
-      >
+          background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
+        })}>
+
         <Box
           sx={{
             p: 1,
@@ -169,9 +160,9 @@ export default function CentroCostoDialog({
             bgcolor: "rgba(255,255,255,.15)",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+            justifyContent: "center"
+          }}>
+
           <AccountTreeOutlined />
         </Box>
         <Box sx={{ lineHeight: 1 }}>
@@ -191,11 +182,11 @@ export default function CentroCostoDialog({
           px: 3,
           py: 2.5,
           bgcolor:
-            theme.palette.mode === "dark"
-              ? theme.palette.background.default
-              : theme.palette.background.paper,
-        })}
-      >
+          theme.palette.mode === "dark" ?
+          theme.palette.background.default :
+          theme.palette.background.paper
+        })}>
+
         <Stack spacing={2} sx={{ mt: 0.5 }}>
           <TextField
             autoFocus
@@ -205,68 +196,68 @@ export default function CentroCostoDialog({
             fullWidth
             error={!!errors.nombre}
             helperText={errors.nombre || " "}
-            disabled={isSaving}
-          />
+            disabled={isSaving} />
+
 
           <Autocomplete
             options={TIPOS_CC}
             value={form.tipo || ""}
             onChange={(_, v) => setForm((s) => ({ ...s, tipo: v || "" }))}
             freeSolo
-            renderInput={(p) => (
-              <TextField
-                {...p}
-                label="Tipo (opcional)"
-                placeholder="Ej: Operativo, Ventas…"
-                disabled={isSaving}
-              />
-            )}
+            renderInput={(p) =>
+            <TextField
+              {...p}
+              label="Tipo (opcional)"
+              placeholder="Ej: Operativo, Ventas…"
+              disabled={isSaving} />
+
+            }
             disabled={isSaving}
             clearOnBlur={false}
-            autoHighlight
-          />
+            autoHighlight />
+
 
           <Autocomplete
             options={sucursales || []}
             value={sucursalValue}
             onChange={(_, v) =>
-              setForm((s) => ({ ...s, id_sucursal: v?.id_sucursal ?? null }))
+            setForm((s) => ({ ...s, id_sucursal: v?.id_sucursal ?? null }))
             }
             isOptionEqualToValue={(o, v) =>
-              Number(o?.id_sucursal) === Number(v?.id_sucursal)
+            Number(o?.id_sucursal) === Number(v?.id_sucursal)
             }
             getOptionLabel={(o) =>
-              o?.nombre || (o?.id_sucursal ? `Sucursal ${o.id_sucursal}` : "")
+            o?.nombre || (o?.id_sucursal ? `Sucursal ${o.id_sucursal}` : "")
             }
             loading={loadingSucursales}
             noOptionsText={loadingSucursales ? "Cargando…" : "Sin resultados"}
-            renderInput={(p) => (
-              <TextField
-                {...p}
-                label="Sucursal"
-                error={!!errors.id_sucursal}
-                helperText={
-                  isGlobal
-                    ? errors.id_sucursal || " "
-                    : "Fijada por alcance (no editable)"
-                }
-                disabled={isSaving || !isGlobal}
-              />
-            )}
+            renderInput={(p) =>
+            <TextField
+              {...p}
+              label="Sucursal"
+              error={!!errors.id_sucursal}
+              helperText={
+              isGlobal ?
+              errors.id_sucursal || " " :
+              "Fijada por alcance (no editable)"
+              }
+              disabled={isSaving || !isGlobal} />
+
+            }
             disabled={isSaving || !isGlobal}
-            sx={{}}
-          />
+            sx={{}} />
+
 
           <FormControlLabel
             control={
-              <Switch
-                checked={!!form.activo}
-                onChange={(_, v) => setForm((s) => ({ ...s, activo: v }))}
-                disabled={isSaving}
-              />
+            <Switch
+              checked={!!form.activo}
+              onChange={(_, v) => setForm((s) => ({ ...s, activo: v }))}
+              disabled={isSaving} />
+
             }
-            label="Activo"
-          />
+            label="Activo" />
+
         </Stack>
       </DialogContent>
 
@@ -276,18 +267,18 @@ export default function CentroCostoDialog({
           py: 2,
           borderTop: `1px solid ${theme.palette.divider}`,
           bgcolor:
-            theme.palette.mode === "dark"
-              ? "rgba(0,0,0,.4)"
-              : "rgba(255,255,255,.6)",
-          backdropFilter: "saturate(180%) blur(6px)",
-        })}
-      >
+          theme.palette.mode === "dark" ?
+          "rgba(0,0,0,.4)" :
+          "rgba(255,255,255,.6)",
+          backdropFilter: "saturate(180%) blur(6px)"
+        })}>
+
         <Button
           onClick={onClose}
           variant="outlined"
           startIcon={<CloseRounded />}
-          disabled={isSaving}
-        >
+          disabled={isSaving}>
+
           Cancelar
         </Button>
         <Button
@@ -295,14 +286,14 @@ export default function CentroCostoDialog({
           variant="contained"
           disabled={!canSave || isSaving}
           startIcon={
-            isSaving ? <CircularProgress size={18} /> : <SaveRounded />
-          }
-        >
+          isSaving ? <CircularProgress size={18} /> : <SaveRounded />
+          }>
+
           {isSaving ? "Guardando..." : "Guardar"}
         </Button>
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 }
 
 CentroCostoDialog.propTypes = {
@@ -315,5 +306,5 @@ CentroCostoDialog.propTypes = {
   mode: PropTypes.string,
   activeSucursalId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   loadingSucursales: PropTypes.bool,
-  onExited: PropTypes.func,
+  onExited: PropTypes.func
 };

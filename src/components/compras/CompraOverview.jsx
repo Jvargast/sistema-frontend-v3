@@ -1,15 +1,9 @@
 import PropTypes from "prop-types";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  Grid,
-  Chip,
-} from "@mui/material";
+import { Card, CardContent, CardHeader, Divider, Chip } from "@mui/material";
 import dayjs from "dayjs";
 import { ESTADOS_COMPRA } from "../../constants/estadosCompra";
 import { formatCLP } from "../../utils/formatUtils";
+import Grid from "../common/CompatGrid";
 
 const estadoChip = (v) =>
   ESTADOS_COMPRA.find((e) => e.value === String(v || "").toLowerCase()) || {

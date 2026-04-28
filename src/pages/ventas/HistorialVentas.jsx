@@ -1,23 +1,4 @@
-import {
-  Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  Typography,
-  IconButton,
-  Chip,
-  useMediaQuery,
-  Tooltip,
-  Button,
-  Checkbox,
-  TextField,
-  MenuItem,
-} from "@mui/material";
+import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, IconButton, Chip, useMediaQuery, Tooltip, Button, Checkbox, MenuItem, useTheme } from "@mui/material";
 import { Visibility, Cancel, Delete, FilterAltOff } from "@mui/icons-material";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
@@ -33,6 +14,10 @@ import LoaderComponent from "../../components/common/LoaderComponent";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useSelector } from "react-redux";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
+import { getActionIconButtonSx } from "../../components/common/tableStyles";
 
 const getVentaSucursalId = (v) =>
   Number(
@@ -57,6 +42,7 @@ const HistorialVentas = ({
   onRejectVenta,
 }) => {
   const dispatch = useDispatch();
+  const theme = useTheme();
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:600px)");
 
@@ -480,28 +466,31 @@ const HistorialVentas = ({
                 <Box display="flex" justifyContent="flex-end" gap={1}>
                   <Tooltip title="Ver Detalle">
                     <IconButton
-                      color="primary"
+                      aria-label="Ver venta"
                       onClick={() =>
                         navigate(`/admin/ventas/ver/${venta.id_venta}`)
                       }
+                      sx={getActionIconButtonSx(theme, "info")}
                     >
-                      <Visibility />
+                      <Visibility fontSize="small" />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Rechazar Venta">
                     <IconButton
-                      color="warning"
+                      aria-label="Rechazar venta"
                       onClick={() => onRejectVenta(venta)}
+                      sx={getActionIconButtonSx(theme, "warning")}
                     >
-                      <Cancel />
+                      <Cancel fontSize="small" />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Eliminar Venta">
                     <IconButton
-                      color="error"
+                      aria-label="Eliminar venta"
                       onClick={() => handleConfirmDelete(venta)}
+                      sx={getActionIconButtonSx(theme, "error")}
                     >
-                      <Delete />
+                      <Delete fontSize="small" />
                     </IconButton>
                   </Tooltip>
                 </Box>
@@ -608,29 +597,32 @@ const HistorialVentas = ({
                       <TableCell align="center">
                         <Tooltip title="Ver Detalle">
                           <IconButton
-                            color="primary"
+                            aria-label="Ver venta"
                             onClick={() =>
                               navigate(`/admin/ventas/ver/${venta.id_venta}`)
                             }
+                            sx={getActionIconButtonSx(theme, "info")}
                           >
-                            <Visibility />
+                            <Visibility fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Rechazar Venta">
                           <IconButton
-                            color="warning"
+                            aria-label="Rechazar venta"
                             onClick={() => onRejectVenta(venta)}
+                            sx={getActionIconButtonSx(theme, "warning")}
                           >
-                            <Cancel />{" "}
+                            <Cancel fontSize="small" />{" "}
                           </IconButton>
                         </Tooltip>
 
                         <Tooltip title="Eliminar Venta">
                           <IconButton
-                            color="error"
+                            aria-label="Eliminar venta"
                             onClick={() => handleConfirmDelete(venta)}
+                            sx={getActionIconButtonSx(theme, "error")}
                           >
-                            <Delete />
+                            <Delete fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       </TableCell>

@@ -1,16 +1,9 @@
-import {
-  Typography,
-  List,
-  ListItem,
-  Divider,
-  Box,
-  Chip,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
+import { List, ListItem, Divider, Chip, useMediaQuery, useTheme } from "@mui/material";
 import dayjs from "dayjs";
 import { AttachMoney, ReceiptLong, CalendarToday } from "@mui/icons-material";
 import PropTypes from "prop-types";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
 
 const PagosVenta = ({ pagos }) => {
   const pagosList = pagos?.[0]?.rows || [];

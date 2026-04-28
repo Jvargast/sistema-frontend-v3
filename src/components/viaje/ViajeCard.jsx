@@ -1,20 +1,14 @@
 import PropTypes from "prop-types";
-import {
-  Card,
-  CardContent,
-  Typography,
-  Chip,
-  Grid,
-  Box,
-  Divider,
-  Button,
-} from "@mui/material";
+import { Card, CardContent, Chip, Divider, Button } from "@mui/material";
 import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
 import PersonIcon from "@mui/icons-material/Person";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
+import Typography from "../common/CompatTypography";
 
 const estadoColor = {
   Pendiente: "default",

@@ -1,7 +1,9 @@
-import { Box, Paper, Typography } from "@mui/material";
+import { Paper } from "@mui/material";
 import PropTypes from "prop-types";
 import TotalsDisplay from "../TotalDisplay";
 import ShoppingCartItem from "../ShoppingCartItem";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
 
 const CarritoDeCompras = ({
   cart,

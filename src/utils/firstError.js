@@ -9,4 +9,3 @@ export function getFirstRelevantError(...errors) {
     }
     return { type: "none" };
   }
-  

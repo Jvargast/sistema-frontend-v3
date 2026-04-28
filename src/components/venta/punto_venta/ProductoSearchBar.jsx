@@ -1,6 +1,7 @@
-import { TextField, InputAdornment } from "@mui/material";
+import { InputAdornment } from "@mui/material";
 import { SearchOutlined } from "@mui/icons-material";
 import PropTypes from "prop-types";
+import TextField from "../../common/CompatTextField";
 
 const ProductoSearchBar = ({ value, onChange }) => (
   <TextField

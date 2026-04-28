@@ -6,7 +6,7 @@ import notificacionesReducer from "./notificacionesSlice";
 import agendaViajeReducer from "./agendaViajesSlice";
 import tabReducer from "./tabSlice";
 import sucursalReducer from "./sucursalSlice";
-import scopeReducer from "./scopeSlice"; 
+import scopeReducer from "./scopeSlice";
 import posReducer from "./posSlice";
 
 const reducers = {

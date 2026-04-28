@@ -1,4 +1,4 @@
-import { Box, Typography, Grid, Divider, useTheme } from "@mui/material";
+import { Divider, useTheme } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
   removeItem,
@@ -7,6 +7,9 @@ import {
 } from "../../store/reducers/cartSlice";
 import ShoppingCartItem from "../venta/ShoppingCartItem";
 import { useState } from "react";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
+import Typography from "../common/CompatTypography";
 
 const PedidoCarrito = () => {
   const dispatch = useDispatch();

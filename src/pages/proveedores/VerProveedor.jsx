@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Box, Grid, Skeleton } from "@mui/material";
+import { Skeleton } from "@mui/material";
 import { useDispatch } from "react-redux";
 import ProveedorHeader from "../../components/proveedores/ProveedorHeader";
 import ProveedorViewCard from "../../components/proveedores/ProveedorViewCard";
@@ -12,6 +12,8 @@ import {
 } from "../../store/services/proveedorApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import AlertDialog from "../../components/common/AlertDialog";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
 
 export default function VerProveedor() {
   const { id } = useParams();

@@ -8,8 +8,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Box, Typography, useTheme } from "@mui/material";
+import { useTheme } from "@mui/material";
 import PropTypes from 'prop-types';
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 // Función para obtener el nombre del mes
 const getMonthName = (monthNumber) => {

@@ -1,21 +1,19 @@
-import { useState, useEffect } from "react";
-import PropTypes from "prop-types";
 import {
-  Autocomplete,
-  Box,
-  Button,
-  CircularProgress,
-  TextField,
-} from "@mui/material";
+  useState,
+  useEffect } from "react";
+import PropTypes from "prop-types";
+import { Autocomplete, Button, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
 
 const AutocompleteProducto = ({
   productos = [],
-  productosQuery, 
+  productosQuery,
   getOptionLabel = (o) => o?.nombre || "",
   selected = null,
-  onSelect, 
-  showCantidad = true, 
+  onSelect,
+  showCantidad = true,
   label = "Buscar...",
 }) => {
   const [cantidad, setCantidad] = useState(1);
@@ -54,21 +52,28 @@ const AutocompleteProducto = ({
         onChange={(_, newVal) => onSelect(newVal)}
         isOptionEqualToValue={(o, v) => o?.id === v?.id}
         getOptionLabel={getOptionLabel}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={label}
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {loading ? <CircularProgress size={18} /> : null}
-                  {params.InputProps.endAdornment}
-                </>
-              ),
-            }}
-          />
-        )}
+        renderInput={(params) => {
+          const inputSlotProps = params.slotProps?.input || {};
+
+          return (
+            <TextField
+              {...params}
+              label={label}
+              slotProps={{
+                ...params.slotProps,
+                input: {
+                  ...inputSlotProps,
+                  endAdornment: (
+                    <>
+                      {loading ? <CircularProgress size={18} /> : null}
+                      {inputSlotProps.endAdornment}
+                    </>
+                  ),
+                },
+              }}
+            />
+          );
+        }}
       />
 
       {showCantidad && (

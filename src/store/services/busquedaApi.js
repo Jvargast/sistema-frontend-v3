@@ -9,7 +9,7 @@ export const busquedaApi = createApi({
     search: builder.query({
       query: (q) => ({
         url: `/search`,
-        params: { q }, 
+        params: { q },
       }),
       providesTags: ["Busqueda"],
     }),

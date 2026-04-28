@@ -1,35 +1,27 @@
+import Modal from "../../components/common/CompatModal";
 import { useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Alert,
-  Grid,
-  Button,
-  Modal,
-  Paper,
-  Fade,
-  IconButton,
-  Backdrop,
-} from "@mui/material";
+import { CircularProgress, Alert, Button, Paper, Fade, IconButton, Backdrop } from "@mui/material";
 import { useRef } from "react";
 import {
   CalendarMonth,
   ArrowBackIos,
-  ArrowForwardIos,
-} from "@mui/icons-material";
+  ArrowForwardIos } from
+"@mui/icons-material";
 import {
   useConfirmarPedidoMutation,
   useRejectPedidoMutation,
-  useGetMisPedidosQuery,
-} from "../../store/services/pedidosApi";
+  useGetMisPedidosQuery } from
+"../../store/services/pedidosApi";
 import PedidoCard from "../../components/pedido/PedidoCard";
 import HistorialPedidos from "../../components/pedido/HistorialPedidos";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { onRefetchMisPedidos } from "../../utils/eventBus";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Typography from "../../components/common/CompatTypography";
 
 const MisPedidos = () => {
   const dispatch = useDispatch();
@@ -40,8 +32,8 @@ const MisPedidos = () => {
       "-" +
       String(date.getMonth() + 1).padStart(2, "0") +
       "-" +
-      String(date.getDate()).padStart(2, "0")
-    );
+      String(date.getDate()).padStart(2, "0"));
+
   };
 
   const today = new Date();
@@ -68,12 +60,12 @@ const MisPedidos = () => {
     data: pedidos,
     refetch,
     isLoading,
-    isError,
+    isError
   } = useGetMisPedidosQuery(
     {
       page: 1,
       limit: 10,
-      fecha: formatFecha(fechaSeleccionada),
+      fecha: formatFecha(fechaSeleccionada)
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -111,7 +103,7 @@ const MisPedidos = () => {
   }, [refetch]);
 
   const [confirmarPedido, { isLoading: isConfirming }] =
-    useConfirmarPedidoMutation();
+  useConfirmarPedidoMutation();
   const [confirmado, setConfirmado] = useState({});
   const [openHistorial, setOpenHistorial] = useState(false);
 
@@ -122,10 +114,10 @@ const MisPedidos = () => {
     nuevaFecha.setDate(nuevaFecha.getDate() + dias);
 
     if (
-      formatFecha(nuevaFecha) < fechaAyer ||
-      formatFecha(nuevaFecha) > fechaHoy
-    )
-      return;
+    formatFecha(nuevaFecha) < fechaAyer ||
+    formatFecha(nuevaFecha) > fechaHoy)
+
+    return;
 
     setFechaSeleccionada(nuevaFecha);
   };
@@ -136,7 +128,7 @@ const MisPedidos = () => {
       dispatch(
         showNotification({
           message: "Se ha confirmado el pedido con éxito",
-          severity: "success",
+          severity: "success"
         })
       );
       setConfirmado((prev) => ({ ...prev, [idPedido]: true }));
@@ -145,7 +137,7 @@ const MisPedidos = () => {
       dispatch(
         showNotification({
           message: `Error al confirmar pedido: ${error.data.error}`,
-          severity: "error",
+          severity: "error"
         })
       );
     }
@@ -157,7 +149,7 @@ const MisPedidos = () => {
       dispatch(
         showNotification({
           message: "El pedido fue rechazado y devuelto a estado 'Pendiente'.",
-          severity: "info",
+          severity: "info"
         })
       );
       setConfirmado((prev) => ({ ...prev, [idPedido]: false }));
@@ -167,19 +159,19 @@ const MisPedidos = () => {
       dispatch(
         showNotification({
           message: `Error al rechazar pedido: ${
-            error.data?.error || error.message
-          }`,
-          severity: "error",
+          error.data?.error || error.message}`,
+
+          severity: "error"
         })
       );
     }
   };
 
   const pedidosPendientes =
-    pedidos?.data?.filter(
-      (pedido) =>
-        pedido?.EstadoPedido?.nombre_estado === "Pendiente de Confirmación"
-    ) || [];
+  pedidos?.data?.filter(
+    (pedido) =>
+    pedido?.EstadoPedido?.nombre_estado === "Pendiente de Confirmación"
+  ) || [];
 
   if (isLoading) {
     return (
@@ -187,11 +179,11 @@ const MisPedidos = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        minHeight="60vh"
-      >
+        minHeight="60vh">
+
         <CircularProgress />
-      </Box>
-    );
+      </Box>);
+
   }
 
   if (isError) {
@@ -200,11 +192,11 @@ const MisPedidos = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        minHeight="60vh"
-      >
+        minHeight="60vh">
+
         <Alert severity="error">Error al cargar los pedidos.</Alert>
-      </Box>
-    );
+      </Box>);
+
   }
 
   return (
@@ -219,8 +211,8 @@ const MisPedidos = () => {
           color="secondary"
           startIcon={<ArrowBackIos />}
           onClick={() => cambiarFecha(-1)}
-          disabled={formatFecha(fechaSeleccionada) === fechaAyer}
-        >
+          disabled={formatFecha(fechaSeleccionada) === fechaAyer}>
+
           Ayer
         </Button>
         <Typography variant="h6" sx={{ mx: 2, fontWeight: "bold" }}>
@@ -231,8 +223,8 @@ const MisPedidos = () => {
           color="secondary"
           endIcon={<ArrowForwardIos />}
           onClick={() => cambiarFecha(1)}
-          disabled={formatFecha(fechaSeleccionada) === fechaHoy}
-        >
+          disabled={formatFecha(fechaSeleccionada) === fechaHoy}>
+
           Mañana
         </Button>
       </Box>
@@ -242,29 +234,29 @@ const MisPedidos = () => {
           variant="contained"
           color="primary"
           startIcon={<CalendarMonth />}
-          onClick={() => setOpenHistorial(true)}
-        >
+          onClick={() => setOpenHistorial(true)}>
+
           Ver Historial de Pedidos
         </Button>
       </Box>
 
       <Grid container spacing={2} justifyContent="center">
-        {pedidosPendientes.length > 0 ? (
-          pedidosPendientes.map((pedido) => (
-            <PedidoCard
-              key={pedido.id_pedido}
-              pedido={pedido}
-              confirmado={confirmado[pedido.id_pedido] ?? false}
-              isConfirming={isConfirming || isRejecting}
-              onConfirmar={handleConfirmar}
-              onRechazar={handleRechazar}
-            />
-          ))
-        ) : (
-          <Typography variant="h6" textAlign="center" color="gray">
+        {pedidosPendientes.length > 0 ?
+        pedidosPendientes.map((pedido) =>
+        <PedidoCard
+          key={pedido.id_pedido}
+          pedido={pedido}
+          confirmado={confirmado[pedido.id_pedido] ?? false}
+          isConfirming={isConfirming || isRejecting}
+          onConfirmar={handleConfirmar}
+          onRechazar={handleRechazar} />
+
+        ) :
+
+        <Typography variant="h6" textAlign="center" color="gray">
             No tienes pedidos pendientes de confirmación en esta fecha.
           </Typography>
-        )}
+        }
       </Grid>
 
       <Modal
@@ -274,10 +266,10 @@ const MisPedidos = () => {
         slots={{ backdrop: Backdrop }}
         slotProps={{
           backdrop: {
-            timeout: 300,
-          },
-        }}
-      >
+            timeout: 300
+          }
+        }}>
+
         <Fade in={openHistorial}>
           <Box
             sx={{
@@ -286,9 +278,9 @@ const MisPedidos = () => {
               mx: "auto",
               mt: { xs: 4, sm: 7 },
               borderRadius: 4,
-              outline: "none",
-            }}
-          >
+              outline: "none"
+            }}>
+
             <Paper
               elevation={8}
               sx={{
@@ -298,20 +290,20 @@ const MisPedidos = () => {
                 maxHeight: "85vh",
                 overflowY: "auto",
                 backgroundColor: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? theme.palette.background.default
-                    : "#F8FAFC",
-                position: "relative",
-              }}
-            >
+                theme.palette.mode === "dark" ?
+                theme.palette.background.default :
+                "#F8FAFC",
+                position: "relative"
+              }}>
+
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  mb: 2.5,
-                }}
-              >
+                  mb: 2.5
+                }}>
+
                 <Typography variant="h6" fontWeight="bold" color="primary">
                   📅 Historial de Pedidos
                 </Typography>
@@ -319,22 +311,22 @@ const MisPedidos = () => {
                   onClick={() => setOpenHistorial(false)}
                   sx={{
                     color: "text.secondary",
-                    "&:hover": { color: "error.main", bgcolor: "transparent" },
-                  }}
-                >
+                    "&:hover": { color: "error.main", bgcolor: "transparent" }
+                  }}>
+
                   <CloseIcon fontSize="medium" />
                 </IconButton>
               </Box>
               <HistorialPedidos
                 onClose={() => setOpenHistorial(false)}
-                pedidos={pedidos?.data || []}
-              />
+                pedidos={pedidos?.data || []} />
+
             </Paper>
           </Box>
         </Fade>
       </Modal>
-    </Box>
-  );
+    </Box>);
+
 };
 
 export default MisPedidos;

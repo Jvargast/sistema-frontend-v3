@@ -1,7 +1,9 @@
 import PropTypes from "prop-types";
 import { Droppable } from "@hello-pangea/dnd";
-import { Paper, Typography, Box, useTheme } from "@mui/material";
+import { Paper, useTheme } from "@mui/material";
 import PedidoCard from "./PedidoCard";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const Column = ({
   droppableId,

@@ -1,15 +1,11 @@
 import PropTypes from "prop-types";
-import {
-  Box,
-  Stack,
-  Typography,
-  Chip,
-  useTheme,
-  Tooltip,
-} from "@mui/material";
+import { Chip, useTheme, Tooltip } from "@mui/material";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const IndicadoresPanel = ({ insumos }) => {
   const t = useTheme();
@@ -32,7 +28,7 @@ const IndicadoresPanel = ({ insumos }) => {
         bgcolor:
           t.palette.mode === "light" ? t.palette.grey[50] : t.palette.grey[900],
         border: 1,
-        borderColor: "divider", 
+        borderColor: "divider",
       }}
     >
       <Stack

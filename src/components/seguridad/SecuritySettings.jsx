@@ -1,5 +1,7 @@
-import { Box, Typography, Switch, Divider, Button } from "@mui/material";
+import { Switch, Divider, Button } from "@mui/material";
 import PropTypes from "prop-types";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const SecuritySettings = ({ settings, onUpdate }) => {
   return (

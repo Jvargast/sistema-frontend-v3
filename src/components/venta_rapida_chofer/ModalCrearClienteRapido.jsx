@@ -1,38 +1,29 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  Stack,
-  IconButton,
-  Chip,
-  InputAdornment,
-  Box,
-  Typography,
-  Fade,
-  CircularProgress,
-} from "@mui/material";
+import Dialog from "../common/CompatDialog";
+import { DialogTitle, DialogContent, DialogActions, Button, IconButton, Chip, InputAdornment, Fade, CircularProgress } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import { useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useCreateClienteMutation } from "../../store/services/clientesApi";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useSelector } from "react-redux";
+import { isPhonePrefixOnlyCL, validatePhoneCL } from "../../utils/phoneCl";
+import PhoneTextField from "../common/PhoneTextField";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const ModalCrearClienteRapido = ({
   open,
   onClose,
   onClienteCreado,
   defaultSucursalId,
-  defaultSucursalName,
+  defaultSucursalName
 }) => {
   const dispatch = useDispatch();
   const usuario = useSelector((state) => state.auth.user);
@@ -50,12 +41,23 @@ const ModalCrearClienteRapido = ({
     const e = {};
     if (touched.nombre && !form.nombre.trim()) e.nombre = "Requerido";
     if (touched.direccion && !form.direccion.trim()) e.direccion = "Requerido";
-    if (touched.telefono && !form.telefono.trim()) e.telefono = "Requerido";
+    if (touched.telefono) {
+      if (!form.telefono.trim() || isPhonePrefixOnlyCL(form.telefono)) {
+        e.telefono = "Requerido";
+      } else {
+        const result = validatePhoneCL(form.telefono);
+        if (!result.valid) e.telefono = result.msg || "Teléfono inválido";
+      }
+    }
     return e;
   }, [form, touched]);
 
   const isValid =
-    form.nombre.trim() && form.direccion.trim() && form.telefono.trim();
+  form.nombre.trim() &&
+  form.direccion.trim() &&
+  form.telefono.trim() &&
+  !isPhonePrefixOnlyCL(form.telefono) &&
+  validatePhoneCL(form.telefono).valid;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -79,7 +81,7 @@ const ModalCrearClienteRapido = ({
         tipo_cliente: "persona",
         creado_por: usuario?.rut || null,
         id_sucursal:
-          defaultSucursalId != null ? Number(defaultSucursalId) : null,
+        defaultSucursalId != null ? Number(defaultSucursalId) : null
       };
 
       const resp = await createCliente(nuevoCliente).unwrap();
@@ -89,7 +91,7 @@ const ModalCrearClienteRapido = ({
       dispatch(
         showNotification({
           message: "Cliente creado con éxito",
-          severity: "success",
+          severity: "success"
         })
       );
       onClose();
@@ -100,9 +102,9 @@ const ModalCrearClienteRapido = ({
       dispatch(
         showNotification({
           message: `Error al crear cliente: ${
-            error?.data?.error || error?.message || "Desconocido"
-          }`,
-          severity: "error",
+          error?.data?.error || error?.message || "Desconocido"}`,
+
+          severity: "error"
         })
       );
     }
@@ -116,8 +118,8 @@ const ModalCrearClienteRapido = ({
   };
 
   const sucursalLabel =
-    defaultSucursalName ||
-    (defaultSucursalId != null ? `Sucursal ${defaultSucursalId}` : "—");
+  defaultSucursalName || (
+  defaultSucursalId != null ? `Sucursal ${defaultSucursalId}` : "—");
 
   return (
     <Dialog
@@ -130,22 +132,22 @@ const ModalCrearClienteRapido = ({
         sx: {
           borderRadius: 3,
           overflow: "hidden",
-          boxShadow: (t) => `0 12px 32px ${t.palette.primary.main}22`,
-        },
-      }}
-    >
+          boxShadow: (t) => `0 12px 32px ${t.palette.primary.main}22`
+        }
+      }}>
+
       <DialogTitle
         sx={{
           m: 0,
           p: 2.5,
           background:
-            "linear-gradient(135deg, rgba(25,118,210,1) 0%, rgba(21,101,192,1) 100%)",
+          "linear-gradient(135deg, rgba(25,118,210,1) 0%, rgba(21,101,192,1) 100%)",
           color: "#fff",
           display: "flex",
           alignItems: "center",
-          gap: 1.5,
-        }}
-      >
+          gap: 1.5
+        }}>
+
         <PersonAddAlt1Icon />
         Nuevo Cliente Rápido
         <Box sx={{ flex: 1 }} />
@@ -154,9 +156,9 @@ const ModalCrearClienteRapido = ({
           onClick={onClose}
           sx={{
             color: "white",
-            "&:hover": { backgroundColor: "rgba(255,255,255,0.15)" },
-          }}
-        >
+            "&:hover": { backgroundColor: "rgba(255,255,255,0.15)" }
+          }}>
+
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -166,17 +168,17 @@ const ModalCrearClienteRapido = ({
         sx={{
           p: 3,
           mt: 1,
-          backgroundColor: (t) => t.palette.background.default,
-        }}
-      >
+          backgroundColor: (t) => t.palette.background.default
+        }}>
+
         <Box
           sx={{
             mb: 2.5,
             display: "flex",
             alignItems: "center",
-            gap: 1,
-          }}
-        >
+            gap: 1
+          }}>
+
           <StorefrontRoundedIcon color="primary" fontSize="small" />
           <Typography variant="body2" color="text.secondary">
             Se registrará en:
@@ -185,8 +187,8 @@ const ModalCrearClienteRapido = ({
             size="small"
             color={defaultSucursalId != null ? "primary" : "warning"}
             label={sucursalLabel}
-            sx={{ fontWeight: 700 }}
-          />
+            sx={{ fontWeight: 700 }} />
+
         </Box>
 
         <Stack
@@ -197,9 +199,9 @@ const ModalCrearClienteRapido = ({
             borderRadius: 2,
             border: (t) => `1px solid ${t.palette.divider}`,
             backgroundColor: (t) =>
-              t.palette.mode === "light" ? "#fff" : t.palette.background.paper,
-          }}
-        >
+            t.palette.mode === "light" ? "#fff" : t.palette.background.paper
+          }}>
+
           <TextField
             inputRef={nombreRef}
             label="Nombre"
@@ -212,13 +214,13 @@ const ModalCrearClienteRapido = ({
             error={!!errors.nombre}
             helperText={errors.nombre ? "Ingresa el nombre del cliente" : " "}
             InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
+              startAdornment:
+              <InputAdornment position="start">
                   <PersonOutlineOutlinedIcon />
                 </InputAdornment>
-              ),
-            }}
-          />
+
+            }} />
+
           <TextField
             label="Dirección"
             name="direccion"
@@ -230,14 +232,14 @@ const ModalCrearClienteRapido = ({
             error={!!errors.direccion}
             helperText={errors.direccion ? "Ingresa una dirección válida" : " "}
             InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
+              startAdornment:
+              <InputAdornment position="start">
                   <HomeOutlinedIcon />
                 </InputAdornment>
-              ),
-            }}
-          />
-          <TextField
+
+            }} />
+
+          <PhoneTextField
             label="Teléfono"
             name="telefono"
             fullWidth
@@ -246,16 +248,9 @@ const ModalCrearClienteRapido = ({
             onChange={handleChange}
             onBlur={handleBlur}
             error={!!errors.telefono}
-            helperText={errors.telefono ? "Ingresa un teléfono válido" : " "}
-            inputProps={{ inputMode: "tel" }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PhoneOutlinedIcon />
-                </InputAdornment>
-              ),
-            }}
+            helperText={errors.telefono || " "}
           />
+
         </Stack>
       </DialogContent>
 
@@ -263,9 +258,9 @@ const ModalCrearClienteRapido = ({
         sx={{
           p: 2.5,
           gap: 1,
-          backgroundColor: (t) => t.palette.background.default,
-        }}
-      >
+          backgroundColor: (t) => t.palette.background.default
+        }}>
+
         <Button onClick={onClose} color="inherit" variant="outlined">
           Cancelar
         </Button>
@@ -274,15 +269,15 @@ const ModalCrearClienteRapido = ({
           onClick={handleGuardar}
           disabled={isLoading || !isValid}
           startIcon={
-            isLoading ? <CircularProgress size={18} color="inherit" /> : null
+          isLoading ? <CircularProgress size={18} color="inherit" /> : null
           }
-          sx={{ fontWeight: 700 }}
-        >
+          sx={{ fontWeight: 700 }}>
+
           {isLoading ? "Creando..." : "Guardar"}
         </Button>
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 
 ModalCrearClienteRapido.propTypes = {
@@ -290,7 +285,7 @@ ModalCrearClienteRapido.propTypes = {
   onClose: PropTypes.func.isRequired,
   onClienteCreado: PropTypes.func.isRequired,
   defaultSucursalId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  defaultSucursalName: PropTypes.string,
+  defaultSucursalName: PropTypes.string
 };
 
 export default ModalCrearClienteRapido;

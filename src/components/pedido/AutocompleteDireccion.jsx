@@ -1,11 +1,17 @@
 import { useEffect, useRef } from "react";
-import { TextField } from "@mui/material";
 import PropTypes from "prop-types";
+import TextField from "../common/CompatTextField";
 
 export default function AutocompleteDireccion({
+  label = "Dirección de origen",
   direccion,
   setDireccion,
   setCoords,
+  InputProps,
+  sx,
+  required = false,
+  error = false,
+  helperText,
 }) {
   const inputRef = useRef(null);
   const acRef = useRef(null);
@@ -73,19 +79,29 @@ export default function AutocompleteDireccion({
     <TextField
       inputRef={inputRef}
       fullWidth
-      label="Dirección de Origen"
+      label={label}
       value={direccion}
       onChange={(e) => setDireccion(e.target.value)}
       onKeyDown={handleKeyDown}
       variant="outlined"
-      sx={{ mb: 3, borderRadius: 1 }}
+      InputProps={InputProps}
+      required={required}
+      error={error}
+      helperText={helperText}
+      sx={[{ mb: 3, borderRadius: 1 }, sx]}
       autoComplete="off"
     />
   );
 }
 
 AutocompleteDireccion.propTypes = {
+  label: PropTypes.string,
   direccion: PropTypes.string.isRequired,
   setDireccion: PropTypes.func.isRequired,
   setCoords: PropTypes.func.isRequired,
+  InputProps: PropTypes.object,
+  sx: PropTypes.oneOfType([PropTypes.object, PropTypes.array, PropTypes.func]),
+  required: PropTypes.bool,
+  error: PropTypes.bool,
+  helperText: PropTypes.node,
 };

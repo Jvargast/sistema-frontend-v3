@@ -1,33 +1,26 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  MenuItem,
-  Box,
-  Typography,
-  Divider,
-} from "@mui/material";
+import Dialog from "../common/CompatDialog";
+import { DialogTitle, DialogContent, DialogActions, Button, MenuItem, Divider } from "@mui/material";
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useUpdateCamionMutation } from "../../store/services/camionesApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useDispatch } from "react-redux";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const estadosCamion = [
-  { value: "Disponible", label: "Disponible" },
-  { value: "En Ruta", label: "En Ruta" },
-  { value: "Mantenimiento", label: "Mantenimiento" },
-];
+{ value: "Disponible", label: "Disponible" },
+{ value: "En Ruta", label: "En Ruta" },
+{ value: "Mantenimiento", label: "Mantenimiento" }];
+
 
 const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     placa: "",
     capacidad: 0,
-    estado: "",
+    estado: ""
   });
 
   const [updateCamion, { isLoading }] = useUpdateCamionMutation();
@@ -37,7 +30,7 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
       setFormData({
         placa: camion.placa,
         capacidad: camion.capacidad,
-        estado: camion.estado,
+        estado: camion.estado
       });
     }
   }, [camion]);
@@ -51,12 +44,12 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
     try {
       await updateCamion({
         id: camion.id_camion,
-        updatedCamion: formData,
+        updatedCamion: formData
       }).unwrap();
       dispatch(
         showNotification({
           message: "Se ha cambiado con éxito",
-          severity: "success",
+          severity: "success"
         })
       );
       onClose();
@@ -68,7 +61,7 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
       dispatch(
         showNotification({
           message: `Error al actualizar camión: ${error}`,
-          severity: "success",
+          severity: "success"
         })
       );
     }
@@ -84,13 +77,13 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
         sx: (theme) => ({
           borderRadius: 4,
           backgroundColor:
-            theme.palette.mode === "dark"
-              ? theme.palette.background.default
-              : "#f9fbfd",
-          boxShadow: theme.shadows[12],
-        }),
-      }}
-    >
+          theme.palette.mode === "dark" ?
+          theme.palette.background.default :
+          "#f9fbfd",
+          boxShadow: theme.shadows[12]
+        })
+      }}>
+
       <DialogTitle sx={{ pb: 1.5 }}>
         <Typography
           variant="h6"
@@ -98,8 +91,8 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
           color="primary"
           component="div"
           letterSpacing={0.4}
-          sx={{ mb: 0.5 }}
-        >
+          sx={{ mb: 0.5 }}>
+
           Editar Camión
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -115,8 +108,8 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
           display="flex"
           flexDirection="column"
           gap={3}
-          mt={1}
-        >
+          mt={1}>
+
           <TextField
             label="Patente"
             name="placa"
@@ -128,12 +121,12 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
               sx: {
                 borderRadius: 2,
                 background: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? theme.palette.grey[900]
-                    : theme.palette.grey[50],
-              },
-            }}
-          />
+                theme.palette.mode === "dark" ?
+                theme.palette.grey[900] :
+                theme.palette.grey[50]
+              }
+            }} />
+
           <TextField
             label="Capacidad de carga"
             name="capacidad"
@@ -146,12 +139,12 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
               sx: {
                 borderRadius: 2,
                 background: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? theme.palette.grey[900]
-                    : theme.palette.grey[50],
-              },
-            }}
-          />
+                theme.palette.mode === "dark" ?
+                theme.palette.grey[900] :
+                theme.palette.grey[50]
+              }
+            }} />
+
           <TextField
             select
             label="Estado"
@@ -164,17 +157,17 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
               sx: {
                 borderRadius: 2,
                 background: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? theme.palette.grey[900]
-                    : theme.palette.grey[50],
-              },
-            }}
-          >
-            {estadosCamion.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
+                theme.palette.mode === "dark" ?
+                theme.palette.grey[900] :
+                theme.palette.grey[50]
+              }
+            }}>
+
+            {estadosCamion.map((option) =>
+            <MenuItem key={option.value} value={option.value}>
                 {option.label}
               </MenuItem>
-            ))}
+            )}
           </TextField>
         </Box>
       </DialogContent>
@@ -186,13 +179,13 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
           px: { xs: 2, sm: 4 },
           justifyContent: "space-between",
           background: (theme) =>
-            theme.palette.mode === "dark"
-              ? theme.palette.background.paper
-              : "#f5f7fb",
+          theme.palette.mode === "dark" ?
+          theme.palette.background.paper :
+          "#f5f7fb",
           borderBottomLeftRadius: 4,
-          borderBottomRightRadius: 4,
-        }}
-      >
+          borderBottomRightRadius: 4
+        }}>
+
         <Button
           onClick={onClose}
           variant="outlined"
@@ -202,9 +195,9 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
             fontWeight: 700,
             px: 2,
             boxShadow: "none",
-            letterSpacing: 0.2,
-          }}
-        >
+            letterSpacing: 0.2
+          }}>
+
           Cancelar
         </Button>
         <Button
@@ -218,24 +211,24 @@ const EditarCamionModal = ({ open, onClose, camion, onSuccess }) => {
             letterSpacing: 0.2,
             boxShadow: "none",
             background: (theme) =>
-              theme.palette.mode === "dark"
-                ? theme.palette.primary.dark
-                : theme.palette.primary.main,
+            theme.palette.mode === "dark" ?
+            theme.palette.primary.dark :
+            theme.palette.primary.main,
             "&:hover": {
               background: (theme) =>
-                theme.palette.mode === "dark"
-                  ? theme.palette.primary.main
-                  : theme.palette.primary.dark,
+              theme.palette.mode === "dark" ?
+              theme.palette.primary.main :
+              theme.palette.primary.dark
             },
-            transition: "all 0.18s",
+            transition: "all 0.18s"
           }}
-          disabled={isLoading}
-        >
+          disabled={isLoading}>
+
           {isLoading ? "Guardando..." : "Guardar Cambios"}
         </Button>
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 
 EditarCamionModal.propTypes = {
@@ -245,9 +238,9 @@ EditarCamionModal.propTypes = {
     id_camion: PropTypes.number.isRequired,
     placa: PropTypes.string.isRequired,
     capacidad: PropTypes.number.isRequired,
-    estado: PropTypes.string.isRequired,
+    estado: PropTypes.string.isRequired
   }),
-  onSuccess: PropTypes.func,
+  onSuccess: PropTypes.func
 };
 
 export default EditarCamionModal;

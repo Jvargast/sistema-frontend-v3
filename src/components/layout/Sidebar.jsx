@@ -1,20 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  BottomNavigationAction,
-  BottomNavigation,
-  Box,
-  Divider,
-  Drawer,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-  useTheme,
-  Collapse,
-  useMediaQuery,
-  alpha,
-} from "@mui/material";
+import { BottomNavigationAction, BottomNavigation, Divider, Drawer, List, ListItemButton, ListItemIcon, ListItemText, useTheme, Collapse, useMediaQuery, alpha } from "@mui/material";
 import {
   HomeOutlined,
   ShoppingCartOutlined,
@@ -46,8 +31,10 @@ import {
   routeToTabInfo,
   shouldUseRouterPath,
 } from "../../utils/tabsConfig";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
-const ANDROID_FALLBACK = 16; 
+const ANDROID_FALLBACK = 16;
 const BASE_H = 64;
 
 const itemStyles = (t, isActive) => ({

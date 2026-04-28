@@ -1,14 +1,5 @@
 import { useParams } from "react-router-dom";
-import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  CircularProgress,
-  Button,
-  Stack,
-} from "@mui/material";
+import { Card, CardContent, CircularProgress, Button } from "@mui/material";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import {
   useGetCotizacionByIdQuery,
@@ -24,6 +15,10 @@ import { Close, Edit } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import BackButton from "../../components/common/BackButton";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Stack from "../../components/common/CompatStack";
+import Typography from "../../components/common/CompatTypography";
 
 const PreviewCotizacion = () => {
   const { id } = useParams();

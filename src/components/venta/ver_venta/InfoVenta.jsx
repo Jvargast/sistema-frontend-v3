@@ -1,10 +1,4 @@
-import {
-  Typography,
-  Divider,
-  Box,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
+import { Divider, useMediaQuery, useTheme } from "@mui/material";
 import {
   Person,
   Event,
@@ -15,6 +9,8 @@ import {
 import RoomIcon from "@mui/icons-material/Room";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
 
 const InfoVenta = ({ venta }) => {
   const theme = useTheme();

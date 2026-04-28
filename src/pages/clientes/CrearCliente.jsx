@@ -1,30 +1,62 @@
-import { useState, useMemo, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useMemo, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import {
-  Box,
-  Typography,
   Button,
+  Chip,
   Divider,
-  TextField,
+  InputAdornment,
   MenuItem,
   useTheme,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
 import { useCreateClienteMutation } from "../../store/services/clientesApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
+import { isPhonePrefixOnlyCL, validatePhoneCL } from "../../utils/phoneCl";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
+import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
-import { useIsMobile } from "../../utils/useIsMobile";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import AutocompleteDireccion from "../../components/pedido/AutocompleteDireccion";
 import MapSelectorGoogle from "../../components/maps/MapSelector";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import SucursalPickerHeader from "../../components/common/SucursalPickerHeader";
+import PhoneTextField from "../../components/common/PhoneTextField";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
+
+const fieldSx = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 1,
+  },
+};
+
+const primaryButtonSx = (theme) => ({
+  borderRadius: 1,
+  textTransform: "none",
+  fontWeight: 800,
+  bgcolor: "#0F172A",
+  color: theme.palette.common.white,
+  boxShadow: "none",
+  "&:hover": {
+    bgcolor: theme.palette.common.black,
+    boxShadow: "none",
+  },
+});
+
+const secondaryButtonSx = {
+  borderRadius: 1,
+  textTransform: "none",
+  fontWeight: 800,
+};
 
 const CrearCliente = () => {
   const theme = useTheme();
-  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [createCliente, { isLoading: isCreating }] = useCreateClienteMutation();
@@ -41,13 +73,13 @@ const CrearCliente = () => {
     lat: null,
     lng: null,
   });
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const usuario = useSelector((s) => s.auth);
   const { mode, activeSucursalId } = useSelector((s) => s.scope);
 
   const sucursalActiva = useSucursalActiva();
   const { data: sucursales = [] } = useGetAllSucursalsQuery();
-
   const isAdmin = usuario?.rol === "administrador";
 
   const [idSucursal, setIdSucursal] = useState(
@@ -59,12 +91,15 @@ const CrearCliente = () => {
           null
   );
 
-  const nombreSucursal = useMemo(() => {
-    const s = (sucursales || []).find(
-      (x) => Number(x.id_sucursal) === Number(idSucursal)
-    );
-    return s?.nombre || "";
-  }, [sucursales, idSucursal]);
+  const selectedSucursal = useMemo(
+    () =>
+      (sucursales || []).find(
+        (sucursal) => Number(sucursal.id_sucursal) === Number(idSucursal)
+      ),
+    [sucursales, idSucursal]
+  );
+
+  const nombreSucursal = selectedSucursal?.nombre || "";
 
   useEffect(() => {
     if (mode !== "global") {
@@ -77,8 +112,7 @@ const CrearCliente = () => {
     } else {
       setIdSucursal((prev) => prev ?? null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, activeSucursalId, sucursalActiva?.id_sucursal]);
+  }, [mode, activeSucursalId, sucursalActiva?.id_sucursal, usuario?.id_sucursal]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -88,7 +122,9 @@ const CrearCliente = () => {
     }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event) => {
+    event?.preventDefault();
+    setSubmitAttempted(true);
     try {
       if (!idSucursal) {
         dispatch(
@@ -99,6 +135,54 @@ const CrearCliente = () => {
         );
         return;
       }
+
+      if (!formData.telefono || isPhonePrefixOnlyCL(formData.telefono)) {
+        dispatch(
+          showNotification({
+            message: "Ingresa un teléfono para el nuevo cliente.",
+            severity: "warning",
+          })
+        );
+        return;
+      }
+
+      const phoneValidation = validatePhoneCL(formData.telefono);
+      if (!phoneValidation.valid) {
+        dispatch(
+          showNotification({
+            message: phoneValidation.msg || "El teléfono no es válido.",
+            severity: "warning",
+          })
+        );
+        return;
+      }
+
+      if (!formData.direccion?.trim()) {
+        dispatch(
+          showNotification({
+            message: "Ingresa la dirección del cliente.",
+            severity: "warning",
+          })
+        );
+        return;
+      }
+
+      if (
+        typeof formData.lat !== "number" ||
+        typeof formData.lng !== "number" ||
+        !Number.isFinite(formData.lat) ||
+        !Number.isFinite(formData.lng)
+      ) {
+        dispatch(
+          showNotification({
+            message:
+              "Selecciona una ubicación válida en el mapa o desde el buscador.",
+            severity: "warning",
+          })
+        );
+        return;
+      }
+
       await createCliente({
         ...formData,
         id_sucursal: Number(idSucursal),
@@ -114,7 +198,7 @@ const CrearCliente = () => {
       dispatch(
         showNotification({
           message: `Error al crear el cliente: ${
-            error?.data?.error || "Desconocido"
+            error?.data?.error || error?.data?.message || "Desconocido"
           }`,
           severity: "error",
         })
@@ -125,6 +209,7 @@ const CrearCliente = () => {
   const handleDireccionChange = (direccion) => {
     setFormData((prev) => ({ ...prev, direccion }));
   };
+
   const handleCoordsChange = (coords) => {
     setFormData((prev) => ({
       ...prev,
@@ -133,88 +218,223 @@ const CrearCliente = () => {
     }));
   };
 
+  const isEmpresa = formData.tipo_cliente === "empresa";
+  const locationMissing =
+    submitAttempted &&
+    (!formData.direccion?.trim() ||
+      typeof formData.lat !== "number" ||
+      typeof formData.lng !== "number" ||
+      !Number.isFinite(formData.lat) ||
+      !Number.isFinite(formData.lng));
+
   return (
-    <Box m={3}>
-      <Typography variant="h4" gutterBottom fontWeight="bold">
-        Crear Cliente
-      </Typography>
-      <SucursalPickerHeader
-        sucursales={sucursales || []}
-        idSucursal={idSucursal}
-        canChoose={!!isAdmin}
-        onChange={(id) => setIdSucursal(id)}
-        nombreSucursal={nombreSucursal}
-      />
-      <Divider sx={{ my: 2 }} />
+    <Box sx={{ p: { xs: 2, md: 3 }, minHeight: "100vh" }}>
       <Box
         sx={{
-          p: 4,
-          borderRadius: "16px",
-          backgroundColor: (theme) => theme.palette.background.paper,
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          mb: 2,
         }}
       >
-        <Typography variant="h5" gutterBottom fontWeight="bold" color="primary">
-          Información del Cliente
-        </Typography>
-        <Divider sx={{ my: 2 }} />
+        <Box
+          sx={{
+            width: 42,
+            height: 42,
+            borderRadius: 1,
+            bgcolor: "#0F172A",
+            color: theme.palette.common.white,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <PersonAddAlt1Icon fontSize="small" />
+        </Box>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="h4" fontWeight={800} lineHeight={1.1}>
+            Crear cliente
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Registra datos comerciales, contacto y ubicación.
+          </Typography>
+        </Box>
+      </Box>
 
-        <Box display="flex" flexDirection="column" gap={3}>
-          <TextField
-            fullWidth
-            id="nombre"
-            label="Nombre"
-            name="nombre"
-            value={formData.nombre}
-            onChange={handleInputChange}
-            required
-            variant="outlined"
-          />
-          <AutocompleteDireccion
-            direccion={formData.direccion}
-            setDireccion={handleDireccionChange}
-            setCoords={handleCoordsChange}
-          />
-          <MapSelectorGoogle
-            coords={{ lat: formData.lat, lng: formData.lng }}
-            setCoords={handleCoordsChange}
-            direccion={formData.direccion}
-            setDireccion={handleDireccionChange}
-          />
-          <TextField
-            fullWidth
-            id="telefono"
-            label="Teléfono"
-            name="telefono"
-            value={formData.telefono}
-            onChange={handleInputChange}
-            required
-            variant="outlined"
+      <Box
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 1.5,
+          bgcolor: "background.paper",
+          boxShadow:
+            theme.palette.mode === "light"
+              ? "0 10px 30px rgba(15, 23, 42, 0.06)"
+              : "0 10px 30px rgba(0, 0, 0, 0.24)",
+          overflow: "hidden",
+        }}
+      >
+        <Box sx={{ px: { xs: 2, md: 2.5 }, pt: 2 }}>
+          <SucursalPickerHeader
+            sucursales={sucursales || []}
+            idSucursal={idSucursal}
+            canChoose={isAdmin}
+            onChange={(id) => setIdSucursal(id)}
+            nombreSucursal={nombreSucursal}
           />
         </Box>
-        <TextField
-          id="tipo_cliente"
-          select
-          fullWidth
-          label="Tipo de Cliente"
-          name="tipo_cliente"
-          value={formData.tipo_cliente}
-          onChange={handleInputChange}
-          sx={{ mt: 3 }}
+
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{ p: { xs: 2, md: 2.5 } }}
         >
-          <MenuItem value="persona">Persona</MenuItem>
-          <MenuItem value="empresa">Empresa</MenuItem>
-        </TextField>
-        {formData.tipo_cliente === "empresa" && (
-          <Box display="flex" flexDirection="column" gap={3} mt={3}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 1.5,
+              mb: 2,
+            }}
+          >
+            <Box>
+              <Typography variant="h6" fontWeight={800}>
+                Información del cliente
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Completa los datos principales antes de guardar.
+              </Typography>
+            </Box>
+            <Chip
+              size="small"
+              label={isEmpresa ? "Empresa" : "Persona"}
+              icon={
+                isEmpresa ? (
+                  <BusinessOutlinedIcon fontSize="small" />
+                ) : (
+                  <PersonOutlineOutlinedIcon fontSize="small" />
+                )
+              }
+              sx={{
+                borderRadius: 1,
+                fontWeight: 800,
+                bgcolor: alpha("#0F172A", 0.08),
+                color: "#0F172A",
+              }}
+            />
+          </Box>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+              gap: 1.5,
+            }}
+          >
+            <TextField
+              select
+              label="Tipo de cliente"
+              name="tipo_cliente"
+              value={formData.tipo_cliente}
+              onChange={handleInputChange}
+              sx={fieldSx}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    {isEmpresa ? (
+                      <BusinessOutlinedIcon fontSize="small" />
+                    ) : (
+                      <PersonOutlineOutlinedIcon fontSize="small" />
+                    )}
+                  </InputAdornment>
+                ),
+              }}
+            >
+              <MenuItem value="persona">Persona</MenuItem>
+              <MenuItem value="empresa">Empresa</MenuItem>
+            </TextField>
+
             <TextField
               fullWidth
-              label="Razón Social"
-              name="razon_social"
-              value={formData.razon_social}
+              label={isEmpresa ? "Nombre de contacto" : "Nombre"}
+              name="nombre"
+              value={formData.nombre}
               onChange={handleInputChange}
-              variant="outlined"
-              id="razon_social"
+              required
+              sx={fieldSx}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonOutlineOutlinedIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
             />
+
+            {!isEmpresa && (
+              <TextField
+                fullWidth
+                label="Apellido"
+                name="apellido"
+                value={formData.apellido}
+                onChange={handleInputChange}
+                sx={fieldSx}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonOutlineOutlinedIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            )}
+
+            {isEmpresa && (
+              <TextField
+                fullWidth
+                label="Razón social"
+                name="razon_social"
+                value={formData.razon_social}
+                onChange={handleInputChange}
+                required
+                sx={fieldSx}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <BusinessOutlinedIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            )}
+
+            <TextField
+              fullWidth
+              label={isEmpresa ? "RUT empresa" : "RUT"}
+              name="rut"
+              value={formData.rut}
+              onChange={handleInputChange}
+              sx={fieldSx}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <BadgeOutlinedIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <PhoneTextField
+              fullWidth
+              label="Teléfono"
+              name="telefono"
+              value={formData.telefono}
+              onChange={handleInputChange}
+              required
+              sx={fieldSx}
+            />
+
             <TextField
               fullWidth
               label="Email"
@@ -222,111 +442,89 @@ const CrearCliente = () => {
               type="email"
               value={formData.email}
               onChange={handleInputChange}
-              variant="outlined"
-              id="email"
-            />
-            <TextField
-              fullWidth
-              id="rut"
-              label={
-                formData.tipo_cliente === "empresa" ? "RUT Empresa" : "RUT"
-              }
-              name="rut"
-              value={formData.rut}
-              onChange={handleInputChange}
-              required
+              sx={fieldSx}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailOutlinedIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
             />
           </Box>
-        )}
-        <Box
-          display="flex"
-          justifyContent={isMobile ? "center" : "space-between"}
-          alignItems="center"
-          mt={4}
-          gap={isMobile ? 3 : 0}
-          sx={{ width: "100%" }}
-        >
-          {isMobile ? (
-            <>
-              <Box
-                sx={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: "50%",
-                  background: theme.palette.grey[100],
-                  boxShadow: "0 2px 8px 0 #0001",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "0.15s all",
-                  cursor: "pointer",
-                  "&:hover": {
-                    background: theme.palette.grey[300],
-                    transform: "scale(1.07)",
-                  },
-                }}
-                onClick={() => navigate("/clientes")}
-                title="Cancelar"
-              >
-                <ArrowBackIcon
-                  sx={{ color: theme.palette.text.primary, fontSize: 32 }}
-                />
-              </Box>
-              <Box
-                sx={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: "50%",
-                  background: `linear-gradient(120deg, ${theme.palette.primary.light} 60%, ${theme.palette.primary.main} 100%)`,
-                  boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}22, 0 1.5px 8px 0 #0001`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "0.15s all",
-                  cursor: isCreating ? "not-allowed" : "pointer",
-                  opacity: isCreating ? 0.6 : 1,
-                  "&:hover": {
-                    background: `linear-gradient(120deg, ${theme.palette.primary.main} 70%, ${theme.palette.primary.dark} 100%)`,
-                    transform: "scale(1.07)",
-                  },
-                }}
-                onClick={isCreating ? undefined : handleSubmit}
-                title="Crear Cliente"
-              >
-                <PersonAddAlt1Icon sx={{ color: "#fff", fontSize: 32 }} />
-              </Box>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="outlined"
-                color="inherit"
-                onClick={() => navigate("/clientes")}
-                sx={{
-                  borderRadius: "8px",
-                  px: 4,
-                  py: 1.5,
-                  fontWeight: "bold",
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSubmit}
-                disabled={isCreating}
-                sx={{
-                  borderRadius: "8px",
-                  px: 4,
-                  py: 1.5,
-                  fontWeight: "bold",
-                }}
-              >
-                {isCreating ? "Creando..." : "Crear Cliente"}
-              </Button>
-            </>
-          )}
+
+          <Divider sx={{ my: 2.5 }} />
+
+          <Box sx={{ mb: 1.5 }}>
+            <Typography variant="h6" fontWeight={800}>
+              Ubicación
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Busca una dirección o marca la posición en el mapa.
+            </Typography>
+          </Box>
+
+          <AutocompleteDireccion
+            label="Dirección del cliente"
+            direccion={formData.direccion}
+            setDireccion={handleDireccionChange}
+            setCoords={handleCoordsChange}
+            required
+            error={locationMissing}
+            helperText={
+              locationMissing
+                ? "Debes ingresar dirección y seleccionar ubicación."
+                : "Obligatoria. Busca la dirección o marca el punto en el mapa."
+            }
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LocationOnOutlinedIcon fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              mb: 1.5,
+              ...fieldSx,
+            }}
+          />
+
+          <MapSelectorGoogle
+            coords={{ lat: formData.lat, lng: formData.lng }}
+            setCoords={handleCoordsChange}
+            direccion={formData.direccion}
+            setDireccion={handleDireccionChange}
+          />
+
+          <Divider sx={{ my: 2.5 }} />
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 1,
+              flexWrap: "wrap",
+            }}
+          >
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={() => navigate("/clientes")}
+              disabled={isCreating}
+              sx={secondaryButtonSx}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              startIcon={<PersonAddAlt1Icon />}
+              disabled={isCreating}
+              sx={primaryButtonSx(theme)}
+            >
+              {isCreating ? "Creando..." : "Crear cliente"}
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Box>

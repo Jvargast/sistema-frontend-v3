@@ -1,4 +1,5 @@
-import { Box, Card, CardContent, Divider, Tab, Tabs } from "@mui/material";
+import Tabs from "../../../components/common/CompatTabs";
+import { Card, CardContent, Divider, Tab } from "@mui/material";
 import usePaginatedData from "../../../utils/usePaginateData";
 import BackButton from "../../../components/common/BackButton";
 import AuditLogs from "../../../components/seguridad/AuditLogs";
@@ -12,6 +13,7 @@ import { useGetAllLogsQuery } from "../../../store/services/logVentasApi";
 import { useState } from "react";
 import Header from "../../../components/common/Header";
 import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
+import Box from "../../../components/common/CompatBox";
 
 const Seguridad = () => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -20,7 +22,7 @@ const Seguridad = () => {
     isLoading: isLoadingLogsTransacciones,
     paginacion: transactionPagination,
     handlePageChange: handleTransactionPageChange,
-    refetch: refetchTransactions,
+    refetch: refetchTransactions
   } = usePaginatedData(useGetAllLogsQuery);
 
   const {
@@ -28,7 +30,7 @@ const Seguridad = () => {
     isLoading: isLoadingAuditLogs,
     paginacion: auditPagination,
     handlePageChange: handleAuditPageChange,
-    refetch: refetchAudit,
+    refetch: refetchAudit
   } = usePaginatedData(useGetLogsQuery);
 
   useRegisterRefresh(
@@ -55,9 +57,9 @@ const Seguridad = () => {
         alignItems: "flex-start",
         bgcolor: "background.default",
         py: 6,
-        px: 2,
-      }}
-    >
+        px: 2
+      }}>
+
       <Box sx={{ width: "100%", maxWidth: "1000px" }}>
         <BackButton to="/admin" label="Volver al menú" />
 
@@ -73,9 +75,9 @@ const Seguridad = () => {
             maxWidth: "1000px",
             mx: "auto",
             display: "flex",
-            flexDirection: "column",
-          }}
-        >
+            flexDirection: "column"
+          }}>
+
           {/* Tabs principal */}
           <Box
             sx={{
@@ -85,15 +87,15 @@ const Seguridad = () => {
               borderTopLeftRadius: 4,
               borderTopRightRadius: 4,
               px: { xs: 0, md: 2 },
-              pt: 1,
-            }}
-          >
+              pt: 1
+            }}>
+
             <Tabs
               value={tabIndex}
               onChange={(_, val) => setTabIndex(val)}
               variant="fullWidth"
               TabIndicatorProps={{
-                sx: { height: 4, borderRadius: 2, bgcolor: "primary.main" },
+                sx: { height: 4, borderRadius: 2, bgcolor: "primary.main" }
               }}
               sx={{
                 ".MuiTab-root": {
@@ -103,58 +105,58 @@ const Seguridad = () => {
                   py: 2,
                   textTransform: "none",
                   color: "text.secondary",
-                  "&.Mui-selected": { color: "primary.main" },
-                },
-              }}
-            >
+                  "&.Mui-selected": { color: "primary.main" }
+                }
+              }}>
+
               <Tab
                 icon={<FactCheckIcon sx={{ mr: 1 }} />}
                 iconPosition="start"
-                label="Auditoría"
-              />
+                label="Auditoría" />
+
               <Tab
                 icon={<ReceiptLongIcon sx={{ mr: 1 }} />}
                 iconPosition="start"
-                label="Logs de Ventas"
-              />
+                label="Logs de Ventas" />
+
               <Tab
                 icon={<SecurityIcon sx={{ mr: 1 }} />}
                 iconPosition="start"
-                label="Seguridad"
-              />
+                label="Seguridad" />
+
             </Tabs>
           </Box>
           <Divider />
 
           {/* Contenido de cada tab */}
           <CardContent sx={{ flex: 1, minHeight: 390, px: { xs: 1, md: 4 } }}>
-            {tabIndex === 0 && (
-              <AuditLogs
-                logs={auditLogsReview}
-                isLoading={isLoadingAuditLogs}
-                onPageChange={handleAuditPageChange}
-                paginacion={auditPagination}
-              />
-            )}
-            {tabIndex === 1 && (
-              <TransactionLogs
-                transactions={transacctionsLogs || []}
-                isLoading={isLoadingLogsTransacciones}
-                onPageChange={handleTransactionPageChange}
-                paginacion={transactionPagination}
-              />
-            )}
-            {tabIndex === 2 && (
-              <SecuritySettings
-                settings={securitySettings}
-                onUpdate={handleUpdateSettings}
-              />
-            )}
+            {tabIndex === 0 &&
+            <AuditLogs
+              logs={auditLogsReview}
+              isLoading={isLoadingAuditLogs}
+              onPageChange={handleAuditPageChange}
+              paginacion={auditPagination} />
+
+            }
+            {tabIndex === 1 &&
+            <TransactionLogs
+              transactions={transacctionsLogs || []}
+              isLoading={isLoadingLogsTransacciones}
+              onPageChange={handleTransactionPageChange}
+              paginacion={transactionPagination} />
+
+            }
+            {tabIndex === 2 &&
+            <SecuritySettings
+              settings={securitySettings}
+              onUpdate={handleUpdateSettings} />
+
+            }
           </CardContent>
         </Card>
       </Box>
-    </Box>
-  );
+    </Box>);
+
 };
 
 export default Seguridad;

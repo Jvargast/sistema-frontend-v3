@@ -1,13 +1,9 @@
 import PropTypes from "prop-types";
-import {
-  Autocomplete,
-  TextField,
-  CircularProgress,
-  Box,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Autocomplete, CircularProgress, useTheme } from "@mui/material";
 import { useGetAvailabreProductosQuery } from "../../store/services/productoApi";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const getStockFromInventarios = (inventario, idSucursal) => {
   if (Array.isArray(inventario)) {
@@ -82,23 +78,30 @@ const SelectorProducto = ({
           </Box>
         );
       }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={label}
-          fullWidth
-          variant="outlined"
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {isLoading && <CircularProgress size={18} />}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
-        />
-      )}
+      renderInput={(params) => {
+        const inputSlotProps = params.slotProps?.input || {};
+
+        return (
+          <TextField
+            {...params}
+            label={label}
+            fullWidth
+            variant="outlined"
+            slotProps={{
+              ...params.slotProps,
+              input: {
+                ...inputSlotProps,
+                endAdornment: (
+                  <>
+                    {isLoading && <CircularProgress size={18} />}
+                    {inputSlotProps.endAdornment}
+                  </>
+                ),
+              },
+            }}
+          />
+        );
+      }}
     />
   );
 };

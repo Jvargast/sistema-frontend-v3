@@ -1,17 +1,12 @@
+import Menu from "../common/CompatMenu";
 import PropTypes from "prop-types";
-import {
-  Menu,
-  MenuItem,
-  Typography,
-  ListItemIcon,
-  Divider,
-  Box,
-  IconButton,
-} from "@mui/material";
+import { MenuItem, ListItemIcon, Divider, IconButton } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
 import ClearIcon from "@mui/icons-material/Clear";
 import { clearNotificaciones, removeNotificacionById } from "../../store/reducers/notificacionesSlice";
 import { useDispatch } from "react-redux";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 /**
  *
@@ -28,7 +23,7 @@ const NotificationsMenu = ({
   open,
   onClose,
   notifications = [],
-  onSelectNotification,
+  onSelectNotification
 }) => {
   const dispatch = useDispatch();
   return (
@@ -42,108 +37,108 @@ const NotificationsMenu = ({
           width: 320,
           borderRadius: 12,
           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-          padding: "0.5rem 0",
-        },
+          padding: "0.5rem 0"
+        }
       }}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      transformOrigin={{ vertical: "top", horizontal: "right" }}
-    >
-      {notifications.length === 0 ? (
-        <MenuItem disabled sx={{ justifyContent: "center" }}>
+      transformOrigin={{ vertical: "top", horizontal: "right" }}>
+
+      {notifications.length === 0 ?
+      <MenuItem disabled sx={{ justifyContent: "center" }}>
           <Typography variant="body2" color="textSecondary">
             No hay notificaciones
           </Typography>
-        </MenuItem>
-      ) : (
-        notifications.map((notif) => (
-          <Box key={notif.id_notificacion || notif.id}>
+        </MenuItem> :
+
+      notifications.map((notif) =>
+      <Box key={notif.id_notificacion || notif.id}>
             <MenuItem
-              onClick={() => {
-                if (onSelectNotification) onSelectNotification(notif);
-                onClose();
-              }}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                "&:hover": { backgroundColor: "#f5f5f5" },
-              }}
-            >
+          onClick={() => {
+            if (onSelectNotification) onSelectNotification(notif);
+            onClose();
+          }}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            "&:hover": { backgroundColor: "#f5f5f5" }
+          }}>
+
               <ListItemIcon sx={{ minWidth: 28 }}>
                 <CircleIcon
-                  sx={{
-                    fontSize: 12,
-                    color:
-                      notif.tipo === "pedido_asignado" ? "#f50057" : "#1976d2",
-                  }}
-                />
+              sx={{
+                fontSize: 12,
+                color:
+                notif.tipo === "pedido_asignado" ? "#f50057" : "#1976d2"
+              }} />
+
               </ListItemIcon>
               <Box display="flex" flexDirection="column" width="100%">
                 <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 500,
-                    color: "#333",
-                    wordBreak: "break-word",
-                    whiteSpace: "normal",
-                    maxWidth: "230px",
-                  }}
-                >
+              variant="body2"
+              sx={{
+                fontWeight: 500,
+                color: "#333",
+                wordBreak: "break-word",
+                whiteSpace: "normal",
+                maxWidth: "230px"
+              }}>
+
                   {notif.mensaje}
                 </Typography>
-                {notif.fecha && (
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "gray", marginTop: "2px" }}
-                  >
+                {notif.fecha &&
+            <Typography
+              variant="caption"
+              sx={{ color: "gray", marginTop: "2px" }}>
+
                     {new Date(notif.fecha).toLocaleString()}
                   </Typography>
-                )}
+            }
               </Box>
 
               <IconButton
-                size="small"
-                edge="end"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  dispatch(
-                    removeNotificacionById(notif.id_notificacion || notif.id)
-                  );
-                }}
-                sx={{
-                  ml: "auto",
-                  color: "#9e9e9e",
-                  "&:hover": {
-                    color: "#f44336",
-                  },
-                }}
-              >
+            size="small"
+            edge="end"
+            onClick={(e) => {
+              e.stopPropagation();
+              dispatch(
+                removeNotificacionById(notif.id_notificacion || notif.id)
+              );
+            }}
+            sx={{
+              ml: "auto",
+              color: "#9e9e9e",
+              "&:hover": {
+                color: "#f44336"
+              }
+            }}>
+
                 <ClearIcon fontSize="small" />
               </IconButton>
             </MenuItem>
             <Divider sx={{ margin: 0 }} />
           </Box>
-        ))
-      )}
-      {notifications.length > 0 && (
-        <>
+      )
+      }
+      {notifications.length > 0 &&
+      <>
           <MenuItem
-            onClick={() => {
-              dispatch(clearNotificaciones());
-              onClose();
-            }}
-            sx={{
-              justifyContent: "center",
-              color: "error.main",
-              fontWeight: "bold",
-            }}
-          >
+          onClick={() => {
+            dispatch(clearNotificaciones());
+            onClose();
+          }}
+          sx={{
+            justifyContent: "center",
+            color: "error.main",
+            fontWeight: "bold"
+          }}>
+
             Borrar todas
           </MenuItem>
         </>
-      )}
-    </Menu>
-  );
+      }
+    </Menu>);
+
 };
 
 NotificationsMenu.propTypes = {
@@ -153,17 +148,17 @@ NotificationsMenu.propTypes = {
   notifications: PropTypes.arrayOf(
     PropTypes.shape({
       id_notificacion: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.number,
-      ]),
+      PropTypes.string,
+      PropTypes.number]
+      ),
       id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       mensaje: PropTypes.string,
       fecha: PropTypes.string,
       tipo: PropTypes.string,
-      leida: PropTypes.bool,
+      leida: PropTypes.bool
     })
   ),
-  onSelectNotification: PropTypes.func,
+  onSelectNotification: PropTypes.func
 };
 
 export default NotificationsMenu;

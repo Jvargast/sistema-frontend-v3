@@ -1,14 +1,7 @@
 import PropTypes from "prop-types";
-import {
-  Box,
-  Typography,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  Chip,
-} from "@mui/material";
+import { Divider, List, ListItem, ListItemText, ListItemSecondaryAction, Chip } from "@mui/material";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const ResumenLote = ({ productoFinal, cantidadFinal = 0, insumos }) => (
   <Box>
@@ -65,7 +58,7 @@ const ResumenLote = ({ productoFinal, cantidadFinal = 0, insumos }) => (
 
 ResumenLote.propTypes = {
   productoFinal: PropTypes.string.isRequired,
-  cantidadFinal: PropTypes.number, 
+  cantidadFinal: PropTypes.number,
   insumos: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),

@@ -1,7 +1,12 @@
 import PropTypes from "prop-types";
-import { useEffect, useMemo, useState } from "react";
-import { Autocomplete, TextField } from "@mui/material";
+import {
+  useEffect,
+  useMemo,
+  useState } from "react";
+import { Autocomplete,
+} from "@mui/material";
 import { useLazyGetAllInsumosQuery } from "../../store/services/insumoApi";
+import TextField from "../common/CompatTextField";
 
 function useDebounced(v, ms = 350) {
   const [s, setS] = useState(v);
@@ -44,7 +49,7 @@ const InsumoCell = ({ value, onChange, disabled }) => {
       disabled={disabled}
       options={options}
       loading={isFetching}
-      filterOptions={(x) => x} 
+      filterOptions={(x) => x}
       getOptionLabel={(o) =>
         o?.nombre_insumo || o?.nombre || o?.descripcion || ""
       }

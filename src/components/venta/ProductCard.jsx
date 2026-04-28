@@ -1,19 +1,11 @@
-import {
-  Card,
-  CardContent,
-  CardMedia,
-  Typography,
-  Button,
-  Box,
-  Chip,
-  Tooltip,
-  useTheme,
-} from "@mui/material";
+import { Card, CardContent, CardMedia, Button, Chip, Tooltip, useTheme } from "@mui/material";
 import BrokenImageIcon from "@mui/icons-material/BrokenImage";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import PropTypes from "prop-types";
 import { useMemo, useState } from "react";
 import { getImageUrl } from "../../store/services/apiBase";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const ProductCard = ({
   product,

@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   cajaAsignada: null,
-  cajaAbierta: false, 
+  cajaAbierta: false,
 };
 
 const cajaSlice = createSlice({

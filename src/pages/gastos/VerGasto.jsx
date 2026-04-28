@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Box, Grid, Skeleton } from "@mui/material";
+import { Skeleton } from "@mui/material";
 import dayjs from "dayjs";
 import { useDispatch } from "react-redux";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
 
 import { formatCLP } from "../../utils/formatUtils";
 import {

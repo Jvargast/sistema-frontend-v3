@@ -1,8 +1,11 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { Box, Grid, Typography } from "@mui/material";
+import Typography from "../common/CompatTypography";
+
 import { useGetAllCategoriasQuery } from "../../store/services/categoriaApi";
 import CategoryBlock from "../venta/CategoryBlock";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
 
 const PedidoCategorias = ({ onSelectCategory }) => {
   const [selectedCategory, setSelectedCategory] = useState("all");

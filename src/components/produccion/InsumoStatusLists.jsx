@@ -1,7 +1,10 @@
 import PropTypes from "prop-types";
-import { Box, Stack, Typography, Tooltip } from "@mui/material";
+import { Tooltip } from "@mui/material";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const InsumoStatusList = ({ items = [] }) => (
   <Box sx={{ mt: 1 }}>

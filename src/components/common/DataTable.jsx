@@ -1,27 +1,12 @@
-import {
-  Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Typography,
-  CircularProgress,
-  useTheme,
-  useMediaQuery,
-  Divider,
-  Pagination,
-  TextField,
-  MenuItem,
-} from "@mui/material";
+import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, CircularProgress, useTheme, useMediaQuery, Divider, Pagination, MenuItem } from "@mui/material";
 import PropTypes from "prop-types";
 import BackButton from "./BackButton";
 import { useSelector } from "react-redux";
 import { formatCLP } from "../../utils/formatUtils";
 import Header from "./Header";
+import TextField from "./CompatTextField";
+import Box from "./CompatBox";
+import Typography from "./CompatTypography";
 
 const DataTable = ({
   columns,

@@ -1,34 +1,15 @@
+import Menu from "../common/CompatMenu";
 import { useState } from "react";
 import PropTypes from "prop-types";
 import {
   Menu as MenuIcon,
   ArrowDropDownOutlined,
   ExpandLess,
-  ExpandMore,
-} from "@mui/icons-material";
+  ExpandMore } from
+"@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
-import {
-  AppBar,
-  Button,
-  Box,
-  Typography,
-  IconButton,
-  Toolbar,
-  Menu,
-  MenuItem,
-  useTheme,
-  useMediaQuery,
-  Drawer,
-  Divider,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Avatar,
-  Collapse,
-  Badge,
-} from "@mui/material";
+import { AppBar, Button, IconButton, Toolbar, MenuItem, useTheme, useMediaQuery, Drawer, Divider, List, ListItemButton, ListItemIcon, ListItemText, Avatar, Collapse, Badge } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useLogoutMutation } from "../../store/services/authApi";
 import { resetCacheAndLogout } from "../../store/reducers/authSlice";
@@ -36,8 +17,8 @@ import FlexBetween from "./FlexBetween";
 import { modulesData } from "../../utils/modulesData";
 import {
   markAllAsRead,
-  removeNotificacionById,
-} from "../../store/reducers/notificacionesSlice";
+  removeNotificacionById } from
+"../../store/reducers/notificacionesSlice";
 import NotificationsMenu from "./NotificationMenu";
 import SearchBar from "./SearchBar";
 import ConfigMenu from "./ConfigMenu";
@@ -47,13 +28,15 @@ import { isColorLight } from "../../utils/colorUtil";
 import useTabNavigation from "../../utils/useTabNavigation";
 import ScopeSwitcher from "./ScopeSwitcher";
 import { alpha } from "@mui/material/styles";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const rolColors = {
   chofer: "#FFE082",
   administrador: "#81D4FA",
   vendedor: "#A5D6A7",
   supervisor: "#FFCCBC",
-  default: "#ECEFF1",
+  default: "#ECEFF1"
 };
 
 const Navbar = ({ user, rol, setIsSidebarOpen }) => {
@@ -63,8 +46,8 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
   const isTabletOrMobile = useMediaQuery("(max-width:1023px)");
   const { i18n } = useTranslation();
   const roleName = (
-    typeof rol === "string" ? rol : rol?.nombre || ""
-  ).toLowerCase();
+  typeof rol === "string" ? rol : rol?.nombre || "").
+  toLowerCase();
   const isAdmin = roleName === "administrador";
   const navbarColor = rolColors[roleName] || rolColors.default;
   const iconNavbarColor = isColorLight(navbarColor) ? "#2c3e50" : "#fff";
@@ -76,9 +59,9 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
     transition: "background-color .15s ease, transform .15s ease",
     "&:hover": {
       backgroundColor:
-        t.palette.mode === "light" ? alpha("#000", 0.06) : alpha("#fff", 0.08),
+      t.palette.mode === "light" ? alpha("#000", 0.06) : alpha("#fff", 0.08)
     },
-    "& .MuiSvgIcon-root": { fontSize: 24 },
+    "& .MuiSvgIcon-root": { fontSize: 24 }
   });
 
   const navigate = useNavigate();
@@ -94,7 +77,7 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
   const openTabAndNavigate = useTabNavigation();
   const tabInfo = {
     label: "Mi Perfil",
-    icon: "AccountCircleOutlined",
+    icon: "AccountCircleOutlined"
   };
 
   const handleLogout = async () => {
@@ -116,7 +99,7 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
   const handleToggleSection = (moduleName) => {
     setOpenSections((prev) => ({
       ...prev,
-      [moduleName]: !prev[moduleName],
+      [moduleName]: !prev[moduleName]
     }));
   };
 
@@ -181,9 +164,9 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
       sx={{
         position: "static",
         background: "none",
-        boxShadow: "none",
-      }}
-    >
+        boxShadow: "none"
+      }}>
+
       <Toolbar
         sx={(t) => ({
           justifyContent: "space-between",
@@ -191,130 +174,43 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
           px: { xs: 1.5, md: 2 },
           background: navbarColor,
           borderBottom: `1px solid ${
-            t.palette.roles?.border || "rgba(2,6,23,0.08)"
-          }`,
+          t.palette.roles?.border || "rgba(2,6,23,0.08)"}`,
+
           boxShadow: "0 4px 18px rgba(2,6,23,0.06)",
-          backdropFilter: "saturate(1.2) blur(6px)",
-        })}
-      >
-        {isTabletOrMobile ? (
-          <Box
-            sx={{
-              display: "flex",
-              width: "100%",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
+          backdropFilter: "saturate(1.2) blur(6px)"
+        })}>
+
+        {isTabletOrMobile ?
+        <Box
+          sx={{
+            display: "flex",
+            width: "100%",
+            alignItems: "center",
+            justifyContent: "space-between"
+          }}>
+
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <IconButton
-                onClick={() => setMobileMenuOpen(true)}
-                aria-label="Abrir menú"
-                sx={(t) => iconBtnSx(t)}
-              >
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Abrir menú"
+              sx={(t) => iconBtnSx(t)}>
+
                 <MenuIcon />
               </IconButton>
             </Box>
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <IconButton
-                aria-label="Ver notificaciones"
-                onClick={handleOpenNotificationsMenu}
-                sx={{
-                  color: iconNavbarColor,
-                  "&:hover": {
-                    backgroundColor: "rgba(44,62,80,0.07)",
-                  },
-                }}
-              >
-                <Badge
-                  badgeContent={notificaciones.filter((n) => !n.leida).length}
-                  color="secondary"
-                  sx={{
-                    "& .MuiBadge-badge": {
-                      minWidth: 18,
-                      height: 18,
-                      fontSize: 10,
-                      fontWeight: 700,
-                      boxShadow: "0 0 0 2px rgba(255,255,255,0.8)",
-                    },
-                  }}
-                >
-                  <NotificationsNoneOutlinedIcon sx={{ fontSize: 25 }} />
-                </Badge>
-              </IconButton>
-              <ConfigMenu
-                iconColor={iconNavbarColor}
-                onToggleTheme={() => dispatch(setMode())}
-                onChangeLanguage={(lang) => {
-                  i18n.changeLanguage(lang);
-                  localStorage.setItem("language", lang);
-                }}
-                currentLang={i18n.language}
-              />
-            </Box>
-          </Box>
-        ) : (
-          <FlexBetween>
-            <IconButton
-              onClick={() => {
-                if (isDesktop) {
-                  setIsSidebarOpen((prev) => !prev);
-                } else {
-                  setMobileMenuOpen(true);
-                }
-              }}
-              sx={(t) => ({
-                display: isDesktop ? "block" : "none",
-                ...iconBtnSx(t),
-              })}
-              aria-label="Abrir o cerrar menú lateral"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Box sx={{ flexGrow: 1, maxWidth: 600, mx: 2 }}>
-              <SearchBar
-                onResultSelect={(item) => {
-                  console.log("Seleccionaste:", item);
-                }}
-              />
-            </Box>
-          </FlexBetween>
-        )}
-
-        {!isTabletOrMobile && (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "center",
-              gap: "1.5rem",
-            }}
-          >
-            {isAdmin && <ScopeSwitcher />}
-            <IconButton
               aria-label="Ver notificaciones"
               onClick={handleOpenNotificationsMenu}
               sx={{
                 color: iconNavbarColor,
                 "&:hover": {
-                  backgroundColor: "rgba(44,62,80,0.07)",
-                  "&:focus": {
-                    outline: "none",
-                    boxShadow: "none",
-                  },
-                  "&:active": {
-                    outline: "none",
-                    boxShadow: "none",
-                  },
-                  "&:focus-visible": {
-                    outline: "none",
-                    boxShadow: "none",
-                  },
-                },
-              }}
-            >
-              <Badge
+                  backgroundColor: "rgba(44,62,80,0.07)"
+                }
+              }}>
+
+                <Badge
                 badgeContent={notificaciones.filter((n) => !n.leida).length}
                 color="secondary"
                 sx={{
@@ -323,142 +219,229 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
                     height: 18,
                     fontSize: 10,
                     fontWeight: 700,
-                    boxShadow: "0 0 0 2px rgba(255,255,255,0.8)",
-                  },
-                }}
-              >
+                    boxShadow: "0 0 0 2px rgba(255,255,255,0.8)"
+                  }
+                }}>
+
+                  <NotificationsNoneOutlinedIcon sx={{ fontSize: 25 }} />
+                </Badge>
+              </IconButton>
+              <ConfigMenu
+              iconColor={iconNavbarColor}
+              onToggleTheme={() => dispatch(setMode())}
+              onChangeLanguage={(lang) => {
+                i18n.changeLanguage(lang);
+                localStorage.setItem("language", lang);
+              }}
+              currentLang={i18n.language} />
+
+            </Box>
+          </Box> :
+
+        <FlexBetween>
+            <IconButton
+            onClick={() => {
+              if (isDesktop) {
+                setIsSidebarOpen((prev) => !prev);
+              } else {
+                setMobileMenuOpen(true);
+              }
+            }}
+            sx={(t) => ({
+              display: isDesktop ? "block" : "none",
+              ...iconBtnSx(t)
+            })}
+            aria-label="Abrir o cerrar menú lateral">
+
+              <MenuIcon />
+            </IconButton>
+            <Box sx={{ flexGrow: 1, maxWidth: 600, mx: 2 }}>
+              <SearchBar
+              onResultSelect={(item) => {
+                console.log("Seleccionaste:", item);
+              }} />
+
+            </Box>
+          </FlexBetween>
+        }
+
+        {!isTabletOrMobile &&
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            gap: "1.5rem"
+          }}>
+
+            {isAdmin && <ScopeSwitcher />}
+            <IconButton
+            aria-label="Ver notificaciones"
+            onClick={handleOpenNotificationsMenu}
+            sx={{
+              color: iconNavbarColor,
+              "&:hover": {
+                backgroundColor: "rgba(44,62,80,0.07)",
+                "&:focus": {
+                  outline: "none",
+                  boxShadow: "none"
+                },
+                "&:active": {
+                  outline: "none",
+                  boxShadow: "none"
+                },
+                "&:focus-visible": {
+                  outline: "none",
+                  boxShadow: "none"
+                }
+              }
+            }}>
+
+              <Badge
+              badgeContent={notificaciones.filter((n) => !n.leida).length}
+              color="secondary"
+              sx={{
+                "& .MuiBadge-badge": {
+                  minWidth: 18,
+                  height: 18,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  boxShadow: "0 0 0 2px rgba(255,255,255,0.8)"
+                }
+              }}>
+
                 <NotificationsNoneOutlinedIcon sx={{ fontSize: "25px" }} />
               </Badge>
             </IconButton>
 
             <ConfigMenu
-              iconColor={iconNavbarColor}
-              onToggleTheme={() => {
-                dispatch(setMode());
-              }}
-              onChangeLanguage={(lang) => {
-                i18n.changeLanguage(lang);
-                localStorage.setItem("language", lang);
-              }}
-              currentLang={i18n.language}
-            />
+            iconColor={iconNavbarColor}
+            onToggleTheme={() => {
+              dispatch(setMode());
+            }}
+            onChangeLanguage={(lang) => {
+              i18n.changeLanguage(lang);
+              localStorage.setItem("language", lang);
+            }}
+            currentLang={i18n.language} />
+
 
             <Button
-              onClick={handleClick}
-              sx={(t) => ({
-                textTransform: "none",
+            onClick={handleClick}
+            sx={(t) => ({
+              textTransform: "none",
+              backgroundColor:
+              t.palette.mode === "light" ?
+              alpha("#000", 0.04) :
+              alpha("#fff", 0.06),
+              borderRadius: "999px",
+              border: `1px solid ${
+              t.palette.roles?.border || "rgba(2,6,23,0.08)"}`,
+
+              px: 1.25,
+              py: 0.5,
+              padding: "6px 12px",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              boxShadow: "0 2px 10px rgba(2,6,23,0.06)",
+              "&:hover": {
                 backgroundColor:
-                  t.palette.mode === "light"
-                    ? alpha("#000", 0.04)
-                    : alpha("#fff", 0.06),
-                borderRadius: "999px",
-                border: `1px solid ${
-                  t.palette.roles?.border || "rgba(2,6,23,0.08)"
-                }`,
-                px: 1.25,
-                py: 0.5,
-                padding: "6px 12px",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-                boxShadow: "0 2px 10px rgba(2,6,23,0.06)",
-                "&:hover": {
-                  backgroundColor:
-                    t.palette.mode === "light"
-                      ? alpha("#000", 0.06)
-                      : alpha("#fff", 0.1),
-                },
-              })}
-            >
+                t.palette.mode === "light" ?
+                alpha("#000", 0.06) :
+                alpha("#fff", 0.1)
+              }
+            })}>
+
               <Avatar
-                sx={{
-                  width: 32,
-                  height: 32,
-                  backgroundColor: "#3F51B5",
-                  fontSize: "0.85rem",
-                  fontWeight: 800,
-                  boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.25)",
-                }}
-              >
+              sx={{
+                width: 32,
+                height: 32,
+                backgroundColor: "#3F51B5",
+                fontSize: "0.85rem",
+                fontWeight: 800,
+                boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.25)"
+              }}>
+
                 {user?.nombre ? user.nombre.charAt(0).toUpperCase() : "U"}
               </Avatar>
               <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  lineHeight: 1.1,
-                  overflow: "hidden",
-                  whiteSpace: "nowrap",
-                  textOverflow: "ellipsis",
-                  maxWidth: 100,
-                }}
-              >
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                lineHeight: 1.1,
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
+                maxWidth: 100
+              }}>
+
                 <Typography
-                  fontWeight={700}
-                  fontSize="0.78rem"
-                  color={theme.palette.text.primary}
-                  sx={{ lineHeight: 1.2 }}
-                  noWrap
-                >
+                fontWeight={700}
+                fontSize="0.78rem"
+                color={theme.palette.text.primary}
+                sx={{ lineHeight: 1.2 }}
+                noWrap>
+
                   {user?.nombre || ""}
                 </Typography>
                 <Typography
-                  fontSize="0.65rem"
-                  color={theme.palette.text.secondary}
-                  sx={{ lineHeight: 1.2 }}
-                  noWrap
-                >
+                fontSize="0.65rem"
+                color={theme.palette.text.secondary}
+                sx={{ lineHeight: 1.2 }}
+                noWrap>
+
                   {rol ? rol.charAt(0).toUpperCase() + rol.slice(1) : ""}
                 </Typography>
               </Box>
               <ArrowDropDownOutlined
-                sx={{ fontSize: "25px", color: theme.palette.text.primary }}
-              />
+              sx={{ fontSize: "25px", color: theme.palette.text.primary }} />
+
             </Button>
 
             <Menu
-              anchorEl={anchorEl}
-              open={isOpen}
-              onClose={handleClose}
-              slotProps={{
-                paper: {
-                  elevation: 0,
-                  sx: (t) => ({
-                    mt: 1,
-                    borderRadius: 2,
-                    border: `1px solid ${
-                      t.palette.roles?.border || "rgba(2,6,23,0.08)"
-                    }`,
-                    boxShadow: "0 12px 32px rgba(2,6,23,0.12)",
-                    overflow: "hidden",
-                    "& .MuiMenuItem-root": {
-                      fontSize: 14,
-                      fontWeight: 600,
-                    },
-                  }),
-                },
-              }}
-            >
+            anchorEl={anchorEl}
+            open={isOpen}
+            onClose={handleClose}
+            slotProps={{
+              paper: {
+                elevation: 0,
+                sx: (t) => ({
+                  mt: 1,
+                  borderRadius: 2,
+                  border: `1px solid ${
+                  t.palette.roles?.border || "rgba(2,6,23,0.08)"}`,
+
+                  boxShadow: "0 12px 32px rgba(2,6,23,0.12)",
+                  overflow: "hidden",
+                  "& .MuiMenuItem-root": {
+                    fontSize: 14,
+                    fontWeight: 600
+                  }
+                })
+              }
+            }}>
+
               <MenuItem
-                onClick={() => {
-                  handleClose();
-                  openTabAndNavigate("miperfil", tabInfo);
-                }}
-              >
+              onClick={() => {
+                handleClose();
+                openTabAndNavigate("miperfil", tabInfo);
+              }}>
+
                 Mi Perfil
               </MenuItem>
               <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
             </Menu>
           </Box>
-        )}
+        }
         <NotificationsMenu
           anchorEl={anchorNoti}
           open={isNotiOpen}
           onClose={handleCloseNoti}
           notifications={notificaciones}
-          onSelectNotification={handleSelectNotification}
-        />
+          onSelectNotification={handleSelectNotification} />
+
       </Toolbar>
       <Drawer
         anchor="left"
@@ -471,76 +454,76 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
             color: "white",
             overflowY: "auto",
             scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          },
-        }}
-      >
+            "&::-webkit-scrollbar": { display: "none" }
+          }
+        }}>
+
         <Box p={2} textAlign="center">
           <Typography variant="h5" fontWeight="bold">
             Menú
           </Typography>
           <Divider />
-          {isAdmin && (
-            <Box sx={{ p: 1.5 }}>
+          {isAdmin &&
+          <Box sx={{ p: 1.5 }}>
               <ScopeSwitcher />
             </Box>
-          )}
+          }
           <List>
-            {modulesData
-              .slice(1)
-              .filter(
-                (module) =>
-                  !module.permission || hasPermission(module.permission)
-              )
-              .map((module) => (
-                <Box key={module.name}>
+            {modulesData.
+            slice(1).
+            filter(
+              (module) =>
+              !module.permission || hasPermission(module.permission)
+            ).
+            map((module) =>
+            <Box key={module.name}>
                   <ListItemButton
-                    onClick={
-                      module.children
-                        ? () => handleToggleSection(module.name)
-                        : () => navigate(module.path)
-                    }
-                  >
+                onClick={
+                module.children ?
+                () => handleToggleSection(module.name) :
+                () => navigate(module.path)
+                }>
+
                     {module.icon && <ListItemIcon>{module.icon}</ListItemIcon>}
                     <ListItemText
-                      primary={module.name}
-                      sx={{ color: "white" }}
-                    />
-                    {module.children &&
-                      (openSections[module.name] ? (
-                        <ExpandLess />
-                      ) : (
-                        <ExpandMore />
-                      ))}
+                  primary={module.name}
+                  sx={{ color: "white" }} />
+
+                    {module.children && (
+                openSections[module.name] ?
+                <ExpandLess /> :
+
+                <ExpandMore />)
+                }
                   </ListItemButton>
-                  {module.children && (
-                    <Collapse
-                      in={!!openSections[module.name]}
-                      timeout="auto"
-                      unmountOnExit
-                    >
+                  {module.children &&
+              <Collapse
+                in={!!openSections[module.name]}
+                timeout="auto"
+                unmountOnExit>
+
                       <List component="div" disablePadding>
-                        {module.children
-                          .filter((child) => hasPermission(child.permission))
-                          .map((child) => (
-                            <ListItemButton
-                              key={child.path}
-                              onClick={() => navigate(child.path)}
-                              sx={{ pl: 4 }}
-                            >
-                              {child.icon && (
-                                <ListItemIcon sx={{ color: "white" }}>
+                        {module.children.
+                  filter((child) => hasPermission(child.permission)).
+                  map((child) =>
+                  <ListItemButton
+                    key={child.path}
+                    onClick={() => navigate(child.path)}
+                    sx={{ pl: 4 }}>
+
+                              {child.icon &&
+                    <ListItemIcon sx={{ color: "white" }}>
                                   {child.icon}
                                 </ListItemIcon>
-                              )}
+                    }
                               <ListItemText primary={child.text} />
                             </ListItemButton>
-                          ))}
+                  )}
                       </List>
                     </Collapse>
-                  )}
+              }
                 </Box>
-              ))}
+            )}
           </List>
           <Box sx={{ p: 2, textAlign: "center" }}>
             <Divider sx={{ backgroundColor: "#555" }} />
@@ -549,9 +532,9 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
                 bgcolor: "#3F51B5",
                 width: 48,
                 height: 48,
-                margin: "10px auto",
-              }}
-            >
+                margin: "10px auto"
+              }}>
+
               {user?.nombre ? user.nombre.charAt(0).toUpperCase() : "U"}
             </Avatar>
             <Typography variant="body2" textAlign="center">
@@ -560,14 +543,14 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
           </Box>
         </Box>
       </Drawer>
-    </AppBar>
-  );
+    </AppBar>);
+
 };
 Navbar.propTypes = {
   user: PropTypes.object,
   rol: PropTypes.string,
   isSidebarOpen: PropTypes.bool.isRequired,
-  setIsSidebarOpen: PropTypes.func.isRequired,
+  setIsSidebarOpen: PropTypes.func.isRequired
 };
 
 export default Navbar;

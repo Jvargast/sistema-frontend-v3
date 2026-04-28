@@ -1,12 +1,7 @@
-import {
-  Box,
-  Typography,
-  Button,
-  CircularProgress,
-  useTheme,
-  Divider,
-} from "@mui/material";
+import { Button, CircularProgress, useTheme, Divider } from "@mui/material";
 import PropTypes from "prop-types";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const PedidoResumen = ({ total, isLoading, error, onSubmit, submitLabel }) => {
   const theme = useTheme();

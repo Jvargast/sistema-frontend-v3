@@ -1,18 +1,16 @@
+import Tabs from "../../components/common/CompatTabs";
 import { useState } from "react";
 import {
-  Box,
-  Grid,
-  Typography,
-  TextField,
   Button,
   Card,
-  CardContent,
   CardActions,
-  Avatar,
+  CardContent,
+  Chip,
   IconButton,
-  Tabs,
   Tab,
+  useTheme,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { useGetAllCajasQuery } from "../../store/services/cajaApi";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import AsignarUsuarioModal from "../../components/caja/AsignarUsuarioModal";
@@ -20,11 +18,95 @@ import DetalleCajaModal from "../../components/caja/DetalleCajaModal";
 import CrearCajaModal from "../../components/caja/CrearCajaModal";
 import BackButton from "../../components/common/BackButton";
 import MovimientosCajaModal from "../../components/caja/MovimientosCajaModal";
-import { InfoOutlined } from "@mui/icons-material";
+import {
+  Add,
+  InfoOutlined,
+  PersonAddAltOutlined,
+  PointOfSale,
+  StorefrontOutlined,
+  VisibilityOutlined,
+} from "@mui/icons-material";
 import MovimientosCajaList from "../../components/caja/MovimientosCajaList";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
+import { getActionIconButtonSx } from "../../components/common/tableStyles";
+
+const cardsGridSx = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    md: "repeat(2, minmax(0, 1fr))",
+    lg: "repeat(3, minmax(0, 1fr))",
+  },
+  gap: 1.5,
+  alignItems: "stretch",
+};
+
+const getEstadoMeta = (estado, theme) => {
+  const key = String(estado || "").toLowerCase();
+  const map = {
+    abierta: {
+      label: "Abierta",
+      color: theme.palette.success.main,
+      bg: alpha(theme.palette.success.main, 0.1),
+    },
+    pendiente: {
+      label: "Pendiente",
+      color: theme.palette.warning.dark,
+      bg: alpha(theme.palette.warning.main, 0.14),
+    },
+    cerrada: {
+      label: "Cerrada",
+      color: theme.palette.error.main,
+      bg: alpha(theme.palette.error.main, 0.1),
+    },
+  };
+
+  return (
+    map[key] || {
+      label: estado || "Sin estado",
+      color: theme.palette.text.secondary,
+      bg: alpha(theme.palette.text.secondary, 0.1),
+    }
+  );
+};
+
+const formatAssignedUser = (caja) => {
+  const usuario = caja?.usuarioAsignado;
+  if (!usuario) return "No asignado";
+
+  const rol = usuario?.rol?.nombre || usuario?.rol;
+  return `${usuario.nombre || "Usuario"}${rol ? ` - ${rol}` : ""}`;
+};
+
+const actionButtonSx = (theme, variant = "primary") => ({
+  borderRadius: 1,
+  textTransform: "none",
+  fontWeight: 800,
+  boxShadow: "none",
+  ...(variant === "primary"
+    ? {
+        bgcolor: "#0F172A",
+        color: theme.palette.common.white,
+        "&:hover": {
+          bgcolor: theme.palette.common.black,
+          boxShadow: "none",
+        },
+      }
+    : {
+        color: "#0F172A",
+        borderColor: alpha("#0F172A", 0.3),
+        "&:hover": {
+          borderColor: "#0F172A",
+          bgcolor: alpha("#0F172A", 0.04),
+        },
+      }),
+});
 
 const ListarCajas = () => {
+  const theme = useTheme();
   const { data: cajasData, isLoading, error, refetch } = useGetAllCajasQuery();
   const [selectedCaja, setSelectedCaja] = useState(null);
   const [detalleCajaId, setDetalleCajaId] = useState(null);
@@ -42,210 +124,262 @@ const ListarCajas = () => {
     [refetch]
   );
 
-  const filteredCajas = cajasData?.rows.filter(
-    (caja) =>
-      caja.sucursal.nombre.toLowerCase().includes(search.toLowerCase()) ||
-      caja.id_caja.toString().includes(search) ||
-      caja.estado.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredCajas = (cajasData?.rows || []).filter((caja) => {
+    const term = search.toLowerCase();
+    return (
+      caja?.sucursal?.nombre?.toLowerCase().includes(term) ||
+      String(caja?.id_caja || "").includes(search) ||
+      String(caja?.estado || "").toLowerCase().includes(term)
+    );
+  });
 
   if (isLoading) return <LoaderComponent />;
   if (error) return <Typography>Error al cargar las cajas.</Typography>;
 
   return (
-    <Box p={3}>
+    <Box sx={{ p: { xs: 2, md: 3 }, minHeight: "100vh" }}>
       <BackButton to="/admin" label="Volver al menú" />
-      <Typography variant="h4" mb={3} fontWeight="bold" textAlign="center">
+      <Typography variant="h4" mb={3} fontWeight={800} textAlign="center">
         Gestión de Cajas
       </Typography>
 
       <Tabs
         value={tabIndex}
         onChange={(_, newValue) => setTabIndex(newValue)}
-        centered
-      >
+        centered>
+
         <Tab label="Listado de Cajas" />
         <Tab label="Movimientos de Cajas" />
       </Tabs>
-      {tabIndex === 0 ? (
-        <>
-          {/* Filtros */}
-          <Box display="flex" gap={2} mb={4}>
+      {tabIndex === 0 ?
+      <>
+          <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "minmax(0, 1fr) auto" },
+            gap: 1.5,
+            alignItems: "center",
+            mb: 3
+          }}>
+
             <TextField
-              label="Buscar Caja (ID, Sucursal, Estado)"
-              variant="outlined"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              fullWidth
-            />
+            label="Buscar caja"
+            variant="outlined"
+            size="small"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            fullWidth
+            placeholder="ID, sucursal o estado"
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 1,
+                bgcolor: "background.paper"
+              }
+            }} />
+
             <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#4CAF50",
-                color: "#fff",
-                marginLeft: 2,
-                "&:hover": {
-                  backgroundColor: "#388E3C",
-                },
-              }}
-              onClick={() => setOpenCrearCajaModal(true)}
-            >
-              Crear Caja
+            variant="contained"
+            startIcon={<Add />}
+            sx={actionButtonSx(theme, "primary")}
+            onClick={() => setOpenCrearCajaModal(true)}>
+
+              Crear caja
             </Button>
           </Box>
 
-          {/* Listado de Cajas */}
-          <Grid container spacing={3}>
-            {filteredCajas?.map((caja) => (
-              <Grid item xs={12} sm={6} md={4} key={caja.id_caja}>
+          {filteredCajas.length > 0 ?
+        <Box sx={cardsGridSx}>
+            {filteredCajas.map((caja) => {
+              const estado = getEstadoMeta(caja.estado, theme);
+              return (
                 <Card
-                  sx={{
-                    borderLeft: `8px solid ${
-                      caja.estado === "abierta"
-                        ? "#4caf50" // Verde suave
-                        : caja.estado === "pendiente"
-                        ? "#ff9800" // Naranja suave
-                        : "#f44336" // Rojo suave
-                    }`,
-                    borderRadius: "12px",
-                    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                    transition: "transform 0.3s ease",
-                    "&:hover": {
-                      transform: "translateY(-5px)",
-                      boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.2)",
-                    },
-                  }}
-                >
-                  <CardContent>
-                    {/* Encabezado con avatar e icono */}
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="space-between"
-                      mb={2}
-                    >
-                      <Box display="flex" alignItems="center" gap={2}>
-                        <Avatar
-                          sx={{
-                            bgcolor: "#2196f3",
-                            color: "#fff",
-                            width: 48,
-                            height: 48,
-                            fontSize: "1.2rem",
-                          }}
-                        >
-                          {caja.id_caja}
-                        </Avatar>
-                        <Typography variant="h6" fontWeight="bold">
+                key={caja.id_caja}
+                elevation={0}
+                sx={{
+                  minHeight: 236,
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1.5,
+                  bgcolor: "background.paper",
+                  boxShadow:
+                    theme.palette.mode === "light"
+                      ? "0 8px 24px rgba(15, 23, 42, 0.07)"
+                      : "0 8px 24px rgba(0, 0, 0, 0.28)",
+                  transition:
+                    "border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease",
+                  "&:hover": {
+                    borderColor: alpha(estado.color, 0.45),
+                    transform: "translateY(-1px)",
+                    boxShadow:
+                      theme.palette.mode === "light"
+                        ? "0 12px 28px rgba(15, 23, 42, 0.1)"
+                        : "0 12px 28px rgba(0, 0, 0, 0.36)"
+                  }
+                }}>
+
+                  <CardContent sx={{ p: 2, flex: 1 }}>
+                    <Box display="flex" alignItems="flex-start" gap={1.25}>
+                      <Box
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 1,
+                        bgcolor: "#0F172A",
+                        color: theme.palette.common.white,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flex: "0 0 auto"
+                      }}>
+
+                        <PointOfSale fontSize="small" />
+                      </Box>
+
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="h6" fontWeight={800} noWrap>
                           Caja #{caja.id_caja}
                         </Typography>
+                        <Chip
+                        size="small"
+                        label={estado.label}
+                        sx={{
+                          mt: 0.5,
+                          height: 22,
+                          borderRadius: 1,
+                          color: estado.color,
+                          bgcolor: estado.bg,
+                          fontWeight: 800
+                        }} />
                       </Box>
-                      {/* Botón de información para ver movimientos */}
+
                       <IconButton
-                        color="primary"
-                        onClick={() => setMovimientosCajaId(caja.id_caja)}
-                      >
-                        <InfoOutlined />
+                      aria-label="Ver movimientos"
+                      onClick={() => setMovimientosCajaId(caja.id_caja)}
+                      sx={getActionIconButtonSx(theme, "info")}>
+
+                        <InfoOutlined fontSize="small" />
                       </IconButton>
                     </Box>
 
-                    {/* Información de la caja */}
-                    <Typography variant="body2" color="textSecondary" mb={1}>
-                      <strong>Sucursal:</strong> {caja.sucursal.nombre}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary" mb={1}>
-                      <strong>Estado:</strong> {caja.estado}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary" mb={1}>
-                      <strong>Usuario Apertura:</strong>{" "}
-                      {caja.usuario_apertura || "No asignado"}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary" mb={1}>
-                      <strong>Usuario Asignado:</strong>{" "}
-                      {caja.usuarioAsignado
-                        ? `Nombre: ${caja.usuarioAsignado.nombre} - Rol: ${caja.usuarioAsignado.rol.nombre}`
-                        : "No asignado"}
-                    </Typography>
+                    <Box sx={{ display: "grid", gap: 1.1, mt: 2 }}>
+                      <Box display="flex" gap={1} sx={{ minWidth: 0 }}>
+                        <StorefrontOutlined
+                        fontSize="small"
+                        sx={{ color: "text.secondary", mt: 0.15 }} />
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            Sucursal
+                          </Typography>
+                          <Typography variant="body2" fontWeight={700} noWrap>
+                            {caja?.sucursal?.nombre || "Sin sucursal"}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      <Box display="flex" gap={1} sx={{ minWidth: 0 }}>
+                        <PersonAddAltOutlined
+                        fontSize="small"
+                        sx={{ color: "text.secondary", mt: 0.15 }} />
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            Usuario asignado
+                          </Typography>
+                          <Typography variant="body2" fontWeight={700} noWrap>
+                            {formatAssignedUser(caja)}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      <Typography variant="caption" color="text.secondary">
+                        Apertura: {caja.usuario_apertura || "No asignado"}
+                      </Typography>
+                    </Box>
                   </CardContent>
 
                   <CardActions
-                    sx={{
-                      display: "flex",
-                      gap: 1,
-                      justifyContent: "space-between",
-                    }}
-                  >
+                sx={{
+                  display: "flex",
+                  gap: 1,
+                  p: 2,
+                  pt: 0
+                }}>
+
                     <Button
-                      variant="contained"
-                      sx={{
-                        backgroundColor: "#03a9f4",
-                        color: "#fff",
-                        flex: 1,
-                        "&:hover": {
-                          backgroundColor: "#0288d1",
-                        },
-                      }}
-                      onClick={() => setSelectedCaja(caja)}
-                    >
-                      Asignar Usuario
+                  variant="contained"
+                  startIcon={<PersonAddAltOutlined />}
+                  sx={{ ...actionButtonSx(theme, "primary"), flex: 1 }}
+                  onClick={() => setSelectedCaja(caja)}>
+
+                      Asignar
                     </Button>
                     <Button
-                      variant="outlined"
-                      sx={{
-                        color: "#ff5722",
-                        borderColor: "#ff5722",
-                        flex: 1,
-                        "&:hover": {
-                          backgroundColor: "rgba(255, 87, 34, 0.1)",
-                          borderColor: "#e64a19",
-                        },
-                      }}
-                      onClick={() => setDetalleCajaId(caja.id_caja)}
-                    >
-                      Ver Detalle
+                  variant="outlined"
+                  startIcon={<VisibilityOutlined />}
+                  sx={{ ...actionButtonSx(theme, "secondary"), flex: 1 }}
+                  onClick={() => setDetalleCajaId(caja.id_caja)}>
+
+                      Detalle
                     </Button>
                   </CardActions>
                 </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </>
-      ) : (
-        <>
+              );
+            })}
+          </Box> :
+
+        <Box
+          sx={{
+            py: 8,
+            textAlign: "center",
+            color: "text.secondary",
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 1,
+            bgcolor: "background.paper"
+          }}>
+
+              No hay cajas para mostrar.
+            </Box>
+        }
+        </> :
+
+      <>
           <MovimientosCajaList />
         </>
-      )}
+      }
 
       {/* Modal para Crear una Caja */}
-      {openCrearCajaModal && (
-        <CrearCajaModal onClose={() => setOpenCrearCajaModal(false)} />
-      )}
+      {openCrearCajaModal &&
+      <CrearCajaModal onClose={() => setOpenCrearCajaModal(false)} />
+      }
 
       {/* Modal para Asignar Usuario */}
-      {selectedCaja && (
-        <AsignarUsuarioModal
-          caja={selectedCaja}
-          onClose={() => setSelectedCaja(null)}
-        />
-      )}
+      {selectedCaja &&
+      <AsignarUsuarioModal
+        caja={selectedCaja}
+        onClose={() => setSelectedCaja(null)} />
+
+      }
 
       {/* Modal para Ver Detalle */}
-      {detalleCajaId && (
-        <DetalleCajaModal
-          idCaja={detalleCajaId}
-          onClose={() => setDetalleCajaId(null)}
-        />
-      )}
+      {detalleCajaId &&
+      <DetalleCajaModal
+        idCaja={detalleCajaId}
+        onClose={() => setDetalleCajaId(null)} />
+
+      }
 
       {/* Modal para Ver Movimientos */}
-      {movimientosCajaId && (
-        <MovimientosCajaModal
-          idCaja={movimientosCajaId}
-          onClose={() => setMovimientosCajaId(null)}
-        />
-      )}
-    </Box>
-  );
+      {movimientosCajaId &&
+      <MovimientosCajaModal
+        idCaja={movimientosCajaId}
+        onClose={() => setMovimientosCajaId(null)} />
+
+      }
+    </Box>);
+
 };
 
 export default ListarCajas;

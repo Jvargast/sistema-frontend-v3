@@ -1,10 +1,12 @@
-import { Box, Typography, Button } from "@mui/material";
+import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import { getInitialRoute } from "../../utils/navigationUtils";
 import { useSelector } from "react-redux";
 import { useMemo } from "react";
 import { useHasPermission } from "../../utils/useHasPermission";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
 
 const NotFoundPage = () => {
   const navigate = useNavigate();

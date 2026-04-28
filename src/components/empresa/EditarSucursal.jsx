@@ -1,13 +1,10 @@
-import {
-  Typography,
-  Divider,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  Grid,
-} from "@mui/material";
+import { Divider, Card, CardContent, Button } from "@mui/material";
 import PropTypes from "prop-types";
+import { formatPhoneInputCL } from "../../utils/phoneCl";
+import PhoneTextField from "../common/PhoneTextField";
+import TextField from "../common/CompatTextField";
+import Grid from "../common/CompatGrid";
+import Typography from "../common/CompatTypography";
 
 const EditarSucursales = ({
   sucursales,
@@ -118,13 +115,13 @@ const EditarSucursales = ({
                       />
                     </Grid>
                     <Grid size={{ xs: 12, md: 6 }}>
-                      <TextField
+                      <PhoneTextField
                         fullWidth
                         label="Teléfono"
-                        value={
-                          sucursalData[sucursal.id_sucursal]?.telefono ||
-                          sucursal.telefono
-                        }
+                        value={formatPhoneInputCL(
+                          sucursalData[sucursal.id_sucursal]?.telefono ??
+                            sucursal.telefono
+                        )}
                         onChange={(e) =>
                           handleSucursalChange(
                             sucursal.id_sucursal,

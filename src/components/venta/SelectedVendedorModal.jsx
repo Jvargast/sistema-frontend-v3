@@ -1,24 +1,19 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Typography,
-  Box,
-  Autocomplete,
-  TextField,
-  Stack,
-} from "@mui/material";
+import Dialog from "../common/CompatDialog";
+import { DialogTitle, DialogContent, DialogActions, Autocomplete } from "@mui/material";
 import PropTypes from "prop-types";
 import { ListboxComponent } from "./ListboxComponent";
 import { useMemo } from "react";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const SelectVendedorModal = ({
   open,
   onClose,
   vendedores,
   selectedVendedor,
-  onSelect,
+  onSelect
 }) => {
   const selectedOption = useMemo(
     () => vendedores.find((v) => v.rut === selectedVendedor) || null,
@@ -40,8 +35,8 @@ const SelectVendedorModal = ({
           borderRadius: "14px !important",
           overflow: "hidden",
           clipPath: "none !important",
-          border: (t) => `1px solid ${t.palette.divider}`,
-        },
+          border: (t) => `1px solid ${t.palette.divider}`
+        }
       }}
       slotProps={{
         paper: {
@@ -49,12 +44,12 @@ const SelectVendedorModal = ({
           sx: {
             borderRadius: "14px !important",
             overflow: "hidden",
-            clipPath: "none !important",
-          },
+            clipPath: "none !important"
+          }
         },
-        backdrop: { sx: { borderRadius: 0 } },
-      }}
-    >
+        backdrop: { sx: { borderRadius: 0 } }
+      }}>
+
       <DialogTitle
         sx={{
           fontSize: "1.5rem",
@@ -63,9 +58,9 @@ const SelectVendedorModal = ({
           background: "linear-gradient(90deg, #4A90E2, #0052D4)",
           color: "white",
           padding: "16px",
-          borderRadius: "10px 10px 0 0",
-        }}
-      >
+          borderRadius: "10px 10px 0 0"
+        }}>
+
         Seleccionar Vendedor
       </DialogTitle>
 
@@ -77,65 +72,65 @@ const SelectVendedorModal = ({
             marginBottom: "10px",
             fontSize: "1.1rem",
             textAlign: "center",
-            mt: 2,
-          }}
-        >
+            mt: 2
+          }}>
+
           Elige un vendedor para continuar con el proceso.
         </Typography>
 
         <Box
           sx={{
             padding: "10px",
-            borderRadius: "8px",
-          }}
-        >
-          {vendedores.length === 0 ? (
-            <Typography align="center" color="text.secondary" fontSize={16}>
+            borderRadius: "8px"
+          }}>
+
+          {vendedores.length === 0 ?
+          <Typography align="center" color="text.secondary" fontSize={16}>
               No hay vendedores/usuarios con caja disponibles en esta sucursal.
-            </Typography>
-          ) : (
-            <Autocomplete
-              value={selectedOption}
-              disableClearable
-              options={vendedores}
-              getOptionLabel={(option) =>
-                option?.nombre && option?.apellido
-                  ? `${option.nombre} ${option.apellido}`
-                  : option?.nombre || option?.apellido || ""
-              }
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Buscar vendedor"
-                  variant="outlined"
-                  fullWidth
-                />
-              )}
-              onChange={(_, value) => {
-                if (!value) return;
-                onSelect?.(value.rut);
-                onClose?.();
-              }}
-              isOptionEqualToValue={(option, value) => option.rut === value.rut}
-              sx={{
-                mt: 1,
-                borderRadius: "8px",
-              }}
-              ListboxComponent={ListboxComponent}
-              renderOption={(props, option) => {
-                //eslint-disable-next-line
-                const { key, ...rest } = props;
-                return (
-                  <Box
-                    key={key}
-                    component="li"
-                    {...rest}
-                    sx={{
-                      px: 2,
-                      py: 1,
-                      borderBottom: "1px solid #eee",
-                    }}
-                  >
+            </Typography> :
+
+          <Autocomplete
+            value={selectedOption}
+            disableClearable
+            options={vendedores}
+            getOptionLabel={(option) =>
+            option?.nombre && option?.apellido ?
+            `${option.nombre} ${option.apellido}` :
+            option?.nombre || option?.apellido || ""
+            }
+            renderInput={(params) =>
+            <TextField
+              {...params}
+              label="Buscar vendedor"
+              variant="outlined"
+              fullWidth />
+
+            }
+            onChange={(_, value) => {
+              if (!value) return;
+              onSelect?.(value.rut);
+              onClose?.();
+            }}
+            isOptionEqualToValue={(option, value) => option.rut === value.rut}
+            sx={{
+              mt: 1,
+              borderRadius: "8px"
+            }}
+            ListboxComponent={ListboxComponent}
+            renderOption={(props, option) => {
+              //eslint-disable-next-line
+              const { key, ...rest } = props;
+              return (
+                <Box
+                  key={key}
+                  component="li"
+                  {...rest}
+                  sx={{
+                    px: 2,
+                    py: 1,
+                    borderBottom: "1px solid #eee"
+                  }}>
+
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Box>
                         <Typography fontWeight={500} fontSize="0.95rem">
@@ -146,11 +141,11 @@ const SelectVendedorModal = ({
                         </Typography>
                       </Box>
                     </Stack>
-                  </Box>
-                );
-              }}
-            />
-          )}
+                  </Box>);
+
+            }} />
+
+          }
         </Box>
       </DialogContent>
 
@@ -159,11 +154,11 @@ const SelectVendedorModal = ({
           display: "flex",
           justifyContent: "center",
           gap: "10px",
-          padding: "16px",
-        }}
-      ></DialogActions>
-    </Dialog>
-  );
+          padding: "16px"
+        }}>
+      </DialogActions>
+    </Dialog>);
+
 };
 
 SelectVendedorModal.propTypes = {
@@ -174,12 +169,12 @@ SelectVendedorModal.propTypes = {
       rut: PropTypes.string.isRequired,
       nombre: PropTypes.string.isRequired,
       apellido: PropTypes.string.isRequired,
-      email: PropTypes.string.isRequired,
+      email: PropTypes.string.isRequired
     })
   ).isRequired,
   selectedVendedor: PropTypes.string,
   onSelect: PropTypes.func.isRequired,
-  esAdministrador: PropTypes.bool,
+  esAdministrador: PropTypes.bool
 };
 
 export default SelectVendedorModal;

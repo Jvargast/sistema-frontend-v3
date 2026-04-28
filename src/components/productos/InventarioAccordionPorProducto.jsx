@@ -1,33 +1,22 @@
-import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Typography,
-  Table,
-  TableRow,
-  TableCell,
-  TableBody,
-  Box,
-  Paper,
-  Chip,
-  useTheme,
-} from "@mui/material";
+import { Accordion, AccordionSummary, AccordionDetails, Table, TableRow, TableCell, TableBody, Paper, Chip, useTheme } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PropTypes from "prop-types";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
+import {
+  getStandardTablePaperSx,
+  getStandardTableSx
+} from "../common/tableStyles";
 
 const InventarioAccordionPorProducto = ({ productos, sucursales }) => {
   const theme = useTheme();
 
   return (
     <Paper
-      elevation={2}
-      sx={{
-        p: { xs: 1.5, md: 3 },
-        borderRadius: 3,
-        background: theme.palette.background.paper,
-        boxShadow: "0 2px 20px 0 #1976d21a",
+      elevation={0}
+      sx={getStandardTablePaperSx(theme, {
         mt: 2,
-      }}
+      })}
     >
       {productos.length === 0 ? (
         <Typography
@@ -51,7 +40,7 @@ const InventarioAccordionPorProducto = ({ productos, sucursales }) => {
               key={prod.id_producto}
               sx={{
                 mb: 1.5,
-                borderRadius: 2,
+                borderRadius: 1,
                 border: `1px solid ${theme.palette.divider}`,
                 background: theme.palette.background.default,
                 boxShadow: theme.shadows[1],
@@ -67,7 +56,7 @@ const InventarioAccordionPorProducto = ({ productos, sucursales }) => {
                     theme.palette.mode === "dark"
                       ? theme.palette.grey[900]
                       : theme.palette.grey[50],
-                  borderRadius: 2,
+                  borderRadius: 1,
                   "& .MuiAccordionSummary-content": {
                     alignItems: "center",
                   },
@@ -93,7 +82,7 @@ const InventarioAccordionPorProducto = ({ productos, sucursales }) => {
                 </Box>
               </AccordionSummary>
               <AccordionDetails sx={{ px: { xs: 0.5, md: 2 }, py: 1.5 }}>
-                <Table size="small" sx={{ minWidth: 350 }}>
+                <Table size="small" sx={getStandardTableSx(theme, { minWidth: 350 })}>
                   <TableBody>
                     {sucursales.map((s) => {
                       const inv = prod.inventario?.find(

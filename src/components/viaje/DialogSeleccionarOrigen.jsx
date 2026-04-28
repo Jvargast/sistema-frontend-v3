@@ -1,16 +1,19 @@
+import Dialog from "../common/CompatDialog";
 import PropTypes from "prop-types";
-import { Dialog, Box, Typography, Button } from "@mui/material";
+import { Button } from "@mui/material";
 import { MapContainer } from "react-leaflet";
 import { useState, useEffect, useRef } from "react";
 import AutocompleteDireccion from "../pedido/AutocompleteDireccion";
 import reverseGeocode from "../../utils/reverseGeocode";
 import OrigenSelectorMap from "./OrigenSelectorMap";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 export default function DialogSeleccionarOrigen({
   open,
   onClose,
   origen,
-  setOrigen,
+  setOrigen
 }) {
   const [direccion, setDireccion] = useState("");
   const skipEffect = useRef(false);
@@ -52,13 +55,13 @@ export default function DialogSeleccionarOrigen({
         <AutocompleteDireccion
           direccion={direccion}
           setDireccion={setDireccion}
-          setCoords={handleSetCoords}
-        />
+          setCoords={handleSetCoords} />
+
         <MapContainer
           center={origen}
           zoom={14}
-          style={{ height: 340, width: "100%", borderRadius: 16 }}
-        >
+          style={{ height: 340, width: "100%", borderRadius: 16 }}>
+
           <OrigenSelectorMap origen={origen} setOrigen={setOrigen} />
         </MapContainer>
         <Button
@@ -66,13 +69,13 @@ export default function DialogSeleccionarOrigen({
           sx={{ mt: 2 }}
           onClick={onClose}
           fullWidth
-          autoFocus
-        >
+          autoFocus>
+
           Confirmar origen
         </Button>
       </Box>
-    </Dialog>
-  );
+    </Dialog>);
+
 }
 
 DialogSeleccionarOrigen.propTypes = {
@@ -80,7 +83,7 @@ DialogSeleccionarOrigen.propTypes = {
   onClose: PropTypes.func.isRequired,
   origen: PropTypes.shape({
     lat: PropTypes.number.isRequired,
-    lng: PropTypes.number.isRequired,
+    lng: PropTypes.number.isRequired
   }).isRequired,
-  setOrigen: PropTypes.func.isRequired,
+  setOrigen: PropTypes.func.isRequired
 };

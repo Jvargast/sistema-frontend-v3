@@ -1,17 +1,6 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Stepper,
-  Step,
-  StepLabel,
-  Button,
-  Box,
-  IconButton,
-  useMediaQuery,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import Dialog from "../common/CompatDialog";
+import StepLabel from "../common/CompatStepLabel";
+import { DialogContent, DialogTitle, Stepper, Step, Button, IconButton, useMediaQuery, useTheme } from "@mui/material";
 import PropTypes from "prop-types";
 import CloseIcon from "@mui/icons-material/Close";
 import { useSelector } from "react-redux";
@@ -23,14 +12,16 @@ import PasoRetornables from "./PasoRetornables";
 import PasoPago from "./PasoPago";
 import PasoResumenFinal from "./PagoResumenFinal";
 import { useState } from "react";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const pasos = [
-  "Seleccionar Cliente",
-  "Seleccionar Productos",
-  "Botellones Retornables",
-  "Pago",
-  "Resumen y Confirmación",
-];
+"Seleccionar Cliente",
+"Seleccionar Productos",
+"Botellones Retornables",
+"Pago",
+"Resumen y Confirmación"];
+
 
 const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
   const theme = useTheme();
@@ -39,11 +30,11 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
   const usuario = useSelector((state) => state.auth.user);
 
   const sucursalId =
-    viaje?.id_sucursal_origen ??
-    viaje?.id_sucursal ??
-    viaje?.origen_inicial?.id_sucursal ??
-    usuario?.id_sucursal ??
-    null;
+  viaje?.id_sucursal_origen ??
+  viaje?.id_sucursal ??
+  viaje?.origen_inicial?.id_sucursal ??
+  usuario?.id_sucursal ??
+  null;
 
   const [ventaSinCliente, setVentaSinCliente] = useState(false);
 
@@ -63,7 +54,7 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
     montoRecibido,
     setMontoRecibido,
     getTotal,
-    isStepValid,
+    isStepValid
   } = useVentaRapidaFormLogic();
 
   const [ventaRapida, { isLoading }] = useRealizarVentaRapidaMutation();
@@ -83,11 +74,11 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
         productos: productosSeleccionados.map((p) => ({
           id_producto: p.id_producto,
           cantidad: p.cantidad,
-          precioUnitario: p.precioUnitario,
+          precioUnitario: p.precioUnitario
         })),
         retornables_recibidos: retornablesRecibidos,
         estadoPago: "pagado",
-        monto_recibido: montoRecibido,
+        monto_recibido: montoRecibido
       };
       await ventaRapida(payload).unwrap();
       onSuccess();
@@ -106,25 +97,25 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
       fullScreen={fullScreen}
       PaperProps={{
         sx: {
-          bgcolor: (theme) => theme.palette.background.paper,
-        },
-      }}
-    >
+          bgcolor: (theme) => theme.palette.background.paper
+        }
+      }}>
+
       <DialogTitle
         sx={{
           m: 0,
           p: 2,
           bgcolor: "#1976d2",
           color: "white",
-          fontWeight: "bold",
-        }}
-      >
+          fontWeight: "bold"
+        }}>
+
         Venta Rápida
         <IconButton
           aria-label="close"
           onClick={handleCerrar}
-          sx={{ position: "absolute", right: 8, top: 8, color: "white" }}
-        >
+          sx={{ position: "absolute", right: 8, top: 8, color: "white" }}>
+
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -136,73 +127,73 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
           sx={{
             flexWrap: "wrap",
             "& .MuiStepIcon-root.Mui-completed": {
-              color: "#1976d2",
+              color: "#1976d2"
             },
             "& .MuiStepIcon-root.Mui-active": {
-              color: "#1565c0",
-            },
-          }}
-        >
-          {pasos.map((label) => (
-            <Step key={label}>
+              color: "#1565c0"
+            }
+          }}>
+
+          {pasos.map((label) =>
+          <Step key={label}>
               <StepLabel>
                 <Typography
-                  variant="caption"
-                  sx={{ fontSize: { xs: 11, sm: 13 }, color: "text.secondary" }}
-                >
+                variant="caption"
+                sx={{ fontSize: { xs: 11, sm: 13 }, color: "text.secondary" }}>
+
                   {label}
                 </Typography>
               </StepLabel>
             </Step>
-          ))}
+          )}
         </Stepper>
 
         <Box sx={{ mt: 3 }}>
-          {activeStep === 0 && (
-            <PasoSeleccionCliente
-              clienteSeleccionado={clienteSeleccionado}
-              setClienteSeleccionado={setClienteSeleccionado}
-              idChofer={usuario?.id}
-              idSucursal={sucursalId}
-              allowSinCliente
-              ventaSinCliente={ventaSinCliente}
-              setVentaSinCliente={setVentaSinCliente}
-            />
-          )}
-          {activeStep === 1 && (
-            <PasoSeleccionProductos
-              idCamion={viaje?.id_camion}
-              productosSeleccionados={productosSeleccionados}
-              setProductosSeleccionados={setProductosSeleccionados}
-            />
-          )}
-          {activeStep === 2 && (
-            <PasoRetornables
-              productosSeleccionados={productosSeleccionados}
-              retornablesRecibidos={retornablesRecibidos}
-              setRetornablesRecibidos={setRetornablesRecibidos}
-            />
-          )}
-          {activeStep === 3 && (
-            <PasoPago
-              metodoPago={metodoPago}
-              setMetodoPago={setMetodoPago}
-              montoRecibido={montoRecibido}
-              setMontoRecibido={setMontoRecibido}
-              total={getTotal()}
-            />
-          )}
-          {activeStep === 4 && (
-            <PasoResumenFinal
-              cliente={clienteSeleccionado}
-              productos={productosSeleccionados}
-              total={getTotal()}
-              metodoPago={metodoPago}
-              montoRecibido={montoRecibido}
-              onConfirmar={handleConfirmarVenta}
-              loading={isLoading}
-            />
-          )}
+          {activeStep === 0 &&
+          <PasoSeleccionCliente
+            clienteSeleccionado={clienteSeleccionado}
+            setClienteSeleccionado={setClienteSeleccionado}
+            idChofer={usuario?.id}
+            idSucursal={sucursalId}
+            allowSinCliente
+            ventaSinCliente={ventaSinCliente}
+            setVentaSinCliente={setVentaSinCliente} />
+
+          }
+          {activeStep === 1 &&
+          <PasoSeleccionProductos
+            idCamion={viaje?.id_camion}
+            productosSeleccionados={productosSeleccionados}
+            setProductosSeleccionados={setProductosSeleccionados} />
+
+          }
+          {activeStep === 2 &&
+          <PasoRetornables
+            productosSeleccionados={productosSeleccionados}
+            retornablesRecibidos={retornablesRecibidos}
+            setRetornablesRecibidos={setRetornablesRecibidos} />
+
+          }
+          {activeStep === 3 &&
+          <PasoPago
+            metodoPago={metodoPago}
+            setMetodoPago={setMetodoPago}
+            montoRecibido={montoRecibido}
+            setMontoRecibido={setMontoRecibido}
+            total={getTotal()} />
+
+          }
+          {activeStep === 4 &&
+          <PasoResumenFinal
+            cliente={clienteSeleccionado}
+            productos={productosSeleccionados}
+            total={getTotal()}
+            metodoPago={metodoPago}
+            montoRecibido={montoRecibido}
+            onConfirmar={handleConfirmarVenta}
+            loading={isLoading} />
+
+          }
         </Box>
 
         <Box
@@ -211,9 +202,9 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
             justifyContent: "space-between",
             mt: 4,
             gap: 2,
-            flexDirection: { xs: "column-reverse", sm: "row" },
-          }}
-        >
+            flexDirection: { xs: "column-reverse", sm: "row" }
+          }}>
+
           <Button
             fullWidth={fullScreen}
             disabled={activeStep === 0}
@@ -225,43 +216,43 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
               fontWeight: 500,
               "&:hover": {
                 borderColor: "#1565c0",
-                backgroundColor: "#e3f2fd",
-              },
-            }}
-          >
+                backgroundColor: "#e3f2fd"
+              }
+            }}>
+
             Atrás
           </Button>
-          {activeStep < pasos.length - 1 && (
-            <Button
-              fullWidth={fullScreen}
-              onClick={handleNext}
-              variant="contained"
-              disabled={
-                activeStep === 0
-                  ? !(ventaSinCliente || clienteSeleccionado)
-                  : !isStepValid()
+          {activeStep < pasos.length - 1 &&
+          <Button
+            fullWidth={fullScreen}
+            onClick={handleNext}
+            variant="contained"
+            disabled={
+            activeStep === 0 ?
+            !(ventaSinCliente || clienteSeleccionado) :
+            !isStepValid()
+            }
+            sx={{
+              backgroundColor: "#1976d2",
+              fontWeight: 600,
+              "&:hover": {
+                backgroundColor: "#1565c0"
               }
-              sx={{
-                backgroundColor: "#1976d2",
-                fontWeight: 600,
-                "&:hover": {
-                  backgroundColor: "#1565c0",
-                },
-              }}
-            >
+            }}>
+
               Siguiente
             </Button>
-          )}
+          }
         </Box>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 ModalVentaRapida.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSuccess: PropTypes.func.isRequired,
-  viaje: PropTypes.object.isRequired,
+  viaje: PropTypes.object.isRequired
 };
 
 export default ModalVentaRapida;

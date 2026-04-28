@@ -1,23 +1,10 @@
 import PropTypes from "prop-types";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  Divider,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Chip,
-  Tooltip,
-  TableContainer,
-  Typography,
-  Box,
-} from "@mui/material";
+import { Card, CardHeader, CardContent, Divider, Table, TableHead, TableRow, TableCell, TableBody, Chip, Tooltip, TableContainer } from "@mui/material";
 import PercentOutlined from "@mui/icons-material/PercentOutlined";
 import Inventory2Outlined from "@mui/icons-material/Inventory2Outlined";
 import { formatCLP } from "../../utils/formatUtils";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const COL = {
   first: { xs: "auto", md: "46%" },

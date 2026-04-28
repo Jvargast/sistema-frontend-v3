@@ -1,22 +1,13 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  List,
-  ListItem,
-  Box,
-  Divider,
-  Button,
-  Paper,
-  Stack,
-  Chip,
-} from "@mui/material";
+import { Card, CardContent, List, ListItem, Divider, Button, Paper, Chip } from "@mui/material";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
 import { ordenarDestinosConGoogle } from "../../utils/ordenRutas";
 import DestinosMapGoogle from "./DestinosMapGoogle";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const ListaDestinos = ({
   destinos,

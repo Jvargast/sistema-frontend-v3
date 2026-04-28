@@ -1,12 +1,8 @@
-import {
-  Box,
-  TextField,
-  MenuItem,
-  Typography,
-  Divider,
-  Paper,
-} from "@mui/material";
+import { MenuItem, Divider, Paper } from "@mui/material";
 import PropTypes from "prop-types";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const EntregaPagoStep = ({ register, errors, detallePedido, watch }) => {
   return (

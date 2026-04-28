@@ -1,15 +1,4 @@
-import {
-  Box,
-  Typography,
-  TextField,
-  Divider,
-  IconButton,
-  Tooltip,
-  useTheme,
-  Chip,
-  Alert,
-  Button,
-} from "@mui/material";
+import { Divider, IconButton, Tooltip, useTheme, Chip, Alert, Button } from "@mui/material";
 import {
   AddCircleOutlineOutlined,
   DeleteOutlineOutlined,
@@ -18,6 +7,10 @@ import {
   Remove,
 } from "@mui/icons-material";
 import PropTypes from "prop-types";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 const ProductoRetornableCard = ({ grupo, onUpdate }) => {
   const theme = useTheme();
@@ -294,9 +287,11 @@ const ProductoRetornableCard = ({ grupo, onUpdate }) => {
                 <Tooltip title="Eliminar este defecto">
                   <IconButton
                     onClick={() => handleEliminarFalla(fallaIdx)}
-                    color="error"
                     size="small"
-                    sx={{ mt: { xs: 1, sm: 0 } }}
+                    aria-label="Eliminar defecto"
+                    sx={getActionIconButtonSx(theme, "error", {
+                      mt: { xs: 1, sm: 0 },
+                    })}
                   >
                     <DeleteOutlineOutlined fontSize="small" />
                   </IconButton>

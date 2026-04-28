@@ -1,6 +1,7 @@
-import { Typography, Button, Paper } from "@mui/material";
+import { Button, Paper } from "@mui/material";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import PropTypes from "prop-types";
+import Typography from "./CompatTypography";
 
 const EmptyState = ({ title, subtitle, buttonText, onAction }) => (
   <Paper

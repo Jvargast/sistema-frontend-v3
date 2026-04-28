@@ -44,11 +44,21 @@ export const clientesApi = createApi({
 
     getAllClientes: builder.query({
       query: (params) => ({ url: `/clientes/`, params }),
-      providesTags: ["Cliente"],
       transformResponse: (response) => ({
         clientes: response.data,
         paginacion: response.total,
       }),
+      providesTags: (result) =>
+        result?.clientes
+          ? [
+              "Cliente",
+              { type: "Cliente", id: "LIST" },
+              ...result.clientes.map((cliente) => ({
+                type: "Cliente",
+                id: cliente.id_cliente,
+              })),
+            ]
+          : ["Cliente", { type: "Cliente", id: "LIST" }],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -75,16 +85,22 @@ export const clientesApi = createApi({
     }),
 
     updateCliente: builder.mutation({
-      query: ({ id, ...formData }) => ({
-        url: `/clientes/${id}`,
-        method: "PUT",
-        body: { ...formData },
-      }),
-      invalidatesTags: ["Cliente"],
+      query: ({ id, formData, ...rest }) => {
+        const payload = formData ?? rest;
+        return {
+          url: `/clientes/${id}`,
+          method: "PUT",
+          body: { formData: payload },
+        };
+      },
+      invalidatesTags: (result, error, arg) => [
+        { type: "Cliente", id: arg?.id },
+        { type: "Cliente", id: "LIST" },
+        "Cliente",
+      ],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
-          console.log("Cliente actualizado correctamente:", data);
+          await queryFulfilled;
         } catch (error) {
           console.error("Error al actualizar cliente:", error);
         }

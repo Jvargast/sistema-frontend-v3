@@ -1,16 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  Box,
-  Typography,
-  Divider,
-  Button,
-  Chip,
-  Stack,
-  CircularProgress,
-  Paper,
-  Grid,
-  Avatar,
-} from "@mui/material";
+import { Divider, Button, Chip, CircularProgress, Paper, Avatar } from "@mui/material";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
@@ -21,6 +10,10 @@ import ChecklistOutlinedIcon from "@mui/icons-material/ChecklistOutlined";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import { useGetProduccionByIdQuery } from "../../store/services/produccionApi";
 import { tiempoDesdeChile } from "../../utils/fechaUtils";
+import Box from "../../components/common/CompatBox";
+import Stack from "../../components/common/CompatStack";
+import Grid from "../../components/common/CompatGrid";
+import Typography from "../../components/common/CompatTypography";
 
 const VerProduccion = () => {
   const { id } = useParams();

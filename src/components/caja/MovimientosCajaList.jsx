@@ -1,29 +1,22 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  List,
-  ListItem,
-  ListItemText,
-  CircularProgress,
-  Typography,
-  Pagination,
-  Paper,
-} from "@mui/material";
+import { List, ListItem, ListItemText, CircularProgress, Pagination, Paper } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import "dayjs/locale/es"; 
+import "dayjs/locale/es";
 import { useGetAllMovimientosCajaQuery } from "../../store/services/movimientoCajaApi";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const MovimientosCajaList = () => {
   const [page, setPage] = useState(1);
-  const [fecha, setFecha] = useState(dayjs()); 
+  const [fecha, setFecha] = useState(dayjs());
   const limit = 10;
 
   const { data, error, isLoading, refetch } = useGetAllMovimientosCajaQuery({
     page,
     limit,
-    fecha: fecha.format("YYYY-MM-DD"), 
+    fecha: fecha.format("YYYY-MM-DD"),
   });
 
   useEffect(() => {
@@ -38,21 +31,19 @@ const MovimientosCajaList = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
       <Box mt={3}>
-        {/* Filtro de Fecha con DatePicker en formato DD/MM/YYYY */}
         <Box display="flex" justifyContent="center" mb={3}>
           <DatePicker
             label="Seleccionar Fecha"
             value={fecha}
-            format="DD/MM/YYYY" 
+            format="DD/MM/YYYY"
             onChange={(newDate) => {
-              setFecha(newDate || dayjs()); 
+              setFecha(newDate || dayjs());
               setPage(1);
             }}
             slotProps={{ textField: { variant: "outlined" } }}
           />
         </Box>
 
-        {/* Cargando o Error */}
         {isLoading && (
           <Typography align="center" sx={{ mt: 2 }}>
             <CircularProgress size={24} /> Cargando movimientos...
@@ -64,7 +55,6 @@ const MovimientosCajaList = () => {
           </Typography>
         )}
 
-        {/* Lista de Movimientos */}
         {!isLoading && !error && (
           <Paper sx={{ maxHeight: 400, overflowY: "auto", p: 2 }}>
             {data?.movimientos?.length > 0 ? (
@@ -86,7 +76,6 @@ const MovimientosCajaList = () => {
           </Paper>
         )}
 
-        {/* Paginación */}
         {!isLoading && !error && data?.paginacion?.totalPages > 1 && (
           <Box display="flex" justifyContent="center" mt={2}>
             <Pagination

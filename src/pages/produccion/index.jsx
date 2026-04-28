@@ -1,26 +1,14 @@
-import { useState, useMemo } from "react";
+import StepLabel from "../../components/common/CompatStepLabel";
 import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  Collapse,
-  Divider,
-  IconButton,
-  Stack,
-  Step,
-  StepLabel,
-  Stepper,
-  TextField,
-  Typography,
-} from "@mui/material";
+  useState,
+  useMemo } from "react";
+import { Button, Card, CardContent, CircularProgress, Collapse, Divider, IconButton, Step, Stepper } from "@mui/material";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import IndicadoresPanel from "../../components/produccion/IndicadoresPanel";
 import {
   useGetAllFormulasQuery,
-  useGetFormulaByIdQuery,
-} from "../../store/services/FormulaProductoApi";
+  useGetFormulaByIdQuery } from
+"../../store/services/FormulaProductoApi";
 import ResumenLote from "../../components/produccion/ResumenLote";
 import AutocompleteGenerico from "../../components/produccion/AutoCompleteGenerico";
 import PreviewFormula from "../../components/formulas/PreviewFormula";
@@ -35,22 +23,26 @@ import FloatingStockBadge from "../../components/produccion/FloatingStockBadge";
 import InsumoStatusList from "../../components/produccion/InsumoStatusLists";
 import { useSelector } from "react-redux";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Stack from "../../components/common/CompatStack";
+import Typography from "../../components/common/CompatTypography";
 
 const steps = [
-  "Seleccionar fórmula",
-  "Cantidad de lote",
-  "Revisar insumos",
-  "Confirmación",
-];
+"Seleccionar fórmula",
+"Cantidad de lote",
+"Revisar insumos",
+"Confirmación"];
+
 
 const PanelProduccion = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { rol } = useSelector((s) => s.auth);
   const isAdmin = ["admin", "administrador", "superadmin"].includes(
-    typeof rol === "string"
-      ? rol.toLowerCase()
-      : String(rol?.nombre || "").toLowerCase()
+    typeof rol === "string" ?
+    rol.toLowerCase() :
+    String(rol?.nombre || "").toLowerCase()
   );
   const [activeStep, setActiveStep] = useState(0);
   const [formulaSel, setFormulaSel] = useState(null);
@@ -60,32 +52,32 @@ const PanelProduccion = () => {
   const idSucursal = sucursalActiva?.id_sucursal ?? sucursalActiva?.id ?? null;
 
   const { data: formulaDetalle, isFetching: loadingFormula, refetch: refetchFormula } =
-    useGetFormulaByIdQuery(
-      { id: formulaSel?.id_formula, id_sucursal: idSucursal },
-      {
-        skip: !formulaSel,
-        refetchOnMountOrArgChange: true,
-      }
-    );
+  useGetFormulaByIdQuery(
+    { id: formulaSel?.id_formula, id_sucursal: idSucursal },
+    {
+      skip: !formulaSel,
+      refetchOnMountOrArgChange: true
+    }
+  );
 
   const { data: formulasResp, isFetching: loadingFormulas, refetch: refetchFormulas } =
-    useGetAllFormulasQuery({ limit: 1000 });
+  useGetAllFormulasQuery({ limit: 1000 });
   const formulas = formulasResp?.formulas ?? [];
 
   const shouldFetchStocks =
-    Boolean(formulaSel?.id_formula) &&
-    Boolean(idSucursal) &&
-    Number(cantLote) > 0;
+  Boolean(formulaSel?.id_formula) &&
+  Boolean(idSucursal) &&
+  Number(cantLote) > 0;
 
   const { data: stocksByFormula = [], isFetching: loadingStocks, refetch: refetchStocks } =
-    useGetStocksByFormulaQuery(
-      {
-        id_formula: formulaSel?.id_formula,
-        id_sucursal: idSucursal,
-        multiplicador: cantLote,
-      },
-      { skip: !shouldFetchStocks }
-    );
+  useGetStocksByFormulaQuery(
+    {
+      id_formula: formulaSel?.id_formula,
+      id_sucursal: idSucursal,
+      multiplicador: cantLote
+    },
+    { skip: !shouldFetchStocks }
+  );
 
   useRegisterRefresh(
     "produccion",
@@ -106,7 +98,7 @@ const PanelProduccion = () => {
     (stocksByFormula || []).forEach((s) => {
       map.set(Number(s.id_insumo), {
         stock: Number(s.stock ?? s.available ?? s.cantidad ?? 0),
-        requerido: Number(s.requerido ?? s.required ?? 0),
+        requerido: Number(s.requerido ?? s.required ?? 0)
       });
     });
     return map;
@@ -117,7 +109,7 @@ const PanelProduccion = () => {
 
     return (formulaDetalle.FormulaProductoDetalles ?? []).map((d) => {
       const baseReq =
-        (Number(d.cantidad_requerida) || 0) * (Number(cantLote) || 1);
+      (Number(d.cantidad_requerida) || 0) * (Number(cantLote) || 1);
       const s = stockMap.get(Number(d.id_insumo));
       const stock = Number(s?.stock ?? 0);
       const requerido = Number(s?.requerido ?? baseReq);
@@ -127,7 +119,7 @@ const PanelProduccion = () => {
         nombre: d.Insumo?.nombre_insumo ?? "—",
         unidad: d.unidad_de_medida || "u.",
         stock,
-        requerido,
+        requerido
       };
     });
   }, [formulaDetalle, cantLote, stockMap]);
@@ -138,17 +130,17 @@ const PanelProduccion = () => {
   const back = () => setActiveStep((s) => Math.max(s - 1, 0));
 
   const [crearProduccion, { isLoading: procesando }] =
-    useCreateProduccionMutation();
+  useCreateProduccionMutation();
 
   const buildPayload = () => ({
     id_formula: formulaSel.id_formula,
     insumos_consumidos: insumos.map((i) => ({
       id_insumo: i.id,
       cantidad: i.requerido,
-      unidad: i.unidad,
+      unidad: i.unidad
     })),
     cantidad_lote: cantLote,
-    id_sucursal: idSucursal,
+    id_sucursal: idSucursal
   });
 
   const ejecutarProduccion = async () => {
@@ -157,7 +149,7 @@ const PanelProduccion = () => {
       dispatch(
         showNotification({
           message: "Producción registrada con éxito",
-          severity: "success",
+          severity: "success"
         })
       );
       navigate(isAdmin ? "/admin/produccion" : "/productos");
@@ -165,13 +157,13 @@ const PanelProduccion = () => {
       dispatch(
         showNotification({
           message: err?.data?.message || "Error al registrar la producción",
-          severity: "error",
+          severity: "error"
         })
       );
     }
   };
 
-  const isStep2Loading = loadingFormula || (shouldFetchStocks && loadingStocks);
+  const isStep2Loading = loadingFormula || shouldFetchStocks && loadingStocks;
 
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
@@ -180,70 +172,70 @@ const PanelProduccion = () => {
       </Stack>
 
       <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
-        {steps.map((l) => (
-          <Step key={l}>
+        {steps.map((l) =>
+        <Step key={l}>
             <StepLabel>{l}</StepLabel>
           </Step>
-        ))}
+        )}
       </Stepper>
 
-      {activeStep === 0 && (
-        <Card elevation={4}>
+      {activeStep === 0 &&
+      <Card elevation={4}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
               Selecciona la fórmula a producir
             </Typography>
 
-            {!idSucursal && (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ mb: 1.5 }}
-              >
+            {!idSucursal &&
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: 1.5 }}>
+
                 Selecciona/activa una sucursal para evaluar stock.
               </Typography>
-            )}
+          }
 
             <AutocompleteGenerico
-              options={formulas}
-              isLoading={loadingFormulas}
-              getLabel={(f) => f.nombre_formula}
-              optionRenderer={(listProps, option, key) => (
-                <Box
-                  component="li"
-                  key={key}
-                  {...listProps}
-                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                >
+            options={formulas}
+            isLoading={loadingFormulas}
+            getLabel={(f) => f.nombre_formula}
+            optionRenderer={(listProps, option, key) =>
+            <Box
+              component="li"
+              key={key}
+              {...listProps}
+              sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+
                   <Typography
-                    variant="caption"
-                    sx={{ fontWeight: 700, width: 40, color: "text.secondary" }}
-                  >
+                variant="caption"
+                sx={{ fontWeight: 700, width: 40, color: "text.secondary" }}>
+
                     {option.id_formula}
                   </Typography>
                   <Typography variant="body2">
                     {option.nombre_formula}
                   </Typography>
                 </Box>
-              )}
-              onSelect={setFormulaSel}
-              labelInput="Buscar fórmula"
-              size="small"
-              defaultValue={formulaSel}
-            />
+            }
+            onSelect={setFormulaSel}
+            labelInput="Buscar fórmula"
+            size="small"
+            defaultValue={formulaSel} />
 
-            {loadingFormula && formulaSel && (
-              <Box mt={2} display="flex" justifyContent="center">
+
+            {loadingFormula && formulaSel &&
+          <Box mt={2} display="flex" justifyContent="center">
                 <CircularProgress size={24} />
               </Box>
-            )}
+          }
 
             <Collapse
-              in={Boolean(formulaSel && formulaDetalle)}
-              timeout={300}
-              unmountOnExit
-              mountOnEnter
-            >
+            in={Boolean(formulaSel && formulaDetalle)}
+            timeout={300}
+            unmountOnExit
+            mountOnEnter>
+
               <Box mt={3}>
                 <PreviewFormula formulaDetalle={formulaDetalle} />
               </Box>
@@ -251,90 +243,90 @@ const PanelProduccion = () => {
 
             <Stack direction="row" justifyContent="flex-end" mt={2}>
               <Button
-                variant="contained"
-                disabled={!formulaSel || !idSucursal}
-                onClick={next}
-              >
+              variant="contained"
+              disabled={!formulaSel || !idSucursal}
+              onClick={next}>
+
                 Siguiente
               </Button>
             </Stack>
           </CardContent>
         </Card>
-      )}
+      }
 
-      {activeStep === 1 && (
-        <Card elevation={4}>
+      {activeStep === 1 &&
+      <Card elevation={4}>
           <CardContent>
             <Typography
-              variant="h5"
-              gutterBottom
-              fontWeight="bold"
-              textAlign="center"
-              sx={{ color: (t) => t.palette.primary.main }}
-            >
+            variant="h5"
+            gutterBottom
+            fontWeight="bold"
+            textAlign="center"
+            sx={{ color: (t) => t.palette.primary.main }}>
+
               ¿Cuántas unidades deseas fabricar?
             </Typography>
 
             <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
               <Stack
-                direction={{ xs: "column", sm: "row" }}
-                alignItems="center"
-                justifyContent="center"
-                gap={2}
-                sx={(t) => ({
-                  bgcolor:
-                    t.palette.mode === "light"
-                      ? t.palette.grey[100]
-                      : t.palette.grey[900],
-                  p: 2,
-                  borderRadius: 3,
-                  width: { xs: "100%", sm: "auto" },
-                  border: `1px solid ${t.palette.divider}`,
-                })}
-              >
+              direction={{ xs: "column", sm: "row" }}
+              alignItems="center"
+              justifyContent="center"
+              gap={2}
+              sx={(t) => ({
+                bgcolor:
+                t.palette.mode === "light" ?
+                t.palette.grey[100] :
+                t.palette.grey[900],
+                p: 2,
+                borderRadius: 3,
+                width: { xs: "100%", sm: "auto" },
+                border: `1px solid ${t.palette.divider}`
+              })}>
+
                 <IconButton
-                  size="large"
-                  color="primary"
-                  sx={(t) => ({
-                    border: `1px solid ${t.palette.primary.main}`,
-                    color: t.palette.primary.main,
-                    "&:hover": { bgcolor: t.palette.action.hover },
-                  })}
-                  onClick={() => setCantLote((v) => Math.max(1, v - 1))}
-                >
+                size="large"
+                color="primary"
+                sx={(t) => ({
+                  border: `1px solid ${t.palette.primary.main}`,
+                  color: t.palette.primary.main,
+                  "&:hover": { bgcolor: t.palette.action.hover }
+                })}
+                onClick={() => setCantLote((v) => Math.max(1, v - 1))}>
+
                   −
                 </IconButton>
 
                 <TextField
-                  type="number"
-                  value={cantLote}
-                  onChange={(e) =>
-                    setCantLote(Math.max(1, Number(e.target.value) || 1))
+                type="number"
+                value={cantLote}
+                onChange={(e) =>
+                setCantLote(Math.max(1, Number(e.target.value) || 1))
+                }
+                inputProps={{
+                  min: 1,
+                  style: { textAlign: "center", fontSize: 28 }
+                }}
+                sx={{
+                  width: 140,
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": { borderColor: "divider" },
+                    "&:hover fieldset": { borderColor: "primary.main" },
+                    "&.Mui-focused fieldset": { borderColor: "primary.main" }
                   }
-                  inputProps={{
-                    min: 1,
-                    style: { textAlign: "center", fontSize: 28 },
-                  }}
-                  sx={{
-                    width: 140,
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": { borderColor: "divider" },
-                      "&:hover fieldset": { borderColor: "primary.main" },
-                      "&.Mui-focused fieldset": { borderColor: "primary.main" },
-                    },
-                  }}
-                />
+                }} />
+
 
                 <IconButton
-                  size="large"
-                  color="primary"
-                  sx={(t) => ({
-                    border: `1px solid ${t.palette.primary.main}`,
-                    color: t.palette.primary.main,
-                    "&:hover": { bgcolor: t.palette.action.hover },
-                  })}
-                  onClick={() => setCantLote((v) => v + 1)}
-                >
+                size="large"
+                color="primary"
+                sx={(t) => ({
+                  border: `1px solid ${t.palette.primary.main}`,
+                  color: t.palette.primary.main,
+                  "&:hover": { bgcolor: t.palette.action.hover }
+                })}
+                onClick={() => setCantLote((v) => v + 1)}>
+
                   +
                 </IconButton>
               </Stack>
@@ -342,53 +334,53 @@ const PanelProduccion = () => {
 
             <Box mt={2} display="flex" justifyContent="center">
               <Stack direction="row" spacing={1.5}>
-                {[10, 50, 100].map((v) => (
-                  <Button
-                    key={v}
-                    variant="contained"
-                    size="small"
-                    color="secondary"
-                    onClick={() => setCantLote((n) => n + v)}
-                    sx={(t) => ({
-                      fontWeight: 600,
-                      minWidth: 64,
-                      bgcolor: t.palette.secondary.main,
-                      "&:hover": { bgcolor: t.palette.secondary.dark },
-                    })}
-                  >
+                {[10, 50, 100].map((v) =>
+              <Button
+                key={v}
+                variant="contained"
+                size="small"
+                color="secondary"
+                onClick={() => setCantLote((n) => n + v)}
+                sx={(t) => ({
+                  fontWeight: 600,
+                  minWidth: 64,
+                  bgcolor: t.palette.secondary.main,
+                  "&:hover": { bgcolor: t.palette.secondary.dark }
+                })}>
+
                     +{v}
                   </Button>
-                ))}
+              )}
               </Stack>
             </Box>
 
             <Stack direction="row" justifyContent="space-between" mt={4}>
               <Button
-                variant="outlined"
-                onClick={back}
-                sx={{ borderRadius: 2, textTransform: "none" }}
-              >
+              variant="outlined"
+              onClick={back}
+              sx={{ borderRadius: 2, textTransform: "none" }}>
+
                 Atrás
               </Button>
               <Button
-                variant="contained"
-                onClick={next}
-                sx={{ borderRadius: 2, textTransform: "none" }}
-              >
+              variant="contained"
+              onClick={next}
+              sx={{ borderRadius: 2, textTransform: "none" }}>
+
                 Siguiente
               </Button>
             </Stack>
           </CardContent>
         </Card>
-      )}
+      }
 
-      {activeStep === 2 && (
-        <Card elevation={4}>
+      {activeStep === 2 &&
+      <Card elevation={4}>
           <CardContent>
-            {isStep2Loading ? (
-              <CircularProgress />
-            ) : (
-              <>
+            {isStep2Loading ?
+          <CircularProgress /> :
+
+          <>
                 <IndicadoresPanel insumos={insumos} />
                 <InsumoStatusList items={insumos} />
                 <Divider sx={{ my: 3 }} />
@@ -397,54 +389,54 @@ const PanelProduccion = () => {
                     Atrás
                   </Button>
                   <Button
-                    variant="contained"
-                    onClick={next}
-                    disabled={!stockOk}
-                  >
+                variant="contained"
+                onClick={next}
+                disabled={!stockOk}>
+
                     {stockOk ? "Siguiente" : "Falta stock"}
                   </Button>
                 </Stack>
               </>
-            )}
+          }
           </CardContent>
         </Card>
-      )}
+      }
 
-      {activeStep === 3 && (
-        <Card elevation={4}>
+      {activeStep === 3 &&
+      <Card elevation={4}>
           <CardContent>
             <ResumenLote
-              insumos={insumos}
-              productoFinal={formulaSel?.Producto?.nombre_producto}
-              cantidadFinal={unidadesSalida}
-            />
+            insumos={insumos}
+            productoFinal={formulaSel?.Producto?.nombre_producto}
+            cantidadFinal={unidadesSalida} />
+
 
             <Stack direction="row" justifyContent="space-between" mt={3}>
               <Button variant="outlined" onClick={back}>
                 Atrás
               </Button>
               <Button
-                variant="contained"
-                color="success"
-                startIcon={<DoneAllIcon />}
-                onClick={ejecutarProduccion}
-                disabled={procesando}
-              >
+              variant="contained"
+              color="success"
+              startIcon={<DoneAllIcon />}
+              onClick={ejecutarProduccion}
+              disabled={procesando}>
+
                 {procesando ? "Procesando…" : "Fabricar lote"}
               </Button>
             </Stack>
           </CardContent>
         </Card>
-      )}
+      }
 
       <FloatingStockBadge
         insumos={insumos}
         loading={isStep2Loading}
         sucursalNombre={sucursalActiva?.nombre}
-        sucursalId={idSucursal}
-      />
-    </Box>
-  );
+        sucursalId={idSucursal} />
+
+    </Box>);
+
 };
 
 export default PanelProduccion;

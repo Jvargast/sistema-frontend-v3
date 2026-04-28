@@ -1,17 +1,10 @@
-import {
-  Paper,
-  Typography,
-  Button,
-  Chip,
-  Grid,
-  Box,
-  Divider,
-  useTheme,
-  Tooltip,
-} from "@mui/material";
+import { Paper, Button, Chip, Divider, useTheme, Tooltip } from "@mui/material";
 import PedidoListaProductos from "./PedidoListaProductos";
 import PropTypes from "prop-types";
 import { formatCLP } from "../../utils/formatUtils";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
+import Typography from "../common/CompatTypography";
 
 const getEstadoColor = (estado, theme) => {
   if (!estado) return "default";

@@ -1,6 +1,9 @@
-import { Box, Typography, Grid, useTheme, useMediaQuery } from "@mui/material";
+import { useTheme, useMediaQuery } from "@mui/material";
 import PropTypes from "prop-types";
 import CategoryBlock from "../CategoryBlock";
+import Box from "../../common/CompatBox";
+import Grid from "../../common/CompatGrid";
+import Typography from "../../common/CompatTypography";
 
 
 const CategoriasSelector = ({

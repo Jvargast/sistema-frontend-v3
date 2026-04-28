@@ -1,7 +1,10 @@
-import { Box, Typography, List, IconButton, TextField } from "@mui/material";
+import { List, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import PropTypes from "prop-types";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const PasoRetornables = ({
   productosSeleccionados,

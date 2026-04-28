@@ -1,18 +1,9 @@
-import {
-  Paper,
-  Typography,
-  Divider,
-  List,
-  ListItem,
-  Avatar,
-  Box,
-  Chip,
-  useTheme,
-} from "@mui/material";
+import { Paper, Divider, List, ListItem, Avatar, Chip, useTheme } from "@mui/material";
 import PropTypes from "prop-types";
-import Icon from "@mdi/react";
-import { mdiBarcode } from "@mdi/js";
+import QrCode2Icon from "@mui/icons-material/QrCode2";
 import { formatCLP } from "../../utils/formatUtils";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const DetallesPedido = ({ detalles }) => {
   const theme = useTheme();
@@ -134,11 +125,8 @@ const DetallesPedido = ({ detalles }) => {
                     <strong>{formatCLP(item.precio_unitario)}</strong>
                   </Typography>
                   <Box display="flex" alignItems="center" gap={0.8} mt={0.2}>
-                    <Icon
-                      path={mdiBarcode}
-                      size={0.8}
-                      color={theme.palette.text.secondary}
-                      style={{ verticalAlign: "middle" }}
+                    <QrCode2Icon
+                      sx={{ fontSize: 18, color: "text.secondary" }}
                     />
                     <Typography variant="body2" color="text.secondary">
                       {codigo}

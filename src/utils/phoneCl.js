@@ -1,5 +1,13 @@
 export const digitsOnly = (s = "") => String(s || "").replace(/\D/g, "");
 
+export const getPhoneLocalDigitsCL = (value = "") => {
+  const d = digitsOnly(value);
+  return d.startsWith("56") ? d.slice(2) : d;
+};
+
+export const isPhonePrefixOnlyCL = (value = "") =>
+  getPhoneLocalDigitsCL(value).length === 0;
+
 export const formatPhoneCL = (value = "") => {
   let d = digitsOnly(value);
   if (d.startsWith("56")) d = d.slice(2);
@@ -29,6 +37,12 @@ export const formatPhoneCL = (value = "") => {
   const b = rest.slice(0, 3);
   const c = rest.slice(3, 7);
   return `+56 ${area}${b ? " " + b : ""}${c ? " " + c : ""}`;
+};
+
+export const formatPhoneInputCL = (value = "", { keepPrefix = false } = {}) => {
+  const local = getPhoneLocalDigitsCL(value).slice(0, 9);
+  if (!local) return keepPrefix ? "+56 " : "";
+  return formatPhoneCL(`+56 ${local}`);
 };
 
 export const validatePhoneCL = (value = "") => {

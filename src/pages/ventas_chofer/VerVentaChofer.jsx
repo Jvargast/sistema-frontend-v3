@@ -1,16 +1,5 @@
 import { useParams } from "react-router-dom";
-import {
-  Box,
-  Typography,
-  Divider,
-  Chip,
-  CircularProgress,
-  Card,
-  CardContent,
-  Grid,
-  Paper,
-  Avatar,
-} from "@mui/material";
+import { Divider, Chip, CircularProgress, Card, CardContent, Paper, Avatar } from "@mui/material";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PersonIcon from "@mui/icons-material/Person";
 import PaidIcon from "@mui/icons-material/Paid";
@@ -20,6 +9,9 @@ import { formatCLP } from "../../utils/formatUtils";
 import { useGetVentaChoferByIdQuery } from "../../store/services/ventasChoferApi";
 import BackButton from "../../components/common/BackButton";
 import { useSelector } from "react-redux";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Typography from "../../components/common/CompatTypography";
 
 const VerVentaChofer = () => {
   const { id } = useParams();

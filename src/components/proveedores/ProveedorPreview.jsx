@@ -1,15 +1,4 @@
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  Stack,
-  Box,
-  IconButton,
-  Tooltip,
-  Divider,
-  Chip,
-  useTheme,
-} from "@mui/material";
+import { Card, CardHeader, CardContent, IconButton, Tooltip, Divider, Chip, useTheme } from "@mui/material";
 import {
   BadgeOutlined,
   EmailOutlined,
@@ -18,6 +7,8 @@ import {
   ContentCopy,
 } from "@mui/icons-material";
 import PropTypes from "prop-types";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
 
 //eslint-disable-next-line
 const Row = ({ icon, label, value }) => {

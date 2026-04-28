@@ -23,5 +23,5 @@ export function parseError(error) {
     };
   }
 
-  return { type: "none" }; 
+  return { type: "none" };
 }

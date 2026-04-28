@@ -1,10 +1,13 @@
-import { Box, Typography, Button, Stack } from "@mui/material";
+import { Button } from "@mui/material";
 import { HomeOutlined, ArrowForward } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { openTab } from "../../store/reducers/tabSlice";
 import { getInitialRoute } from "../../utils/navigationUtils";
 import { useNavigate } from "react-router-dom";
+import Box from "./CompatBox";
+import Stack from "./CompatStack";
+import Typography from "./CompatTypography";
 
 const tabMap = {
   "/dashboard": {

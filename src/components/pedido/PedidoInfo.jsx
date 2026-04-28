@@ -1,14 +1,14 @@
-import { Paper, Typography, Divider, Box, Chip, useTheme } from "@mui/material";
-import {
-  Person,
-  Event,
-  LocalShipping,
-  Payments,
-  LocationOn,
-} from "@mui/icons-material";
+import { Paper, Divider, Chip, useTheme } from "@mui/material";
+import EventIcon from "@mui/icons-material/Event";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import PaymentsIcon from "@mui/icons-material/Payments";
+import PersonIcon from "@mui/icons-material/Person";
 import PropTypes from "prop-types";
 import dayjs from "dayjs";
 import { formatCLP } from "../../utils/formatUtils";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const InfoPedido = ({ pedido }) => {
   const theme = useTheme();
@@ -58,7 +58,7 @@ const InfoPedido = ({ pedido }) => {
             sx={{ mb: 1, pl: 0 }}
           >
             <Box display="flex" alignItems="center" gap={1.5}>
-              <Person sx={{ color: theme.palette.primary.main }} />
+              <PersonIcon sx={{ color: theme.palette.primary.main }} />
               <Typography variant="body1" fontWeight="bold" whiteSpace="nowrap">
                 Cliente:
               </Typography>
@@ -105,32 +105,32 @@ const InfoPedido = ({ pedido }) => {
           </Box>
         ) : (
           <Box display="flex" alignItems="center" gap={1.5}>
-            <Person sx={{ color: theme.palette.primary.main }} />
+            <PersonIcon sx={{ color: theme.palette.primary.main }} />
             <Typography variant="body1">Cliente: N/A</Typography>
           </Box>
         )}
 
         <Box display="flex" alignItems="center" gap={1.5}>
-          <Event sx={{ color: theme.palette.info.main }} />
+          <EventIcon sx={{ color: theme.palette.info.main }} />
           <Typography variant="body1">
             <strong>Fecha del Pedido:</strong>{" "}
             {dayjs(pedido.fecha_pedido).format("DD/MM/YYYY HH:mm")}
           </Typography>
         </Box>
         <Box display="flex" alignItems="center" gap={1.5}>
-          <LocalShipping sx={{ color: theme.palette.secondary.main }} />
+          <LocalShippingIcon sx={{ color: theme.palette.secondary.main }} />
           <Typography variant="body1">
             <strong>Chofer:</strong> {pedido.Chofer?.nombre || "Sin asignar"}
           </Typography>
         </Box>
         <Box display="flex" alignItems="center" gap={1.5}>
-          <Payments sx={{ color: theme.palette.success.main }} />
+          <PaymentsIcon sx={{ color: theme.palette.success.main }} />
           <Typography variant="body1">
             <strong>Método Pago:</strong> {pedido.MetodoPago?.nombre || "N/A"}
           </Typography>
         </Box>
         <Box display="flex" alignItems="center" gap={1.5}>
-          <LocationOn sx={{ color: theme.palette.error.main }} />
+          <LocationOnIcon sx={{ color: theme.palette.error.main }} />
           <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
             <strong>Dirección Entrega:</strong>{" "}
             {pedido.direccion_entrega || "N/A"}

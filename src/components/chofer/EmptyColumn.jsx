@@ -1,4 +1,6 @@
-import { Paper, Typography, Box, useTheme } from "@mui/material";
+import { Paper, useTheme } from "@mui/material";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const EmptyColumn = () => {
   const theme = useTheme();

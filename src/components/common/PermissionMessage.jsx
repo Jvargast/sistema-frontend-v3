@@ -1,6 +1,8 @@
-import { Box, Paper, Typography } from "@mui/material";
+import { Paper } from "@mui/material";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import PropTypes from "prop-types";
+import Box from "./CompatBox";
+import Typography from "./CompatTypography";
 
 const PermissionMessage = ({ requiredPermission }) => {
   return (
@@ -10,7 +12,7 @@ const PermissionMessage = ({ requiredPermission }) => {
         p: 2,
         display: "flex",
         alignItems: "center",
-        backgroundColor: "#ffebee", 
+        backgroundColor: "#ffebee",
         borderRadius: 2,
       }}
     >

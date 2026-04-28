@@ -1,16 +1,10 @@
-import {
-  Box,
-  Typography,
-  FormControlLabel,
-  Switch,
-  Grid,
-  Paper,
-  Divider,
-  IconButton,
-} from "@mui/material";
+import { FormControlLabel, Switch, Paper, Divider, IconButton } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
 import PropTypes from "prop-types";
 import { useEffect, useMemo, useState } from "react";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
+import Typography from "../common/CompatTypography";
 
 const EntregaBotellonesStep = ({
   productos,

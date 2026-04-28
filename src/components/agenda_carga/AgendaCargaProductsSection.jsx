@@ -1,7 +1,9 @@
 import PropTypes from "prop-types";
-import { Box, Typography, Button, Paper, Divider } from "@mui/material";
+import { Button, Paper, Divider } from "@mui/material";
 import ProductSelectorRow from "./ProductSelector";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const AgendaCargaProductsSection = ({
   productos,

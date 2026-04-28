@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Chip, IconButton } from "@mui/material";
+import { Chip, IconButton, useTheme } from "@mui/material";
 import { Visibility, Delete } from "@mui/icons-material";
 import { AddCircleOutlineOutlined } from "@mui/icons-material";
 import {
@@ -14,8 +14,11 @@ import { useDispatch } from "react-redux";
 import AlertDialog from "../../components/common/AlertDialog";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 import PrimaryActionButton from "../../components/common/PrimaryActionButton";
+import Box from "../../components/common/CompatBox";
+import { getActionIconButtonSx } from "../../components/common/tableStyles";
 
 const ListarFormulasProductos = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [alertOpen, setAlertOpen] = useState(false);
@@ -116,13 +119,18 @@ const ListarFormulasProductos = () => {
       render: (row) => (
         <>
           <IconButton
-            color="info"
+            aria-label="Ver fórmula"
             onClick={() => navigate(`/formulas/ver/${row.id_formula}`)}
+            sx={getActionIconButtonSx(theme, "info")}
           >
-            <Visibility />
+            <Visibility fontSize="small" />
           </IconButton>
-          <IconButton color="error" onClick={() => pedirConfirmacion(row)}>
-            <Delete />
+          <IconButton
+            aria-label="Eliminar fórmula"
+            onClick={() => pedirConfirmacion(row)}
+            sx={getActionIconButtonSx(theme, "error")}
+          >
+            <Delete fontSize="small" />
           </IconButton>
         </>
       ),

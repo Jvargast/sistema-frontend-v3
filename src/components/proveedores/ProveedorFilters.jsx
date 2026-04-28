@@ -1,14 +1,10 @@
 import PropTypes from "prop-types";
-import {
-  Paper,
-  TextField,
-  InputAdornment,
-  IconButton,
-  Stack,
-} from "@mui/material";
+import { Paper, InputAdornment, IconButton } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { alpha } from "@mui/material/styles";
+import TextField from "../common/CompatTextField";
+import Stack from "../common/CompatStack";
 
 const ProveedorFilters = ({ search, setSearch, setPage }) => {
   return (

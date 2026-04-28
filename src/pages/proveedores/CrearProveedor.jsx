@@ -1,5 +1,6 @@
+import Snackbar from "../../components/common/CompatSnackbar";
 import { useState } from "react";
-import { Box, Grid, Snackbar, Alert, useTheme } from "@mui/material";
+import { Alert, useTheme } from "@mui/material";
 import Header from "../../components/common/Header";
 import useProveedorForm from "../../hooks/useProveedorForm";
 import { useCreateProveedorMutation } from "../../store/services/proveedorApi";
@@ -7,20 +8,22 @@ import ProveedorForm from "../../components/proveedores/ProveedorForm";
 import ProveedorPreview from "../../components/proveedores/ProveedorPreview";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
 
 const CrearProveedor = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
 
   const { form, setForm, onChange, reset, rutState, telState, isDuplicado, baseCanSave } =
-    useProveedorForm();
+  useProveedorForm();
   const [createProveedor, { isLoading: isSaving }] =
-    useCreateProveedorMutation();
+  useCreateProveedorMutation();
 
   const [snack, setSnack] = useState({
     open: false,
     severity: "success",
-    msg: "",
+    msg: ""
   });
 
   const handleSubmit = async (e) => {
@@ -30,7 +33,7 @@ const CrearProveedor = () => {
       dispatch(
         showNotification({
           message: "Proveedor creado con éxito",
-          severity: "success",
+          severity: "success"
         })
       );
       reset();
@@ -38,7 +41,7 @@ const CrearProveedor = () => {
       dispatch(
         showNotification({
           message: err?.data?.error || "No se pudo crear el proveedor",
-          severity: "error",
+          severity: "error"
         })
       );
     }
@@ -59,8 +62,8 @@ const CrearProveedor = () => {
             canSave={baseCanSave && !isSaving}
             isSaving={isSaving}
             onReset={reset}
-            onSubmit={handleSubmit}
-          />
+            onSubmit={handleSubmit} />
+
         </Grid>
 
         <Grid item xs={12} md={4}>
@@ -72,19 +75,19 @@ const CrearProveedor = () => {
         open={snack.open}
         autoHideDuration={3500}
         onClose={() => setSnack((s) => ({ ...s, open: false }))}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+
         <Alert
           onClose={() => setSnack((s) => ({ ...s, open: false }))}
           severity={snack.severity}
           variant="filled"
-          sx={{ width: "100%" }}
-        >
+          sx={{ width: "100%" }}>
+
           {snack.msg}
         </Alert>
       </Snackbar>
-    </Box>
-  );
+    </Box>);
+
 };
 
 export default CrearProveedor;

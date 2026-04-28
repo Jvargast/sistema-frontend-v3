@@ -1,13 +1,8 @@
-import { useState, useEffect } from "react";
-import PropTypes from "prop-types";
 import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Button,
-  TextField,
-} from "@mui/material";
+  useState,
+  useEffect } from "react";
+import PropTypes from "prop-types";
+import { Card, CardContent, Button } from "@mui/material";
 import { List as VirtualizedList } from "react-window";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -20,6 +15,9 @@ import { useGetAllpermisosQuery } from "../../../store/services/permisosRolesApi
 import Row from "../../../components/roles/Row";
 import { useHasPermission } from "../../../utils/useHasPermission";
 import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
+import TextField from "../../../components/common/CompatTextField";
+import Box from "../../../components/common/CompatBox";
+import Typography from "../../../components/common/CompatTypography";
 
 const PermissionRow = ({
   index,

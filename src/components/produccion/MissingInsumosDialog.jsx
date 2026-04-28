@@ -1,31 +1,19 @@
+import Dialog from "../common/CompatDialog";
 import PropTypes from "prop-types";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Typography,
-  Box,
-  Stack,
-  Chip,
-  Divider,
-} from "@mui/material";
+import { DialogTitle, DialogContent, DialogActions, Button, Table, TableHead, TableRow, TableCell, TableBody, Chip, Divider } from "@mui/material";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const MissingInsumosDialog = ({
   open,
   onClose,
   items = [],
   sucursalNombre,
-  sucursalId,
+  sucursalId
 }) => {
   const rows = [...items].sort(
     (a, b) => (Number(b.deficit) || 0) - (Number(a.deficit) || 0)
@@ -45,8 +33,8 @@ const MissingInsumosDialog = ({
             size="small"
             icon={<StorefrontOutlinedIcon />}
             label={sucursalNombre || `ID ${sucursalId ?? "—"}`}
-            variant="outlined"
-          />
+            variant="outlined" />
+
         </Stack>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
           Revisa el detalle de insumos con stock insuficiente para el lote
@@ -66,21 +54,21 @@ const MissingInsumosDialog = ({
             border: "1px solid",
             borderColor: "divider",
             bgcolor: (t) =>
-              t.palette.mode === "light" ? "grey.50" : "grey.900",
-          }}
-        >
+            t.palette.mode === "light" ? "grey.50" : "grey.900"
+          }}>
+
           <Chip
             size="small"
             color="error"
             icon={<ErrorOutlineOutlinedIcon />}
-            label={`Faltantes: ${rows.length}`}
-          />
+            label={`Faltantes: ${rows.length}`} />
+
           <Chip
             size="small"
             color="warning"
             icon={<Inventory2OutlinedIcon />}
-            label={`Déficit total: ${totalDeficit}`}
-          />
+            label={`Déficit total: ${totalDeficit}`} />
+
           <Box sx={{ flex: 1 }} />
           <Typography variant="caption" color="text.secondary">
             Mostrando {rows.length} ítem(s)
@@ -94,16 +82,16 @@ const MissingInsumosDialog = ({
           sx={{
             "& thead th": {
               bgcolor: (t) =>
-                t.palette.mode === "light" ? "grey.100" : "grey.800",
-              fontWeight: 700,
+              t.palette.mode === "light" ? "grey.100" : "grey.800",
+              fontWeight: 700
             },
             "& td, & th": { borderBottomColor: "divider" },
             "& tbody tr:hover": {
               bgcolor: (t) =>
-                t.palette.mode === "light" ? "grey.50" : "grey.900",
-            },
-          }}
-        >
+              t.palette.mode === "light" ? "grey.50" : "grey.900"
+            }
+          }}>
+
           <TableHead>
             <TableRow>
               <TableCell>Insumo</TableCell>
@@ -113,16 +101,16 @@ const MissingInsumosDialog = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((m) => (
-              <TableRow key={m.id}>
+            {rows.map((m) =>
+            <TableRow key={m.id}>
                 <TableCell>
                   <Stack direction="row" spacing={1} alignItems="center">
                     <Chip
-                      size="small"
-                      color="error"
-                      variant="outlined"
-                      label="Falta"
-                    />
+                    size="small"
+                    color="error"
+                    variant="outlined"
+                    label="Falta" />
+
                     <Typography variant="body2" fontWeight={600}>
                       {m.name}
                     </Typography>
@@ -136,23 +124,23 @@ const MissingInsumosDialog = ({
                 </TableCell>
                 <TableCell align="right">
                   <Chip
-                    size="small"
-                    color="error"
-                    label={`-${m.deficit}`}
-                    sx={{ fontWeight: 700 }}
-                  />
+                  size="small"
+                  color="error"
+                  label={`-${m.deficit}`}
+                  sx={{ fontWeight: 700 }} />
+
                 </TableCell>
               </TableRow>
-            ))}
-            {rows.length === 0 && (
-              <TableRow>
+            )}
+            {rows.length === 0 &&
+            <TableRow>
                 <TableCell colSpan={4} align="center">
                   <Typography variant="body2" color="text.secondary">
                     No hay faltantes 🤘
                   </Typography>
                 </TableCell>
               </TableRow>
-            )}
+            }
           </TableBody>
         </Table>
       </DialogContent>
@@ -162,8 +150,8 @@ const MissingInsumosDialog = ({
           Cerrar
         </Button>
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 
 MissingInsumosDialog.propTypes = {
@@ -175,11 +163,11 @@ MissingInsumosDialog.propTypes = {
       name: PropTypes.string,
       requerido: PropTypes.number,
       stock: PropTypes.number,
-      deficit: PropTypes.number,
+      deficit: PropTypes.number
     })
   ),
   sucursalNombre: PropTypes.string,
-  sucursalId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  sucursalId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 };
 
 export default MissingInsumosDialog;

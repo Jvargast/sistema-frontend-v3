@@ -1,16 +1,10 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Divider,
-} from "@mui/material";
+import Dialog from "../common/CompatDialog";
+import { DialogTitle, DialogContent, DialogActions, Button, Divider } from "@mui/material";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router";
 import { useSelector } from "react-redux";
+import Typography from "../common/CompatTypography";
 
 const NoCajaAsignadaDialog = ({ open, handleClose, choferName }) => {
   const navigate = useNavigate();
@@ -28,9 +22,9 @@ const NoCajaAsignadaDialog = ({ open, handleClose, choferName }) => {
       maxWidth="xs"
       fullWidth
       aria-labelledby="no-caja-dialog-title"
-      disableEnforceFocus
-      
-    >
+      disableEnforceFocus>
+
+
       <DialogTitle
         id="no-caja-dialog-title"
         sx={{
@@ -39,9 +33,9 @@ const NoCajaAsignadaDialog = ({ open, handleClose, choferName }) => {
           gap: 1,
           py: 1.5,
           px: 2,
-          displayPrint: "none",
-        }}
-      >
+          displayPrint: "none"
+        }}>
+
         <ErrorOutlineOutlinedIcon sx={{ color: "error.main", fontSize: 28 }} />
         Sin caja asignada
       </DialogTitle>
@@ -50,9 +44,9 @@ const NoCajaAsignadaDialog = ({ open, handleClose, choferName }) => {
 
       <DialogContent sx={{ py: 2, px: 2.5 }}>
         <Typography variant="body1" sx={{ mb: 1 }}>
-          {choferName
-            ? `El usuario ${choferName} no tiene caja asignada.`
-            : "El usuario seleccionado no tiene caja asignada."}
+          {choferName ?
+          `El usuario ${choferName} no tiene caja asignada.` :
+          "El usuario seleccionado no tiene caja asignada."}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Por favor, asígnale una caja antes de continuar.
@@ -65,29 +59,29 @@ const NoCajaAsignadaDialog = ({ open, handleClose, choferName }) => {
           variant="outlined"
           color="primary"
           sx={{ textTransform: "none" }}
-          autoFocus
-        >
+          autoFocus>
+
           Cerrar
         </Button>
-        {rol === "administrador" && (
-          <Button
-            onClick={handleIrACajas}
-            variant="contained"
-            color="primary"
-            sx={{ textTransform: "none" }}
-          >
+        {rol === "administrador" &&
+        <Button
+          onClick={handleIrACajas}
+          variant="contained"
+          color="primary"
+          sx={{ textTransform: "none" }}>
+
             Ir a Cajas
           </Button>
-        )}
+        }
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 
 NoCajaAsignadaDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
-  choferName: PropTypes.string,
+  choferName: PropTypes.string
 };
 
 export default NoCajaAsignadaDialog;

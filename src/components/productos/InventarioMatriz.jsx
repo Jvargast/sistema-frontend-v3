@@ -1,30 +1,20 @@
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, useTheme, Paper } from "@mui/material";
+import Typography from "../common/CompatTypography";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  Chip,
-  useTheme,
-  Paper,
-} from "@mui/material";
+  getStandardTablePaperSx,
+  getStandardTableSx
+} from "../common/tableStyles";
 
 const InventarioMatriz = ({ productos, sucursales }) => {
   const theme = useTheme();
 
   return (
     <Paper
-      elevation={2}
-      sx={{
+      elevation={0}
+      sx={getStandardTablePaperSx(theme, {
         overflowX: "auto",
-        borderRadius: 3,
-        boxShadow: theme.shadows[4],
-        p: { xs: 1.5, md: 3 },
-        background: theme.palette.background.paper,
         mt: 2,
-      }}
+      })}
     >
       <Typography
         variant="h6"
@@ -37,8 +27,8 @@ const InventarioMatriz = ({ productos, sucursales }) => {
       >
         Inventario Global (Matriz)
       </Typography>
-      <TableContainer sx={{ borderRadius: 2, boxShadow: "none" }}>
-        <Table size="small" stickyHeader>
+      <TableContainer sx={{ borderRadius: 1, boxShadow: "none" }}>
+        <Table size="small" stickyHeader sx={getStandardTableSx(theme)}>
           <TableHead>
             <TableRow>
               <TableCell
@@ -46,7 +36,10 @@ const InventarioMatriz = ({ productos, sucursales }) => {
                   position: "sticky",
                   left: 0,
                   zIndex: 1,
-                  background: theme.palette.background.paper,
+                  background:
+                    theme.palette.mode === "light"
+                      ? theme.palette.grey[100]
+                      : theme.palette.grey[900],
                   fontWeight: 700,
                   fontSize: 15,
                   letterSpacing: 0.2,
@@ -62,7 +55,6 @@ const InventarioMatriz = ({ productos, sucursales }) => {
                   sx={{
                     fontWeight: 700,
                     fontSize: 15,
-                    background: theme.palette.background.paper,
                   }}
                 >
                   {s.nombre}

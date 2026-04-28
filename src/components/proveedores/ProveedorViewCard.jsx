@@ -1,12 +1,5 @@
 import PropTypes from "prop-types";
-import {
-  Card,
-  CardContent,
-  Grid,
-  Stack,
-  Typography,
-  Divider,
-} from "@mui/material";
+import { Card, CardContent, Divider } from "@mui/material";
 import Business from "@mui/icons-material/Business";
 import Badge from "@mui/icons-material/Badge";
 import AlternateEmail from "@mui/icons-material/AlternateEmail";
@@ -16,6 +9,9 @@ import Category from "@mui/icons-material/Category";
 import Event from "@mui/icons-material/Event";
 import dayjs from "dayjs";
 import { formatRut } from "../../utils/rut";
+import Grid from "../common/CompatGrid";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const Row = ({ icon: Icon, label, value }) => (
   <Stack direction="row" spacing={1} alignItems="center" sx={{ minHeight: 32 }}>

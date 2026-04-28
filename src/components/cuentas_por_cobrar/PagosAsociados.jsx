@@ -1,20 +1,11 @@
-import {
-  Box,
-  Typography,
-  Divider,
-  Chip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Tooltip,
-  CircularProgress,
-} from "@mui/material";
+import { Divider, Chip, List, ListItem, ListItemText, ListItemIcon, Tooltip, CircularProgress } from "@mui/material";
 import PropTypes from "prop-types";
 import PaymentIcon from "@mui/icons-material/Payment";
 import { useGetPagosByVentaIdQuery } from "../../store/services/pagosApi";
 import { formatCLP } from "../../utils/formatUtils";
 import { useEffect, useRef } from "react";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const PagosAsociados = ({ idVenta, refetchTrigger }) => {
   const {

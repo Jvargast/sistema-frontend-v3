@@ -1,7 +1,9 @@
-import { Box, Typography, Avatar, useTheme } from "@mui/material";
+import { Avatar, useTheme } from "@mui/material";
 import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
 
 const MotionBox = motion.create(Box);
 

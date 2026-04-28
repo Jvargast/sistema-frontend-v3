@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography, Paper } from "@mui/material";
+import { Button, Paper } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import BackButton from "../../components/common/BackButton";
@@ -13,10 +13,13 @@ import { useGenerarProductoEstadisticasMutation } from "../../store/services/pro
 import { useGetReporteDiarioQuery } from "../../store/services/reportesAnalisisApi";
 import { convertirChileAUtc, obtenerFechaChile } from "../../utils/fechaUtils";
 import { exportarReporteDiarioExcel } from "../../utils/exportarAnalisisExcel";
+import Box from "../../components/common/CompatBox";
+import Stack from "../../components/common/CompatStack";
+import Typography from "../../components/common/CompatTypography";
 
 const Analisis = () => {
   const hoyChile = obtenerFechaChile();
-  const fechaReporte = hoyChile.format("YYYY-MM-DD"); 
+  const fechaReporte = hoyChile.format("YYYY-MM-DD");
   const fechaLabel = hoyChile.format("DD-MM-YYYY");
   const hoyUtc = convertirChileAUtc(fechaReporte);
 

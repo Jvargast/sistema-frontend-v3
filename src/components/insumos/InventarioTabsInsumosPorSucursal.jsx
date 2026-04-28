@@ -1,7 +1,12 @@
+import Tabs from "../common/CompatTabs";
 import { useMemo, useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { Box, Chip, Tab, Tabs, Typography /* useTheme */ } from "@mui/material";
+import { Chip, Tab, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
+import { CustomPagination } from "../common/CustomPagination";
+import { getStandardDataGridSx } from "../common/tableStyles";
 
 function getCantidadEnSucursal(inventario, id_sucursal) {
   if (!Array.isArray(inventario)) {
@@ -19,61 +24,59 @@ function getTotal(inventario) {
 
 export default function InventarioTabsInsumosPorSucursal({
   insumos = [],
-  sucursales = [],
+  sucursales = []
 }) {
-  /*  const theme = useTheme(); */
+  const theme = useTheme();
 
   const [tab, setTab] = useState(0);
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
 
   const noSucursales = !Array.isArray(sucursales) || sucursales.length === 0;
 
   const columns = useMemo(
     () => [
-      {
-        field: "nombre_insumo",
-        headerName: "Insumo",
-        flex: 0.6,
-        minWidth: 200,
-      },
-      {
-        field: "stock",
-        headerName: "Stock",
-        flex: 0.25,
-        minWidth: 120,
-        renderCell: (params) => {
-          const v = params.value ?? 0;
-          return v === 0 ? (
-            <Chip
-              label="0"
-              color="error"
-              size="small"
-              sx={{ fontWeight: 700 }}
-            />
-          ) : v < 10 ? (
-            <Chip
-              label={v}
-              color="warning"
-              size="small"
-              sx={{ fontWeight: 700 }}
-            />
-          ) : (
-            <Typography fontWeight={700}>{v}</Typography>
-          );
-        },
-      },
-    ],
+    {
+      field: "nombre_insumo",
+      headerName: "Insumo",
+      flex: 0.6,
+      minWidth: 200
+    },
+    {
+      field: "stock",
+      headerName: "Stock",
+      flex: 0.25,
+      minWidth: 120,
+      renderCell: (params) => {
+        const v = params.value ?? 0;
+        return v === 0 ?
+        <Chip
+          label="0"
+          color="error"
+          size="small"
+          sx={{ fontWeight: 700 }} /> :
+
+        v < 10 ?
+        <Chip
+          label={v}
+          color="warning"
+          size="small"
+          sx={{ fontWeight: 700 }} /> :
+
+
+        <Typography fontWeight={700}>{v}</Typography>;
+
+      }
+    }],
+
     []
   );
 
   const rowsNoSucursales = useMemo(
     () =>
-      (insumos || []).map((ins) => ({
-        id: ins.id_insumo,
-        nombre_insumo: ins.nombre_insumo,
-        stock: getTotal(ins.inventario),
-      })),
+    (insumos || []).map((ins) => ({
+      id: ins.id_insumo,
+      nombre_insumo: ins.nombre_insumo,
+      stock: getTotal(ins.inventario)
+    })),
     [insumos]
   );
 
@@ -89,7 +92,7 @@ export default function InventarioTabsInsumosPorSucursal({
         id: `${ins.id_insumo}-${s.id_sucursal}`,
         id_insumo: ins.id_insumo,
         nombre_insumo: ins.nombre_insumo,
-        stock: getCantidadEnSucursal(ins.inventario, s.id_sucursal),
+        stock: getCantidadEnSucursal(ins.inventario, s.id_sucursal)
       }));
     });
     return map;
@@ -103,7 +106,7 @@ export default function InventarioTabsInsumosPorSucursal({
 
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
-    pageSize: 25,
+    pageSize: 25
   });
 
   const totalRows = activeRows?.length ?? 0;
@@ -121,45 +124,42 @@ export default function InventarioTabsInsumosPorSucursal({
 
   return (
     <Box>
-      {!noSucursales && (
-        <Tabs
-          value={tab}
-          onChange={(_, v) => {
-            setTab(v);
-            setPage(0);
-          }}
-          variant="scrollable"
-          scrollButtons="auto"
-          sx={{ mb: 2 }}
-        >
-          {sucursales.map((s) => (
-            <Tab key={s.id_sucursal} label={s.nombre} />
-          ))}
+      {!noSucursales &&
+      <Tabs
+        value={tab}
+        onChange={(_, v) => {
+          setTab(v);
+          setPaginationModel((prev) => ({ ...prev, page: 0 }));
+        }}
+        variant="scrollable"
+        scrollButtons="auto"
+        sx={{ mb: 2 }}>
+
+          {sucursales.map((s) =>
+        <Tab key={s.id_sucursal} label={s.nombre} />
+        )}
         </Tabs>
-      )}
+      }
 
       <Box sx={{ height: "70vh" }}>
         <DataGrid
           rows={activeRows || []}
           columns={columns}
-          pagination
-          page={page}
-          onPageChange={(newPage) => setPage(newPage)}
-          pageSize={pageSize}
-          onPageSizeChange={(newSize) => {
-            setPageSize(newSize);
-            setPage(0);
-          }}
-          rowsPerPageOptions={[10, 25, 50, 100]}
+          paginationMode="client"
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[10, 25, 50, 100]}
           getRowId={(row) => row.id}
+          slots={{ pagination: CustomPagination }}
           slotProps={{ pagination: { count: totalRows } }}
-        />
+          sx={getStandardDataGridSx(theme)} />
+
       </Box>
-    </Box>
-  );
+    </Box>);
+
 }
 
 InventarioTabsInsumosPorSucursal.propTypes = {
   insumos: PropTypes.array,
-  sucursales: PropTypes.array,
+  sucursales: PropTypes.array
 };

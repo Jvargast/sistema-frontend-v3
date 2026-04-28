@@ -1,19 +1,13 @@
-import {
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  Paper,
-  Stack,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { CardContent, Chip, Divider, Paper, Tooltip } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import PaidOutlined from "@mui/icons-material/PaidOutlined";
 import PersonSearchOutlined from "@mui/icons-material/PersonSearchOutlined";
 import CategoryOutlined from "@mui/icons-material/CategoryOutlined";
 import PropTypes from "prop-types";
 import { tipoChipColor } from "../../utils/gastoUtils";
+import Grid from "../common/CompatGrid";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 function ChipField({
   caption,

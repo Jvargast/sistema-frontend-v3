@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { Stack, Typography, Chip, IconButton, Tooltip } from "@mui/material";
+import { Chip, IconButton, Tooltip, useTheme } from "@mui/material";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import Edit from "@mui/icons-material/Edit";
 import Save from "@mui/icons-material/Save";
@@ -8,6 +8,9 @@ import DeleteOutlineOutlined from "@mui/icons-material/DeleteOutlineOutlined";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import { useNavigate } from "react-router-dom";
 import { ESTADOS_COMPRA } from "../../constants/estadosCompra";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 
 const estadoChip = (v) =>
@@ -24,6 +27,7 @@ export default function CompraViewHeader({
   onSave,
   onDelete,
 }) {
+  const theme = useTheme();
   const navigate = useNavigate();
   const e = estadoChip(compra?.estado);
 
@@ -61,11 +65,11 @@ export default function CompraViewHeader({
       {!edit ? (
         <Tooltip title="Editar">
           <IconButton
-            color="primary"
             onClick={onToggleEdit}
             aria-label="Editar compra"
+            sx={getActionIconButtonSx(theme, "primary")}
           >
-            <Edit />
+            <Edit fontSize="small" />
           </IconButton>
         </Tooltip>
       ) : (
@@ -96,11 +100,11 @@ export default function CompraViewHeader({
 
       <Tooltip title="Eliminar">
         <IconButton
-          color="error"
           onClick={onDelete}
           aria-label="Eliminar compra"
+          sx={getActionIconButtonSx(theme, "error")}
         >
-          <DeleteOutlineOutlined />
+          <DeleteOutlineOutlined fontSize="small" />
         </IconButton>
       </Tooltip>
     </Stack>

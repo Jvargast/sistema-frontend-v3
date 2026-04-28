@@ -6,8 +6,10 @@ import {
 } from "@react-google-maps/api";
 import PropTypes from "prop-types";
 import { useEffect, useState, useMemo } from "react";
-import { Box, Typography } from "@mui/material";
+import Typography from "../common/CompatTypography";
+
 import { convertirFechaLocal } from "../../utils/fechaUtils";
+import Box from "../common/CompatBox";
 
 const mapContainerStyle = {
   height: "300px",

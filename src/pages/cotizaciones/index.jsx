@@ -1,21 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
-import PropTypes from "prop-types";
+import StepLabel from "../../components/common/CompatStepLabel";
 import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Stepper,
-  Step,
-  StepLabel,
-  Stack,
-  useTheme,
-  Divider,
-} from "@mui/material";
+  useEffect,
+  useMemo,
+  useState } from "react";
+import PropTypes from "prop-types";
+import { Button, Stepper, Step, useTheme, Divider } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import StepConnector, {
-  stepConnectorClasses,
-} from "@mui/material/StepConnector";
+  stepConnectorClasses } from
+"@mui/material/StepConnector";
 import { useSelector, useDispatch } from "react-redux";
 import { useCreateCotizacionMutation } from "../../store/services/cotizacionesApi";
 import { addItem, clearCart } from "../../store/reducers/cartSlice";
@@ -33,42 +26,46 @@ import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import { getStockForSucursal } from "../../utils/inventoryUtils";
 import SucursalPickerHeader from "../../components/common/SucursalPickerHeader";
 import MiniCartSummary from "../../components/pedido/MiniCartSummary";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Stack from "../../components/common/CompatStack";
+import Typography from "../../components/common/CompatTypography";
 
 const StyledConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
-    top: 12,
+    top: 12
   },
   [`& .${stepConnectorClasses.line}`]: {
     borderColor: theme.palette.divider,
     borderTopWidth: 2,
-    borderRadius: 1,
+    borderRadius: 1
   },
   [`&.${stepConnectorClasses.active} .${stepConnectorClasses.line}`]: {
-    borderColor: theme.palette.primary.main,
+    borderColor: theme.palette.primary.main
   },
   [`&.${stepConnectorClasses.completed} .${stepConnectorClasses.line}`]: {
-    borderColor: theme.palette.primary.main,
-  },
+    borderColor: theme.palette.primary.main
+  }
 }));
 
 const StepIconRoot = styled(Box)(({ theme, ownerState }) => ({
   backgroundColor: theme.palette.background.paper,
   border: `2px solid ${
-    ownerState.active || ownerState.completed
-      ? theme.palette.primary.main
-      : theme.palette.divider
-  }`,
+  ownerState.active || ownerState.completed ?
+  theme.palette.primary.main :
+  theme.palette.divider}`,
+
   color:
-    ownerState.active || ownerState.completed
-      ? theme.palette.primary.main
-      : theme.palette.text.disabled,
+  ownerState.active || ownerState.completed ?
+  theme.palette.primary.main :
+  theme.palette.text.disabled,
   width: 30,
   height: 30,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   borderRadius: "50%",
-  fontWeight: 600,
+  fontWeight: 600
 }));
 
 const StepIconComponent = (props) => {
@@ -76,15 +73,15 @@ const StepIconComponent = (props) => {
   return (
     <StepIconRoot className={className} ownerState={{ active, completed }}>
       {icon}
-    </StepIconRoot>
-  );
+    </StepIconRoot>);
+
 };
 
 StepIconComponent.propTypes = {
   active: PropTypes.bool,
   completed: PropTypes.bool,
   className: PropTypes.string,
-  icon: PropTypes.node,
+  icon: PropTypes.node
 };
 
 dayjs.extend(utc);
@@ -93,20 +90,20 @@ dayjs.extend(timezone);
 const ZONA_HORARIA = "America/Santiago";
 
 const calcularFechaVencimiento = (dias) => {
-  return dayjs()
-    .tz(ZONA_HORARIA)
-    .add(dias, "day")
-    .hour(12)
-    .minute(0)
-    .second(0)
-    .format();
+  return dayjs().
+  tz(ZONA_HORARIA).
+  add(dias, "day").
+  hour(12).
+  minute(0).
+  second(0).
+  format();
 };
 
 const initialFormState = {
   selectedCliente: null,
   direccionEntrega: "",
   notas: "",
-  id_sucursal: null,
+  id_sucursal: null
 };
 
 const CrearCotizacion = () => {
@@ -129,7 +126,7 @@ const CrearCotizacion = () => {
   const steps = ["Datos", "Productos", "Carrito", "Resumen"];
   const [activeStep, setActiveStep] = useState(0);
   const nextStep = () =>
-    setActiveStep((s) => Math.min(s + 1, steps.length - 1));
+  setActiveStep((s) => Math.min(s + 1, steps.length - 1));
   const prevStep = () => setActiveStep((s) => Math.max(s - 1, 0));
 
   const theme = useTheme();
@@ -139,18 +136,18 @@ const CrearCotizacion = () => {
     if (!id) return null;
     return (
       (sucursales || []).find((s) => Number(s.id_sucursal) === Number(id)) ||
-      null
-    );
+      null);
+
   }, [formState.id_sucursal, sucursales]);
 
   const [createCotizacion, { isLoading, error }] =
-    useCreateCotizacionMutation();
+  useCreateCotizacionMutation();
 
   useEffect(() => {
     if (formState.selectedCliente && formState.selectedCliente.direccion) {
       setFormState((prev) => ({
         ...prev,
-        direccionEntrega: formState.selectedCliente.direccion,
+        direccionEntrega: formState.selectedCliente.direccion
       }));
     }
   }, [formState.selectedCliente]);
@@ -158,14 +155,14 @@ const CrearCotizacion = () => {
   useEffect(() => {
     if (isSucursalScope) {
       setFormState((prev) =>
-        prev.id_sucursal === Number(activeSucursalId)
-          ? prev
-          : { ...prev, id_sucursal: Number(activeSucursalId) }
+      prev.id_sucursal === Number(activeSucursalId) ?
+      prev :
+      { ...prev, id_sucursal: Number(activeSucursalId) }
       );
     } else {
       setFormState((prev) => ({
         ...prev,
-        id_sucursal: prev.id_sucursal ?? null,
+        id_sucursal: prev.id_sucursal ?? null
       }));
     }
   }, [isSucursalScope, activeSucursalId, mode]);
@@ -174,16 +171,16 @@ const CrearCotizacion = () => {
     if (!formState.id_sucursal) return;
     const otraSucursal = cart.some(
       (i) =>
-        i.id_sucursal_origen &&
-        Number(i.id_sucursal_origen) !== Number(formState.id_sucursal)
+      i.id_sucursal_origen &&
+      Number(i.id_sucursal_origen) !== Number(formState.id_sucursal)
     );
     if (otraSucursal) {
       dispatch(clearCart());
       dispatch(
         showNotification({
           message:
-            "La sucursal cambió. Se vació el carrito para evitar mezclar.",
-          severity: "info",
+          "La sucursal cambió. Se vació el carrito para evitar mezclar.",
+          severity: "info"
         })
       );
     }
@@ -206,7 +203,7 @@ const CrearCotizacion = () => {
       dispatch(
         showNotification({
           message: "Selecciona una sucursal para agregar productos.",
-          severity: "info",
+          severity: "info"
         })
       );
       return;
@@ -214,32 +211,32 @@ const CrearCotizacion = () => {
 
     const stockDisponible = getStockForSucursal(product.inventario, idSucursal);
 
-    const qtyEnCarrito = cart
-      .filter(
-        (i) =>
-          i.id_producto === product.id_producto &&
-          Number(i.id_sucursal_origen) === idSucursal
-      )
-      .reduce((s, i) => s + i.cantidad, 0);
+    const qtyEnCarrito = cart.
+    filter(
+      (i) =>
+      i.id_producto === product.id_producto &&
+      Number(i.id_sucursal_origen) === idSucursal
+    ).
+    reduce((s, i) => s + i.cantidad, 0);
 
     if (qtyEnCarrito + 1 > stockDisponible) {
       dispatch(
         showNotification({
           message: "No hay stock suficiente en la sucursal seleccionada.",
-          severity: "warning",
+          severity: "warning"
         })
       );
       return;
     }
 
     const isInsumo = product.tipo === "insumo";
-    const idInsumo = isInsumo
-      ? parseInt(
-          typeof product.id_producto === "string"
-            ? product.id_producto.replace("insumo_", "")
-            : product.id_producto
-        )
-      : undefined;
+    const idInsumo = isInsumo ?
+    parseInt(
+      typeof product.id_producto === "string" ?
+      product.id_producto.replace("insumo_", "") :
+      product.id_producto
+    ) :
+    undefined;
 
     dispatch(
       addItem({
@@ -249,7 +246,7 @@ const CrearCotizacion = () => {
         cantidad: 1,
         tipo: product.tipo || "producto",
         ...(isInsumo && { id_insumo: idInsumo }),
-        id_sucursal_origen: idSucursal,
+        id_sucursal_origen: idSucursal
       })
     );
   };
@@ -259,8 +256,8 @@ const CrearCotizacion = () => {
       dispatch(
         showNotification({
           message:
-            "Cliente, productos y fecha de vencimiento son obligatorios.",
-          severity: "warning",
+          "Cliente, productos y fecha de vencimiento son obligatorios.",
+          severity: "warning"
         })
       );
       return;
@@ -269,7 +266,7 @@ const CrearCotizacion = () => {
       dispatch(
         showNotification({
           message: "Debes seleccionar una sucursal para la cotización.",
-          severity: "warning",
+          severity: "warning"
         })
       );
       return;
@@ -278,34 +275,34 @@ const CrearCotizacion = () => {
     const cotizacionData = {
       id_cliente: formState.selectedCliente.id_cliente,
       id_sucursal: Number(formState.id_sucursal),
-      fecha_vencimiento: dayjs(fechaVencimiento)
-        .tz(ZONA_HORARIA)
-        .hour(12)
-        .minute(0)
-        .second(0)
-        .format(),
+      fecha_vencimiento: dayjs(fechaVencimiento).
+      tz(ZONA_HORARIA).
+      hour(12).
+      minute(0).
+      second(0).
+      format(),
       productos: cart.map((item) => {
         if (
-          typeof item.id_producto === "string" &&
-          item.id_producto.startsWith("insumo_")
-        ) {
+        typeof item.id_producto === "string" &&
+        item.id_producto.startsWith("insumo_"))
+        {
           return {
             id_insumo: parseInt(item.id_producto.replace("insumo_", "")),
             cantidad: item.cantidad,
             precio_unitario: item.precio_unitario,
-            descuento_porcentaje: 0,
+            descuento_porcentaje: 0
           };
         }
         return {
           id_producto: item.id_producto,
           cantidad: item.cantidad,
           precio_unitario: item.precio_unitario,
-          descuento_porcentaje: 0,
+          descuento_porcentaje: 0
         };
       }),
       notas: formState.notas,
       impuesto,
-      descuento_total_porcentaje: descuentoPorcentaje,
+      descuento_total_porcentaje: descuentoPorcentaje
     };
 
     try {
@@ -317,9 +314,9 @@ const CrearCotizacion = () => {
       dispatch(
         showNotification({
           message: `Error al crear cotización: ${
-            err?.data?.message || err.message
-          }`,
-          severity: "error",
+          err?.data?.message || err.message}`,
+
+          severity: "error"
         })
       );
     }
@@ -335,8 +332,8 @@ const CrearCotizacion = () => {
         idSucursal={formState.id_sucursal}
         canChoose={canChooseSucursal}
         onChange={(id) => setFormState((p) => ({ ...p, id_sucursal: id }))}
-        nombreSucursal={sucursalActual?.nombre}
-      />
+        nombreSucursal={sucursalActual?.nombre} />
+
       <Stepper
         activeStep={activeStep}
         alternativeLabel
@@ -346,123 +343,123 @@ const CrearCotizacion = () => {
           backgroundColor: theme.palette.background.paper,
           p: 2,
           borderRadius: 2,
-          border: `1px solid ${theme.palette.divider}`,
-        }}
-      >
-        {steps.map((label) => (
-          <Step key={label}>
+          border: `1px solid ${theme.palette.divider}`
+        }}>
+
+        {steps.map((label) =>
+        <Step key={label}>
             <StepLabel StepIconComponent={StepIconComponent}>{label}</StepLabel>
           </Step>
-        ))}
+        )}
       </Stepper>
-      {activeStep === 0 && (
-        <Box>
+      {activeStep === 0 &&
+      <Box>
           <PedidoForm
-            formState={formState}
-            setFormState={setFormState}
-            metodoPago={""}
-            setMetodoPago={() => {}}
-            mostrarMetodoPago={false}
-            mostrarTipoDocumento={false}
-            tipoDocumento={""}
-            setTipoDocumento={() => {}}
-            idSucursalFiltro={formState.id_sucursal}
-            extraFields={
-              <>
+          formState={formState}
+          setFormState={setFormState}
+          metodoPago={""}
+          setMetodoPago={() => {}}
+          mostrarMetodoPago={false}
+          mostrarTipoDocumento={false}
+          tipoDocumento={""}
+          setTipoDocumento={() => {}}
+          idSucursalFiltro={formState.id_sucursal}
+          extraFields={
+          <>
                 <Typography sx={{ fontWeight: "bold", mt: 2 }}>
                   Fecha de vencimiento:
                 </Typography>
                 <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-                  {[15, 30, 60].map((dias) => (
-                    <Button
-                      key={dias}
-                      variant="outlined"
-                      onClick={() =>
-                        setFechaVencimiento(calcularFechaVencimiento(dias))
-                      }
-                    >
+                  {[15, 30, 60].map((dias) =>
+              <Button
+                key={dias}
+                variant="outlined"
+                onClick={() =>
+                setFechaVencimiento(calcularFechaVencimiento(dias))
+                }>
+
                       +{dias} días
                     </Button>
-                  ))}
+              )}
                 </Box>
                 <TextField
-                  type="date"
-                  label="Fecha de vencimiento"
-                  value={
-                    fechaVencimiento
-                      ? dayjs(fechaVencimiento)
-                          .tz(ZONA_HORARIA)
-                          .format("YYYY-MM-DD")
-                      : ""
-                  }
-                  onChange={(e) => {
-                    const fecha = dayjs(e.target.value)
-                      .tz(ZONA_HORARIA)
-                      .hour(12)
-                      .minute(0)
-                      .second(0)
-                      .format();
-                    setFechaVencimiento(fecha);
-                  }}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  sx={{ mb: 3 }}
-                />
+              type="date"
+              label="Fecha de vencimiento"
+              value={
+              fechaVencimiento ?
+              dayjs(fechaVencimiento).
+              tz(ZONA_HORARIA).
+              format("YYYY-MM-DD") :
+              ""
+              }
+              onChange={(e) => {
+                const fecha = dayjs(e.target.value).
+                tz(ZONA_HORARIA).
+                hour(12).
+                minute(0).
+                second(0).
+                format();
+                setFechaVencimiento(fecha);
+              }}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+              sx={{ mb: 3 }} />
+
 
                 <TextField
-                  label="Impuesto (%)"
-                  type="number"
-                  value={isNaN(impuesto) ? "" : impuesto * 100}
-                  onChange={(e) => {
-                    const value = parseFloat(e.target.value);
-                    setImpuesto(isNaN(value) ? 0 : value / 100);
-                  }}
-                  fullWidth
-                  sx={{ mb: 3 }}
-                />
+              label="Impuesto (%)"
+              type="number"
+              value={isNaN(impuesto) ? "" : impuesto * 100}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value);
+                setImpuesto(isNaN(value) ? 0 : value / 100);
+              }}
+              fullWidth
+              sx={{ mb: 3 }} />
+
 
                 <TextField
-                  label="Descuento total (%)"
-                  type="number"
-                  value={isNaN(descuentoPorcentaje) ? "" : descuentoPorcentaje}
-                  onChange={(e) => {
-                    const value = parseFloat(e.target.value);
-                    setDescuentoPorcentaje(isNaN(value) ? 0 : value);
-                  }}
-                  fullWidth
-                  sx={{ mb: 3 }}
-                />
+              label="Descuento total (%)"
+              type="number"
+              value={isNaN(descuentoPorcentaje) ? "" : descuentoPorcentaje}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value);
+                setDescuentoPorcentaje(isNaN(value) ? 0 : value);
+              }}
+              fullWidth
+              sx={{ mb: 3 }} />
+
               </>
-            }
-          />
+          } />
+
           <Stack direction="row" justifyContent="flex-end" mt={2}>
             <Button
-              variant="contained"
-              onClick={nextStep}
-              disabled={mode === "global" && !formState.id_sucursal}
-            >
+            variant="contained"
+            onClick={nextStep}
+            disabled={mode === "global" && !formState.id_sucursal}>
+
               Siguiente
             </Button>
           </Stack>
         </Box>
-      )}
-      {activeStep === 1 && (
-        <Box>
+      }
+      {activeStep === 1 &&
+      <Box>
           <Typography
-            variant="h5"
-            fontWeight="bold"
-            color="primary"
-            gutterBottom
-          >
+          variant="h5"
+          fontWeight="bold"
+          color="primary"
+          gutterBottom>
+
             Productos
           </Typography>
           <Divider sx={{ mb: 3 }} />
           <PedidoCategorias onSelectCategory={setCategoriaSeleccionada} />
           <PedidoProductos
-            selectedCategory={categoriaSeleccionada}
-            onAddToCart={handleAddToCart}
-            sucursalId={formState.id_sucursal}
-          />
+          selectedCategory={categoriaSeleccionada}
+          onAddToCart={handleAddToCart}
+          sucursalId={formState.id_sucursal} />
+
           <MiniCartSummary onOpenCart={() => setActiveStep(2)} />
           <Stack direction="row" justifyContent="space-between" mt={2}>
             <Button variant="outlined" onClick={prevStep}>
@@ -473,42 +470,42 @@ const CrearCotizacion = () => {
             </Button>
           </Stack>
         </Box>
-      )}
-      {activeStep === 2 && (
-        <Box>
+      }
+      {activeStep === 2 &&
+      <Box>
           <PedidoCarrito />
           <Stack direction="row" justifyContent="space-between" mt={2}>
             <Button variant="outlined" onClick={prevStep}>
               Atrás
             </Button>
             <Button
-              variant="contained"
-              onClick={nextStep}
-              disabled={cart.length === 0}
-            >
+            variant="contained"
+            onClick={nextStep}
+            disabled={cart.length === 0}>
+
               Siguiente
             </Button>
           </Stack>
         </Box>
-      )}
-      {activeStep === 3 && (
-        <Box>
+      }
+      {activeStep === 3 &&
+      <Box>
           <PedidoResumen
-            total={total}
-            isLoading={isLoading}
-            error={error}
-            onSubmit={handleCreateAndRedirect}
-            submitLabel="Ver Cotización"
-          />
+          total={total}
+          isLoading={isLoading}
+          error={error}
+          onSubmit={handleCreateAndRedirect}
+          submitLabel="Ver Cotización" />
+
           <Stack direction="row" justifyContent="flex-start" mt={2}>
             <Button variant="outlined" onClick={prevStep} disabled={isLoading}>
               Atrás
             </Button>
           </Stack>
         </Box>
-      )}
-    </Box>
-  );
+      }
+    </Box>);
+
 };
 
 export default CrearCotizacion;

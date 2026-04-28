@@ -1,31 +1,21 @@
-import { useState, useEffect } from "react";
-import PropTypes from "prop-types";
+import Dialog from "../common/CompatDialog";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  List,
-  ListItem,
-  ListItemText,
-  CircularProgress,
-  Typography,
-  Box,
-  IconButton,
-  Alert,
-  Pagination,
-} from "@mui/material";
+  useState,
+  useEffect } from "react";
+import PropTypes from "prop-types";
+import { DialogTitle, DialogContent, DialogActions, Button, List, ListItem, ListItemText, CircularProgress, IconButton, Alert, Pagination } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import { useGetMovimientosByCajaQuery } from "../../store/services/movimientoCajaApi";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const MovimientosCajaModal = ({ idCaja, onClose }) => {
-  const [fecha, setFecha] = useState(new Date().toISOString().split("T")[0]); 
-  const [movimientos, setMovimientos] = useState([]); 
-  const [errorMensaje, setErrorMensaje] = useState(null); 
-  const [page, setPage] = useState(1); 
-  const limit = 10; 
+  const [fecha, setFecha] = useState(new Date().toISOString().split("T")[0]);
+  const [movimientos, setMovimientos] = useState([]);
+  const [errorMensaje, setErrorMensaje] = useState(null);
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
   const { data, error, isLoading, refetch } = useGetMovimientosByCajaQuery(
     { id_caja: idCaja, fecha, page, limit },
@@ -34,7 +24,7 @@ const MovimientosCajaModal = ({ idCaja, onClose }) => {
 
   useEffect(() => {
     if (isLoading) {
-      setMovimientos([]); 
+      setMovimientos([]);
       setErrorMensaje(null);
     } else if (data?.movimientos?.length > 0) {
       setMovimientos(data.movimientos);
@@ -46,9 +36,9 @@ const MovimientosCajaModal = ({ idCaja, onClose }) => {
   }, [data, isLoading, error]);
 
   const cambiarFecha = (dias) => {
-    setMovimientos([]); 
+    setMovimientos([]);
     setErrorMensaje(null);
-    setPage(1); 
+    setPage(1);
     const nuevaFecha = new Date(fecha);
     nuevaFecha.setDate(nuevaFecha.getDate() + dias);
     setFecha(nuevaFecha.toISOString().split("T")[0]);
@@ -59,7 +49,7 @@ const MovimientosCajaModal = ({ idCaja, onClose }) => {
     setPage(newPage);
     refetch();
   };
-  console.log(data?.paginacion)
+  console.log(data?.paginacion);
 
   return (
     <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth>
@@ -75,67 +65,67 @@ const MovimientosCajaModal = ({ idCaja, onClose }) => {
             type="date"
             value={fecha}
             onChange={(e) => {
-              setMovimientos([]); 
+              setMovimientos([]);
               setErrorMensaje(null);
               setFecha(e.target.value);
               setPage(1);
               refetch();
             }}
-            sx={{ flex: 1 }}
-          />
+            sx={{ flex: 1 }} />
+
           <IconButton onClick={() => cambiarFecha(1)} color="primary">
             <ArrowForward />
           </IconButton>
         </Box>
 
         {/* Manejo de carga y errores */}
-        {isLoading && (
-          <Typography align="center" sx={{ mt: 2 }}>
+        {isLoading &&
+        <Typography align="center" sx={{ mt: 2 }}>
             <CircularProgress size={24} /> Cargando movimientos...
           </Typography>
-        )}
-        {errorMensaje && !isLoading && (
-          <Alert severity="info" sx={{ mt: 2 }}>
+        }
+        {errorMensaje && !isLoading &&
+        <Alert severity="info" sx={{ mt: 2 }}>
             {errorMensaje}
           </Alert>
-        )}
+        }
 
         {/* Lista de movimientos */}
         <List sx={{ maxHeight: 400, overflowY: "auto" }}>
-          {movimientos.map((mov) => (
-            <ListItem key={mov.id_movimiento} sx={{ borderBottom: "1px solid #e0e0e0" }}>
+          {movimientos.map((mov) =>
+          <ListItem key={mov.id_movimiento} sx={{ borderBottom: "1px solid #e0e0e0" }}>
               <ListItemText
-                primary={`Venta #${mov.id_venta || "N/A"} - ${mov.tipo_movimiento.toUpperCase()} - $${Number(mov.monto || 0).toFixed(2)}`}
-                secondary={`📅 Fecha: ${new Date(mov.fecha_movimiento).toLocaleString("es-ES")}`}
-              />
+              primary={`Venta #${mov.id_venta || "N/A"} - ${mov.tipo_movimiento.toUpperCase()} - $${Number(mov.monto || 0).toFixed(2)}`}
+              secondary={`📅 Fecha: ${new Date(mov.fecha_movimiento).toLocaleString("es-ES")}`} />
+
             </ListItem>
-          ))}
+          )}
         </List>
 
         {/* Paginación */}
-        {!isLoading && !errorMensaje && data?.paginacion?.totalPages > 1 && (
-          <Box display="flex" justifyContent="center" mt={2}>
+        {!isLoading && !errorMensaje && data?.paginacion?.totalPages > 1 &&
+        <Box display="flex" justifyContent="center" mt={2}>
             <Pagination
-              count={data?.paginacion?.totalPages || 1}
-              page={page}
-              onChange={handlePageChange}
-              color="primary"
-            />
+            count={data?.paginacion?.totalPages || 1}
+            page={page}
+            onChange={handlePageChange}
+            color="primary" />
+
           </Box>
-        )}
+        }
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="error" variant="outlined">
           Cerrar
         </Button>
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 
 MovimientosCajaModal.propTypes = {
   idCaja: PropTypes.number.isRequired,
-  onClose: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired
 };
 
 export default MovimientosCajaModal;

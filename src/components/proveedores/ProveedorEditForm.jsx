@@ -1,25 +1,22 @@
 import PropTypes from "prop-types";
-import {
-  Card,
-  CardContent,
-  Grid,
-  TextField,
-  FormControlLabel,
-  Switch,
-  /*   CardActions,
-  Button, */
-} from "@mui/material";
+import { Card, CardContent, FormControlLabel, Switch
+/*   CardActions,
+Button,
+*/ } from "@mui/material";
 import { useEffect, useState } from "react";
+import {
+  formatPhoneInputCL,
+  isPhonePrefixOnlyCL,
+  validatePhoneCL,
+} from "../../utils/phoneCl";
+import PhoneTextField from "../common/PhoneTextField";
+import TextField from "../common/CompatTextField";
+import Grid from "../common/CompatGrid";
 
 function validateEmail(email) {
   if (!email) return true;
   return /[^\s@]+@[^\s@]+\.[^\s@]+/.test(email);
 }
-function validatePhone(phone) {
-  if (!phone) return true;
-  return /^[+]?\d[\d\s()-]{5,}$/.test(phone);
-}
-
 const ProveedorEditForm = ({
   proveedor,
   onSubmit /* , onCancel, saving  */,
@@ -43,7 +40,7 @@ const ProveedorEditForm = ({
       razon_social: proveedor.razon_social || "",
       giro: proveedor.giro || "",
       email: proveedor.email || "",
-      telefono: proveedor.telefono || "",
+      telefono: formatPhoneInputCL(proveedor.telefono) || "",
       direccion: proveedor.direccion || "",
       activo: Boolean(proveedor.activo),
     });
@@ -59,8 +56,10 @@ const ProveedorEditForm = ({
     const nextErrors = {};
     if (!form.razon_social.trim()) nextErrors.razon_social = "Requerido";
     if (!validateEmail(form.email)) nextErrors.email = "Email inválido";
-    if (!validatePhone(form.telefono))
-      nextErrors.telefono = "Teléfono inválido";
+    if (form.telefono && !isPhonePrefixOnlyCL(form.telefono)) {
+      const result = validatePhoneCL(form.telefono);
+      if (!result.valid) nextErrors.telefono = result.msg || "Teléfono inválido";
+    }
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
@@ -100,7 +99,7 @@ const ProveedorEditForm = ({
           razon_social: proveedor.razon_social || "",
           giro: proveedor.giro || "",
           email: proveedor.email || "",
-          telefono: proveedor.telefono || "",
+          telefono: formatPhoneInputCL(proveedor.telefono) || "",
           direccion: proveedor.direccion || "",
           activo: Boolean(proveedor.activo),
         });
@@ -147,7 +146,7 @@ const ProveedorEditForm = ({
             />
           </Grid>
           <Grid item xs={12} md={6}>
-            <TextField
+            <PhoneTextField
               label="Teléfono"
               value={form.telefono}
               onChange={handleChange("telefono")}

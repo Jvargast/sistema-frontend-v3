@@ -1,7 +1,8 @@
-import { Box, Button, useTheme } from "@mui/material";
+import { Button, useTheme } from "@mui/material";
 import BackspaceIcon from "@mui/icons-material/Backspace";
 import ClearIcon from "@mui/icons-material/Clear";
 import PropTypes from "prop-types";
+import Box from "../common/CompatBox";
 
 const NUMPAD_VALUES = [
   ["7", "8", "9"],

@@ -1,5 +1,8 @@
-import { Box, Typography, TextField, Button } from "@mui/material";
+import { Button } from "@mui/material";
 import PropTypes from "prop-types";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const formatCLP = (value) =>
   new Intl.NumberFormat("es-CL", {
@@ -71,7 +74,7 @@ const TotalsDisplay = ({
             Productos Retornables
           </Typography>
           {productosRetornables
-            .filter((producto) => producto.cantidad > 0) 
+            .filter((producto) => producto.cantidad > 0)
             .map((producto, index) => (
               <Box
                 key={index}

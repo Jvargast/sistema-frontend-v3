@@ -1,5 +1,8 @@
 import PropTypes from "prop-types";
-import { Box, Chip, Paper, Stack, Typography, useTheme } from "@mui/material";
+import { Chip, Paper, useTheme } from "@mui/material";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const PreviewFormula = ({ formulaDetalle }) => {
   const theme = useTheme();

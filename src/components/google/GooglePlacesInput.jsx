@@ -2,7 +2,6 @@ import { useState, useRef } from "react";
 import PropTypes from "prop-types";
 import debounce from "lodash.debounce"; // ← 1) instala:  npm i lodash.debounce
 import {
-  TextField,
   List,
   Paper,
   Popper,
@@ -10,6 +9,7 @@ import {
   ListItemButton,
   ListItemText,
 } from "@mui/material";
+import TextField from "../common/CompatTextField";
 
 const GooglePlacesInput = ({
   onSelect,

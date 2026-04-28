@@ -1,13 +1,8 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  Divider,
-  Box,
-  useMediaQuery,
-  Stack,
-} from "@mui/material";
+import { Card, CardContent, Divider, useMediaQuery } from "@mui/material";
 import PropTypes from "prop-types";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const InventarioCargado = ({ inventario, isLoading }) => {
   const isMobile = useMediaQuery("(max-width:600px)");

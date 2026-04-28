@@ -9,8 +9,10 @@ import {
 import L from "leaflet";
 import PropTypes from "prop-types";
 import { useEffect } from "react";
-import { Box, Typography } from "@mui/material";
+import Typography from "../common/CompatTypography";
+
 import { convertirFechaLocal } from "../../utils/fechaUtils";
+import Box from "../common/CompatBox";
 
 function FitBounds({ points }) {
   const map = useMap();

@@ -1,21 +1,13 @@
-import {
-  Autocomplete,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  Grid,
-  InputAdornment,
-  Stack,
-  TextField,
-} from "@mui/material";
+import { Autocomplete, Button, Card, CardContent, CardHeader, Divider, InputAdornment } from "@mui/material";
 import CloseOutlined from "@mui/icons-material/CloseOutlined";
 import SaveOutlined from "@mui/icons-material/SaveOutlined";
 import PersonSearchOutlined from "@mui/icons-material/PersonSearchOutlined";
 import PropTypes from "prop-types";
 import { METODOS_PAGO } from "../../constants/metodosPago";
 import { TIPOS_DOCUMENTO } from "../../constants/tiposDocumento";
+import TextField from "../common/CompatTextField";
+import Grid from "../common/CompatGrid";
+import Stack from "../common/CompatStack";
 
 export default function GastoEditForm({
   form,
@@ -94,7 +86,7 @@ export default function GastoEditForm({
               options={categorias}
               value={
                 categorias.find(
-                  (c) => c.id_categoria_gasto === form.id_categoria_gasto
+                  (c) => c.id_categoria_gasto === form.id_categoria_gasto,
                 ) || null
               }
               onChange={(_, v) =>
@@ -130,23 +122,30 @@ export default function GastoEditForm({
                 o?.id_proveedor === v?.id_proveedor
               }
               getOptionLabel={(o) => o?.razon_social || o?.nombre || ""}
-              renderInput={(p) => (
-                <TextField
-                  {...p}
-                  label="Proveedor (opcional)"
-                  InputProps={{
-                    ...p.InputProps,
-                    startAdornment: (
-                      <>
-                        <InputAdornment position="start">
-                          <PersonSearchOutlined />
-                        </InputAdornment>
-                        {p.InputProps.startAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
+              renderInput={(p) => {
+                const inputSlotProps = p.slotProps?.input || {};
+
+                return (
+                  <TextField
+                    {...p}
+                    label="Proveedor"
+                    slotProps={{
+                      ...p.slotProps,
+                      input: {
+                        ...inputSlotProps,
+                        startAdornment: (
+                          <>
+                            <InputAdornment position="start">
+                              <PersonSearchOutlined />
+                            </InputAdornment>
+                            {inputSlotProps.startAdornment}
+                          </>
+                        ),
+                      },
+                    }}
+                  />
+                );
+              }}
             />
           </Grid>
 
@@ -155,7 +154,7 @@ export default function GastoEditForm({
               options={centros}
               value={
                 centros.find(
-                  (c) => c.id_centro_costo === form.id_centro_costo
+                  (c) => c.id_centro_costo === form.id_centro_costo,
                 ) || null
               }
               onChange={(_, v) =>

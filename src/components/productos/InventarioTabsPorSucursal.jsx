@@ -1,19 +1,13 @@
-import {
-  Tabs,
-  Tab,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Box,
-  Typography,
-  Paper,
-  Chip,
-  useTheme,
-} from "@mui/material";
+import Tabs from "../common/CompatTabs";
+import { Tab, Table, TableHead, TableRow, TableCell, TableBody, Paper, Chip, useTheme } from "@mui/material";
 import { useState } from "react";
 import PropTypes from "prop-types";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
+import {
+  getStandardTablePaperSx,
+  getStandardTableSx
+} from "../common/tableStyles";
 
 const InventarioTabsPorSucursal = ({ productos, sucursales }) => {
   const [tab, setTab] = useState(0);
@@ -24,14 +18,9 @@ const InventarioTabsPorSucursal = ({ productos, sucursales }) => {
 
   return (
     <Paper
-      elevation={2}
-      sx={{
-        p: { xs: 1.5, md: 3 },
-        borderRadius: 3,
-        background: theme.palette.background.paper,
-        boxShadow: "0 2px 20px 0 #1976d21a",
-      }}
-    >
+      elevation={0}
+      sx={getStandardTablePaperSx(theme)}>
+
       <Tabs
         value={tab}
         onChange={(_, v) => setTab(v)}
@@ -42,28 +31,20 @@ const InventarioTabsPorSucursal = ({ productos, sucursales }) => {
           ".MuiTab-root": {
             textTransform: "none",
             fontWeight: 500,
-            fontSize: 16,
-          },
-        }}
-      >
-        {sucursales.map((s) => (
-          <Tab key={s.id_sucursal} label={s.nombre} />
-        ))}
+            fontSize: 16
+          }
+        }}>
+
+        {sucursales.map((s) =>
+        <Tab key={s.id_sucursal} label={s.nombre} />
+        )}
       </Tabs>
 
       <Box sx={{ overflowX: "auto" }}>
-        <Table size="small" sx={{ minWidth: 420 }}>
+        <Table size="small" sx={getStandardTableSx(theme, { minWidth: 420 })}>
           <TableHead>
-            <TableRow
-              sx={{
-                background: theme.palette.background.paper,
-                "& th": {
-                  borderBottom: `2px solid ${theme.palette.divider}`,
-                  fontWeight: 700,
-                  fontSize: 15,
-                },
-              }}
-            >
+            <TableRow>
+
               <TableCell>Producto</TableCell>
               <TableCell align="center">Stock</TableCell>
             </TableRow>
@@ -76,65 +57,58 @@ const InventarioTabsPorSucursal = ({ productos, sucursales }) => {
               const stock = inv ? inv.cantidad : 0;
 
               return (
-                <TableRow
-                  key={prod.id_producto}
-                  sx={{
-                    "&:hover": {
-                      background: theme.palette.action.hover,
-                      transition: "background 0.15s",
-                    },
-                  }}
-                >
+                <TableRow key={prod.id_producto}>
+
                   <TableCell
-                    sx={{ fontWeight: 500, color: theme.palette.text.primary }}
-                  >
+                    sx={{ fontWeight: 500, color: theme.palette.text.primary }}>
+
                     {prod.nombre_producto}
                   </TableCell>
                   <TableCell align="center">
-                    {stock === 0 ? (
-                      <Chip
-                        label="Sin stock"
-                        color="error"
-                        size="small"
-                        sx={{ fontWeight: 600, fontSize: 13 }}
-                      />
-                    ) : stock < 10 ? (
-                      <Chip
-                        label={stock}
-                        color="warning"
-                        size="small"
-                        sx={{ fontWeight: 600, fontSize: 13 }}
-                      />
-                    ) : (
-                      <Typography fontWeight={600} fontSize={14}>
+                    {stock === 0 ?
+                    <Chip
+                      label="Sin stock"
+                      color="error"
+                      size="small"
+                      sx={{ fontWeight: 600, fontSize: 13 }} /> :
+
+                    stock < 10 ?
+                    <Chip
+                      label={stock}
+                      color="warning"
+                      size="small"
+                      sx={{ fontWeight: 600, fontSize: 13 }} /> :
+
+
+                    <Typography fontWeight={600} fontSize={14}>
                         {stock}
                       </Typography>
-                    )}
+                    }
                   </TableCell>
-                </TableRow>
-              );
+                </TableRow>);
+
             })}
-            {productos.length === 0 && (
-              <TableRow>
+            {productos.length === 0 &&
+            <TableRow>
                 <TableCell
-                  colSpan={2}
-                  align="center"
-                  sx={{ color: theme.palette.text.secondary }}
-                >
+                colSpan={2}
+                align="center"
+                sx={{ color: theme.palette.text.secondary }}>
+
                   No hay productos registrados en esta sucursal.
                 </TableCell>
               </TableRow>
-            )}
+            }
           </TableBody>
         </Table>
       </Box>
-    </Paper>
-  );
+    </Paper>);
+
 };
 
 InventarioTabsPorSucursal.propTypes = {
   productos: PropTypes.array.isRequired,
-  sucursales: PropTypes.array.isRequired,
+  sucursales: PropTypes.array.isRequired
 };
 
 export default InventarioTabsPorSucursal;

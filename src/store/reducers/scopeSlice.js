@@ -4,7 +4,7 @@ import { logout } from "./authSlice";
 const initialState = {
   activeSucursalId: null,
   mode: "sucursal",
-  
+
 };
 
 const scopeSlice = createSlice({

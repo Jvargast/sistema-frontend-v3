@@ -1,15 +1,10 @@
-import {
-  Paper,
-  Typography,
-  CircularProgress,
-  Divider,
-  Chip,
-} from "@mui/material";
+import { Paper, CircularProgress, Divider, Chip } from "@mui/material";
 import PropTypes from "prop-types";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import InfoIcon from "@mui/icons-material/Info";
 import PaidIcon from "@mui/icons-material/Paid";
 import { useGetDocumentoByIdQuery } from "../../store/services/documentoApi";
+import Typography from "../common/CompatTypography";
 
 const DocumentoTooltip = ({ idDocumento }) => {
   const {

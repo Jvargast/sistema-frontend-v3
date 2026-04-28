@@ -1,18 +1,13 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  Button,
-  TextField,
-  InputAdornment,
-  IconButton,
-  MenuItem,
-  CircularProgress,
-  Grid,
-  Container,
-} from "@mui/material";
+import { Button, InputAdornment, IconButton, MenuItem, CircularProgress, Container } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
 
 const EditUserForm = ({
   userId,

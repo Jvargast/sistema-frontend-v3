@@ -1,14 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-  Paper,
-  InputAdornment,
-  Chip,
-  IconButton,
-  Tooltip,
-  TextField,
-  Stack,
-} from "@mui/material";
+  useEffect,
+  useMemo,
+  useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Paper, InputAdornment, Chip, IconButton, Tooltip } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
 import dayjs from "dayjs";
 import { useSelector } from "react-redux";
@@ -23,6 +18,8 @@ import { useGetAllComprasQuery } from "../../store/services/compraApi";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import { selectScope } from "../../store/reducers/scopeSlice";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import TextField from "../../components/common/CompatTextField";
+import Stack from "../../components/common/CompatStack";
 
 const estadoChip = (v) =>
   ESTADOS_COMPRA.find((e) => e.value === String(v || "").toLowerCase()) || {

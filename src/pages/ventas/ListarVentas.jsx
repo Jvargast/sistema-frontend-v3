@@ -1,10 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  useMediaQuery,
-} from "@mui/material";
+import { CircularProgress, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import {
   useDeleteVentaMutation,
@@ -17,6 +12,8 @@ import { Outlet, useMatch, useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
 
 const ListaVentas = () => {
   const theme = useTheme();

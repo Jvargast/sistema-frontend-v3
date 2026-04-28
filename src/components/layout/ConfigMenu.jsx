@@ -1,14 +1,15 @@
+import Menu from "../common/CompatMenu";
 import { useState } from "react";
 import PropTypes from "prop-types";
 import {
-  Menu,
+
   MenuItem,
   IconButton,
   ListItemIcon,
   ListItemText,
   Divider,
-  useTheme,
-} from "@mui/material";
+  useTheme } from
+"@mui/material";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import Brightness4OutlinedIcon from "@mui/icons-material/Brightness4Outlined";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
@@ -21,7 +22,7 @@ const ConfigMenu = ({
   iconColor,
   onToggleTheme,
   onChangeLanguage,
-  currentLang,
+  currentLang
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [languageMenuEl, setLanguageMenuEl] = useState(null);
@@ -56,27 +57,27 @@ const ConfigMenu = ({
             borderWidth: 0,
             ":focus": {
               outline: "none",
-              boxShadow: "none",
+              boxShadow: "none"
             },
             ":active": {
               outline: "none",
-              boxShadow: "none",
+              boxShadow: "none"
             },
             "&:focus": {
               outline: "none !important",
-              boxShadow: "none !important",
+              boxShadow: "none !important"
             },
             "&:focus-visible": {
               outline: "none !important",
-              boxShadow: "none !important",
+              boxShadow: "none !important"
             },
             "&:active": {
               outline: "none !important",
-              boxShadow: "none !important",
-            },
-          },
-        }}
-      >
+              boxShadow: "none !important"
+            }
+          }
+        }}>
+
         <SettingsOutlinedIcon sx={{ fontSize: 26 }} />
       </IconButton>
 
@@ -90,21 +91,21 @@ const ConfigMenu = ({
             borderRadius: 2,
             minWidth: 220,
             backgroundColor:
-              theme.palette.mode === "light"
-                ? theme.palette.background.paper
-                : theme.palette.background.default,
-            boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-          },
+            theme.palette.mode === "light" ?
+            theme.palette.background.paper :
+            theme.palette.background.default,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.2)"
+          }
         }}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-      >
+        transformOrigin={{ vertical: "top", horizontal: "right" }}>
+
         <MenuItem
           onClick={() => {
             onToggleTheme();
             handleClose();
-          }}
-        >
+          }}>
+
           <ListItemIcon>
             <Brightness4OutlinedIcon fontSize="small" />
           </ListItemIcon>
@@ -133,27 +134,27 @@ const ConfigMenu = ({
               borderRadius: 2,
               minWidth: 180,
               backgroundColor:
-                theme.palette.mode === "light"
-                  ? theme.palette.background.paper
-                  : theme.palette.background.default,
-              boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-            },
-          }}
-        >
+              theme.palette.mode === "light" ?
+              theme.palette.background.paper :
+              theme.palette.background.default,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.2)"
+            }
+          }}>
+
           <MenuItem
             onClick={() => {
               onChangeLanguage("es");
               handleClose();
-            }}
-          >
+            }}>
+
             <ListItemIcon>🇪🇸</ListItemIcon>
             <ListItemText
               sx={{
                 fontWeight: currentLang === "es" ? "bold" : "normal",
                 color:
-                  currentLang === "es" ? theme.palette.primary.main : "inherit",
-              }}
-            >
+                currentLang === "es" ? theme.palette.primary.main : "inherit"
+              }}>
+
               Español
             </ListItemText>
             {currentLang === "es" && <span>✔</span>}
@@ -163,16 +164,16 @@ const ConfigMenu = ({
             onClick={() => {
               onChangeLanguage("en");
               handleClose();
-            }}
-          >
+            }}>
+
             <ListItemIcon>🇬🇧</ListItemIcon>
             <ListItemText
               sx={{
                 fontWeight: currentLang === "en" ? "bold" : "normal",
                 color:
-                  currentLang === "en" ? theme.palette.primary.main : "inherit",
-              }}
-            >
+                currentLang === "en" ? theme.palette.primary.main : "inherit"
+              }}>
+
               English
             </ListItemText>
             {currentLang === "en" && <span>✔</span>}
@@ -188,15 +189,15 @@ const ConfigMenu = ({
           <ListItemText>{t("general.advanced_settings")}</ListItemText>
         </MenuItem>
       </Menu>
-    </>
-  );
+    </>);
+
 };
 
 ConfigMenu.propTypes = {
   iconColor: PropTypes.string,
   onToggleTheme: PropTypes.func.isRequired,
   onChangeLanguage: PropTypes.func.isRequired,
-  currentLang: PropTypes.string.isRequired,
+  currentLang: PropTypes.string.isRequired
 };
 
 export default ConfigMenu;

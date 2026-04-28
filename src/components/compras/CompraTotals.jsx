@@ -1,13 +1,8 @@
 import PropTypes from "prop-types";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  Divider,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Card, CardHeader, CardContent, Divider } from "@mui/material";
 import { formatCLP } from "../../utils/formatUtils";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const Row = ({ label, value, strong }) => (
   <Stack direction="row" justifyContent="space-between" sx={{ py: 0.5 }}>

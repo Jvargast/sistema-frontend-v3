@@ -1,19 +1,11 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  CardActions,
-  Button,
-  CircularProgress,
-  Alert,
-  Grid,
-  Divider,
-} from "@mui/material";
+import { Card, CardContent, CardActions, Button, CircularProgress, Alert, Divider } from "@mui/material";
 import { CheckCircle } from "@mui/icons-material";
 import { useGetPedidosConfirmadosQuery } from "../../store/services/pedidosApi";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
+import Typography from "../common/CompatTypography";
 
 const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
   const {
@@ -79,10 +71,10 @@ const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
               sx={{
                 borderRadius: 3,
                 bgcolor: "background.paper",
-                height: "100%", 
+                height: "100%",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "space-between", 
+                justifyContent: "space-between",
                 minHeight: "250px",
               }}
             >

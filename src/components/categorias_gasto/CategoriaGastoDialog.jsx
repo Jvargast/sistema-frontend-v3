@@ -1,27 +1,7 @@
+import Dialog from "../common/CompatDialog";
+import Select from "../common/CompatSelect";
 import PropTypes from "prop-types";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Grid,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControlLabel,
-  Switch,
-  FormHelperText,
-  Chip,
-  Stack,
-  Typography,
-  useTheme,
-  InputAdornment,
-  ListItemIcon,
-  Divider,
-} from "@mui/material";
+import { DialogTitle, DialogContent, DialogActions, Button, FormControl, InputLabel, MenuItem, FormControlLabel, Switch, FormHelperText, Chip, useTheme, InputAdornment, ListItemIcon, Divider } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 import CategoryOutlined from "@mui/icons-material/CategoryOutlined";
@@ -32,28 +12,32 @@ import Badge from "@mui/icons-material/Badge";
 import RequestQuote from "@mui/icons-material/RequestQuote";
 import ReceiptLong from "@mui/icons-material/ReceiptLong";
 import StyleOutlined from "@mui/icons-material/StyleOutlined";
+import TextField from "../common/CompatTextField";
+import Grid from "../common/CompatGrid";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const TIPOS_CATEGORIA = [
-  { id: "operativo", label: "Operativo", Icon: WorkOutlineOutlined, color: "primary" },
-  { id: "personal", label: "Personal", Icon: Badge, color: "secondary" },
-  { id: "financiero", label: "Financiero", Icon: RequestQuote, color: "info" },
-  { id: "impuestos", label: "Impuestos", Icon: ReceiptLong, color: "warning" },
-  {
-    id: "logistica",
-    label: "Logística",
-    Icon: LocalShipping,
-    color: "success",
-  },
-  { id: "otros", label: "Otros", Icon: StyleOutlined, color: "default" },
-];
+{ id: "operativo", label: "Operativo", Icon: WorkOutlineOutlined, color: "primary" },
+{ id: "personal", label: "Personal", Icon: Badge, color: "secondary" },
+{ id: "financiero", label: "Financiero", Icon: RequestQuote, color: "info" },
+{ id: "impuestos", label: "Impuestos", Icon: ReceiptLong, color: "warning" },
+{
+  id: "logistica",
+  label: "Logística",
+  Icon: LocalShipping,
+  color: "success"
+},
+{ id: "otros", label: "Otros", Icon: StyleOutlined, color: "default" }];
+
 
 function metaTipo(tipoId, theme) {
   const found =
-    TIPOS_CATEGORIA.find((t) => t.id === tipoId) || TIPOS_CATEGORIA.at(-1);
+  TIPOS_CATEGORIA.find((t) => t.id === tipoId) || TIPOS_CATEGORIA.at(-1);
   const main =
-    found.color === "default"
-      ? theme.palette.text.secondary
-      : theme.palette[found.color].main;
+  found.color === "default" ?
+  theme.palette.text.secondary :
+  theme.palette[found.color].main;
   const bg = alpha(main, 0.12);
   return { ...found, main, bg };
 }
@@ -63,7 +47,7 @@ export default function CategoriaGastoDialog({
   initialData,
   onClose,
   onSubmit,
-  isSaving,
+  isSaving
 }) {
   const theme = useTheme();
   const [form, setForm] = useState({
@@ -71,7 +55,7 @@ export default function CategoriaGastoDialog({
     descripcion: "",
     tipo_categoria: "",
     deducible: true,
-    activo: true,
+    activo: true
   });
 
   useEffect(() => {
@@ -82,11 +66,11 @@ export default function CategoriaGastoDialog({
         descripcion: initialData.descripcion || "",
         tipo_categoria: initialData.tipo_categoria || "",
         deducible:
-          typeof initialData.deducible === "boolean"
-            ? initialData.deducible
-            : true,
+        typeof initialData.deducible === "boolean" ?
+        initialData.deducible :
+        true,
         activo:
-          typeof initialData.activo === "boolean" ? initialData.activo : true,
+        typeof initialData.activo === "boolean" ? initialData.activo : true
       });
     } else {
       setForm({
@@ -94,7 +78,7 @@ export default function CategoriaGastoDialog({
         descripcion: "",
         tipo_categoria: "",
         deducible: true,
-        activo: true,
+        activo: true
       });
     }
   }, [open, initialData]);
@@ -140,46 +124,46 @@ export default function CategoriaGastoDialog({
           bgcolor: theme.palette.background.paper,
           borderRadius: 2,
           overflow: "hidden",
-          border: `1px solid ${alpha(theme.palette.divider, 0.7)}`,
-        },
-      }}
-    >
+          border: `1px solid ${alpha(theme.palette.divider, 0.7)}`
+        }
+      }}>
+
       <DialogTitle
         sx={{
           fontWeight: 800,
           pb: 1,
           display: "flex",
           alignItems: "center",
-          gap: 1,
-        }}
-      >
+          gap: 1
+        }}>
+
         <CategoryOutlined
           sx={{
             color: tipoMeta.main,
             background: tipoMeta.bg,
             p: 0.75,
             borderRadius: 2,
-            fontSize: 28,
-          }}
-        />
+            fontSize: 28
+          }} />
+
         <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
           <Typography component="span" variant="h6" fontWeight={800}>
-            {initialData
-              ? "Editar Categoría de Gasto"
-              : "Nueva Categoría de Gasto"}
+            {initialData ?
+            "Editar Categoría de Gasto" :
+            "Nueva Categoría de Gasto"}
           </Typography>
-          {form.tipo_categoria && (
-            <Chip
-              label={tipoMeta.label}
-              size="small"
-              sx={{
-                bgcolor: tipoMeta.bg,
-                color: tipoMeta.main,
-                borderColor: alpha(tipoMeta.main, 0.35),
-              }}
-              variant="outlined"
-            />
-          )}
+          {form.tipo_categoria &&
+          <Chip
+            label={tipoMeta.label}
+            size="small"
+            sx={{
+              bgcolor: tipoMeta.bg,
+              color: tipoMeta.main,
+              borderColor: alpha(tipoMeta.main, 0.35)
+            }}
+            variant="outlined" />
+
+          }
         </Stack>
       </DialogTitle>
 
@@ -189,9 +173,9 @@ export default function CategoriaGastoDialog({
         dividers
         sx={{
           border: "none",
-          pt: 2,
-        }}
-      >
+          pt: 2
+        }}>
+
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
@@ -202,19 +186,19 @@ export default function CategoriaGastoDialog({
               required
               error={touched && !nombreOk}
               helperText={
-                touched && !nombreOk
-                  ? "Mínimo 3 caracteres"
-                  : "Nombre visible en reportes y formularios"
+              touched && !nombreOk ?
+              "Mínimo 3 caracteres" :
+              "Nombre visible en reportes y formularios"
               }
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
+                startAdornment:
+                <InputAdornment position="start">
                     <CategoryOutlined fontSize="small" />
                   </InputAdornment>
-                ),
+
               }}
-              autoFocus
-            />
+              autoFocus />
+
           </Grid>
 
           <Grid item xs={12}>
@@ -232,26 +216,26 @@ export default function CategoriaGastoDialog({
                     <Stack direction="row" alignItems="center" spacing={1}>
                       <Ico fontSize="small" sx={{ color: meta.main }} />
                       <span>{meta.label}</span>
-                    </Stack>
-                  );
-                }}
-              >
-                {TIPOS_CATEGORIA.map(({ id, label, Icon, color }) => (
-                  <MenuItem key={id} value={id}>
+                    </Stack>);
+
+                }}>
+
+                {TIPOS_CATEGORIA.map(({ id, label, Icon, color }) =>
+                <MenuItem key={id} value={id}>
                     <ListItemIcon sx={{ minWidth: 32 }}>
                       <Icon
-                        fontSize="small"
-                        sx={{
-                          color:
-                            color === "default"
-                              ? "text.secondary"
-                              : `${color}.main`,
-                        }}
-                      />
+                      fontSize="small"
+                      sx={{
+                        color:
+                        color === "default" ?
+                        "text.secondary" :
+                        `${color}.main`
+                      }} />
+
                     </ListItemIcon>
                     {label}
                   </MenuItem>
-                ))}
+                )}
               </Select>
               <FormHelperText>
                 {touched && !tipoOk ? "Selecciona un tipo" : " "}
@@ -269,13 +253,13 @@ export default function CategoriaGastoDialog({
               minRows={2}
               placeholder="Opcional: describe el uso de esta categoría"
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
+                startAdornment:
+                <InputAdornment position="start">
                     <NotesOutlined fontSize="small" />
                   </InputAdornment>
-                ),
-              }}
-            />
+
+              }} />
+
           </Grid>
 
           <Grid item xs={12}>
@@ -283,32 +267,32 @@ export default function CategoriaGastoDialog({
               direction="row"
               spacing={2}
               alignItems="center"
-              flexWrap="wrap"
-            >
+              flexWrap="wrap">
+
               <FormControlLabel
                 control={
-                  <Switch
-                    checked={form.deducible}
-                    onChange={(_, v) =>
-                      onChange("deducible")({ target: { value: v } })
-                    }
-                    size="small"
-                  />
+                <Switch
+                  checked={form.deducible}
+                  onChange={(_, v) =>
+                  onChange("deducible")({ target: { value: v } })
+                  }
+                  size="small" />
+
                 }
-                label="Deducible de impuestos"
-              />
+                label="Deducible de impuestos" />
+
               <FormControlLabel
                 control={
-                  <Switch
-                    checked={form.activo}
-                    onChange={(_, v) =>
-                      onChange("activo")({ target: { value: v } })
-                    }
-                    size="small"
-                  />
+                <Switch
+                  checked={form.activo}
+                  onChange={(_, v) =>
+                  onChange("activo")({ target: { value: v } })
+                  }
+                  size="small" />
+
                 }
-                label="Activo"
-              />
+                label="Activo" />
+
             </Stack>
           </Grid>
         </Grid>
@@ -322,8 +306,8 @@ export default function CategoriaGastoDialog({
           {isSaving ? "Guardando..." : "Guardar"}
         </Button>
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 }
 
 CategoriaGastoDialog.propTypes = {
@@ -331,5 +315,5 @@ CategoriaGastoDialog.propTypes = {
   initialData: PropTypes.object,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
-  isSaving: PropTypes.bool,
+  isSaving: PropTypes.bool
 };

@@ -87,7 +87,7 @@ export const cajaApi = createApi({
         try {
           await queryFulfilled;
         } catch {
-          patch.undo(); 
+          patch.undo();
         }
       },
       invalidatesTags: ["Caja", "CajaUsuario"],

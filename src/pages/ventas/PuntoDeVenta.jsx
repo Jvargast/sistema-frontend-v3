@@ -1,11 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  useTheme,
-  useMediaQuery,
-} from "@mui/material";
+import { Button, useTheme, useMediaQuery } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import {
   addItem,
@@ -49,6 +43,8 @@ import usePOSSelector from "../../utils/usePOSSelector";
 import usePOSMemory from "../../hooks/usePosMemory";
 import { setCaja } from "../../store/reducers/posSlice";
 import { useNavigate } from "react-router";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
 
 function useDebouncedValue(value, delay = 400) {
   const [v, setV] = useState(value);
@@ -458,7 +454,7 @@ const PuntoDeVenta = () => {
   }, [estado?.cajaSeleccionada?.id_caja]);
 
   /*********************+*
-  
+
   Reset Retornables
 
   **************************/

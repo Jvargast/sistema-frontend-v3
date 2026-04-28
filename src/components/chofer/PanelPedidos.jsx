@@ -1,8 +1,11 @@
-import { Box, Grid, Typography } from "@mui/material";
+import Typography from "../common/CompatTypography";
+
 import PropTypes from "prop-types";
 import ChoferColumn from "./ChoferColumn";
 import InventarioCamion from "../inventario/InventarioCamion";
 import { useGetPedidosAsignadosQuery } from "../../store/services/pedidosApi";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
 
 const PanelPedidos = ({ idChofer }) => {
   if (!idChofer) return null; // ✅ No mostrar nada si no hay chofer seleccionado

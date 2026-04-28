@@ -1,5 +1,9 @@
-import { Grid, Typography, TextField, Button, Stack } from "@mui/material";
+import { Button } from "@mui/material";
 import PropTypes from "prop-types";
+import TextField from "../common/CompatTextField";
+import Grid from "../common/CompatGrid";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const InformacionEmpresaYFechas = ({
   empresa,

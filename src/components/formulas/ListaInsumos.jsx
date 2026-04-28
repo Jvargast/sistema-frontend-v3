@@ -1,20 +1,17 @@
-import { useState } from "react";
-import PropTypes from "prop-types";
 import {
-  Box,
-  Typography,
-  IconButton,
-  TextField,
-  Grid,
-  Button,
-  Paper,
-  Chip,
-  Divider,
-} from "@mui/material";
+  useState } from "react";
+import PropTypes from "prop-types";
+import { IconButton, Button, Paper, Chip, Divider, useTheme } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 import SelectorInsumo from "./SelectorInsumo";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 const ListaInsumos = ({ insumos, setInsumos }) => {
+  const theme = useTheme();
   const [insumoSeleccionado, setInsumoSeleccionado] = useState(null);
   const [cantidad, setCantidad] = useState(1);
 
@@ -56,7 +53,7 @@ const ListaInsumos = ({ insumos, setInsumos }) => {
               <SelectorInsumo
                 label="Selecciona Insumo"
                 onInsumoSeleccionado={setInsumoSeleccionado}
-                insumoSeleccionado={insumoSeleccionado} 
+                insumoSeleccionado={insumoSeleccionado}
                 size="medium"
               />
             </Box>
@@ -202,15 +199,11 @@ const ListaInsumos = ({ insumos, setInsumos }) => {
                 />
               </Box>
               <IconButton
-                color="error"
+                aria-label="Eliminar insumo"
                 onClick={() => eliminarInsumo(insumo.id_insumo)}
-                sx={{
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 0, 0, 0.1)",
-                  },
-                }}
+                sx={getActionIconButtonSx(theme, "error")}
               >
-                <Delete />
+                <Delete fontSize="small" />
               </IconButton>
             </Paper>
           ))

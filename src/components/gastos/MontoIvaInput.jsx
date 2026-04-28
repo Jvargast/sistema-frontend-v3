@@ -1,18 +1,12 @@
 import PropTypes from "prop-types";
-import {
-  TextField,
-  FormControlLabel,
-  Switch,
-  Stack,
-  InputAdornment,
-  useTheme,
-  Tooltip,
-  Box,
-} from "@mui/material";
+import { FormControlLabel, Switch, InputAdornment, useTheme, Tooltip } from "@mui/material";
 import PaidOutlined from "@mui/icons-material/PaidOutlined";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { parseCLP } from "../../utils/currency";
 import { formatCLP } from "../../utils/formatUtils";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
 
 export default function MontoIvaInput({
   value,

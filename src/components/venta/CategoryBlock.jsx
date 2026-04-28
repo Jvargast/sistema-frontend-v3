@@ -1,5 +1,7 @@
-import { Box, Typography } from "@mui/material";
+import Typography from "../common/CompatTypography";
+
 import PropTypes from 'prop-types';
+import Box from "../common/CompatBox";
 
 const CategoryBlock = ({ category, isSelected, onClick }) => {
   return (

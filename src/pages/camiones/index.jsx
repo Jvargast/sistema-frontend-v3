@@ -1,5 +1,9 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
-import { Box, Typography, TextField, MenuItem } from "@mui/material";
+import {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo } from "react";
+import { MenuItem } from "@mui/material";
 import { AddCircleOutlineOutlined } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -17,6 +21,9 @@ import Header from "../../components/common/Header";
 import { useSelector } from "react-redux";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 import PrimaryActionButton from "../../components/common/PrimaryActionButton";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
 
 const CamionesManagement = () => {
   const navigate = useNavigate();

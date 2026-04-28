@@ -1,19 +1,13 @@
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Button, Card, CardContent, Chip, Divider } from "@mui/material";
 import PropTypes from "prop-types";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useNavigate } from "react-router";
 import { useIsMobile } from "../../utils/useIsMobile";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const TarjetaViaje = ({ viaje }) => {
   const fechaInicio = viaje.fecha_inicio ? new Date(viaje.fecha_inicio) : null;
@@ -99,7 +93,7 @@ const TarjetaViaje = ({ viaje }) => {
             </Typography>
           )}
 
-          <Box sx={{ mt: 2, flexGrow: 1, display: "flex", alignItems: "end" }}>
+          <Box sx={{ mt: 2, flexGrow: 1, display: "flex", alignItems: "flex-end" }}>
             <Button
               variant="contained"
               fullWidth={isMobile}

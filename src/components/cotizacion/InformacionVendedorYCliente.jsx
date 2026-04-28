@@ -1,5 +1,7 @@
-import { Grid, Typography } from "@mui/material";
+import Typography from "../common/CompatTypography";
+
 import PropTypes from "prop-types";
+import Grid from "../common/CompatGrid";
 
 const InformacionVendedorYCliente = ({ vendedor, cliente }) => {
   return (

@@ -1,17 +1,9 @@
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  useTheme,
-  LinearProgress,
-} from "@mui/material";
+import { CircularProgress, Card, CardContent, CardHeader, Divider, useTheme, LinearProgress } from "@mui/material";
 import PropTypes from "prop-types";
 import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventarioCamionApi";
 import { useImperativeHandle, useMemo, forwardRef } from "react";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const InventarioCamion = forwardRef(({ id_camion }, ref) => {
   const theme = useTheme();

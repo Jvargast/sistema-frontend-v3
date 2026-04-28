@@ -1,15 +1,4 @@
 import { useEffect, useState } from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  CardActions,
-  Typography,
-  Button,
-  Grid,
-  useTheme,
-} from "@mui/material";
-import { Add, Edit, Delete } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {
@@ -24,13 +13,25 @@ import LoaderComponent from "../../components/common/LoaderComponent";
 import ModalForm from "../../components/common/ModalForm";
 import AlertDialog from "../../components/common/AlertDialog";
 import { useHasPermission } from "../../utils/useHasPermission";
-import { useIsMobile } from "../../utils/useIsMobile";
 import Header from "../../components/common/Header";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
+import CompactCatalogCard from "../../components/common/CompactCatalogCard";
+
+const catalogGridSx = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    sm: "repeat(2, minmax(0, 1fr))",
+    md: "repeat(3, minmax(0, 1fr))",
+    lg: "repeat(4, minmax(0, 1fr))",
+  },
+  gap: 1.5,
+  alignItems: "stretch",
+};
 
 const CategoriaManagement = () => {
-  const isMobile = useIsMobile();
-  const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [createCategoria, { isLoading: isCreating }] =
@@ -193,152 +194,32 @@ const CategoriaManagement = () => {
         mb={3}
       >
         <Header title="Categorías" subtitle="Gestión de Categorías" />
-        {crearCategoria &&
-          (isMobile ? (
-            <Box
-              sx={{
-                width: 48,
-                height: 48,
-                borderRadius: "50%",
-                background: `linear-gradient(145deg, ${theme.palette.primary.light} 60%, ${theme.palette.primary.main} 100%)`,
-                boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}22, 0 1.5px 8px 0 #0001`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: isCreating ? "not-allowed" : "pointer",
-                opacity: isCreating ? 0.7 : 1,
-                transition: "all 0.15s",
-                "&:hover": {
-                  background: `linear-gradient(120deg, ${theme.palette.primary.main} 70%, ${theme.palette.primary.dark} 100%)`,
-                  transform: "scale(1.08)",
-                  boxShadow: `0 4px 24px 0 ${theme.palette.primary.dark}33`,
-                },
-              }}
-              onClick={() => {
-                if (!isCreating) setOpen(true);
-              }}
-              title="Añadir Categoría"
-            >
-              <Add sx={{ color: "#fff", fontSize: 28 }} />
-            </Box>
-          ) : (
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => setOpen(true)}
-              sx={{
-                backgroundColor: "#1976d2",
-                color: "#fff",
-                "&:hover": {
-                  backgroundColor: "#1565c0",
-                },
-              }}
-              disabled={isCreating}
-            >
-              Añadir Categoría
-            </Button>
-          ))}
       </Box>
 
-      <Grid container spacing={3} alignItems="stretch">
+      <Box sx={catalogGridSx}>
         {categorias?.map((categoria) => (
-          <Grid
+          <CompactCatalogCard
             key={categoria.id_categoria}
-            display="flex"
-           size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-            <Card
-              sx={{
-                borderRadius: "16px",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                transition: "transform 0.2s, box-shadow 0.2s",
-                minHeight: 170,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                width: "100%", // <-- esto asegura igual ancho
-                "&:hover": {
-                  transform: "translateY(-4px)",
-                  boxShadow: "0 6px 16px rgba(0,0,0,0.18)",
-                },
-              }}
-            >
-              <CardContent
-                sx={{
-                  flex: 1,
-                  overflow: "hidden",
-                  pb: 0,
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  fontWeight={700}
-                  color="text.primary"
-                  noWrap
-                  title={categoria.nombre_categoria}
-                  sx={{ mb: 1 }}
-                >
-                  {categoria.nombre_categoria}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    minHeight: 40,
-                    mb: 1,
-                  }}
-                  title={categoria.descripcion}
-                >
-                  {categoria.descripcion || "Sin descripción"}
-                </Typography>
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  sx={{ fontSize: 13, mt: 1 }}
-                >
-                  ID: {categoria.id_categoria}
-                </Typography>
-              </CardContent>
-              <CardActions
-                sx={{
-                  justifyContent: "flex-end",
-                  gap: 1,
-                  pb: 2,
-                  px: 2,
-                }}
-              >
-                {editarCategoria && (
-                  <Button
-                    size="small"
-                    startIcon={<Edit />}
-                    onClick={() => handleEdit(categoria.id_categoria)}
-                    sx={{ color: "#1976d2", fontWeight: "bold" }}
-                  >
-                    Editar
-                  </Button>
-                )}
-                {borrarCategoria && (
-                  <Button
-                    size="small"
-                    startIcon={<Delete />}
-                    onClick={() =>
-                      confirmDeleteCategoria(categoria.id_categoria)
-                    }
-                    sx={{ color: "#d32f2f", fontWeight: "bold" }}
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? "Eliminando..." : "Eliminar"}
-                  </Button>
-                )}
-              </CardActions>
-            </Card>
-          </Grid>
+            id={categoria.id_categoria}
+            title={categoria.nombre_categoria}
+            description={categoria.descripcion}
+            canEdit={editarCategoria}
+            canDelete={borrarCategoria}
+            isDeleting={isDeleting}
+            onEdit={() => handleEdit(categoria.id_categoria)}
+            onDelete={() => confirmDeleteCategoria(categoria.id_categoria)}
+          />
         ))}
-      </Grid>
+
+        {crearCategoria && (
+          <CompactCatalogCard
+            createLabel="Crear Categoría"
+            onCreate={() => {
+              if (!isCreating) setOpen(true);
+            }}
+          />
+        )}
+      </Box>
 
       <ModalForm
         open={open}

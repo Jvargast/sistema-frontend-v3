@@ -1,15 +1,10 @@
-import {
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  Typography,
-  Box,
-  Stack,
-  Divider,
-} from "@mui/material";
+import { Card, CardContent, Chip, Divider } from "@mui/material";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PropTypes from "prop-types";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const InfoGeneral = ({ viaje }) => {
   const fechaFormateada = new Date(viaje.fecha_inicio).toLocaleString("es-CL", {

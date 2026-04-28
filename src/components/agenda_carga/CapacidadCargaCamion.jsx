@@ -1,6 +1,8 @@
-import { Box, Typography, Alert, Paper } from "@mui/material";
+import { Alert, Paper } from "@mui/material";
 import PropTypes from "prop-types";
 import { useEffect } from "react";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const CapacidadCargaCamion = ({
   capacidadTotal,

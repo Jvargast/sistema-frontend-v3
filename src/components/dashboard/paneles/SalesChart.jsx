@@ -7,7 +7,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import { useGetVentasResumenSemanalQuery } from "../../../store/services/ventasEstadisticasApi";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
@@ -16,6 +16,8 @@ import "dayjs/locale/en";
 import { useMemo } from "react";
 import PropTypes from "prop-types";
 import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
 
 const CLPFormatter = new Intl.NumberFormat("es-CL", {
   style: "currency",

@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 export function Pagination({ page, onPageChange, className }) {
     const apiRef = useGridApiContext();
     const pageCount = useGridSelector(apiRef, gridPageCountSelector);
-  
+
     return (
       <MuiPagination
         color="primary"

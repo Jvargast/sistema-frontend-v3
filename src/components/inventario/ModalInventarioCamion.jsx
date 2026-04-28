@@ -1,16 +1,5 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
-  Slide,
-  CircularProgress,
-  Box,
-  Alert,
-  FormControlLabel,
-  Checkbox,
-  Button,
-} from "@mui/material";
+import Dialog from "../common/CompatDialog";
+import { DialogTitle, DialogContent, IconButton, Slide, CircularProgress, Alert, FormControlLabel, Checkbox, Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PropTypes from "prop-types";
 import InventarioCamion from "./InventarioCamion";
@@ -18,6 +7,7 @@ import { useVaciarCamionMutation } from "../../store/services/inventarioCamionAp
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { showNotification } from "../../store/reducers/notificacionSlice";
+import Box from "../common/CompatBox";
 
 const Transition = Slide;
 
@@ -28,7 +18,7 @@ const ModalInventarioCamion = ({
   isLoading,
   error,
   id_camion,
-  onInventarioUpdated,
+  onInventarioUpdated
 }) => {
   const dispatch = useDispatch();
   const [descargarDisponibles, setDescargarDisponibles] = useState(true);
@@ -40,12 +30,12 @@ const ModalInventarioCamion = ({
       await vaciarCamion({
         id_camion,
         descargarDisponibles,
-        descargarRetorno,
+        descargarRetorno
       }).unwrap();
       dispatch(
         showNotification({
           message: "Camión vaciado correctamente",
-          severity: "success",
+          severity: "success"
         })
       );
       if (typeof onInventarioUpdated === "function") {
@@ -57,7 +47,7 @@ const ModalInventarioCamion = ({
       dispatch(
         showNotification({
           message: err?.data?.error || "Error al vaciar camión",
-          severity: "error",
+          severity: "error"
         })
       );
     }
@@ -75,21 +65,21 @@ const ModalInventarioCamion = ({
           borderRadius: 4,
           boxShadow: theme.shadows[10],
           backgroundColor:
-            theme.palette.mode === "dark"
-              ? theme.palette.background.default
-              : theme.palette.background.paper,
-        }),
-      }}
-    >
+          theme.palette.mode === "dark" ?
+          theme.palette.background.default :
+          theme.palette.background.paper
+        })
+      }}>
+
       <DialogTitle
         sx={(theme) => ({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           bgcolor:
-            theme.palette.mode === "dark"
-              ? theme.palette.primary.dark + "22"
-              : theme.palette.primary.light + "44",
+          theme.palette.mode === "dark" ?
+          theme.palette.primary.dark + "22" :
+          theme.palette.primary.light + "44",
           color: theme.palette.primary.main,
           fontWeight: "bold",
           fontSize: { xs: 18, sm: 22 },
@@ -98,12 +88,12 @@ const ModalInventarioCamion = ({
           px: { xs: 2, sm: 4 },
           py: { xs: 1.5, sm: 2 },
           borderBottom: `1.5px solid ${
-            theme.palette.mode === "dark"
-              ? theme.palette.primary.dark
-              : theme.palette.primary.light
-          }`,
-        })}
-      >
+          theme.palette.mode === "dark" ?
+          theme.palette.primary.dark :
+          theme.palette.primary.light}`
+
+        })}>
+
         Detalle Visual del Inventario del Camión
         <IconButton
           onClick={onClose}
@@ -112,12 +102,12 @@ const ModalInventarioCamion = ({
             color: (theme) => theme.palette.primary.main,
             "&:hover": {
               backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? theme.palette.primary.dark + "1A"
-                  : theme.palette.primary.light + "1A",
-            },
-          }}
-        >
+              theme.palette.mode === "dark" ?
+              theme.palette.primary.dark + "1A" :
+              theme.palette.primary.light + "1A"
+            }
+          }}>
+
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -127,72 +117,72 @@ const ModalInventarioCamion = ({
           px: { xs: 2, sm: 4 },
           py: { xs: 2, sm: 3 },
           background:
-            theme.palette.mode === "dark"
-              ? theme.palette.background.paper
-              : "#F9FBFF",
+          theme.palette.mode === "dark" ?
+          theme.palette.background.paper :
+          "#F9FBFF",
           borderBottomLeftRadius: 16,
-          borderBottomRightRadius: 16,
-        })}
-      >
-        {isLoading ? (
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            minHeight={180}
-          >
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Alert severity="error">
-            Error al obtener el inventario del camión
-          </Alert>
-        ) : (
-          inventarioData && (
-            <InventarioCamion
-              inventarioData={inventarioData.data}
-              modo="visual"
-              productos={[]}
-              productosReservados={[]}
-              onValidezCambio={() => {}}
-            />
-          )
-        )}
+          borderBottomRightRadius: 16
+        })}>
 
-        {inventarioData && (
-          <Box sx={{ mt: 3 }}>
+        {isLoading ?
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight={180}>
+
+            <CircularProgress />
+          </Box> :
+        error ?
+        <Alert severity="error">
+            Error al obtener el inventario del camión
+          </Alert> :
+
+        inventarioData &&
+        <InventarioCamion
+          inventarioData={inventarioData.data}
+          modo="visual"
+          productos={[]}
+          productosReservados={[]}
+          onValidezCambio={() => {}} />
+
+
+        }
+
+        {inventarioData &&
+        <Box sx={{ mt: 3 }}>
             <FormControlLabel
-              control={
-                <Checkbox
-                  checked={descargarDisponibles}
-                  onChange={(e) => setDescargarDisponibles(e.target.checked)}
-                />
-              }
-              label="Descargar disponibles"
-            />
+            control={
+            <Checkbox
+              checked={descargarDisponibles}
+              onChange={(e) => setDescargarDisponibles(e.target.checked)} />
+
+            }
+            label="Descargar disponibles" />
+
             <FormControlLabel
-              control={
-                <Checkbox
-                  checked={descargarRetorno}
-                  onChange={(e) => setDescargarRetorno(e.target.checked)}
-                />
-              }
-              label="Descargar retorno"
-            />
+            control={
+            <Checkbox
+              checked={descargarRetorno}
+              onChange={(e) => setDescargarRetorno(e.target.checked)} />
+
+            }
+            label="Descargar retorno" />
+
             <Box mt={2}>
               <Button
-                variant="contained"
-                onClick={handleVaciar}
-                disabled={vaciando}
-              >
+              variant="contained"
+              onClick={handleVaciar}
+              disabled={vaciando}>
+
                 {vaciando ? "Vaciando..." : "Vaciar Camión"}
               </Button>
             </Box>
           </Box>
-        )}
+        }
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 
 ModalInventarioCamion.propTypes = {
@@ -202,7 +192,7 @@ ModalInventarioCamion.propTypes = {
   isLoading: PropTypes.bool,
   error: PropTypes.any,
   id_camion: PropTypes.number.isRequired,
-  onInventarioUpdated: PropTypes.func,
+  onInventarioUpdated: PropTypes.func
 };
 
 export default ModalInventarioCamion;

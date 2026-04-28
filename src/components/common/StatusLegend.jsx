@@ -1,12 +1,14 @@
 import PropTypes from "prop-types";
-import { Box, Typography } from "@mui/material";
+import Typography from "./CompatTypography";
+
+import Box from "./CompatBox";
 
 const StatusLegend = ({
   items,
   columns = 2,
   title = "Leyenda estados",
   hideOnMobile = true,
-  maxWidth = 480, 
+  maxWidth = 480,
 }) => {
   const data = items ?? [];
 

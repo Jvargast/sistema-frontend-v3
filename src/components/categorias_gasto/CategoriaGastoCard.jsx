@@ -1,17 +1,5 @@
 import PropTypes from "prop-types";
-import {
-  Card,
-  CardContent,
-  CardActions,
-  Typography,
-  Chip,
-  IconButton,
-  Tooltip,
-  Stack,
-  Box,
-  Divider,
-  useTheme,
-} from "@mui/material";
+import { Card, CardContent, CardActions, Chip, IconButton, Tooltip, Divider, useTheme } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import {
   Edit as EditIcon,
@@ -23,6 +11,10 @@ import {
   ReceiptLong as ImpuestosIcon,
   Category as OtrosIcon,
 } from "@mui/icons-material";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 function tipoMeta(tipo, theme) {
   const map = {
@@ -189,15 +181,9 @@ export default function CategoriaGastoCard({
         <Tooltip title="Editar">
           <IconButton
             size="small"
+            aria-label="Editar categoría de gasto"
             onClick={onEdit}
-            sx={{
-              borderRadius: 2,
-              transition: "all .15s ease",
-              "&:hover": {
-                bgcolor: alpha(theme.palette.primary.main, 0.12),
-                color: theme.palette.primary.main,
-              },
-            }}
+            sx={getActionIconButtonSx(theme, "primary")}
           >
             <EditIcon fontSize="small" />
           </IconButton>
@@ -206,15 +192,9 @@ export default function CategoriaGastoCard({
         <Tooltip title="Eliminar">
           <IconButton
             size="small"
+            aria-label="Eliminar categoría de gasto"
             onClick={onDelete}
-            sx={{
-              borderRadius: 2,
-              transition: "all .15s ease",
-              "&:hover": {
-                bgcolor: alpha(theme.palette.error.main, 0.12),
-                color: theme.palette.error.main,
-              },
-            }}
+            sx={getActionIconButtonSx(theme, "error")}
           >
             <DeleteIcon fontSize="small" />
           </IconButton>

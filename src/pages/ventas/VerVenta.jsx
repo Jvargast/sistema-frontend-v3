@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Typography, Grid, Paper, Button } from "@mui/material";
+import { Paper, Button } from "@mui/material";
 import BackButton from "../../components/common/BackButton";
 import InfoVenta from "../../components/venta/ver_venta/InfoVenta";
 import DetallesVenta from "../../components/venta/ver_venta/DetallesVenta";
@@ -9,6 +9,9 @@ import { useGetVentaByIdQuery } from "../../store/services/ventasApi";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Typography from "../../components/common/CompatTypography";
 
 const VerVenta = () => {
   const { id } = useParams();

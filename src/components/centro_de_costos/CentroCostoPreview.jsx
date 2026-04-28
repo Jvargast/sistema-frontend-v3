@@ -1,15 +1,8 @@
 import PropTypes from "prop-types";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  Stack,
-  Chip,
-  Divider,
-  Box,
-  useTheme,
-} from "@mui/material";
+import { Card, CardHeader, CardContent, Chip, Divider, useTheme } from "@mui/material";
 import { TIPOS_CC } from "../../utils/centroCosto";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
 
 const CentroCostoPreview = ({ form, sucursalActual }) => {
   const theme = useTheme();

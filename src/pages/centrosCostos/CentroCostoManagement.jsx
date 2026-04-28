@@ -1,21 +1,6 @@
+import Dialog from "../../components/common/CompatDialog";
 import * as React from "react";
-import {
-  Box,
-  Grid,
-  Stack,
-  TextField,
-  InputAdornment,
-  FormControlLabel,
-  Switch,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Typography,
-  Autocomplete,
-  useTheme,
-} from "@mui/material";
+import { InputAdornment, FormControlLabel, Switch, Button, DialogTitle, DialogContent, DialogActions, Autocomplete, useTheme } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import Header from "../../components/common/Header";
 import LoaderComponent from "../../components/common/LoaderComponent";
@@ -25,8 +10,8 @@ import {
   useGetAllCentrosCostoQuery,
   useCreateCentroCostoMutation,
   useUpdateCentroCostoMutation,
-  useDeleteCentroCostoMutation,
-} from "../../store/services/centroCostoApi";
+  useDeleteCentroCostoMutation } from
+"../../store/services/centroCostoApi";
 import { selectScope } from "../../store/reducers/scopeSlice";
 import CentroCostoCard from "../../components/centro_de_costos/CentroCostoCard";
 import CentroCostoDialog from "../../components/centro_de_costos/CentroCostoDialog";
@@ -34,6 +19,11 @@ import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 import PrimaryActionButton from "../../components/common/PrimaryActionButton";
 import { AddCircleOutlineOutlined } from "@mui/icons-material";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Stack from "../../components/common/CompatStack";
+import Typography from "../../components/common/CompatTypography";
 
 export default function CentroCostoManagement() {
   const theme = useTheme();
@@ -44,9 +34,9 @@ export default function CentroCostoManagement() {
 
   const sucursales = React.useMemo(() => {
     if (!sucData) return [];
-    return Array.isArray(sucData)
-      ? sucData
-      : sucData.items || sucData.sucursales || [];
+    return Array.isArray(sucData) ?
+    sucData :
+    sucData.items || sucData.sucursales || [];
   }, [sucData]);
 
   const [search, setSearch] = React.useState("");
@@ -64,7 +54,7 @@ export default function CentroCostoManagement() {
     if (q) p.search = q;
     if (soloActivos) p.activo = true;
     if (sucursalSel?.id_sucursal)
-      p.id_sucursal = Number(sucursalSel.id_sucursal);
+    p.id_sucursal = Number(sucursalSel.id_sucursal);
     if (mode !== "global" && activeSucursalId != null) {
       p.id_sucursal = Number(activeSucursalId);
     }
@@ -72,7 +62,7 @@ export default function CentroCostoManagement() {
   }, [q, soloActivos, sucursalSel, mode, activeSucursalId]);
 
   const { data, isLoading, isError, refetch } =
-    useGetAllCentrosCostoQuery(params);
+  useGetAllCentrosCostoQuery(params);
 
   useRegisterRefresh(
     "centros-costo",
@@ -116,7 +106,7 @@ export default function CentroCostoManagement() {
         dispatch(
           showNotification({
             message: "Centro de Costo actualizado",
-            severity: "success",
+            severity: "success"
           })
         );
       } else {
@@ -124,7 +114,7 @@ export default function CentroCostoManagement() {
         dispatch(
           showNotification({
             message: "Centro de Costo creado",
-            severity: "success",
+            severity: "success"
           })
         );
       }
@@ -135,7 +125,7 @@ export default function CentroCostoManagement() {
       dispatch(
         showNotification({
           message: err?.data?.error || "No se pudo guardar el Centro de Costo",
-          severity: "error",
+          severity: "error"
         })
       );
     }
@@ -154,7 +144,7 @@ export default function CentroCostoManagement() {
       dispatch(
         showNotification({
           message: "Centro de Costo eliminado",
-          severity: "success",
+          severity: "success"
         })
       );
       setConfirmOpen(false);
@@ -164,7 +154,7 @@ export default function CentroCostoManagement() {
       dispatch(
         showNotification({
           message: err?.data?.error || "No se pudo eliminar",
-          severity: "error",
+          severity: "error"
         })
       );
     }
@@ -177,13 +167,13 @@ export default function CentroCostoManagement() {
       <Box p={3}>
         <Header
           title="Centros de Costo"
-          subtitle="Gestión de Centros de Costo"
-        />
+          subtitle="Gestión de Centros de Costo" />
+
         <Typography color="error" sx={{ mt: 2 }}>
           Error al cargar centros de costo.
         </Typography>
-      </Box>
-    );
+      </Box>);
+
   }
 
   return (
@@ -195,8 +185,8 @@ export default function CentroCostoManagement() {
         spacing={2}
         alignItems={{ xs: "stretch", md: "center" }}
         justifyContent="space-between"
-        sx={{ mb: 2 }}
-      >
+        sx={{ mb: 2 }}>
+
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2} flex={1}>
           <TextField
             value={search}
@@ -204,13 +194,13 @@ export default function CentroCostoManagement() {
             placeholder="Buscar por nombre o tipo…"
             fullWidth
             InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
+              startAdornment:
+              <InputAdornment position="start">
                   <SearchIcon sx={{ opacity: 0.7 }} />
                 </InputAdornment>
-              ),
-            }}
-          />
+
+            }} />
+
 
           <Autocomplete
             options={sucursales}
@@ -218,69 +208,69 @@ export default function CentroCostoManagement() {
             value={sucursalSel}
             onChange={(_, v) => setSucursalSel(v)}
             getOptionLabel={(o) =>
-              o?.nombre || `Sucursal ${o?.id_sucursal || ""}`
+            o?.nombre || `Sucursal ${o?.id_sucursal || ""}`
             }
             renderInput={(p) => <TextField {...p} label="Sucursal" />}
             sx={{ minWidth: 240 }}
-            disabled={mode !== "global"}
-          />
+            disabled={mode !== "global"} />
+
 
           <FormControlLabel
             control={
-              <Switch
-                checked={soloActivos}
-                onChange={(_, v) => setSoloActivos(v)}
-                size="small"
-              />
+            <Switch
+              checked={soloActivos}
+              onChange={(_, v) => setSoloActivos(v)}
+              size="small" />
+
             }
             label="Solo activos"
-            sx={{ ml: { xs: 0, sm: 1 } }}
-          />
+            sx={{ ml: { xs: 0, sm: 1 } }} />
+
         </Stack>
         <PrimaryActionButton
           label="Nuevo Centro de Costo"
           startIcon={<AddCircleOutlineOutlined />}
           onClick={(e) => openCreate(e)}
           disabled={creating || updating}
-          aria-label="Nuevo Centro de Costo"
-        />
+          aria-label="Nuevo Centro de Costo" />
+
       </Stack>
 
       <Grid container spacing={2}>
-        {centros.map((cc) => (
-          <Grid
-            item
-            key={cc.id_centro_costo || cc.id}
-            xs={12}
-            sm={6}
-            md={4}
-            lg={3}
-            sx={{ display: "flex" }}
-          >
-            <CentroCostoCard
-              centro={cc}
-              sucursalNombre={
-                cc?.sucursal?.nombre ||
-                sucursales.find(
-                  (s) => Number(s.id_sucursal) === Number(cc.id_sucursal)
-                )?.nombre
-              }
-              onEdit={(e) => openEdit(cc, e)}
-              onDelete={(e) => askDelete(cc, e)}
-            />
-          </Grid>
-        ))}
+        {centros.map((cc) =>
+        <Grid
+          item
+          key={cc.id_centro_costo || cc.id}
+          xs={12}
+          sm={6}
+          md={4}
+          lg={3}
+          sx={{ display: "flex" }}>
 
-        {centros.length === 0 && (
-          <Grid item xs={12}>
+            <CentroCostoCard
+            centro={cc}
+            sucursalNombre={
+            cc?.sucursal?.nombre ||
+            sucursales.find(
+              (s) => Number(s.id_sucursal) === Number(cc.id_sucursal)
+            )?.nombre
+            }
+            onEdit={(e) => openEdit(cc, e)}
+            onDelete={(e) => askDelete(cc, e)} />
+
+          </Grid>
+        )}
+
+        {centros.length === 0 &&
+        <Grid item xs={12}>
             <Box
-              sx={{
-                p: 3,
-                borderRadius: 2,
-                border: `1px dashed ${theme.palette.divider}`,
-                textAlign: "center",
-              }}
-            >
+            sx={{
+              p: 3,
+              borderRadius: 2,
+              border: `1px dashed ${theme.palette.divider}`,
+              textAlign: "center"
+            }}>
+
               <Typography sx={{ mb: 1.5 }}>
                 No hay centros con los filtros actuales.
               </Typography>
@@ -289,7 +279,7 @@ export default function CentroCostoManagement() {
               </Button>
             </Box>
           </Grid>
-        )}
+        }
       </Grid>
 
       <CentroCostoDialog
@@ -309,8 +299,8 @@ export default function CentroCostoManagement() {
             shouldRefetch.current = false;
             refetch();
           }
-        }}
-      />
+        }} />
+
 
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogTitle>Eliminar Centro de Costo</DialogTitle>
@@ -330,12 +320,12 @@ export default function CentroCostoManagement() {
             variant="contained"
             color="error"
             disabled={deleting}
-            autoFocus
-          >
+            autoFocus>
+
             {deleting ? "Eliminando..." : "Eliminar"}
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
-  );
+    </Box>);
+
 }

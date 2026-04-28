@@ -1,16 +1,11 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import Dialog from "../common/CompatDialog";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Box,
-  Typography,
-  CircularProgress,
-  IconButton,
-} from "@mui/material";
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo } from "react";
+import { DialogTitle, DialogContent, DialogActions, Button, CircularProgress, IconButton } from "@mui/material";
 import PropTypes from "prop-types";
 import PersonIcon from "@mui/icons-material/Person";
 import SearchIcon from "@mui/icons-material/Search";
@@ -19,6 +14,9 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import CloseIcon from "@mui/icons-material/Close";
 import { useGetAllClientesQuery } from "../../store/services/clientesApi";
 import LoaderComponent from "../common/LoaderComponent";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 function useDebounce(value, delay = 300) {
   const [v, setV] = useState(value);
@@ -34,12 +32,12 @@ const SelectClienteModal = ({
   onClose,
   selectedCliente,
   onSelect,
-  idSucursal,
+  idSucursal
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  const [clientes, setClientes] = useState([]); 
+  const [clientes, setClientes] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
@@ -52,22 +50,22 @@ const SelectClienteModal = ({
   }, [page, debouncedSearch, idSucursal]);
 
   const { data, isLoading, isFetching } = useGetAllClientesQuery(params, {
-    skip: !open, 
+    skip: !open,
     keepUnusedDataFor: 30,
     refetchOnMountOrArgChange: true,
     refetchOnFocus: true,
-    refetchOnReconnect: true,
+    refetchOnReconnect: true
   });
 
   useEffect(() => {
     if (!data) return;
-    const raw = Array.isArray(data?.clientes)
-      ? data.clientes
-      : Array.isArray(data)
-      ? data
-      : [];
-    if (page === 1) setClientes(raw);
-    else setClientes((prev) => [...prev, ...raw]);
+    const raw = Array.isArray(data?.clientes) ?
+    data.clientes :
+    Array.isArray(data) ?
+    data :
+    [];
+    if (page === 1) setClientes(raw);else
+    setClientes((prev) => [...prev, ...raw]);
 
     const totalPages = Number(data?.paginacion?.totalPages) || 1;
     setHasMore(page < totalPages && raw.length > 0);
@@ -99,8 +97,8 @@ const SelectClienteModal = ({
   if (open && isLoading && page === 1) return <LoaderComponent />;
 
   const selectedName =
-    clientes.find((c) => c.id_cliente === selectedCliente)?.nombre ||
-    "Desconocido";
+  clientes.find((c) => c.id_cliente === selectedCliente)?.nombre ||
+  "Desconocido";
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -112,9 +110,9 @@ const SelectClienteModal = ({
           fontWeight: "bold",
           background: "linear-gradient(90deg, #4A90E2 0%, #0052D4 100%)",
           color: "white",
-          padding: "16px 24px",
-        }}
-      >
+          padding: "16px 24px"
+        }}>
+
         <Box display="flex" alignItems="center" gap={1}>
           <PersonIcon sx={{ fontSize: 30 }} /> Seleccionar Cliente
         </Box>
@@ -132,23 +130,23 @@ const SelectClienteModal = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             margin="dense"
-            sx={{ "& input": { fontSize: "1rem" } }}
-          />
+            sx={{ "& input": { fontSize: "1rem" } }} />
+
         </Box>
 
-        {selectedCliente && (
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-            p={2}
-            mb={2}
-            borderRadius="8px"
-            sx={{
-              border: "1px solid #4A90E2",
-              boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-            }}
-          >
+        {selectedCliente &&
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          p={2}
+          mb={2}
+          borderRadius="8px"
+          sx={{
+            border: "1px solid #4A90E2",
+            boxShadow: "0px 4px 10px rgba(0,0,0,0.1)"
+          }}>
+
             <Box>
               <Typography fontWeight="bold">Cliente Seleccionado</Typography>
               <Typography fontSize="0.9rem" color="textSecondary">
@@ -159,69 +157,69 @@ const SelectClienteModal = ({
               <CloseIcon />
             </IconButton>
           </Box>
-        )}
+        }
 
         <Box sx={{ maxHeight: "300px", overflowY: "auto", p: 1 }}>
-          {clientes.map((cliente, index) => (
-            <Box
-              key={cliente.id_cliente}
-              ref={index === clientes.length - 1 ? lastClienteRef : null}
-              onClick={() => onSelect(cliente.id_cliente)}
-              sx={(theme) => {
-                const isSelected = selectedCliente === cliente.id_cliente;
-                return {
-                  p: 2,
-                  mb: 1,
-                  cursor: "pointer",
-                  borderRadius: "8px",
-                  backgroundColor: isSelected
-                    ? theme.palette.mode === "dark"
-                      ? "#1e2a36"
-                      : "#c0d0df"
-                    : theme.palette.mode === "dark"
-                    ? "#23272b"
-                    : "#f7fafd",
-                  transition: "background 0.2s",
-                  "&:hover": {
-                    backgroundColor: isSelected
-                      ? theme.palette.mode === "dark"
-                        ? "#263241"
-                        : "#adc5db"
-                      : theme.palette.mode === "dark"
-                      ? "#31353a"
-                      : "#e3eaf3",
-                  },
-                  color: theme.palette.text.primary,
-                };
-              }}
-            >
+          {clientes.map((cliente, index) =>
+          <Box
+            key={cliente.id_cliente}
+            ref={index === clientes.length - 1 ? lastClienteRef : null}
+            onClick={() => onSelect(cliente.id_cliente)}
+            sx={(theme) => {
+              const isSelected = selectedCliente === cliente.id_cliente;
+              return {
+                p: 2,
+                mb: 1,
+                cursor: "pointer",
+                borderRadius: "8px",
+                backgroundColor: isSelected ?
+                theme.palette.mode === "dark" ?
+                "#1e2a36" :
+                "#c0d0df" :
+                theme.palette.mode === "dark" ?
+                "#23272b" :
+                "#f7fafd",
+                transition: "background 0.2s",
+                "&:hover": {
+                  backgroundColor: isSelected ?
+                  theme.palette.mode === "dark" ?
+                  "#263241" :
+                  "#adc5db" :
+                  theme.palette.mode === "dark" ?
+                  "#31353a" :
+                  "#e3eaf3"
+                },
+                color: theme.palette.text.primary
+              };
+            }}>
+
               <Typography fontWeight="bold">{cliente.nombre}</Typography>
-              {cliente.telefono && (
-                <Box display="flex" alignItems="center">
+              {cliente.telefono &&
+            <Box display="flex" alignItems="center">
                   <PhoneIcon sx={{ fontSize: 16, color: "#4CAF50", mr: 1 }} />
                   <Typography fontSize="0.9rem">{cliente.telefono}</Typography>
                 </Box>
-              )}
-              {cliente.direccion && (
-                <Box display="flex" alignItems="center">
+            }
+              {cliente.direccion &&
+            <Box display="flex" alignItems="center">
                   <HomeIcon sx={{ fontSize: 16, color: "#FF9800", mr: 1 }} />
                   <Typography fontSize="0.9rem">{cliente.direccion}</Typography>
                 </Box>
-              )}
+            }
             </Box>
-          ))}
+          )}
 
-          {isFetching && (
-            <Box display="flex" justifyContent="center" mt={2}>
+          {isFetching &&
+          <Box display="flex" justifyContent="center" mt={2}>
               <CircularProgress size={30} />
             </Box>
-          )}
+          }
 
-          {open && !isFetching && clientes.length === 0 && (
-            <Box p={2} textAlign="center" color="text.secondary">
+          {open && !isFetching && clientes.length === 0 &&
+          <Box p={2} textAlign="center" color="text.secondary">
               Sin resultados.
             </Box>
-          )}
+          }
         </Box>
       </DialogContent>
 
@@ -233,9 +231,9 @@ const SelectClienteModal = ({
             backgroundColor: "#FF5252",
             color: "white",
             fontWeight: "bold",
-            "&:hover": { backgroundColor: "#D32F2F" },
-          }}
-        >
+            "&:hover": { backgroundColor: "#D32F2F" }
+          }}>
+
           Cancelar
         </Button>
         <Button
@@ -246,15 +244,15 @@ const SelectClienteModal = ({
             color: "white",
             fontWeight: "bold",
             px: 3,
-            "&:hover": { backgroundColor: "#005BB5" },
+            "&:hover": { backgroundColor: "#005BB5" }
           }}
-          disabled={!selectedCliente}
-        >
+          disabled={!selectedCliente}>
+
           Confirmar Cliente
         </Button>
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 
 SelectClienteModal.propTypes = {
@@ -262,7 +260,7 @@ SelectClienteModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   selectedCliente: PropTypes.number,
   onSelect: PropTypes.func.isRequired,
-  idSucursal: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  idSucursal: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
 };
 
 export default SelectClienteModal;

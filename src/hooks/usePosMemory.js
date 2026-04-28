@@ -5,8 +5,8 @@ import { setVendorRut, setCaja } from "../store/reducers/posSlice";
 export default function usePOSMemory({
   selectedVendedor,
   setSelectedVendedor,
-  estado, 
-  seleccionarCaja, 
+  estado,
+  seleccionarCaja,
 }) {
   const dispatch = useDispatch();
 
@@ -45,8 +45,8 @@ export default function usePOSMemory({
   }, [selectedVendedor, setSelectedVendedor, savedVendorRut]);
 
   useEffect(() => {
-    if (estado?.cajaSeleccionada?.id_caja) return; 
-    if (!savedCaja || triedCajaRef.current) return; 
+    if (estado?.cajaSeleccionada?.id_caja) return;
+    if (!savedCaja || triedCajaRef.current) return;
     if (estado?.initializing) return;
 
     if (
@@ -54,7 +54,7 @@ export default function usePOSMemory({
       activeSucursalId &&
       Number(savedCaja.id_sucursal) !== Number(activeSucursalId)
     ) {
-     
+
       return;
     }
 
@@ -64,7 +64,7 @@ export default function usePOSMemory({
 
     if (abierta) {
       triedCajaRef.current = true;
-      seleccionarCaja(abierta); 
+      seleccionarCaja(abierta);
       return;
     }
 

@@ -1,22 +1,10 @@
-import { useEffect, useState } from "react";
-import { Add, Edit, Delete } from "@mui/icons-material";
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  Avatar,
-  Button,
-  useTheme,
-  IconButton,
-  Stack,
-  TextField,
-} from "@mui/material";
+  useEffect,
+  useState } from "react";
+import { Add,
+  Edit,
+  Delete } from "@mui/icons-material";
+import { Card, CardContent, List, ListItem, ListItemText, Divider, Avatar, Button, useTheme, IconButton } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import BackButton from "../../../components/common/BackButton";
 import {
@@ -31,6 +19,14 @@ import CrearSucursalModal from "../../../components/empresa/CrearSucursalModal";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../../store/reducers/notificacionSlice";
 import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
+import { formatPhoneInputCL } from "../../../utils/phoneCl";
+import PhoneTextField from "../../../components/common/PhoneTextField";
+import TextField from "../../../components/common/CompatTextField";
+import Box from "../../../components/common/CompatBox";
+import Grid from "../../../components/common/CompatGrid";
+import Stack from "../../../components/common/CompatStack";
+import Typography from "../../../components/common/CompatTypography";
+import { getActionIconButtonSx } from "../../../components/common/tableStyles";
 
 const Empresa = () => {
   const {
@@ -88,7 +84,7 @@ const Empresa = () => {
     setEditData({
       nombre: sucursal.nombre,
       direccion: sucursal.direccion || "",
-      telefono: sucursal.telefono || "",
+      telefono: formatPhoneInputCL(sucursal.telefono) || "",
     });
   };
 
@@ -135,7 +131,7 @@ const Empresa = () => {
         nombre: empresa.nombre || "",
         rut_empresa: empresa.rut_empresa || "",
         direccion: empresa.direccion || "",
-        telefono: empresa.telefono || "",
+        telefono: formatPhoneInputCL(empresa.telefono) || "",
         email: empresa.email || "",
       });
     }
@@ -196,7 +192,7 @@ const Empresa = () => {
         nombre: empresa.nombre || "",
         rut_empresa: empresa.rut_empresa || "",
         direccion: empresa.direccion || "",
-        telefono: empresa.telefono || "",
+        telefono: formatPhoneInputCL(empresa.telefono) || "",
         email: empresa.email || "",
       });
     }
@@ -364,7 +360,7 @@ const Empresa = () => {
                         },
                       }}
                     />
-                    <TextField
+                    <PhoneTextField
                       label="Teléfono"
                       variant="standard"
                       value={empresaData.telefono}
@@ -607,20 +603,20 @@ const Empresa = () => {
                         ) : (
                           <>
                             <IconButton
-                              color="primary"
                               size="small"
                               onClick={() => startEditing(sucursal)}
                               aria-label="Editar sucursal"
+                              sx={getActionIconButtonSx(theme, "primary")}
                             >
                               <Edit fontSize="small" />
                             </IconButton>
                             <IconButton
-                              color="error"
                               size="small"
                               onClick={() =>
                                 handleDeleteSucursal(sucursal.id_sucursal)
                               }
                               aria-label="Eliminar sucursal"
+                              sx={getActionIconButtonSx(theme, "error")}
                             >
                               <Delete fontSize="small" />
                             </IconButton>
@@ -634,9 +630,8 @@ const Empresa = () => {
                     <List disablePadding>
                       <ListItem>
                         {editingId === sucursal.id_sucursal ? (
-                          <TextField
+                          <PhoneTextField
                             variant="standard"
-                            placeholder="Nombre"
                             InputProps={{
                               disableUnderline: false,
                               sx: {

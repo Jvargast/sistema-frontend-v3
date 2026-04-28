@@ -1,16 +1,11 @@
 import PropTypes from "prop-types";
-import {
-  Autocomplete,
-  TextField,
-  CircularProgress,
-  Avatar,
-  Box,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Autocomplete, CircularProgress, Avatar, useTheme } from "@mui/material";
 import { useEffect, useMemo } from "react";
 import { useGetAllInsumosAllQuery } from "../../store/services/insumoApi";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const getStockFromInventarios = (inventario, idSucursal) => {
   if (Array.isArray(inventario)) {
@@ -149,23 +144,30 @@ const SelectorInsumo = ({
           </Box>
         );
       }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={label}
-          placeholder="Buscar insumos…"
-          fullWidth
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {isFetching && <CircularProgress size={18} />}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
-        />
-      )}
+      renderInput={(params) => {
+        const inputSlotProps = params.slotProps?.input || {};
+
+        return (
+          <TextField
+            {...params}
+            label={label}
+            placeholder="Buscar insumos…"
+            fullWidth
+            slotProps={{
+              ...params.slotProps,
+              input: {
+                ...inputSlotProps,
+                endAdornment: (
+                  <>
+                    {isFetching && <CircularProgress size={18} />}
+                    {inputSlotProps.endAdornment}
+                  </>
+                ),
+              },
+            }}
+          />
+        );
+      }}
     />
   );
 };

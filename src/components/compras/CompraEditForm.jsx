@@ -1,18 +1,7 @@
 import PropTypes from "prop-types";
-import { useMemo } from "react";
 import {
-  Card,
-  CardHeader,
-  CardContent,
-  Divider,
-  Grid,
-  TextField,
-  Stack,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Chip,
-} from "@mui/material";
+  useMemo } from "react";
+import { Card, CardHeader, CardContent, Divider, MenuItem, ListItemIcon, ListItemText, Chip } from "@mui/material";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
@@ -20,6 +9,9 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import ProveedorPicker from "./ProveedorPicker";
 import { MONEDAS } from "../../constants/monedas";
 import { ESTADOS_COMPRA } from "../../constants/estadosCompra";
+import TextField from "../common/CompatTextField";
+import Grid from "../common/CompatGrid";
+import Stack from "../common/CompatStack";
 
 const inputFilledSx = {
   "& .MuiFilledInput-root": {

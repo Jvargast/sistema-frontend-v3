@@ -1,8 +1,10 @@
-import { Box, Typography, Button } from "@mui/material";
+import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import BlockIcon from "@mui/icons-material/Block";
 import { useHasPermission } from "../../utils/useHasPermission";
 import { useEffect } from "react";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
 
 const UnauthorizedPage = () => {
   const navigate = useNavigate();

@@ -84,12 +84,12 @@ const cartSlice = createSlice({
       }
     },
     applyDiscount: (state, action) => {
-      const descuento = action.payload || 0; 
+      const descuento = action.payload || 0;
       state.descuento = (state.subtotal) * (descuento/100);
       state.total = state.subtotal + state.impuestos - state.descuento;
     },
     calculateTaxes: (state, action) => {
-      const tasaImpuesto = action.payload || 0; 
+      const tasaImpuesto = action.payload || 0;
       state.impuestos = (state.subtotal - state.descuento) * (tasaImpuesto / 100);
       state.total = state.subtotal + state.impuestos - state.descuento;
     },

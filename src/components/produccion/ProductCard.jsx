@@ -1,14 +1,9 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Box,
-  TextField,
-  Chip,
-} from "@mui/material";
+import { Card, CardContent, Button, Chip } from "@mui/material";
 import { useState } from "react";
 import PropTypes from 'prop-types';
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const ProductCard = ({ producto, onAdd }) => {
   const [cantidad, setCantidad] = useState(1);

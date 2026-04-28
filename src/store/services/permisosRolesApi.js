@@ -4,11 +4,11 @@ import { baseQueryWithReauthEnhanced } from "./fettchQuery";
 export const permisosApi = createApi({
     reducerPath: "permisosApi",
     baseQuery: baseQueryWithReauthEnhanced,
-    tagTypes: ["Permiso"], 
+    tagTypes: ["Permiso"],
     endpoints: (builder) => ({
       getAllpermisos: builder.query({
         query: (params) => ({ url: `/permisos/`, params }),
-        providesTags: ["Permiso"], 
+        providesTags: ["Permiso"],
         transformResponse: (response) => ({
           permisos: response.data,
           paginacion: response.total,
@@ -21,7 +21,7 @@ export const permisosApi = createApi({
           }
         },
       }),
-  
+
       getPermisoById: builder.query({
         query: (id) => `/permisos/${id}`,
         providesTags: ["Permiso"],
@@ -33,7 +33,7 @@ export const permisosApi = createApi({
           }
         },
       }),
-  
+
       createPermiso: builder.mutation({
         query: (newPermiso) => ({
           url: `/permisos/`,
@@ -49,7 +49,7 @@ export const permisosApi = createApi({
           }
         },
       }),
-  
+
       updatePermiso: builder.mutation({
         query: ({ id, ...formData }) => ({
           url: `/permisos/${id}`,
@@ -66,7 +66,7 @@ export const permisosApi = createApi({
           }
         },
       }),
-  
+
       deletePermiso: builder.mutation({
         query: (id) => ({
           url: `/permisos/${id}`,
@@ -83,7 +83,7 @@ export const permisosApi = createApi({
       }),
     }),
   });
-  
+
   export const {
     useGetAllpermisosQuery,
     useLazyGetAllpermisosQuery,

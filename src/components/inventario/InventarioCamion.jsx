@@ -1,16 +1,9 @@
-import {
-  Box,
-  Typography,
-  Paper,
-  useMediaQuery,
-  Tooltip,
-  ToggleButtonGroup,
-  ToggleButton,
-  Chip,
-} from "@mui/material";
+import { Paper, useMediaQuery, Tooltip, ToggleButtonGroup, ToggleButton, Chip } from "@mui/material";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const MotionBox = motion.create(Box);
 
@@ -278,15 +271,17 @@ const InventarioCamion = ({
               return (
                 <Tooltip key={index} title={item.nombre_producto || item.tipo}>
                   <MotionBox
-                    width={40}
-                    height={40}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    bgcolor={getColor(item.tipo)}
-                    borderRadius={1}
-                    fontSize="0.7rem"
-                    fontWeight="bold"
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      bgcolor: getColor(item.tipo),
+                      borderRadius: 1,
+                      fontSize: "0.7rem",
+                      fontWeight: "bold",
+                    }}
                     animate={
                       item.tipo === "ReservadoParaCarga" ||
                       item.tipo === "ACargarAhora"

@@ -1,15 +1,8 @@
-import {
-  Badge,
-  Typography,
-  Paper,
-  Slide,
-  useTheme,
-  useMediaQuery,
-  Portal,
-} from "@mui/material";
+import { Badge, Paper, Slide, useTheme, useMediaQuery, Portal } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
+import Typography from "../common/CompatTypography";
 
 const MiniCartSummary = ({ onOpenCart }) => {
   const cart = useSelector((state) => state.cart.items || []);

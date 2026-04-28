@@ -1,5 +1,7 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import { useTheme } from "@mui/material";
 import PropTypes from "prop-types";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 export const Info = ({ label, value, children }) => {
   const theme = useTheme();

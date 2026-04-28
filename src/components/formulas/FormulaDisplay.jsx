@@ -1,11 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Stack, Box, Divider, useTheme } from "@mui/material";
+import { Divider, useTheme } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ElementoDetalle from "./ElementoDetalle";
 import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import DragHandleIcon from "@mui/icons-material/DragHandle";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
 
 const FormulaDisplay = ({
   insumos = [],

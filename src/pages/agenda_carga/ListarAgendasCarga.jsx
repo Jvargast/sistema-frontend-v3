@@ -1,6 +1,12 @@
-import { useState, useMemo, useEffect } from "react";
+import {
+  useState,
+  useMemo,
+  useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Chip, IconButton, MenuItem, TextField } from "@mui/material";
+import { Chip,
+  IconButton,
+  MenuItem,
+} from "@mui/material";
 import { Visibility } from "@mui/icons-material";
 import EmptyState from "../../components/common/EmptyState";
 import DataTable from "../../components/common/DataTable";
@@ -9,6 +15,7 @@ import { convertirFechaLocal } from "../../utils/fechaUtils";
 import { useSelector } from "react-redux";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import TextField from "../../components/common/CompatTextField";
 
 const estadoColores = {
   pendiente: "warning",

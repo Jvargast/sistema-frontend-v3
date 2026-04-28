@@ -1,21 +1,12 @@
-import {
-  Box,
-  Typography,
-  TextField,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Button,
-  Grid,
-  CircularProgress,
-  FormControlLabel,
-  Switch,
-} from "@mui/material";
+import { List, ListItem, ListItemButton, ListItemText, Button, CircularProgress, FormControlLabel, Switch } from "@mui/material";
 import { useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { useGetAllClientesQuery } from "../../store/services/clientesApi";
 import ModalCrearClienteRapido from "./ModalCrearClienteRapido";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
+import Typography from "../common/CompatTypography";
 
 const PasoSeleccionCliente = ({
   clienteSeleccionado,

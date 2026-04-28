@@ -34,7 +34,7 @@ export function useDirections(ruta) {
       location: { lat: Number(p.lat), lng: Number(p.lng) },
       stopover: true,
     }));
-    
+
 
     directionsService.route(
       {

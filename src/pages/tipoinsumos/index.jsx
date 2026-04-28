@@ -1,14 +1,4 @@
-import { useEffect, useState } from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  CardActions,
-  Typography,
-  Button,
-  Grid,
-} from "@mui/material";
-import { Add, Edit, Delete } from "@mui/icons-material";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {
@@ -23,14 +13,27 @@ import { showNotification } from "../../store/reducers/notificacionSlice";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import ModalForm from "../../components/common/ModalForm";
 import AlertDialog from "../../components/common/AlertDialog";
-import { useIsMobile } from "../../utils/useIsMobile";
 import Header from "../../components/common/Header";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
+import CompactCatalogCard from "../../components/common/CompactCatalogCard";
+
+const catalogGridSx = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    sm: "repeat(2, minmax(0, 1fr))",
+    md: "repeat(3, minmax(0, 1fr))",
+    lg: "repeat(4, minmax(0, 1fr))",
+  },
+  gap: 1.5,
+  alignItems: "stretch",
+};
 
 const TipoInsumoManagement = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useIsMobile();
   const [createTipoInsumo, { isLoading: isCreating }] = useCreateTipoMutation();
   const [deleteTipoInsumo, { isLoading: isDeleting }] = useDeleteTipoMutation();
   const [updateTipoInsumo, { isLoading: isUpdating }] = useUpdateTipoMutation();
@@ -89,7 +92,7 @@ const TipoInsumoManagement = () => {
         await createTipoInsumo({ ...data }).unwrap();
         dispatch(
           showNotification({
-            message: "Categoría creada correctamente",
+            message: "Tipo de insumo creado correctamente",
             severity: "success",
           })
         );
@@ -140,6 +143,18 @@ const TipoInsumoManagement = () => {
     }
   }, [location.state, refetch, navigate]);
 
+  const tiposOrdenados = useMemo(
+    () =>
+      [...(tiposInsumos || [])].sort((a, b) =>
+        String(a?.nombre_tipo || "").localeCompare(
+          String(b?.nombre_tipo || ""),
+          "es",
+          { sensitivity: "base" }
+        )
+      ),
+    [tiposInsumos]
+  );
+
   if (isLoading || isLoadingTipoInsumo) return <LoaderComponent />;
 
   if (isError) {
@@ -173,7 +188,7 @@ const TipoInsumoManagement = () => {
   return (
     <Box
       sx={{
-        p: 3,
+        p: { xs: 2, md: 3 },
         minHeight: "100vh",
       }}
     >
@@ -185,227 +200,48 @@ const TipoInsumoManagement = () => {
         gap={2}
       >
         <Header title="Tipo de Insumos" subtitle="Gestión de tipo de insumos" />
-        {crearTipoInsumo &&
-          (isMobile ? (
-            <Box
-              sx={{
-                width: 48,
-                height: 48,
-                borderRadius: "50%",
-                background: `linear-gradient(145deg, #64b5f6 60%, #1976d2 100%)`,
-                boxShadow: "0 2px 12px 0 #1976d222, 0 1.5px 8px 0 #0001",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: isCreating ? "not-allowed" : "pointer",
-                opacity: isCreating ? 0.5 : 1,
-                transition: "all 0.16s cubic-bezier(.4,0,.2,1)",
-                "&:hover": {
-                  background: `linear-gradient(120deg, #1976d2 70%, #1565c0 100%)`,
-                  transform: "scale(1.08)",
-                  boxShadow: "0 4px 24px 0 #1565c033",
-                },
-              }}
-              onClick={() => !isCreating && setOpen(true)}
-              title="Añadir Tipo Insumo"
-            >
-              <Add sx={{ color: "#fff", fontSize: 28 }} />
-            </Box>
-          ) : (
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => setOpen(true)}
-              sx={{
-                backgroundColor: "#1976d2",
-                color: "#fff",
-                fontWeight: "bold",
-                borderRadius: 2,
-                px: 3,
-                py: 1.5,
-                boxShadow: "0 2px 8px 0 #1976d230",
-                "&:hover": { backgroundColor: "#1565c0" },
-              }}
-              disabled={isCreating}
-            >
-              Añadir Tipo Insumo
-            </Button>
-          ))}
       </Box>
 
-      <Grid
-        container
-        spacing={3}
-        alignItems="stretch"
-        /* direction={isMobile ? "column" : "row"} */
-      >
-        {tiposInsumos?.map((tipo) => (
-          <Grid
+      <Box sx={catalogGridSx}>
+        {tiposOrdenados.map((tipo) => (
+          <CompactCatalogCard
             key={tipo.id_tipo_insumo}
-            display="flex"
-            sx={{
-              width: "100%",
-              height: "100%",
-              justifyContent: "center",
-              maxWidth: { xs: "100%", sm: "100%", md: 360, lg: 360 },
-              flex: {
-                xs: "1 1 100%",
-                sm: "1 1 100%",
-                md: "1 1 340px",
-                lg: "1 1 340px",
-              },
-            }}
-           size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-            <Card
-              sx={{
-                borderRadius: "12px",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                transition: "transform 0.2s, box-shadow 0.2s",
-                minHeight: 250,
-                maxWidth: 360,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                width: "100%",
-                height: "100%",
-                "&:hover": {
-                  transform: "translateY(-4px)",
-                  boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)",
-                },
-              }}
-            >
-              <CardContent
-                sx={{
-                  flex: "1 1 auto",
-                  overflow: "hidden",
-                  pb: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 1,
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  fontWeight={700}
-                  color="text.primary"
-                  noWrap
-                  title={tipo.nombre_tipo}
-                  sx={{ mb: 0.5 }}
-                >
-                  {tipo.nombre_tipo}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    minHeight: 40,
-                    mb: 1,
-                  }}
-                  title={tipo.descripcion}
-                >
-                  {tipo.descripcion || "Sin descripción"}
-                </Typography>
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  sx={{ fontSize: 13, mt: 1 }}
-                >
-                  ID: {tipo.id_tipo_insumo}
-                </Typography>
-              </CardContent>
-              <CardActions
-                sx={{
-                  justifyContent: isMobile ? "center" : "flex-end",
-                  gap: 2,
-                  pb: 2,
-                  px: 2,
-                }}
-              >
-                {editarTipoInsumo &&
-                  (isMobile ? (
-                    <Box
-                      sx={{
-                        width: 38,
-                        height: 38,
-                        borderRadius: "50%",
-                        background: `linear-gradient(120deg, #90caf9, #1976d2)`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        transition: "all 0.15s",
-                        "&:hover": {
-                          background: "#1565c0",
-                          transform: "scale(1.09)",
-                        },
-                        boxShadow: "0 2px 8px 0 #1976d222",
-                      }}
-                      onClick={() => handleEdit(tipo.id_tipo_insumo)}
-                      title="Editar"
-                    >
-                      <Edit sx={{ color: "#fff", fontSize: 22 }} />
-                    </Box>
-                  ) : (
-                    <Button
-                      size="small"
-                      startIcon={<Edit />}
-                      onClick={() => handleEdit(tipo.id_tipo_insumo)}
-                      sx={{ color: "#1976d2", fontWeight: "bold" }}
-                    >
-                      Editar
-                    </Button>
-                  ))}
-                {borrarTipoInsumo &&
-                  (isMobile ? (
-                    <Box
-                      sx={{
-                        width: 38,
-                        height: 38,
-                        borderRadius: "50%",
-                        background: `linear-gradient(120deg, #ef9a9a, #d32f2f)`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        transition: "all 0.15s",
-                        "&:hover": {
-                          background: "#c62828",
-                          transform: "scale(1.09)",
-                        },
-                        boxShadow: "0 2px 8px 0 #d32f2f22",
-                        opacity: isDeleting ? 0.7 : 1,
-                      }}
-                      onClick={() =>
-                        !isDeleting &&
-                        confirmDeleteTipoInsumo(tipo.id_tipo_insumo)
-                      }
-                      title="Eliminar"
-                    >
-                      <Delete sx={{ color: "#fff", fontSize: 22 }} />
-                    </Box>
-                  ) : (
-                    <Button
-                      size="small"
-                      startIcon={<Delete />}
-                      onClick={() =>
-                        confirmDeleteTipoInsumo(tipo.id_tipo_insumo)
-                      }
-                      sx={{ color: "#d32f2f", fontWeight: "bold" }}
-                      disabled={isDeleting}
-                    >
-                      {isDeleting ? "Eliminando..." : "Eliminar"}
-                    </Button>
-                  ))}
-              </CardActions>
-            </Card>
-          </Grid>
+            id={tipo.id_tipo_insumo}
+            title={tipo.nombre_tipo}
+            description={tipo.descripcion}
+            canEdit={editarTipoInsumo}
+            canDelete={borrarTipoInsumo}
+            isDeleting={isDeleting}
+            onEdit={() => handleEdit(tipo.id_tipo_insumo)}
+            onDelete={() => confirmDeleteTipoInsumo(tipo.id_tipo_insumo)}
+          />
         ))}
-      </Grid>
+
+        {crearTipoInsumo && (
+          <CompactCatalogCard
+            createLabel="Crear Tipo"
+            onCreate={() => {
+              if (!isCreating) setOpen(true);
+            }}
+          />
+        )}
+      </Box>
+
+      {tiposOrdenados.length === 0 && !crearTipoInsumo && (
+        <Box
+          sx={{
+            py: 8,
+            textAlign: "center",
+            color: "text.secondary",
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 1,
+            bgcolor: "background.paper",
+          }}
+        >
+          No hay tipos de insumo registrados.
+        </Box>
+      )}
 
       <ModalForm
         open={open}
@@ -427,7 +263,7 @@ const TipoInsumoManagement = () => {
         onCloseAlert={() => setOpenAlert(false)}
         onConfirm={handleDeleteTipoInsumo}
         title="Confirmar eliminación"
-        message="¿Estás seguro de que deseas eliminar esta categoría? Esta acción no se puede deshacer."
+        message="¿Estás seguro de que deseas eliminar este tipo de insumo? Esta acción no se puede deshacer."
       />
     </Box>
   );

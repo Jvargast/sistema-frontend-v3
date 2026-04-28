@@ -1,15 +1,11 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import {
-  Box,
-  Typography,
-  Grid,
-  Paper,
-  Button,
-  Chip,
-  useTheme,
-} from "@mui/material";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import { Paper, Button, Chip, useTheme } from "@mui/material";
 import BackButton from "../../components/common/BackButton";
 import {
   useGetPedidoByIdQuery,
@@ -22,17 +18,19 @@ import { useState } from "react";
 import ModalPagoPedido from "../../components/pedido/ModalPago";
 import { useGetVentaByIdQuery } from "../../store/services/ventasApi";
 import { useGetCuentaPorCobrarByVentaIdQuery } from "../../store/services/cuentasPorCobrarApi";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
 
-import { PointOfSale, ReceiptLong, OpenInNew } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 
 const VerPedido = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const theme = useTheme();
+  const backTo = location.state?.from || "/admin-pedidos";
   const [toggleMostrarEnTablero, { isLoading: isToggling }] =
     useToggleMostrarEnTableroMutation();
   const { data, error, isLoading, refetch } = useGetPedidoByIdQuery(id);
@@ -52,7 +50,7 @@ const VerPedido = () => {
 
   const mostrarEnTablero = data?.mostrar_en_tablero ?? true;
   const [openPago, setOpenPago] = useState(false);
-  const tipoDocumento = ventaData?.documentos[0]?.tipo_documento || "boleta";
+  const tipoDocumento = ventaData?.documentos?.[0]?.tipo_documento || "boleta";
 
   const mostrarBotonPago = data?.pagado !== true && tipoDocumento !== "factura";
 
@@ -131,7 +129,7 @@ const VerPedido = () => {
         width: "100%",
       }}
     >
-      <BackButton to="/admin/pedidos" label="Volver a Pedidos" />
+      <BackButton to={backTo} label="Volver a Pedidos" />
 
       {hasVenta && (
         <Paper
@@ -156,7 +154,7 @@ const VerPedido = () => {
           >
             <Box display="flex" alignItems="center" gap={1.25} flexWrap="wrap">
               <Chip
-                icon={<PointOfSale />}
+                icon={<PointOfSaleIcon />}
                 label={`Venta asociada #${ventaResumen?.id}`}
                 color="primary"
                 variant="filled"
@@ -164,7 +162,7 @@ const VerPedido = () => {
               />
               {ventaResumen?.numeroDoc && (
                 <Chip
-                  icon={<ReceiptLong />}
+                  icon={<ReceiptLongIcon />}
                   label={ventaResumen.numeroDoc}
                   variant="outlined"
                   sx={{ fontWeight: 600 }}
@@ -196,7 +194,7 @@ const VerPedido = () => {
                 facturaData?.estado === "pendiente" && (
                   <Button
                     variant="contained"
-                    endIcon={<OpenInNew />}
+                    endIcon={<OpenInNewIcon />}
                     onClick={() =>
                       navigate(`/facturas/ver/${facturaData.id_cxc}`)
                     }
@@ -211,7 +209,7 @@ const VerPedido = () => {
                 )}
               <Button
                 variant="outlined"
-                endIcon={<OpenInNew />}
+                endIcon={<OpenInNewIcon />}
                 onClick={() => navigate(`/admin/ventas/ver/${ventaResumen.id}`)}
                 sx={{ textTransform: "none", fontWeight: 700, borderRadius: 2 }}
               >
@@ -418,15 +416,21 @@ const VerPedido = () => {
         )}
       </Paper>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={5}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "5fr 7fr" },
+          gap: 3,
+        }}
+      >
+        <Box minWidth={0}>
           <InfoPedido pedido={data} />
-        </Grid>
+        </Box>
 
-        <Grid item xs={12} md={7}>
-          <DetallesPedido detalles={data.DetallesPedido} />
-        </Grid>
-      </Grid>
+        <Box minWidth={0}>
+          <DetallesPedido detalles={data.DetallesPedido || []} />
+        </Box>
+      </Box>
 
       <ModalPagoPedido
         open={openPago}

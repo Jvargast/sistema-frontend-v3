@@ -1,24 +1,12 @@
-import {
-  Avatar,
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  IconButton,
-  Link as MLink,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Stack,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Avatar, Card, CardContent, CardHeader, Divider, IconButton, Link as MLink, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import OpenInNew from "@mui/icons-material/OpenInNew";
 import DeleteOutlineOutlined from "@mui/icons-material/DeleteOutlineOutlined";
 import PropTypes from "prop-types";
 import { iconForMime } from "../../utils/gastoUtils";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 export default function GastoAdjuntos({
   adjuntos,
@@ -61,11 +49,12 @@ export default function GastoAdjuntos({
                         <span>
                           <IconButton
                             edge="end"
-                            color="error"
+                            aria-label="Eliminar adjunto"
                             onClick={(e) => onDelete(a, e)}
                             disabled={removing}
+                            sx={getActionIconButtonSx(theme, "error")}
                           >
-                            <DeleteOutlineOutlined />
+                            <DeleteOutlineOutlined fontSize="small" />
                           </IconButton>
                         </span>
                       </Tooltip>

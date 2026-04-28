@@ -1,5 +1,8 @@
-import { Box, Divider, Paper, TextField, Typography } from "@mui/material";
+import { Divider, Paper } from "@mui/material";
 import PropTypes from "prop-types";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const formatoCLP = (valor) =>
   new Intl.NumberFormat("es-CL", {

@@ -1,11 +1,17 @@
-import { useState } from "react";
+import {
+  useState } from "react";
 import PropTypes from "prop-types";
-import { Box, TextField, IconButton, Typography, Button } from "@mui/material";
+import { IconButton, Button, useTheme } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AsyncSelect from "react-select/async";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 const ProductDetails = ({ value, onChange, productos, setSearchTerm }) => {
+  const theme = useTheme();
   const [details, setDetails] = useState(value || []);
 
   const handleAddProduct = () => {
@@ -25,8 +31,8 @@ const ProductDetails = ({ value, onChange, productos, setSearchTerm }) => {
   };
 
   const handleInputChange = (index, field, newValue) => {
-    const updatedDetails = [...details]; 
-    const detailToUpdate = updatedDetails[index]; 
+    const updatedDetails = [...details];
+    const detailToUpdate = updatedDetails[index];
 
     if (!detailToUpdate) {
 
@@ -41,12 +47,12 @@ const ProductDetails = ({ value, onChange, productos, setSearchTerm }) => {
   };
 
   const loadProductOptions = async (inputValue) => {
-    setSearchTerm(inputValue); 
+    setSearchTerm(inputValue);
     const options = productos.map((product) => ({
       value: String(product.id_producto),
       label: product.nombre_producto,
     }));
-    
+
     return options;
   };
 
@@ -64,13 +70,13 @@ const ProductDetails = ({ value, onChange, productos, setSearchTerm }) => {
               value={
                 detail.id_producto
                   ? {
-                      value: String(detail.id_producto), 
+                      value: String(detail.id_producto),
                       label: detail.nombre_producto || "",
                     }
                   : null
               }
               onChange={(selectedOption) => {
-                console.log("Opción seleccionada:", selectedOption); 
+                console.log("Opción seleccionada:", selectedOption);
                 handleInputChange(index, "id_producto", selectedOption.value);
                 handleInputChange(
                   index,
@@ -89,8 +95,12 @@ const ProductDetails = ({ value, onChange, productos, setSearchTerm }) => {
             }
             style={{ flex: 1 }}
           />
-          <IconButton color="error" onClick={() => handleRemoveProduct(index)}>
-            <RemoveIcon />
+          <IconButton
+            aria-label="Eliminar producto"
+            onClick={() => handleRemoveProduct(index)}
+            sx={getActionIconButtonSx(theme, "error")}
+          >
+            <RemoveIcon fontSize="small" />
           </IconButton>
         </Box>
       ))}

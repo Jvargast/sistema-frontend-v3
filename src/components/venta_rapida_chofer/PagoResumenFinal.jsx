@@ -1,15 +1,8 @@
-import {
-  Box,
-  Typography,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  Chip,
-  Button,
-  Stack,
-} from "@mui/material";
+import { Divider, List, ListItem, ListItemText, Chip, Button } from "@mui/material";
 import PropTypes from "prop-types";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const PasoResumenFinal = ({
   cliente,

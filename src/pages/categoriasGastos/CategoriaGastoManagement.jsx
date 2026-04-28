@@ -1,26 +1,7 @@
+import Select from "../../components/common/CompatSelect";
+import Dialog from "../../components/common/CompatDialog";
 import * as React from "react";
-import {
-  Box,
-  Grid,
-  Stack,
-  TextField,
-  InputAdornment,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  ToggleButtonGroup,
-  ToggleButton,
-  Switch,
-  FormControlLabel,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { InputAdornment, MenuItem, FormControl, InputLabel, ToggleButtonGroup, ToggleButton, Switch, FormControlLabel, Button, DialogTitle, DialogContent, DialogActions, useTheme } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import Header from "../../components/common/Header";
 import LoaderComponent from "../../components/common/LoaderComponent";
@@ -30,23 +11,28 @@ import {
   useCreateCategoriaGastoMutation,
   useDeleteCategoriaGastoMutation,
   useGetAllCategoriasGastoQuery,
-  useUpdateCategoriaGastoMutation,
-} from "../../store/services/categoriaGastoApi";
+  useUpdateCategoriaGastoMutation } from
+"../../store/services/categoriaGastoApi";
 import CategoriaGastoCard from "../../components/categorias_gasto/CategoriaGastoCard";
 import CategoriaGastoDialog from "../../components/categorias_gasto/CategoriaGastoDialog";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 import { AddCircleOutlineOutlined } from "@mui/icons-material";
 import PrimaryActionButton from "../../components/common/PrimaryActionButton";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Stack from "../../components/common/CompatStack";
+import Typography from "../../components/common/CompatTypography";
 
 const TIPOS_CATEGORIA = [
-  { id: "", label: "Todos" },
-  { id: "operativo", label: "Operativo" },
-  { id: "personal", label: "Personal" },
-  { id: "financiero", label: "Financiero" },
-  { id: "impuestos", label: "Impuestos" },
-  { id: "logistica", label: "Logística" },
-  { id: "otros", label: "Otros" },
-];
+{ id: "", label: "Todos" },
+{ id: "operativo", label: "Operativo" },
+{ id: "personal", label: "Personal" },
+{ id: "financiero", label: "Financiero" },
+{ id: "impuestos", label: "Impuestos" },
+{ id: "logistica", label: "Logística" },
+{ id: "otros", label: "Otros" }];
+
 
 export default function CategoriaGastoManagement() {
   const theme = useTheme();
@@ -73,7 +59,7 @@ export default function CategoriaGastoManagement() {
   }, [q, tipo, deducible, soloActivos]);
 
   const { data, isLoading, isError, refetch } =
-    useGetAllCategoriasGastoQuery(params);
+  useGetAllCategoriasGastoQuery(params);
 
   useRegisterRefresh(
     "categorias-gastos",
@@ -94,11 +80,11 @@ export default function CategoriaGastoManagement() {
   const [editItem, setEditItem] = React.useState(null);
 
   const [createCat, { isLoading: creating }] =
-    useCreateCategoriaGastoMutation();
+  useCreateCategoriaGastoMutation();
   const [updateCat, { isLoading: updating }] =
-    useUpdateCategoriaGastoMutation();
+  useUpdateCategoriaGastoMutation();
   const [deleteCat, { isLoading: deleting }] =
-    useDeleteCategoriaGastoMutation();
+  useDeleteCategoriaGastoMutation();
 
   const openCreate = () => {
     setEditItem(null);
@@ -114,12 +100,12 @@ export default function CategoriaGastoManagement() {
       if (editItem) {
         await updateCat({
           id: editItem.id_categoria_gasto || editItem.id,
-          ...payload,
+          ...payload
         }).unwrap();
         dispatch(
           showNotification({
             message: "Categoría actualizada",
-            severity: "success",
+            severity: "success"
           })
         );
       } else {
@@ -127,7 +113,7 @@ export default function CategoriaGastoManagement() {
         dispatch(
           showNotification({
             message: "Categoría creada",
-            severity: "success",
+            severity: "success"
           })
         );
       }
@@ -138,7 +124,7 @@ export default function CategoriaGastoManagement() {
       dispatch(
         showNotification({
           message: err?.data?.error || "No se pudo guardar la categoría",
-          severity: "error",
+          severity: "error"
         })
       );
     }
@@ -157,7 +143,7 @@ export default function CategoriaGastoManagement() {
       dispatch(
         showNotification({
           message: "Categoría eliminada",
-          severity: "success",
+          severity: "success"
         })
       );
       setConfirmOpen(false);
@@ -167,7 +153,7 @@ export default function CategoriaGastoManagement() {
       dispatch(
         showNotification({
           message: err?.data?.error || "No se pudo eliminar",
-          severity: "error",
+          severity: "error"
         })
       );
     }
@@ -180,29 +166,29 @@ export default function CategoriaGastoManagement() {
       <Box p={3}>
         <Header
           title="Categorías de Gasto"
-          subtitle="Gestión de categorías de gasto"
-        />
+          subtitle="Gestión de categorías de gasto" />
+
         <Typography color="error" sx={{ mt: 2 }}>
           Error al cargar categorías.
         </Typography>
-      </Box>
-    );
+      </Box>);
+
   }
 
   return (
     <Box sx={{ p: { xs: 2, sm: 4 } }}>
       <Header
         title="Categorías de Gasto"
-        subtitle="Gestión de categorías de gasto"
-      />
+        subtitle="Gestión de categorías de gasto" />
+
 
       <Stack
         direction={{ xs: "column", md: "row" }}
         spacing={2}
         alignItems={{ xs: "stretch", md: "center" }}
         justifyContent="space-between"
-        sx={{ mb: 2 }}
-      >
+        sx={{ mb: 2 }}>
+
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2} flex={1}>
           <TextField
             value={search}
@@ -210,13 +196,13 @@ export default function CategoriaGastoManagement() {
             placeholder="Buscar por nombre o descripción…"
             fullWidth
             InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
+              startAdornment:
+              <InputAdornment position="start">
                   <SearchIcon sx={{ opacity: 0.7 }} />
                 </InputAdornment>
-              ),
-            }}
-          />
+
+            }} />
+
 
           <FormControl sx={{ minWidth: 200 }}>
             <InputLabel id="tipo-cat-filter">Tipo</InputLabel>
@@ -224,13 +210,13 @@ export default function CategoriaGastoManagement() {
               labelId="tipo-cat-filter"
               value={tipo}
               label="Tipo"
-              onChange={(e) => setTipo(e.target.value)}
-            >
-              {TIPOS_CATEGORIA.map((t) => (
-                <MenuItem key={t.id} value={t.id}>
+              onChange={(e) => setTipo(e.target.value)}>
+
+              {TIPOS_CATEGORIA.map((t) =>
+              <MenuItem key={t.id} value={t.id}>
                   {t.label}
                 </MenuItem>
-              ))}
+              )}
             </Select>
           </FormControl>
 
@@ -238,8 +224,8 @@ export default function CategoriaGastoManagement() {
             exclusive
             value={deducible}
             onChange={(_, v) => v && setDeducible(v)}
-            size="small"
-          >
+            size="small">
+
             <ToggleButton value="all">Todos</ToggleButton>
             <ToggleButton value="si">Deducible</ToggleButton>
             <ToggleButton value="no">No deducible</ToggleButton>
@@ -247,15 +233,15 @@ export default function CategoriaGastoManagement() {
 
           <FormControlLabel
             control={
-              <Switch
-                checked={soloActivos}
-                onChange={(_, v) => setSoloActivos(v)}
-                size="small"
-              />
+            <Switch
+              checked={soloActivos}
+              onChange={(_, v) => setSoloActivos(v)}
+              size="small" />
+
             }
             label="Solo activos"
-            sx={{ ml: { xs: 0, sm: 1 } }}
-          />
+            sx={{ ml: { xs: 0, sm: 1 } }} />
+
         </Stack>
 
         <PrimaryActionButton
@@ -263,37 +249,37 @@ export default function CategoriaGastoManagement() {
           startIcon={<AddCircleOutlineOutlined />}
           onClick={openCreate}
           disabled={creating || updating}
-          aria-label="Nueva Categoría"
-        />
+          aria-label="Nueva Categoría" />
+
       </Stack>
 
       <Grid container spacing={2}>
-        {categorias.map((cat) => (
-          <Grid
-            item
-            key={cat.id_categoria_gasto || cat.id}
-            xs={12}
-            sm={6}
-            md={4}
-            lg={3}
-          >
+        {categorias.map((cat) =>
+        <Grid
+          item
+          key={cat.id_categoria_gasto || cat.id}
+          xs={12}
+          sm={6}
+          md={4}
+          lg={3}>
+
             <CategoriaGastoCard
-              categoria={cat}
-              onEdit={() => openEdit(cat)}
-              onDelete={() => askDelete(cat)}
-            />
+            categoria={cat}
+            onEdit={() => openEdit(cat)}
+            onDelete={() => askDelete(cat)} />
+
           </Grid>
-        ))}
-        {categorias.length === 0 && (
-          <Grid item xs={12}>
+        )}
+        {categorias.length === 0 &&
+        <Grid item xs={12}>
             <Box
-              sx={{
-                p: 3,
-                borderRadius: 2,
-                border: `1px dashed ${theme.palette.divider}`,
-                textAlign: "center",
-              }}
-            >
+            sx={{
+              p: 3,
+              borderRadius: 2,
+              border: `1px dashed ${theme.palette.divider}`,
+              textAlign: "center"
+            }}>
+
               <Typography sx={{ mb: 1.5 }}>
                 No hay categorías con los filtros actuales.
               </Typography>
@@ -302,7 +288,7 @@ export default function CategoriaGastoManagement() {
               </Button>
             </Box>
           </Grid>
-        )}
+        }
       </Grid>
 
       <CategoriaGastoDialog
@@ -313,8 +299,8 @@ export default function CategoriaGastoManagement() {
           setEditItem(null);
         }}
         onSubmit={handleSubmit}
-        isSaving={creating || updating}
-      />
+        isSaving={creating || updating} />
+
 
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogTitle>Eliminar categoría</DialogTitle>
@@ -333,12 +319,12 @@ export default function CategoriaGastoManagement() {
             onClick={doDelete}
             variant="contained"
             color="error"
-            disabled={deleting}
-          >
+            disabled={deleting}>
+
             {deleting ? "Eliminando..." : "Eliminar"}
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
-  );
+    </Box>);
+
 }

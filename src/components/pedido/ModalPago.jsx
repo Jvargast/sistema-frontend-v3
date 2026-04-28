@@ -1,21 +1,19 @@
+import Dialog from "../common/CompatDialog";
 import {
-  Dialog,
+
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   Button,
-  MenuItem,
-} from "@mui/material";
+  MenuItem } from
+"@mui/material";
 import PropTypes from "prop-types";
-import {
-  Paid,
-  CreditCard,
-  ReceiptLong,
-  Notes,
-  Close,
-  CheckCircle,
-} from "@mui/icons-material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CloseIcon from "@mui/icons-material/Close";
+import CreditCardIcon from "@mui/icons-material/CreditCard";
+import NotesIcon from "@mui/icons-material/Notes";
+import PaidIcon from "@mui/icons-material/Paid";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import { useForm, Controller } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { useRegistrarDesdePedidoMutation } from "../../store/services/pedidosApi";
@@ -23,13 +21,14 @@ import useVerificarCaja from "../../utils/useVerificationCaja";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useEffect, useMemo } from "react";
+import TextField from "../common/CompatTextField";
 
 const metodosPagoDisponibles = [
-  { id: 1, nombre: "Efectivo" },
-  { id: 2, nombre: "Tarjeta crédito" },
-  { id: 3, nombre: "Tarjeta débito" },
-  { id: 4, nombre: "Transferencia" },
-];
+{ id: 1, nombre: "Efectivo" },
+{ id: 2, nombre: "Tarjeta crédito" },
+{ id: 3, nombre: "Tarjeta débito" },
+{ id: 4, nombre: "Transferencia" }];
+
 
 const ModalPagoPedido = ({ open, onClose, pedido }) => {
   const usuario = useSelector((state) => state.auth.user);
@@ -38,18 +37,18 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
     defaultValues: {
       tipo_documento: "boleta",
       id_metodo_pago:
-        pedido?.id_metodo_pago != null ? String(pedido.id_metodo_pago) : "",
-    },
+      pedido?.id_metodo_pago != null ? String(pedido.id_metodo_pago) : ""
+    }
   });
   const sucursalPedido = Number(pedido?.id_sucursal);
 
   const cajasEnSucursal = useMemo(() => {
-    const cajasAsignadas = Array.isArray(estado?.cajasAsignadas)
-      ? estado.cajasAsignadas
-      : [];
+    const cajasAsignadas = Array.isArray(estado?.cajasAsignadas) ?
+    estado.cajasAsignadas :
+    [];
     return cajasAsignadas.filter(
       (c) =>
-        c.estado === "abierta" && Number(c.id_sucursal) === sucursalPedido
+      c.estado === "abierta" && Number(c.id_sucursal) === sucursalPedido
     );
   }, [estado?.cajasAsignadas, sucursalPedido]);
 
@@ -65,18 +64,18 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
     reset({
       tipo_documento: "boleta",
       id_metodo_pago:
-        pedido?.id_metodo_pago != null ? String(pedido.id_metodo_pago) : "",
+      pedido?.id_metodo_pago != null ? String(pedido.id_metodo_pago) : "",
       pago_recibido: montoPendiente,
       referencia: "",
       notas: "",
       id_caja:
-        usuario?.rol === "vendedor"
-          ? cajasEnSucursal[0]?.id_caja
-            ? String(cajasEnSucursal[0].id_caja)
-            : ""
-          : cajasEnSucursal.length === 1
-          ? String(cajasEnSucursal[0].id_caja)
-          : "",
+      usuario?.rol === "vendedor" ?
+      cajasEnSucursal[0]?.id_caja ?
+      String(cajasEnSucursal[0].id_caja) :
+      "" :
+      cajasEnSucursal.length === 1 ?
+      String(cajasEnSucursal[0].id_caja) :
+      ""
     });
   }, [open, pedido, reset, montoPendiente, usuario?.rol, cajasEnSucursal]);
   const dispatch = useDispatch();
@@ -88,8 +87,8 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
       dispatch(
         showNotification({
           message:
-            "No tienes una caja abierta en la sucursal del pedido. Abre o selecciona una para registrar el pago.",
-          severity: "warning",
+          "No tienes una caja abierta en la sucursal del pedido. Abre o selecciona una para registrar el pago.",
+          severity: "warning"
         })
       );
       return;
@@ -103,12 +102,12 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
         referencia: data.referencia,
         notas: data.notas,
         id_usuario_creador: usuario?.rut,
-        id_metodo_pago: parseInt(data.id_metodo_pago, 10),
+        id_metodo_pago: parseInt(data.id_metodo_pago, 10)
       }).unwrap();
       dispatch(
         showNotification({
           message: "Se ha registrado pago con éxito.",
-          severity: "success",
+          severity: "success"
         })
       );
       onClose();
@@ -117,7 +116,7 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
       dispatch(
         showNotification({
           message: `Error al registrar pago ${err.data.mensaje}`,
-          severity: "error",
+          severity: "error"
         })
       );
       console.error("Error al registrar el pago del pedido:", err);
@@ -133,19 +132,19 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
       sx={{
         "& .MuiDialog-paper": {
           borderRadius: 3,
-          boxShadow: 6,
-        },
-      }}
-    >
+          boxShadow: 6
+        }
+      }}>
+
       <DialogTitle
         sx={{
           display: "flex",
           alignItems: "center",
           gap: 1,
-          fontWeight: 800,
-        }}
-      >
-        <Paid fontSize="small" />
+          fontWeight: 800
+        }}>
+
+        <PaidIcon fontSize="small" />
         Registrar pago
         <span style={{ flex: 1 }} />
         <TextField
@@ -155,9 +154,9 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
           InputProps={{ readOnly: true }}
           sx={{
             width: 120,
-            "& .MuiInputBase-input": { fontWeight: 700, textAlign: "center" },
-          }}
-        />
+            "& .MuiInputBase-input": { fontWeight: 700, textAlign: "center" }
+          }} />
+
       </DialogTitle>
       <DialogContent>
         <div
@@ -166,14 +165,14 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
             padding: "10px 12px",
             borderRadius: 10,
             background:
-              "linear-gradient(135deg, rgba(25,118,210,0.08), rgba(25,118,210,0.02))",
+            "linear-gradient(135deg, rgba(25,118,210,0.08), rgba(25,118,210,0.02))",
             border: "1px dashed rgba(25,118,210,0.35)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            fontWeight: 700,
-          }}
-        >
+            fontWeight: 700
+          }}>
+
           <span>Saldo pendiente</span>
           <span style={{ color: "#1976d2" }}>
             ${montoPendiente.toLocaleString()}
@@ -185,39 +184,39 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
             control={control}
             rules={{
               required:
-                usuario?.rol === "administrador" && cajasEnSucursal.length > 0,
+              usuario?.rol === "administrador" && cajasEnSucursal.length > 0
             }}
-            render={({ field }) => (
-              <TextField
-                label={`Caja (sucursal ${sucursalPedido || "-"})`}
-                select
-                fullWidth
-                margin="normal"
-                size="small"
-                value={field.value ?? ""}
-                onChange={(e) => field.onChange(e.target.value)}
-                SelectProps={{ displayEmpty: true }}
-                helperText={
-                  cajasEnSucursal.length === 0
-                    ? "No tienes cajas abiertas en esta sucursal."
-                    : undefined
-                }
-              >
+            render={({ field }) =>
+            <TextField
+              label={`Caja (sucursal ${sucursalPedido || "-"})`}
+              select
+              fullWidth
+              margin="normal"
+              size="small"
+              value={field.value ?? ""}
+              onChange={(e) => field.onChange(e.target.value)}
+              SelectProps={{ displayEmpty: true }}
+              helperText={
+              cajasEnSucursal.length === 0 ?
+              "No tienes cajas abiertas en esta sucursal." :
+              undefined
+              }>
+
                 <MenuItem value="" disabled>
-                  {cajasEnSucursal.length === 0
-                    ? "Sin cajas abiertas"
-                    : "Selecciona una caja…"}
+                  {cajasEnSucursal.length === 0 ?
+                "Sin cajas abiertas" :
+                "Selecciona una caja…"}
                 </MenuItem>
-                {cajasEnSucursal.map((c) => (
-                  <MenuItem key={c.id_caja} value={String(c.id_caja)}>
+                {cajasEnSucursal.map((c) =>
+              <MenuItem key={c.id_caja} value={String(c.id_caja)}>
                     {`Caja #${c.id_caja}${
-                      c.sucursal?.nombre ? ` · ${c.sucursal.nombre}` : ""
-                    }`}
+                c.sucursal?.nombre ? ` · ${c.sucursal.nombre}` : ""}`
+                }
                   </MenuItem>
-                ))}
+              )}
               </TextField>
-            )}
-          />
+            } />
+
 
           <TextField
             label="Tipo de Documento"
@@ -226,67 +225,67 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
             margin="normal"
             size="small"
             {...register("tipo_documento", { required: true })}
-            defaultValue="boleta"
-          >
+            defaultValue="boleta">
+
             <MenuItem value="boleta">Boleta</MenuItem>
             {/* <MenuItem value="factura">Factura</MenuItem> */}
           </TextField>
 
           {/* <TextField
-            label="Método de Pago"
-            select
-            fullWidth
-            margin="normal"
-            size="small"
-            defaultValue={
-              pedido?.id_metodo_pago != null
-                ? String(pedido.id_metodo_pago)
-                : ""
-            }
-            {...register("id_metodo_pago", { required: true })}
-            SelectProps={{ displayEmpty: true }}
-            InputProps={{
-              startAdornment: <CreditCard sx={{ mr: 1, opacity: 0.6 }} />,
-            }}
-          >
-            <MenuItem value="" disabled>
-              Selecciona un método…
-            </MenuItem>
-            {metodosPagoDisponibles.map((metodo) => (
-              <MenuItem key={metodo.id} value={String(metodo.id)}>
-                {metodo.nombre}
-              </MenuItem>
-            ))}
-          </TextField> */}
+             label="Método de Pago"
+             select
+             fullWidth
+             margin="normal"
+             size="small"
+             defaultValue={
+               pedido?.id_metodo_pago != null
+                 ? String(pedido.id_metodo_pago)
+                 : ""
+             }
+             {...register("id_metodo_pago", { required: true })}
+             SelectProps={{ displayEmpty: true }}
+             InputProps={{
+	               startAdornment: <CreditCardIcon sx={{ mr: 1, opacity: 0.6 }} />,
+             }}
+            >
+             <MenuItem value="" disabled>
+               Selecciona un método…
+             </MenuItem>
+             {metodosPagoDisponibles.map((metodo) => (
+               <MenuItem key={metodo.id} value={String(metodo.id)}>
+                 {metodo.nombre}
+               </MenuItem>
+             ))}
+            </TextField> */}
           <Controller
             name="id_metodo_pago"
             control={control}
             rules={{ required: true }}
-            render={({ field }) => (
-              <TextField
-                label="Método de Pago"
-                select
-                fullWidth
-                margin="normal"
-                size="small"
-                SelectProps={{ displayEmpty: true }}
-                value={field.value ?? ""} // <- nunca undefined
-                onChange={(e) => field.onChange(e.target.value)}
-                InputProps={{
-                  startAdornment: <CreditCard sx={{ mr: 1, opacity: 0.6 }} />,
-                }}
-              >
+            render={({ field }) =>
+            <TextField
+              label="Método de Pago"
+              select
+              fullWidth
+              margin="normal"
+              size="small"
+              SelectProps={{ displayEmpty: true }}
+              value={field.value ?? ""} // <- nunca undefined
+              onChange={(e) => field.onChange(e.target.value)}
+              InputProps={{
+	                startAdornment: <CreditCardIcon sx={{ mr: 1, opacity: 0.6 }} />
+              }}>
+
                 <MenuItem value="" disabled>
                   Selecciona un método…
                 </MenuItem>
-                {metodosPagoDisponibles.map((metodo) => (
-                  <MenuItem key={metodo.id} value={String(metodo.id)}>
+                {metodosPagoDisponibles.map((metodo) =>
+              <MenuItem key={metodo.id} value={String(metodo.id)}>
                     {metodo.nombre}
                   </MenuItem>
-                ))}
+              )}
               </TextField>
-            )}
-          />
+            } />
+
 
           <TextField
             label="Monto recibido"
@@ -298,9 +297,9 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
             helperText={`Sugerido: $${montoPendiente.toLocaleString()}`}
             {...register("pago_recibido", { required: true })}
             InputProps={{
-              startAdornment: <Paid sx={{ mr: 1, opacity: 0.6 }} />,
-            }}
-          />
+	              startAdornment: <PaidIcon sx={{ mr: 1, opacity: 0.6 }} />
+            }} />
+
 
           <TextField
             label="Referencia (opcional)"
@@ -309,9 +308,9 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
             size="small"
             {...register("referencia")}
             InputProps={{
-              startAdornment: <ReceiptLong sx={{ mr: 1, opacity: 0.6 }} />,
-            }}
-          />
+	              startAdornment: <ReceiptLongIcon sx={{ mr: 1, opacity: 0.6 }} />
+            }} />
+
 
           <TextField
             label="Notas"
@@ -322,11 +321,11 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
             size="small"
             {...register("notas")}
             InputProps={{
-              startAdornment: (
-                <Notes sx={{ mr: 1, opacity: 0.6, alignSelf: "flex-start" }} />
-              ),
-            }}
-          />
+              startAdornment:
+	              <NotesIcon sx={{ mr: 1, opacity: 0.6, alignSelf: "flex-start" }} />
+
+            }} />
+
         </form>
       </DialogContent>
       <DialogActions sx={{ p: 2.5 }}>
@@ -334,9 +333,9 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
           onClick={onClose}
           variant="outlined"
           color="inherit"
-          startIcon={<Close />}
-          sx={{ textTransform: "none", borderRadius: 2 }}
-        >
+	          startIcon={<CloseIcon />}
+          sx={{ textTransform: "none", borderRadius: 2 }}>
+
           Cancelar
         </Button>
         <Button
@@ -345,20 +344,20 @@ const ModalPagoPedido = ({ open, onClose, pedido }) => {
           variant="contained"
           color="primary"
           disabled={isLoading}
-          startIcon={!isLoading ? <CheckCircle /> : null}
-          sx={{ textTransform: "none", borderRadius: 2, fontWeight: 700 }}
-        >
+	          startIcon={!isLoading ? <CheckCircleIcon /> : null}
+          sx={{ textTransform: "none", borderRadius: 2, fontWeight: 700 }}>
+
           {isLoading ? "Procesando..." : "Registrar"}
         </Button>
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 
 ModalPagoPedido.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  pedido: PropTypes.object.isRequired,
+  pedido: PropTypes.object.isRequired
 };
 
 export default ModalPagoPedido;

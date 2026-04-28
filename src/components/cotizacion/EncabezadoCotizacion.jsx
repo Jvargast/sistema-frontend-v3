@@ -1,6 +1,8 @@
-import { Box, Typography } from "@mui/material";
+import Typography from "../common/CompatTypography";
+
 import PropTypes from "prop-types";
 import logo from "../../assets/images/logoLogin.png";
+import Box from "../common/CompatBox";
 
 const EncabezadoCotizacion = ({ id }) => (
   <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>

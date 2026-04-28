@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Button, Divider, Typography } from "@mui/material";
+import { Button, Divider } from "@mui/material";
 import { useDispatch } from "react-redux";
 import {
   useFindByRutQuery,
@@ -17,6 +17,8 @@ import LoaderComponent from "../../../components/common/LoaderComponent";
 import EditUserForm from "../../../components/usuarios/EditUser";
 import PasswordModal from "../../../components/usuarios/PasswordModal";
 import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
+import Box from "../../../components/common/CompatBox";
+import Typography from "../../../components/common/CompatTypography";
 
 const EditUser = () => {
   const { id } = useParams();

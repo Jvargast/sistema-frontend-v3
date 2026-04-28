@@ -1,5 +1,6 @@
-import { List, ListItem, ListItemText, Typography, Paper } from "@mui/material";
+import { List, ListItem, ListItemText, Paper } from "@mui/material";
 import PropTypes from "prop-types";
+import Typography from "../common/CompatTypography";
 
 const formatCLP = (value) =>
   new Intl.NumberFormat("es-CL", {

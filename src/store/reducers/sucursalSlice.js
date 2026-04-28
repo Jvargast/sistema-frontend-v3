@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  sucursalActiva: null, 
+  sucursalActiva: null,
 };
 
 const sucursalSlice = createSlice({

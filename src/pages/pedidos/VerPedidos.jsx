@@ -1,4 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
+import {
+  useState,
+  useEffect,
+  useMemo,
+  useRef } from "react";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { DragDropContext } from "@hello-pangea/dnd";
 import {
@@ -6,18 +10,21 @@ import {
   useAsignarPedidoMutation,
   useDesasignarPedidoMutation,
   useToggleMostrarEnTableroMutation,
-} from "../../store/services/pedidosApi";
+  } from "../../store/services/pedidosApi";
 import { useGetAllChoferesQuery } from "../../store/services/usuariosApi";
 import Column from "../../components/chofer/Column";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
-import { Box, MenuItem, TextField, Typography } from "@mui/material";
+import { MenuItem } from "@mui/material";
 import EmptyColumn from "../../components/chofer/EmptyColumn";
 import { useIsMobile } from "../../utils/useIsMobile";
 import MobilePedidosBoard from "./MobilePedidosBoard";
 import { useSelector } from "react-redux";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Typography from "../../components/common/CompatTypography";
 
 const getPedidoSucursalId = (p) =>
   Number(
@@ -40,6 +47,10 @@ const userOperaEnSucursal = (u, targetId) =>
 
 const PedidosBoard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialSucursalFromNavigation = useRef(
+    location.state?.idSucursal ? String(location.state.idSucursal) : ""
+  );
   const {
     mode,
     activeSucursalId,
@@ -48,8 +59,14 @@ const PedidosBoard = () => {
   const [sucursalFiltro, setSucursalFiltro] = useState("");
 
   useEffect(() => {
-    const next = mode === "global" ? "" : String(activeSucursalId ?? "");
+    const next =
+      mode === "global" ?
+      initialSucursalFromNavigation.current :
+      String(activeSucursalId ?? "");
     setSucursalFiltro((prev) => (prev === next ? prev : next));
+    if (mode === "global" && initialSucursalFromNavigation.current) {
+      initialSucursalFromNavigation.current = "";
+    }
   }, [mode, activeSucursalId]);
 
   //eslint-disable-next-line
@@ -96,7 +113,9 @@ const PedidosBoard = () => {
   } = useGetAllChoferesQuery(choferesArgs, { refetchOnMountOrArgChange: true });
 
   const handleVerDetalle = (pedido) => {
-    navigate(`/admin/pedidos/ver/${pedido.id_pedido}`);
+    navigate(`/admin-pedidos/ver/${pedido.id_pedido}`, {
+      state: { from: "/admin-pedidos" }
+    });
   };
 
   const handleSacarDeTablero = async (pedido) => {
@@ -381,6 +400,7 @@ const PedidosBoard = () => {
         sucursalFiltro={String(sucursalFiltro)}
         onChangeSucursal={setSucursalFiltro}
         onSacarDeTablero={handleSacarDeTablero}
+        onVerDetalle={handleVerDetalle}
       />
     );
   }

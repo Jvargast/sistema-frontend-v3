@@ -1,6 +1,8 @@
-import { Box, CircularProgress, Typography, useTheme } from "@mui/material";
+import { CircularProgress, useTheme } from "@mui/material";
 import PropTypes from 'prop-types';
 import FlexBetween from "../layout/FlexBetween";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const StatBox = ({ title, icon, useQueryHook, description }) => {
   const theme = useTheme();

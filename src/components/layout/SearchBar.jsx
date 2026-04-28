@@ -1,21 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  InputBase,
-  IconButton,
-  CircularProgress,
-  Paper,
-  List,
-  ListItemButton,
-  ListItemText,
-  Typography,
-  Divider,
-} from "@mui/material";
+import { InputBase, IconButton, CircularProgress, Paper, List, ListItemButton, ListItemText, Divider } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { Search } from "@mui/icons-material";
 import PropTypes from "prop-types";
 import { useSearchQuery } from "../../store/services/busquedaApi";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const SearchBar = ({ onResultSelect }) => {
   const navigate = useNavigate();
@@ -91,7 +82,7 @@ const SearchBar = ({ onResultSelect }) => {
           border: `1px solid ${t.palette.roles?.border || "rgba(2,6,23,0.12)"}`,
           transition: "box-shadow .2s ease, border-color .2s ease",
           "&:focus-within": {
-            boxShadow: `0 0 0 3px rgba(59,130,246,0.30)`, 
+            boxShadow: `0 0 0 3px rgba(59,130,246,0.30)`,
             borderColor: "#3B82F6",
           },
         })}
@@ -146,7 +137,7 @@ const SearchBar = ({ onResultSelect }) => {
               top: "calc(100% + 8px)",
               left: 0,
               right: 0,
-              zIndex: 1300, 
+              zIndex: 1300,
               borderRadius: 3,
               bgcolor: t.palette.background.paper,
               border: `1px solid ${

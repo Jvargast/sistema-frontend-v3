@@ -1,10 +1,12 @@
-import { Box, Typography, Paper } from "@mui/material";
+import { Paper } from "@mui/material";
 import PropTypes from "prop-types";
 import StoreIcon from "@mui/icons-material/Store";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import EventIcon from "@mui/icons-material/Event";
 import { obtenerFechaChile } from "../../utils/formatearHora";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const CajaInfo = ({ caja }) => {
   if (!caja) return null;

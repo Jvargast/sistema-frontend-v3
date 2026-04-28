@@ -1,17 +1,5 @@
 import PropTypes from "prop-types";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  Grid,
-  TextField,
-  Divider,
-  Stack,
-  Chip,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
+import { Card, CardHeader, CardContent, Divider, Chip, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
 import ProveedorPicker from "./ProveedorPicker";
 import { MONEDAS } from "../../constants/monedas";
 import { ESTADOS_COMPRA } from "../../constants/estadosCompra";
@@ -19,6 +7,9 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
+import TextField from "../common/CompatTextField";
+import Grid from "../common/CompatGrid";
+import Stack from "../common/CompatStack";
 
 const CompraHeaderCard = ({ header, setHeader, onProveedor }) => {
   return (

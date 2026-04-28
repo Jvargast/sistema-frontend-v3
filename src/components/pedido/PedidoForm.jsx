@@ -1,21 +1,15 @@
-import { useState, useEffect } from "react";
 import {
-  Button,
-  IconButton,
-  TextField,
-  MenuItem,
-  Box,
-  Checkbox,
-  FormControlLabel,
-  Typography,
-  useTheme,
-  Divider,
-} from "@mui/material";
+  useState,
+  useEffect } from "react";
+import { Button, IconButton, MenuItem, Checkbox, FormControlLabel, useTheme, Divider } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PedidoClienteSelector from "./PedidoClienteSelector";
 import PropTypes from "prop-types";
 import AutocompleteDireccion from "./AutocompleteDireccion";
 import MapSelectorGoogle from "../maps/MapSelector";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const PedidoForm = ({
   formState,

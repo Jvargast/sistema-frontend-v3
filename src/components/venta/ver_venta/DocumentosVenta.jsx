@@ -1,13 +1,4 @@
-import {
-  Typography,
-  List,
-  ListItem,
-  Divider,
-  Box,
-  useMediaQuery,
-  useTheme,
-  Button,
-} from "@mui/material";
+import { List, ListItem, Divider, useMediaQuery, useTheme, Button } from "@mui/material";
 import {
   Description,
   Event,
@@ -17,6 +8,8 @@ import {
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
 
 const DocumentosVenta = ({ documentos, id_factura }) => {
   const theme = useTheme();

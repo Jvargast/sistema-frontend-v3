@@ -1,5 +1,8 @@
 import PropTypes from "prop-types";
-import { Box, Typography, Divider, Chip, Stack } from "@mui/material";
+import { Divider, Chip } from "@mui/material";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const ResumenFormula = ({ productoFinal, cantidadFinal, cantidadInsumos }) => {
   return (

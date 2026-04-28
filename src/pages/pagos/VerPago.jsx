@@ -1,13 +1,5 @@
 import { useParams } from "react-router-dom";
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Divider,
-  Chip,
-  IconButton,
-} from "@mui/material";
+import { Paper, Divider, Chip, IconButton } from "@mui/material";
 import BackButton from "../../components/common/BackButton";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
@@ -17,6 +9,9 @@ import LoaderComponent from "../../components/common/LoaderComponent";
 import DocumentoPopover from "../../components/documento/DocumentoPopover";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useState } from "react";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Typography from "../../components/common/CompatTypography";
 
 const CLP = (valor) =>
   new Intl.NumberFormat("es-CL", {

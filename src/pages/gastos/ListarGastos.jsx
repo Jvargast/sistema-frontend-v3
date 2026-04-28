@@ -1,14 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-  Paper,
-  InputAdornment,
-  Chip,
-  IconButton,
-  Tooltip,
-  TextField,
-  Stack,
-} from "@mui/material";
+  useEffect,
+  useMemo,
+  useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Paper, InputAdornment, Chip, IconButton, Tooltip } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
 import dayjs from "dayjs";
 import { useSelector } from "react-redux";
@@ -20,6 +15,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { alpha } from "@mui/material/styles";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import TextField from "../../components/common/CompatTextField";
+import Stack from "../../components/common/CompatStack";
 
 const tipoChipColor = (t) =>
   ({

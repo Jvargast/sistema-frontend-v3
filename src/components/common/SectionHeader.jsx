@@ -1,5 +1,7 @@
-import { Box, Typography } from "@mui/material";
+import Typography from "./CompatTypography";
+
 import PropTypes from "prop-types";
+import Box from "./CompatBox";
 
 const SectionHeader = ({ children }) => {
   return (

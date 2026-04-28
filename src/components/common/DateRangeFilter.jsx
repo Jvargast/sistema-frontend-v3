@@ -1,13 +1,17 @@
-import { useState } from "react";
+import Popover from "./CompatPopover";
+import {
+  useState } from "react";
 import PropTypes from "prop-types";
-import { Box, TextField, IconButton, Popover } from "@mui/material";
+import { IconButton } from "@mui/material";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { Calendar } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "../../reactCalendarMui.css";
+import TextField from "./CompatTextField";
+import Box from "./CompatBox";
 
 const toISO = (date) =>
-  date instanceof Date ? date.toISOString().slice(0, 10) : "";
+date instanceof Date ? date.toISOString().slice(0, 10) : "";
 
 const DateRangeFilter = ({
   fromId,
@@ -18,7 +22,7 @@ const DateRangeFilter = ({
   onChange,
   size = "small",
   variant = "outlined",
-  sx,
+  sx
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -47,11 +51,11 @@ const DateRangeFilter = ({
   };
 
   const calendarValue =
-    fromVal && toVal
-      ? [new Date(fromVal), new Date(toVal)]
-      : fromVal
-      ? [new Date(fromVal), new Date(fromVal)]
-      : new Date();
+  fromVal && toVal ?
+  [new Date(fromVal), new Date(toVal)] :
+  fromVal ?
+  [new Date(fromVal), new Date(fromVal)] :
+  new Date();
 
   return (
     <Box
@@ -61,9 +65,9 @@ const DateRangeFilter = ({
         gap: 1.5,
         flexWrap: "wrap",
         alignItems: "center",
-        ...sx,
-      }}
-    >
+        ...sx
+      }}>
+
       <TextField
         type="date"
         size={size}
@@ -72,8 +76,8 @@ const DateRangeFilter = ({
         value={fromVal}
         onChange={(e) => onChange(fromId, e.target.value)}
         InputLabelProps={{ shrink: true }}
-        sx={{ minWidth: 150, flex: 1 }}
-      />
+        sx={{ minWidth: 150, flex: 1 }} />
+
 
       <TextField
         type="date"
@@ -83,8 +87,8 @@ const DateRangeFilter = ({
         value={toVal}
         onChange={(e) => onChange(toId, e.target.value)}
         InputLabelProps={{ shrink: true }}
-        sx={{ minWidth: 150, flex: 1 }}
-      />
+        sx={{ minWidth: 150, flex: 1 }} />
+
 
       <IconButton
         onClick={handleOpen}
@@ -94,9 +98,9 @@ const DateRangeFilter = ({
           position: "absolute",
           right: 0,
           top: "50%",
-          transform: "translateY(-50%)",
-        }}
-      >
+          transform: "translateY(-50%)"
+        }}>
+
         <CalendarMonthIcon fontSize="small" />
       </IconButton>
 
@@ -104,19 +108,19 @@ const DateRangeFilter = ({
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-      >
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}>
+
         <Box sx={{ p: 1 }}>
           <Calendar
             onChange={handleCalendarChange}
             value={calendarValue}
             selectRange
-            locale="es-ES"
-          />
+            locale="es-ES" />
+
         </Box>
       </Popover>
-    </Box>
-  );
+    </Box>);
+
 };
 
 DateRangeFilter.propTypes = {
@@ -128,7 +132,7 @@ DateRangeFilter.propTypes = {
   onChange: PropTypes.func.isRequired,
   size: PropTypes.oneOf(["small", "medium"]),
   variant: PropTypes.oneOf(["outlined", "filled", "standard"]),
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };
 
 export default DateRangeFilter;

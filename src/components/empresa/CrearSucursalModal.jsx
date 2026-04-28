@@ -1,20 +1,15 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Box,
-  CircularProgress,
-} from "@mui/material";
+import Dialog from "../common/CompatDialog";
+import { DialogTitle, DialogContent, DialogActions, Button, CircularProgress } from "@mui/material";
 import { useState } from "react";
+import PhoneTextField from "../common/PhoneTextField";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
 
 export default function CrearSucursalModal({
   open,
   onClose,
   onCrearSucursal,
-  idEmpresa,
+  idEmpresa
 }) {
   const [nombre, setNombre] = useState("");
   const [direccion, setDireccion] = useState("");
@@ -40,7 +35,7 @@ export default function CrearSucursalModal({
         id_empresa: idEmpresa,
         nombre: nombre.trim(),
         direccion: direccion.trim(),
-        telefono: telefono.trim() || null,
+        telefono: telefono.trim() || null
       });
       setNombre("");
       setDireccion("");
@@ -63,8 +58,8 @@ export default function CrearSucursalModal({
           component="form"
           noValidate
           autoComplete="off"
-          sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 1 }}
-        >
+          sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 1 }}>
+
           <TextField
             label="Nombre"
             value={nombre}
@@ -73,8 +68,8 @@ export default function CrearSucursalModal({
             helperText={errors.nombre}
             required
             autoFocus
-            fullWidth
-          />
+            fullWidth />
+
           <TextField
             label="Dirección"
             value={direccion}
@@ -82,15 +77,15 @@ export default function CrearSucursalModal({
             error={!!errors.direccion}
             helperText={errors.direccion}
             required
-            fullWidth
-          />
-          <TextField
+            fullWidth />
+
+          <PhoneTextField
             label="Teléfono"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
             fullWidth
-            placeholder="Opcional"
           />
+
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, py: 2 }}>
@@ -98,36 +93,36 @@ export default function CrearSucursalModal({
           onClick={onClose}
           disabled={loading}
           variant="outlined"
-          sx={{ textTransform: "none", minWidth: 120 }}
-        >
+          sx={{ textTransform: "none", minWidth: 120 }}>
+
           Cancelar
         </Button>
         <Button
           onClick={handleSubmit}
           disabled={loading}
           variant="contained"
-          sx={{ textTransform: "none", minWidth: 120, position: "relative" }}
-        >
-          {loading ? (
-            <>
+          sx={{ textTransform: "none", minWidth: 120, position: "relative" }}>
+
+          {loading ?
+          <>
               Creando...
               <CircularProgress
-                size={20}
-                sx={{
-                  color: "inherit",
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  marginTop: "-10px",
-                  marginLeft: "-10px",
-                }}
-              />
-            </>
-          ) : (
-            "Crear"
-          )}
+              size={20}
+              sx={{
+                color: "inherit",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                marginTop: "-10px",
+                marginLeft: "-10px"
+              }} />
+
+            </> :
+
+          "Crear"
+          }
         </Button>
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 }

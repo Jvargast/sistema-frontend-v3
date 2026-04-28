@@ -1,13 +1,6 @@
-import { useState } from "react";
 import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  TextField,
-  Grid,
-  Divider,
-} from "@mui/material";
+  useState } from "react";
+import { Paper, Button, Divider } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useCreateFormulaMutation } from "../../store/services/FormulaProductoApi";
@@ -16,6 +9,10 @@ import ListaInsumos from "../../components/formulas/ListaInsumos";
 import ResumenFormula from "../../components/formulas/ResumenFormula";
 import SelectorProducto from "../../components/formulas/SelectorProducto";
 import BackButton from "../../components/common/BackButton";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Typography from "../../components/common/CompatTypography";
 
 const CrearFormula = () => {
   const dispatch = useDispatch();
@@ -85,7 +82,7 @@ const CrearFormula = () => {
           gridTemplateColumns: "1fr auto 1fr",
           alignItems: "center",
           mb: 2,
-          minHeight: 40, 
+          minHeight: 40,
         }}
       >
         <Box sx={{ justifySelf: "start" }}>

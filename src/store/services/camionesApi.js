@@ -5,9 +5,9 @@ import { baseQueryWithReauthEnhanced } from "./fettchQuery";
 export const camionesApi = createApi({
   reducerPath: "camionesApi",
   baseQuery: baseQueryWithReauthEnhanced,
-  tagTypes: ["Camion"], 
+  tagTypes: ["Camion"],
   endpoints: (builder) => ({
-    
+
     // Obtener todos los camiones
     getAllCamiones: builder.query({
       query: (params) => ({

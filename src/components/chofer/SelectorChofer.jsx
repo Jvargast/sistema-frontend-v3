@@ -1,6 +1,9 @@
-import { Box, TextField, MenuItem, Typography } from "@mui/material";
+import { MenuItem } from "@mui/material";
 import PropTypes from 'prop-types';
 import { useGetAllChoferesQuery } from "../../store/services/usuariosApi";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const ChoferSelector = ({ selectedChofer, setSelectedChofer }) => {
   const { data: choferes, isLoading, error } = useGetAllChoferesQuery();

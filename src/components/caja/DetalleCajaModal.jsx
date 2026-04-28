@@ -1,21 +1,27 @@
+import Modal from "../common/CompatModal";
 import {
-  Box,
-  Typography,
-  Modal,
   Backdrop,
-  Fade,
-  CircularProgress,
   Button,
+  Chip,
+  CircularProgress,
   Divider,
-  TextField,
+  Fade,
+  IconButton,
 } from "@mui/material";
 import {
-  Close,
   AccountBalance,
-  DateRange,
   AttachMoney,
+  Close,
+  DateRange,
+  EditOutlined,
+  LockOpenOutlined,
+  LockOutlined,
   Person,
+  PhoneOutlined,
+  SaveOutlined,
+  StorefrontOutlined,
 } from "@mui/icons-material";
+import { alpha, useTheme } from "@mui/material/styles";
 import PropTypes from "prop-types";
 import {
   useCloseCajaMutation,
@@ -27,31 +33,159 @@ import { useEffect, useState } from "react";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { useDispatch } from "react-redux";
 import AlertDialog from "../common/AlertDialog";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
-const modalStyle = {
+const getModalSx = (theme) => ({
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 480,
+  width: { xs: "calc(100vw - 32px)", sm: 680 },
+  maxWidth: "100%",
+  maxHeight: "calc(100vh - 32px)",
   bgcolor: "background.paper",
-  p: 4,
-  borderRadius: 3,
-  boxShadow: 24,
+  border: "1px solid",
+  borderColor: "divider",
+  borderRadius: 1.5,
+  boxShadow:
+    theme.palette.mode === "light"
+      ? "0 18px 48px rgba(15, 23, 42, 0.18)"
+      : "0 18px 48px rgba(0, 0, 0, 0.45)",
+  overflow: "hidden",
+  display: "flex",
+  flexDirection: "column",
+});
+
+const getEstadoMeta = (estado, theme) => {
+  const key = String(estado || "").toLowerCase();
+  const map = {
+    abierta: {
+      label: "Abierta",
+      color: theme.palette.success.main,
+      bg: alpha(theme.palette.success.main, 0.1),
+    },
+    pendiente: {
+      label: "Pendiente",
+      color: theme.palette.warning.dark,
+      bg: alpha(theme.palette.warning.main, 0.14),
+    },
+    cerrada: {
+      label: "Cerrada",
+      color: theme.palette.error.main,
+      bg: alpha(theme.palette.error.main, 0.1),
+    },
+  };
+
+  return (
+    map[key] || {
+      label: estado || "Sin estado",
+      color: theme.palette.text.secondary,
+      bg: alpha(theme.palette.text.secondary, 0.1),
+    }
+  );
+};
+
+const formatCLP = (value) =>
+  new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: "CLP",
+    maximumFractionDigits: 0,
+  }).format(Number(value || 0));
+
+const formatFecha = (fecha) =>
+  fecha ? new Date(fecha).toLocaleString() : "No disponible";
+
+const actionButtonSx = (theme, variant = "primary") => ({
+  borderRadius: 1,
+  textTransform: "none",
+  fontWeight: 800,
+  boxShadow: "none",
+  ...(variant === "primary"
+    ? {
+        bgcolor: "#0F172A",
+        color: theme.palette.common.white,
+        "&:hover": {
+          bgcolor: theme.palette.common.black,
+          boxShadow: "none",
+        },
+      }
+    : {
+        borderColor: alpha("#0F172A", 0.3),
+        color: "#0F172A",
+        "&:hover": {
+          borderColor: "#0F172A",
+          bgcolor: alpha("#0F172A", 0.04),
+        },
+      }),
+});
+
+const InfoItem = ({
+  icon,
+  label,
+  value,
+  children,
+  indicator,
+  fullWidth = false,
+}) => (
+  <Box
+    sx={{
+      border: "1px solid",
+      borderColor: "divider",
+      borderRadius: 1,
+      p: 1.25,
+      display: "flex",
+      gap: 1,
+      minWidth: 0,
+      gridColumn: fullWidth ? { xs: "auto", sm: "1 / -1" } : "auto",
+    }}
+  >
+    <Box sx={{ mt: 0.25, flex: "0 0 auto" }}>{icon}</Box>
+    <Box sx={{ minWidth: 0, flex: 1 }}>
+      <Box
+        sx={{
+          minHeight: 20,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 1,
+        }}
+      >
+        <Typography variant="caption" color="text.secondary">
+          {label}
+        </Typography>
+        {indicator}
+      </Box>
+      {children || (
+        <Typography variant="body2" fontWeight={800} noWrap sx={{ minHeight: 22 }}>
+          {value}
+        </Typography>
+      )}
+    </Box>
+  </Box>
+);
+
+InfoItem.propTypes = {
+  icon: PropTypes.node.isRequired,
+  label: PropTypes.string.isRequired,
+  value: PropTypes.node,
+  children: PropTypes.node,
+  indicator: PropTypes.node,
+  fullWidth: PropTypes.bool,
 };
 
 const DetalleCajaModal = ({ idCaja, onClose }) => {
+  const theme = useTheme();
   const dispatch = useDispatch();
   const [alertType, setAlertType] = useState(null);
   const [alertOpen, setAlertOpen] = useState(false);
-
-  const { data: caja, isLoading, refetch, error } = useGetCajaByIdQuery(idCaja);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
-    saldo_inicial: caja?.saldo_inicial || 0,
-    // otros campos que quieras editar
+    saldo_inicial: 0,
   });
 
+  const { data: caja, isLoading, refetch, error } = useGetCajaByIdQuery(idCaja);
   const [abrirCaja] = useOpenCajaMutation();
   const [cerrarCaja] = useCloseCajaMutation();
   const [updateCaja] = useUpdateCajaMutation();
@@ -94,7 +228,10 @@ const DetalleCajaModal = ({ idCaja, onClose }) => {
       console.error("Error al abrir caja:", err);
       dispatch(
         showNotification({
-          message: `Error al abrir la caja: ${err?.data}`,
+          message:
+            err?.data?.message ||
+            err?.data?.error ||
+            "Error al abrir la caja",
           severity: "error",
         })
       );
@@ -115,7 +252,10 @@ const DetalleCajaModal = ({ idCaja, onClose }) => {
       console.error("Error al cerrar caja:", err);
       dispatch(
         showNotification({
-          message: "Error al cerrar la caja",
+          message:
+            err?.data?.message ||
+            err?.data?.error ||
+            "Error al cerrar la caja",
           severity: "error",
         })
       );
@@ -142,15 +282,17 @@ const DetalleCajaModal = ({ idCaja, onClose }) => {
       console.error("Error al guardar cambios:", err);
       dispatch(
         showNotification({
-          message: "Error al guardar los cambios",
+          message:
+            err?.data?.message ||
+            err?.data?.error ||
+            "Error al guardar los cambios",
           severity: "error",
         })
       );
     }
   };
-  const formatFecha = (fecha) => {
-    return fecha ? new Date(fecha).toLocaleString() : "No disponible";
-  };
+
+  const estado = caja ? getEstadoMeta(caja.estado, theme) : null;
 
   return (
     <>
@@ -161,229 +303,412 @@ const DetalleCajaModal = ({ idCaja, onClose }) => {
         BackdropComponent={Backdrop}
         BackdropProps={{ timeout: 500 }}
       >
-        <>
-          <Fade in={!!idCaja}>
-            <Box sx={modalStyle}>
-              {/* Botón de cierre */}
-              <Button
-                onClick={onClose}
+        <Fade in={!!idCaja}>
+          <Box sx={getModalSx(theme)}>
+            <Box
+              sx={{
+                px: { xs: 2, sm: 2.5 },
+                py: 2,
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                borderBottom: "1px solid",
+                borderColor: "divider",
+                bgcolor:
+                  theme.palette.mode === "light"
+                    ? alpha(theme.palette.grey[100], 0.72)
+                    : alpha(theme.palette.common.white, 0.04),
+              }}
+            >
+              <Box
                 sx={{
-                  position: "absolute",
-                  top: 10,
-                  right: 10,
-                  minWidth: "32px",
-                  borderRadius: "50%",
-                  color: "#333",
-                  "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" },
+                  width: 38,
+                  height: 38,
+                  borderRadius: 1,
+                  bgcolor: "#0F172A",
+                  color: theme.palette.common.white,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                <Close />
-              </Button>
+                <AccountBalance fontSize="small" />
+              </Box>
 
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography variant="h6" fontWeight={800} lineHeight={1.2}>
+                  Detalle de caja
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {caja ? `Caja #${caja.id_caja}` : "Cargando información"}
+                </Typography>
+              </Box>
+
+              {estado && (
+                <Chip
+                  size="small"
+                  label={estado.label}
+                  sx={{
+                    borderRadius: 1,
+                    color: estado.color,
+                    bgcolor: estado.bg,
+                    fontWeight: 800,
+                  }}
+                />
+              )}
+
+              <IconButton
+                size="small"
+                aria-label="Cerrar"
+                onClick={onClose}
+                sx={{
+                  borderRadius: "50%",
+                  color: "text.secondary",
+                  "&:hover": {
+                    bgcolor: alpha(theme.palette.text.primary, 0.08),
+                  },
+                }}
+              >
+                <Close fontSize="small" />
+              </IconButton>
+            </Box>
+
+            <Box sx={{ p: { xs: 2, sm: 2.5 }, overflow: "auto" }}>
               {isLoading ? (
                 <Box
                   display="flex"
                   justifyContent="center"
                   alignItems="center"
-                  minHeight="200px"
+                  minHeight={240}
                 >
-                  <CircularProgress />
+                  <CircularProgress size={30} />
                 </Box>
               ) : error ? (
-                <Typography color="error">
+                <Box
+                  sx={{
+                    py: 5,
+                    textAlign: "center",
+                    color: "error.main",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 1,
+                  }}
+                >
                   Error al cargar los detalles.
-                </Typography>
+                </Box>
               ) : (
                 <>
-                  <Typography
-                    variant="h5"
-                    fontWeight="bold"
-                    mb={2}
-                    textAlign="center"
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                      gap: 1.25,
+                    }}
                   >
-                    Detalles de Caja #{caja.id_caja}
-                  </Typography>
-                  <Box display="flex" justifyContent="center" gap={2} mb={2}>
-                    {caja.estado === "cerrada" && (
-                      <Button
-                        variant="contained"
-                        color="success"
-                        onClick={() => {
-                          setAlertType("abrir");
-                          setAlertOpen(true);
-                        }}
-                      >
-                        Abrir Caja
-                      </Button>
-                    )}
+                    <InfoItem
+                      fullWidth
+                      icon={
+                        <StorefrontOutlined
+                          fontSize="small"
+                          sx={{ color: "text.secondary" }}
+                        />
+                      }
+                      label="Sucursal"
+                      value={caja?.sucursal?.nombre || "Sin sucursal"}
+                    />
 
-                    {caja.estado === "abierta" && (
-                      <Button
-                        variant="contained"
-                        color="error"
-                        onClick={() => {
-                          setAlertType("cerrar");
-                          setAlertOpen(true);
-                        }}
-                      >
-                        Cerrar Caja
-                      </Button>
-                    )}
+                    <InfoItem
+                      icon={
+                        <AttachMoney
+                          fontSize="small"
+                          sx={{ color: theme.palette.warning.dark }}
+                        />
+                      }
+                      label="Saldo inicial"
+                      indicator={
+                        editMode ? (
+                          <Chip
+                            size="small"
+                            label="Editando"
+                            sx={{
+                              height: 18,
+                              borderRadius: 1,
+                              fontSize: 11,
+                              fontWeight: 800,
+                              color: theme.palette.warning.dark,
+                              bgcolor: alpha(theme.palette.warning.main, 0.14),
+                            }}
+                          />
+                        ) : null
+                      }
+                    >
+                      {editMode ? (
+                        <Box
+                          sx={{
+                            minHeight: 22,
+                            display: "flex",
+                            alignItems: "center",
+                            maxWidth: 180,
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            fontWeight={800}
+                            sx={{ mr: 0.25 }}
+                          >
+                            $
+                          </Typography>
+                          <TextField
+                            variant="standard"
+                            type="number"
+                            value={formData.saldo_inicial}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                saldo_inicial: e.target.value,
+                              })
+                            }
+                            InputProps={{ disableUnderline: true }}
+                            inputProps={{
+                              "aria-label": "Saldo inicial",
+                              inputMode: "numeric",
+                            }}
+                            sx={{
+                              width: 120,
+                              "& .MuiInputBase-root": {
+                                p: 0,
+                                height: 22,
+                                fontSize: "0.875rem",
+                                fontWeight: 800,
+                                lineHeight: 1.43,
+                                color: "text.primary",
+                              },
+                              "& .MuiInputBase-input": {
+                                p: 0,
+                                height: "auto",
+                                fontWeight: 800,
+                              },
+                              "& input[type=number]": {
+                                MozAppearance: "textfield",
+                              },
+                              "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button":
+                                {
+                                  WebkitAppearance: "none",
+                                  margin: 0,
+                                },
+                            }}
+                          />
+                        </Box>
+                      ) : (
+                        <Typography variant="body2" fontWeight={800} sx={{ minHeight: 22 }}>
+                          {formatCLP(caja.saldo_inicial)}
+                        </Typography>
+                      )}
+                    </InfoItem>
 
-                    {!editMode && (
-                      <Button
-                        variant="outlined"
-                        onClick={() => setEditMode(true)}
-                      >
-                        Editar
-                      </Button>
-                    )}
+                    <InfoItem
+                      icon={
+                        <AttachMoney
+                          fontSize="small"
+                          sx={{ color: theme.palette.warning.dark }}
+                        />
+                      }
+                      label="Saldo final"
+                      value={formatCLP(caja.saldo_final)}
+                    />
+
+                    <InfoItem
+                      icon={
+                        <DateRange
+                          fontSize="small"
+                          sx={{ color: theme.palette.text.secondary }}
+                        />
+                      }
+                      label="Fecha apertura"
+                      value={formatFecha(caja.fecha_apertura)}
+                    />
+
+                    <InfoItem
+                      icon={
+                        <DateRange
+                          fontSize="small"
+                          sx={{ color: theme.palette.text.secondary }}
+                        />
+                      }
+                      label="Fecha cierre"
+                      value={formatFecha(caja.fecha_cierre)}
+                    />
+
+                    <InfoItem
+                      icon={
+                        <Person
+                          fontSize="small"
+                          sx={{ color: theme.palette.text.secondary }}
+                        />
+                      }
+                      label="Usuario apertura"
+                      value={caja.usuario_apertura || "No asignado"}
+                    />
+
+                    <InfoItem
+                      icon={
+                        <Person
+                          fontSize="small"
+                          sx={{ color: theme.palette.text.secondary }}
+                        />
+                      }
+                      label="Usuario cierre"
+                      value={caja.usuario_cierre || "No asignado"}
+                    />
                   </Box>
 
-                  <Divider sx={{ mb: 2 }} />
-
-                  <Box display="flex" flexDirection="column" gap={1.5}>
-                    {/* Sucursal */}
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <AccountBalance sx={{ color: "#0288d1" }} />
-                      <Typography variant="body1">
-                        <strong>Sucursal:</strong> {caja.sucursal.nombre}
-                      </Typography>
-                    </Box>
-
-                    {/* Estado */}
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <DateRange
-                        sx={{
-                          color:
-                            caja.estado === "abierta" ? "#4CAF50" : "#F44336",
-                        }}
+                  <Box
+                    sx={{
+                      mt: 1.5,
+                      border: "1px solid",
+                      borderColor: "divider",
+                      borderRadius: 1,
+                      p: 1.5,
+                      display: "grid",
+                      gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                      gap: 1.25,
+                      bgcolor:
+                        theme.palette.mode === "light"
+                          ? alpha(theme.palette.grey[100], 0.42)
+                          : alpha(theme.palette.common.white, 0.03),
+                    }}
+                  >
+                    <Box display="flex" gap={1} sx={{ minWidth: 0 }}>
+                      <StorefrontOutlined
+                        fontSize="small"
+                        sx={{ color: "text.secondary" }}
                       />
-                      <Typography variant="body1">
-                        <strong>Estado:</strong> {caja.estado}
-                      </Typography>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Dirección sucursal
+                        </Typography>
+                        <Typography variant="body2" fontWeight={700} noWrap>
+                          {caja?.sucursal?.direccion || "No disponible"}
+                        </Typography>
+                      </Box>
                     </Box>
 
-                    {/* Saldos */}
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      gap={1}
-                      sx={{
-                        backgroundColor: editMode
-                          ? "rgba(255, 152, 0, 0.08)"
-                          : "transparent",
-                        px: 2,
-                        py: 1,
-                        borderRadius: 2,
-                        transition: "background-color 0.3s",
-                      }}
-                    >
-                      <AttachMoney sx={{ color: "#ff9800" }} />
-                      <Typography variant="body1" fontWeight="500" width={140}>
-                        Saldo Inicial:
-                      </Typography>
-
-                      {editMode ? (
-                        <TextField
-                          variant="standard"
-                          type="number"
-                          value={formData.saldo_inicial}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              saldo_inicial: e.target.value,
-                            })
-                          }
-                          inputProps={{
-                            style: { textAlign: "right", fontWeight: "bold" },
-                          }}
-                          sx={{
-                            maxWidth: 100,
-                            "& input": {
-                              fontSize: "1rem",
-                            },
-                          }}
-                        />
-                      ) : (
-                        caja.saldo_inicial
-                      )}
-                    </Box>
-
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <AttachMoney sx={{ color: "#ff9800" }} />
-                      <Typography variant="body1">
-                        <strong>Saldo Final:</strong> ${caja.saldo_final || "0"}
-                      </Typography>
-                    </Box>
-
-                    {/* Fechas */}
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <DateRange sx={{ color: "#9C27B0" }} />
-                      <Typography variant="body1">
-                        <strong>Fecha Apertura:</strong>{" "}
-                        {formatFecha(caja.fecha_apertura)}
-                      </Typography>
-                    </Box>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <DateRange sx={{ color: "#9C27B0" }} />
-                      <Typography variant="body1">
-                        <strong>Fecha Cierre:</strong>{" "}
-                        {formatFecha(caja.fecha_cierre)}
-                      </Typography>
-                    </Box>
-
-                    {/* Usuarios */}
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Person sx={{ color: "#673AB7" }} />
-                      <Typography variant="body1">
-                        <strong>Usuario Apertura:</strong>{" "}
-                        {caja.usuario_apertura || "No asignado"}
-                      </Typography>
-                    </Box>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Person sx={{ color: "#673AB7" }} />
-                      <Typography variant="body1">
-                        <strong>Usuario Cierre:</strong>{" "}
-                        {caja.usuario_cierre || "No asignado"}
-                      </Typography>
-                    </Box>
-
-                    {/* Dirección y Teléfono */}
-                    <Box display="flex" flexDirection="column" mt={2}>
-                      <Typography variant="body2">
-                        <strong>Dirección Sucursal:</strong>{" "}
-                        {caja.sucursal.direccion}
-                      </Typography>
-                      <Typography variant="body2">
-                        <strong>Teléfono Sucursal:</strong>{" "}
-                        {caja.sucursal.telefono}
-                      </Typography>
+                    <Box display="flex" gap={1} sx={{ minWidth: 0 }}>
+                      <PhoneOutlined
+                        fontSize="small"
+                        sx={{ color: "text.secondary" }}
+                      />
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Teléfono sucursal
+                        </Typography>
+                        <Typography variant="body2" fontWeight={700} noWrap>
+                          {caja?.sucursal?.telefono || "No disponible"}
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
                 </>
               )}
-              {editMode && (
-                <Box mt={3} display="flex" justifyContent="space-between">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                      setAlertType("guardar");
-                      setAlertOpen(true);
-                    }}
-                  >
-                    Guardar Cambios
-                  </Button>
-                  <Button variant="outlined" onClick={() => setEditMode(false)}>
-                    Cancelar
-                  </Button>
-                </Box>
-              )}
             </Box>
-          </Fade>
-        </>
+
+            {!isLoading && !error && caja && (
+              <>
+                <Divider />
+                <Box
+                  sx={{
+                    px: { xs: 2, sm: 2.5 },
+                    py: 1.5,
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "flex-end",
+                    gap: 1,
+                    bgcolor:
+                      theme.palette.mode === "light"
+                        ? alpha(theme.palette.grey[50], 0.8)
+                        : alpha(theme.palette.common.white, 0.03),
+                  }}
+                >
+                  {editMode ? (
+                    <>
+                      <Button
+                        variant="outlined"
+                        onClick={() => setEditMode(false)}
+                        sx={actionButtonSx(theme, "secondary")}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        variant="contained"
+                        startIcon={<SaveOutlined />}
+                        onClick={() => {
+                          setAlertType("guardar");
+                          setAlertOpen(true);
+                        }}
+                        sx={actionButtonSx(theme, "primary")}
+                      >
+                        Guardar cambios
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outlined"
+                        startIcon={<EditOutlined />}
+                        onClick={() => setEditMode(true)}
+                        sx={actionButtonSx(theme, "secondary")}
+                      >
+                        Editar saldo
+                      </Button>
+
+                      {caja.estado === "cerrada" && (
+                        <Button
+                          variant="contained"
+                          color="success"
+                          startIcon={<LockOpenOutlined />}
+                          onClick={() => {
+                            setAlertType("abrir");
+                            setAlertOpen(true);
+                          }}
+                          sx={{
+                            borderRadius: 1,
+                            textTransform: "none",
+                            fontWeight: 800,
+                            boxShadow: "none",
+                          }}
+                        >
+                          Abrir caja
+                        </Button>
+                      )}
+
+                      {caja.estado === "abierta" && (
+                        <Button
+                          variant="contained"
+                          color="error"
+                          startIcon={<LockOutlined />}
+                          onClick={() => {
+                            setAlertType("cerrar");
+                            setAlertOpen(true);
+                          }}
+                          sx={{
+                            borderRadius: 1,
+                            textTransform: "none",
+                            fontWeight: 800,
+                            boxShadow: "none",
+                          }}
+                        >
+                          Cerrar caja
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </Box>
+              </>
+            )}
+          </Box>
+        </Fade>
       </Modal>
+
       <AlertDialog
         openAlert={alertOpen}
         onCloseAlert={() => setAlertOpen(false)}

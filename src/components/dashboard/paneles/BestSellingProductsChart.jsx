@@ -8,13 +8,15 @@ import {
   Cell,
   CartesianGrid,
 } from "recharts";
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import { useGetResumenProductosPorFechaQuery } from "../../../store/services/productosEstadisticasApi";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { useMemo } from "react";
 import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
 
 const colors = [
   "#A3C4F3",

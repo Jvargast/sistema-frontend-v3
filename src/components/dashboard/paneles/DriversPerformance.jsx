@@ -1,10 +1,12 @@
-import { Box, Typography, Avatar, Chip } from "@mui/material";
+import { Avatar, Chip } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import PersonIcon from "@mui/icons-material/Person";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import WarningIcon from "@mui/icons-material/Warning";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
 
 // 📍 Datos de desempeño de los conductores
 const drivers = [

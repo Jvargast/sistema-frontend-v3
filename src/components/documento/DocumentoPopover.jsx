@@ -1,12 +1,5 @@
-import {
-  Popover,
-  Typography,
-  Divider,
-  Chip,
-  CircularProgress,
-  Box,
-  Button,
-} from "@mui/material";
+import Popover from "../common/CompatPopover";
+import { Divider, Chip, CircularProgress, Button } from "@mui/material";
 import PropTypes from "prop-types";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import PaidIcon from "@mui/icons-material/Paid";
@@ -15,31 +8,33 @@ import { useGetDocumentoByIdQuery } from "../../store/services/documentoApi";
 import { useNavigate } from "react-router-dom";
 import Fade from "@mui/material/Fade";
 import { useGetCuentaPorCobrarByDocumentoIdQuery } from "../../store/services/cuentasPorCobrarApi";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
 
 const DocumentoPopover = ({ anchorEl, onClose, idDocumento }) => {
   const open = Boolean(anchorEl);
   const {
     data: documento,
     isLoading,
-    isError,
+    isError
   } = useGetDocumentoByIdQuery(idDocumento, {
-    skip: !open,
+    skip: !open
   });
   const navigate = useNavigate();
   const {
     data: factura,
     isLoading: isLoadingFactura,
-    isError: isErrorFactura,
+    isError: isErrorFactura
   } = useGetCuentaPorCobrarByDocumentoIdQuery(idDocumento, {
-    skip: !open,
+    skip: !open
   });
 
   const colorChip =
-    documento?.estadoPago?.nombre === "Pagado"
-      ? "success"
-      : documento?.estadoPago?.nombre === "Pendiente"
-      ? "warning"
-      : "default";
+  documento?.estadoPago?.nombre === "Pagado" ?
+  "success" :
+  documento?.estadoPago?.nombre === "Pendiente" ?
+  "warning" :
+  "default";
 
   return (
     <Popover
@@ -55,18 +50,18 @@ const DocumentoPopover = ({ anchorEl, onClose, idDocumento }) => {
           maxWidth: 360,
           border: "1px solid #e0e0e0",
           borderRadius: 2,
-          boxShadow: 3,
-        },
-      }}
-    >
-      {isLoading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" p={2}>
+          boxShadow: 3
+        }
+      }}>
+
+      {isLoading ?
+      <Box display="flex" justifyContent="center" alignItems="center" p={2}>
           <CircularProgress size={20} />
-        </Box>
-      ) : isError || !documento ? (
-        <Typography color="error">Error al cargar documento.</Typography>
-      ) : (
-        <Box>
+        </Box> :
+      isError || !documento ?
+      <Typography color="error">Error al cargar documento.</Typography> :
+
+      <Box>
           <Box display="flex" alignItems="center" gap={1} mb={1}>
             <ReceiptLongIcon color="primary" />
             <Typography variant="h6" fontWeight="bold" color="primary">
@@ -93,11 +88,11 @@ const DocumentoPopover = ({ anchorEl, onClose, idDocumento }) => {
               <strong>Estado:</strong>
             </Typography>
             <Chip
-              label={documento.estadoPago?.nombre}
-              color={colorChip}
-              size="small"
-              sx={{ fontWeight: "bold" }}
-            />
+            label={documento.estadoPago?.nombre}
+            color={colorChip}
+            size="small"
+            sx={{ fontWeight: "bold" }} />
+
           </Box>
 
           <Divider sx={{ my: 1 }} />
@@ -116,8 +111,8 @@ const DocumentoPopover = ({ anchorEl, onClose, idDocumento }) => {
             <strong>${Number(documento.total).toLocaleString("es-CL")}</strong>
           </Typography>
 
-          {documento.observaciones && (
-            <>
+          {documento.observaciones &&
+        <>
               <Divider sx={{ my: 1 }} />
               <Box display="flex" alignItems="flex-start" gap={1}>
                 <InfoIcon fontSize="small" sx={{ mt: 0.5 }} />
@@ -126,56 +121,56 @@ const DocumentoPopover = ({ anchorEl, onClose, idDocumento }) => {
                 </Typography>
               </Box>
             </>
-          )}
+        }
 
           <Divider sx={{ my: 2 }} />
 
           <Box display="flex" justifyContent="center">
-            {isLoadingFactura ? (
-              <CircularProgress size={18} />
-            ) : isErrorFactura ? (
-              <Typography
-                variant="caption"
-                color="error"
-                textAlign="center"
-                display="block"
-              >
+            {isLoadingFactura ?
+          <CircularProgress size={18} /> :
+          isErrorFactura ?
+          <Typography
+            variant="caption"
+            color="error"
+            textAlign="center"
+            display="block">
+
                 ❌ No se pudo obtener la factura asociada.
-              </Typography>
-            ) : factura?.id_cxc ? (
-              <Button
-                variant="contained"
-                size="small"
-                sx={{
-                  textTransform: "none",
-                  fontWeight: "bold",
-                  borderRadius: 2,
-                  px: 2,
-                  backgroundColor: "#1e88e5",
-                  color: "#fff",
-                  "&:hover": {
-                    backgroundColor: "#1565c0",
-                  },
-                }}
-                onClick={() => {
-                  onClose();
-                  navigate(`/facturas/ver/${factura.id_cxc}`);
-                }}
-              >
+              </Typography> :
+          factura?.id_cxc ?
+          <Button
+            variant="contained"
+            size="small"
+            sx={{
+              textTransform: "none",
+              fontWeight: "bold",
+              borderRadius: 2,
+              px: 2,
+              backgroundColor: "#1e88e5",
+              color: "#fff",
+              "&:hover": {
+                backgroundColor: "#1565c0"
+              }
+            }}
+            onClick={() => {
+              onClose();
+              navigate(`/facturas/ver/${factura.id_cxc}`);
+            }}>
+
                 Ir a Factura
-              </Button>
-            ) : null}
+              </Button> :
+          null}
           </Box>
         </Box>
-      )}
-    </Popover>
-  );
+      }
+    </Popover>);
+
 };
 
 DocumentoPopover.propTypes = {
   anchorEl: PropTypes.any,
   onClose: PropTypes.func.isRequired,
-  idDocumento: PropTypes.number.isRequired,
+  idDocumento: PropTypes.number.isRequired
 };
 
 export default DocumentoPopover;

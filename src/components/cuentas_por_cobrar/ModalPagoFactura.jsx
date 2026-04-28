@@ -1,17 +1,5 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  MenuItem,
-  CircularProgress,
-  Box,
-  Grid,
-  InputAdornment,
-  Divider,
-} from "@mui/material";
+import Dialog from "../common/CompatDialog";
+import { DialogTitle, DialogContent, DialogActions, Button, MenuItem, CircularProgress, InputAdornment, Divider } from "@mui/material";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import PaymentIcon from "@mui/icons-material/Payment";
 import NotesIcon from "@mui/icons-material/Notes";
@@ -22,13 +10,16 @@ import { useRegistrarPagoMutation } from "../../store/services/cuentasPorCobrarA
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import { formatCLP } from "../../utils/formatUtils";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
 
 const metodos = [
-  { value: 1, label: "Efectivo" },
-  { value: 2, label: "Tarjeta crédito" },
-  { value: 3, label: "Tarjeta débito" },
-  { value: 4, label: "Transferencia" },
-];
+{ value: 1, label: "Efectivo" },
+{ value: 2, label: "Tarjeta crédito" },
+{ value: 3, label: "Tarjeta débito" },
+{ value: 4, label: "Transferencia" }];
+
 
 const ModalPagoFactura = ({ open, onClose, idCxc, montoPorDefecto }) => {
   const dispatch = useDispatch();
@@ -37,12 +28,12 @@ const ModalPagoFactura = ({ open, onClose, idCxc, montoPorDefecto }) => {
   const [observaciones, setObservaciones] = useState("");
   const [referencia, setReferencia] = useState("");
   const [registrarPago, { isLoading }] = useRegistrarPagoMutation();
-  const saldoPendiente = Number(montoPorDefecto); 
+  const saldoPendiente = Number(montoPorDefecto);
   const montoNumerico = Number(monto);
   const montoValido =
-    !isNaN(montoNumerico) &&
-    montoNumerico > 0 &&
-    montoNumerico <= saldoPendiente;
+  !isNaN(montoNumerico) &&
+  montoNumerico > 0 &&
+  montoNumerico <= saldoPendiente;
 
   useEffect(() => {
     if (open && montoPorDefecto) {
@@ -57,13 +48,13 @@ const ModalPagoFactura = ({ open, onClose, idCxc, montoPorDefecto }) => {
         monto: parseFloat(monto),
         metodo_pago: metodoPago,
         observaciones,
-        referencia,
+        referencia
       }).unwrap();
       onClose();
       dispatch(
         showNotification({
           message: "Se ha registrado el pago correctamente.",
-          severity: "success",
+          severity: "success"
         })
       );
     } catch (err) {
@@ -71,7 +62,7 @@ const ModalPagoFactura = ({ open, onClose, idCxc, montoPorDefecto }) => {
       dispatch(
         showNotification({
           message: `Error al registrar el pago: ${err?.data?.error}`,
-          severity: "error",
+          severity: "error"
         })
       );
     }
@@ -100,24 +91,24 @@ const ModalPagoFactura = ({ open, onClose, idCxc, montoPorDefecto }) => {
               variant="outlined"
               error={!montoValido}
               helperText={
-                !montoValido
-                  ? "El monto debe ser mayor a 0 y no exceder el saldo pendiente"
-                  : ""
+              !montoValido ?
+              "El monto debe ser mayor a 0 y no exceder el saldo pendiente" :
+              ""
               }
               sx={{
                 "& .MuiInputAdornment-root": {
                   alignSelf: "center",
-                  mt: 0.5,
-                },
+                  mt: 0.5
+                }
               }}
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
+                startAdornment:
+                <InputAdornment position="start">
                     <MonetizationOnIcon />
                   </InputAdornment>
-                ),
-              }}
-            />
+
+              }} />
+
           </Grid>
 
           <Grid item xs={12}>
@@ -129,18 +120,18 @@ const ModalPagoFactura = ({ open, onClose, idCxc, montoPorDefecto }) => {
               fullWidth
               required
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
+                startAdornment:
+                <InputAdornment position="start">
                     <PaymentIcon />
                   </InputAdornment>
-                ),
-              }}
-            >
-              {metodos.map((op) => (
-                <MenuItem key={op.value} value={op.value}>
+
+              }}>
+
+              {metodos.map((op) =>
+              <MenuItem key={op.value} value={op.value}>
                   {op.label}
                 </MenuItem>
-              ))}
+              )}
             </TextField>
           </Grid>
 
@@ -151,13 +142,13 @@ const ModalPagoFactura = ({ open, onClose, idCxc, montoPorDefecto }) => {
               onChange={(e) => setReferencia(e.target.value)}
               fullWidth
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
+                startAdornment:
+                <InputAdornment position="start">
                     <ReceiptIcon />
                   </InputAdornment>
-                ),
-              }}
-            />
+
+              }} />
+
           </Grid>
 
           <Grid item xs={12}>
@@ -169,13 +160,13 @@ const ModalPagoFactura = ({ open, onClose, idCxc, montoPorDefecto }) => {
               onChange={(e) => setObservaciones(e.target.value)}
               fullWidth
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
+                startAdornment:
+                <InputAdornment position="start">
                     <NotesIcon />
                   </InputAdornment>
-                ),
-              }}
-            />
+
+              }} />
+
           </Grid>
         </Grid>
       </DialogContent>
@@ -191,26 +182,26 @@ const ModalPagoFactura = ({ open, onClose, idCxc, montoPorDefecto }) => {
           variant="contained"
           color="primary"
           disabled={isLoading || !montoValido || !metodoPago}
-          sx={{ fontWeight: "bold", textTransform: "none" }}
-        >
-          {isLoading ? (
-            <Box display="flex" alignItems="center" gap={1}>
+          sx={{ fontWeight: "bold", textTransform: "none" }}>
+
+          {isLoading ?
+          <Box display="flex" alignItems="center" gap={1}>
               <CircularProgress size={18} color="inherit" /> Registrando...
-            </Box>
-          ) : (
-            "Registrar Pago"
-          )}
+            </Box> :
+
+          "Registrar Pago"
+          }
         </Button>
       </DialogActions>
-    </Dialog>
-  );
+    </Dialog>);
+
 };
 
 ModalPagoFactura.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   idCxc: PropTypes.number.isRequired,
-  montoPorDefecto: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  montoPorDefecto: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 };
 
 export default ModalPagoFactura;

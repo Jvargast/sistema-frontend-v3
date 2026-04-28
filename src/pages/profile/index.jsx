@@ -1,20 +1,9 @@
-import { useState } from "react";
+import {
+  useState } from "react";
 import PropTypes from "prop-types";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LoginIcon from "@mui/icons-material/Login";
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Divider,
-  Avatar,
-  TextField,
-  Button,
-  Grid,
-  useTheme,
-  Paper,
-} from "@mui/material";
+import { Card, CardContent, Divider, Avatar, Button, useTheme, Paper } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
   useChangePasswordMutation,
@@ -26,6 +15,10 @@ import LoaderComponent from "../../components/common/LoaderComponent";
 import PasswordModal from "../../components/profile/PasswordModal";
 import BackButton from "../../components/common/BackButton";
 import { getInitialRoute } from "../../utils/navigationUtils";
+import TextField from "../../components/common/CompatTextField";
+import Box from "../../components/common/CompatBox";
+import Grid from "../../components/common/CompatGrid";
+import Typography from "../../components/common/CompatTypography";
 
 const PerfilHeader = ({ nombre, apellido, email }) => {
   const theme = useTheme();
@@ -468,7 +461,7 @@ const PerfilUsuario = () => {
         sx={{
           width: "100%",
           mx: "auto",
-          p: { xs: 1, sm: 2, md: 3 }, 
+          p: { xs: 1, sm: 2, md: 3 },
           boxShadow: { xs: 2, md: 4 },
           borderRadius: { xs: 2, md: 4 },
           background: (theme) =>

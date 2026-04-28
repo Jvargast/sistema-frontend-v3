@@ -1,15 +1,12 @@
-import {
-  Box,
-  Typography,
-  Stack,
-  IconButton,
-  TextField,
-  Paper,
-} from "@mui/material";
+import { IconButton, Paper } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import PropTypes from "prop-types";
 import { useGetInventarioDisponibleQuery } from "../../store/services/inventarioCamionApi";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
 
 const PasoSeleccionProductos = ({
   idCamion,

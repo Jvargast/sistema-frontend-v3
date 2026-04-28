@@ -1,22 +1,11 @@
-import {
-  Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
-  FormControlLabel,
-  Checkbox,
-  ListItemIcon,
-  ListItemText,
-  Box,
-  InputAdornment,
-  FormHelperText,
-  FormGroup,
-} from "@mui/material";
+import Select from "../common/CompatSelect";
+import { FormControl, InputLabel, MenuItem, FormControlLabel, Checkbox, ListItemIcon, ListItemText, InputAdornment, FormHelperText, FormGroup } from "@mui/material";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import PersonIcon from "@mui/icons-material/Person";
 import PropTypes from "prop-types";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Grid from "../common/CompatGrid";
 
 const circleNumberStyles = {
   display: "inline-flex",
@@ -29,7 +18,7 @@ const circleNumberStyles = {
   color: "#fff",
   fontSize: 14,
   fontWeight: "bold",
-  mr: 1,
+  mr: 1
 };
 
 const AgendaCargaFormInputs = ({
@@ -46,78 +35,78 @@ const AgendaCargaFormInputs = ({
   setNotas,
   descargarRetornables,
   setDescargarRetornables,
-  choferDisplay,
+  choferDisplay
 }) => {
   return (
     <>
 
       <Grid item xs={12} sm={6}>
         <Box sx={circleNumberStyles}>1</Box>
-        {isChofer ? (
-          <TextField
-            label="Chofer"
-            size="small"
-            value={`${choferDisplay?.nombre ?? "Mi usuario"} — RUT: ${
-              choferDisplay?.rut ?? idChofer
-            }`}
-            fullWidth
-            sx={{ mt: 1 }}
-            helperText="Tus datos se completan automáticamente y no se pueden editar."
-            InputProps={{
-              readOnly: true,
-              startAdornment: (
-                <InputAdornment position="start">
+        {isChofer ?
+        <TextField
+          label="Chofer"
+          size="small"
+          value={`${choferDisplay?.nombre ?? "Mi usuario"} — RUT: ${
+          choferDisplay?.rut ?? idChofer}`
+          }
+          fullWidth
+          sx={{ mt: 1 }}
+          helperText="Tus datos se completan automáticamente y no se pueden editar."
+          InputProps={{
+            readOnly: true,
+            startAdornment:
+            <InputAdornment position="start">
                   <PersonIcon />
                 </InputAdornment>
-              ),
-            }}
-          />
-        ) : (
-          <FormControl fullWidth required sx={{ minWidth: 200, mt: 1 }}>
+
+          }} /> :
+
+
+        <FormControl fullWidth required sx={{ minWidth: 200, mt: 1 }}>
             <InputLabel id="chofer-label">Chofer</InputLabel>
             <Select
-              labelId="chofer-label"
-              value={idChofer}
-              label="Chofer"
-              onChange={(e) => setIdChofer(e.target.value)}
-              size="small"
-              sx={(theme) => ({
-                bgcolor:
-                  theme.palette.mode === "dark"
-                    ? theme.palette.grey[900]
-                    : "#fff",
-                color:
-                  theme.palette.mode === "dark"
-                    ? theme.palette.grey[100]
-                    : theme.palette.text.primary,
-                borderRadius: 1,
-              })}
-            >
+            labelId="chofer-label"
+            value={idChofer}
+            label="Chofer"
+            onChange={(e) => setIdChofer(e.target.value)}
+            size="small"
+            sx={(theme) => ({
+              bgcolor:
+              theme.palette.mode === "dark" ?
+              theme.palette.grey[900] :
+              "#fff",
+              color:
+              theme.palette.mode === "dark" ?
+              theme.palette.grey[100] :
+              theme.palette.text.primary,
+              borderRadius: 1
+            })}>
+
               <MenuItem value="">
                 <ListItemText primary="-- Selecciona Chofer --" />
               </MenuItem>
               {choferes?.map((chofer) => {
-                const nombre = `${chofer.nombre ?? chofer.nombres ?? ""} ${
-                  chofer.apellido ?? chofer.apellidos ?? ""
-                }`.trim();
-                return (
-                  <MenuItem key={chofer.rut} value={chofer.rut}>
+              const nombre = `${chofer.nombre ?? chofer.nombres ?? ""} ${
+              chofer.apellido ?? chofer.apellidos ?? ""}`.
+              trim();
+              return (
+                <MenuItem key={chofer.rut} value={chofer.rut}>
                     <ListItemIcon>
                       <PersonIcon />
                     </ListItemIcon>
                     <ListItemText
-                      primary={nombre || `RUT: ${chofer.rut}`}
-                      secondary={`RUT: ${chofer.rut}`}
-                    />
-                  </MenuItem>
-                );
-              })}
+                    primary={nombre || `RUT: ${chofer.rut}`}
+                    secondary={`RUT: ${chofer.rut}`} />
+
+                  </MenuItem>);
+
+            })}
             </Select>
             <FormHelperText>
               Selecciona el chofer responsable de esta carga.
             </FormHelperText>
           </FormControl>
-        )}
+        }
       </Grid>
 
 
@@ -133,16 +122,16 @@ const AgendaCargaFormInputs = ({
             size="small"
             sx={(theme) => ({
               bgcolor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.grey[900]
-                  : "#fff",
+              theme.palette.mode === "dark" ?
+              theme.palette.grey[900] :
+              "#fff",
               color:
-                theme.palette.mode === "dark"
-                  ? theme.palette.grey[100]
-                  : theme.palette.text.primary,
-              borderRadius: 1,
-            })}
-          >
+              theme.palette.mode === "dark" ?
+              theme.palette.grey[100] :
+              theme.palette.text.primary,
+              borderRadius: 1
+            })}>
+
             <MenuItem value="">
               <ListItemText primary="-- Selecciona Camión --" />
             </MenuItem>
@@ -155,24 +144,24 @@ const AgendaCargaFormInputs = ({
                   disabled={false}
                   sx={{
                     color: estaBloqueado ? "error.main" : "inherit",
-                    fontWeight: estaBloqueado ? "bold" : "normal",
-                  }}
-                >
+                    fontWeight: estaBloqueado ? "bold" : "normal"
+                  }}>
+
                   <ListItemIcon>
                     <DirectionsCarIcon
-                      sx={{ color: estaBloqueado ? "error.main" : "inherit" }}
-                    />
+                      sx={{ color: estaBloqueado ? "error.main" : "inherit" }} />
+
                   </ListItemIcon>
                   <ListItemText
                     primary={`ID: ${camion.id_camion} - ${camion.placa}`}
                     secondary={
-                      estaBloqueado
-                        ? "🚫 Ya tiene agenda asignada"
-                        : `Capacidad: ${camion.capacidad} espacios`
-                    }
-                  />
-                </MenuItem>
-              );
+                    estaBloqueado ?
+                    "🚫 Ya tiene agenda asignada" :
+                    `Capacidad: ${camion.capacidad} espacios`
+                    } />
+
+                </MenuItem>);
+
             })}
           </Select>
           <FormHelperText>
@@ -194,16 +183,16 @@ const AgendaCargaFormInputs = ({
             size="small"
             sx={(theme) => ({
               bgcolor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.grey[900]
-                  : "#fff",
+              theme.palette.mode === "dark" ?
+              theme.palette.grey[900] :
+              "#fff",
               color:
-                theme.palette.mode === "dark"
-                  ? theme.palette.grey[100]
-                  : theme.palette.text.primary,
-              borderRadius: 1,
-            })}
-          >
+              theme.palette.mode === "dark" ?
+              theme.palette.grey[100] :
+              theme.palette.text.primary,
+              borderRadius: 1
+            })}>
+
             <MenuItem value="Baja">Baja</MenuItem>
             <MenuItem value="Media">Media</MenuItem>
             <MenuItem value="Alta">Alta</MenuItem>
@@ -227,21 +216,21 @@ const AgendaCargaFormInputs = ({
           helperText="Información adicional para bodega / planificación (opcional)."
           sx={(theme) => ({
             bgcolor:
-              theme.palette.mode === "dark" ? theme.palette.grey[900] : "#fff",
+            theme.palette.mode === "dark" ? theme.palette.grey[900] : "#fff",
             color:
-              theme.palette.mode === "dark"
-                ? theme.palette.grey[100]
-                : theme.palette.text.primary,
+            theme.palette.mode === "dark" ?
+            theme.palette.grey[100] :
+            theme.palette.text.primary,
             borderRadius: 1,
             mt: 1,
             "& .MuiInputBase-root": {
               color:
-                theme.palette.mode === "dark"
-                  ? theme.palette.grey[100]
-                  : theme.palette.text.primary,
-            },
-          })}
-        />
+              theme.palette.mode === "dark" ?
+              theme.palette.grey[100] :
+              theme.palette.text.primary
+            }
+          })} />
+
       </Grid>
 
       {/* 5) Checkbox con ayuda */}
@@ -250,14 +239,14 @@ const AgendaCargaFormInputs = ({
           <FormGroup>
             <FormControlLabel
               control={
-                <Checkbox
-                  checked={descargarRetornables}
-                  onChange={(e) => setDescargarRetornables(e.target.checked)}
-                  color="primary"
-                />
+              <Checkbox
+                checked={descargarRetornables}
+                onChange={(e) => setDescargarRetornables(e.target.checked)}
+                color="primary" />
+
               }
-              label="Descargar retornables antes de cargar"
-            />
+              label="Descargar retornables antes de cargar" />
+
           </FormGroup>
           <FormHelperText>
             Marca esta opción si el camión debe descargar envases/retorno antes
@@ -265,8 +254,8 @@ const AgendaCargaFormInputs = ({
           </FormHelperText>
         </FormControl>
       </Grid>
-    </>
-  );
+    </>);
+
 };
 
 AgendaCargaFormInputs.propTypes = {
@@ -275,8 +264,8 @@ AgendaCargaFormInputs.propTypes = {
   camiones: PropTypes.array.isRequired,
   idChofer: PropTypes.string.isRequired,
   setIdChofer: PropTypes.func.isRequired,
-  idCamion: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
-    .isRequired,
+  idCamion: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).
+  isRequired,
   setIdCamion: PropTypes.func.isRequired,
   prioridad: PropTypes.string.isRequired,
   setPrioridad: PropTypes.func.isRequired,
@@ -286,8 +275,8 @@ AgendaCargaFormInputs.propTypes = {
   setDescargarRetornables: PropTypes.func.isRequired,
   choferDisplay: PropTypes.shape({
     nombre: PropTypes.string,
-    rut: PropTypes.string,
-  }),
+    rut: PropTypes.string
+  })
 };
 
 export default AgendaCargaFormInputs;

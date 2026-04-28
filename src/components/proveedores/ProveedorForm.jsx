@@ -1,20 +1,4 @@
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  Grid,
-  TextField,
-  Autocomplete,
-  Switch,
-  FormControlLabel,
-  Stack,
-  Button,
-  Tooltip,
-  Chip,
-  InputAdornment,
-  Divider,
-  useTheme,
-} from "@mui/material";
+import { Card, CardHeader, CardContent, Autocomplete, Switch, FormControlLabel, Button, Tooltip, Chip, InputAdornment, Divider, useTheme } from "@mui/material";
 import {
   SaveOutlined,
   RestartAltOutlined,
@@ -22,13 +6,16 @@ import {
   ErrorOutlineOutlined,
   BusinessOutlined,
   EmailOutlined,
-  LocalPhoneOutlined,
   LocationOnOutlined,
   BadgeOutlined,
   VerifiedOutlined,
 } from "@mui/icons-material";
 import PropTypes from "prop-types";
 import { GIROS_SUGERIDOS } from "../../hooks/useProveedorForm";
+import PhoneTextField from "../common/PhoneTextField";
+import TextField from "../common/CompatTextField";
+import Grid from "../common/CompatGrid";
+import Stack from "../common/CompatStack";
 
 const ProveedorForm = ({
   form,
@@ -134,7 +121,7 @@ const ProveedorForm = ({
               inputValue={form.giro || ""}
               isOptionEqualToValue={(o, v) => o === v}
               value={form.giro || ""}
-              onInputChange={(e, v) => onChange("giro")(e, v || "")} 
+              onInputChange={(e, v) => onChange("giro")(e, v || "")}
               onChange={(e, v) => onChange("giro")(e, v || "")}
               renderInput={(params) => (
                 <TextField
@@ -165,35 +152,13 @@ const ProveedorForm = ({
           </Grid>
 
           <Grid item xs={12} md={6}>
-            <TextField
+            <PhoneTextField
               label="Teléfono"
               value={form.telefono}
               onChange={onChange("telefono")}
               fullWidth
-              placeholder="+56 9 1234 5678 o +56 2 2345 6789"
-              inputProps={{ inputMode: "numeric", pattern: "[0-9+ ]*" }}
-              onKeyDown={(e) => {
-                const allowed = [
-                  "Backspace",
-                  "Delete",
-                  "ArrowLeft",
-                  "ArrowRight",
-                  "Tab",
-                  "Home",
-                  "End",
-                ];
-                if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
-                if (!/[0-9+ ]/.test(e.key)) e.preventDefault();
-              }}
               helperText={form.telefono ? telState.msg || " " : " "}
               error={!!form.telefono && telState.valid === false}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LocalPhoneOutlined />
-                  </InputAdornment>
-                ),
-              }}
             />
           </Grid>
 

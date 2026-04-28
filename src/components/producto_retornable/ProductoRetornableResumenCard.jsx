@@ -1,5 +1,8 @@
 import PropTypes from "prop-types";
-import { Paper, Typography, TextField, Grid } from "@mui/material";
+import { Paper } from "@mui/material";
+import TextField from "../common/CompatTextField";
+import Grid from "../common/CompatGrid";
+import Typography from "../common/CompatTypography";
 
 const ProductoRetornableResumenCard = ({ producto, estado, onChange }) => {
   const total = producto.totalCantidad;

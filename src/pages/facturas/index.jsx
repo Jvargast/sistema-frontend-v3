@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Chip, IconButton } from "@mui/material";
+import { Chip, IconButton } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
 import { useGetAllCuentasPorCobrarQuery } from "../../store/services/cuentasPorCobrarApi";
 import EmptyState from "../../components/common/EmptyState";
@@ -10,6 +10,7 @@ import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 import FilterBar from "../../components/common/FilterBar";
 import StatusLegend from "../../components/common/StatusLegend";
+import Box from "../../components/common/CompatBox";
 
 const estadoColores = {
   pendiente: "warning",

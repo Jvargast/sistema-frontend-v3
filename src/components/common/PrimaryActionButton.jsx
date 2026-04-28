@@ -35,7 +35,7 @@ const PrimaryActionButton = ({ label, startIcon, onClick, ...props }) => {
         display: "inline-flex",
         alignItems: "center",
         "& .MuiButton-startIcon": {
-          marginRight: 0.6, 
+          marginRight: 0.6,
           marginLeft: -0.2,
           "& > *:first-of-type": {
             fontSize: 20,

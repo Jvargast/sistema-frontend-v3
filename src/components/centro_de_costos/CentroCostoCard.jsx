@@ -1,23 +1,14 @@
 import PropTypes from "prop-types";
-import {
-  Card,
-  CardContent,
-  CardActions,
-  CardActionArea,
-  Typography,
-  Chip,
-  Stack,
-  IconButton,
-  Tooltip,
-  Box,
-  Divider,
-  useTheme,
-} from "@mui/material";
+import { Card, CardContent, CardActions, CardActionArea, Chip, IconButton, Tooltip, Divider, useTheme } from "@mui/material";
 import EditOutlined from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlined from "@mui/icons-material/DeleteOutlineOutlined";
 import BusinessOutlined from "@mui/icons-material/BusinessOutlined";
 import CategoryOutlined from "@mui/icons-material/CategoryOutlined";
 import { alpha } from "@mui/material/styles";
+import Box from "../common/CompatBox";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 export default function CentroCostoCard({
   centro,
@@ -147,6 +138,7 @@ export default function CentroCostoCard({
             aria-label="Editar centro de costo"
             onClick={(e) => onEdit?.(e)}
             size="small"
+            sx={getActionIconButtonSx(theme, "primary")}
           >
             <EditOutlined fontSize="small" />
           </IconButton>
@@ -155,8 +147,8 @@ export default function CentroCostoCard({
           <IconButton
             aria-label="Eliminar centro de costo"
             onClick={(e) => onDelete?.(e)}
-            color="error"
             size="small"
+            sx={getActionIconButtonSx(theme, "error")}
           >
             <DeleteOutlineOutlined fontSize="small" />
           </IconButton>
@@ -172,7 +164,7 @@ export default function CentroCostoCard({
         flex: 1,
         display: "flex",
         flexDirection: "column",
-        minHeight: 184, 
+        minHeight: 184,
         borderRadius: 2,
         border: `1px solid ${theme.palette.divider}`,
         overflow: "hidden",

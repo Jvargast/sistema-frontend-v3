@@ -1,19 +1,12 @@
-import {
-  Box,
-  Paper,
-  Typography,
-  IconButton,
-  Tooltip,
-  Button,
-  Breadcrumbs,
-  Link,
-} from "@mui/material";
+import { Paper, IconButton, Tooltip, Button, Breadcrumbs, Link } from "@mui/material";
 import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
 import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import NavigateNextRoundedIcon from "@mui/icons-material/NavigateNextRounded";
 import PropTypes from "prop-types";
 import { alpha } from "@mui/material/styles";
+import Box from "../../common/CompatBox";
+import Typography from "../../common/CompatTypography";
 
 export default function DashboardHeader({ title, subtitle, onReset }) {
   return (

@@ -1,7 +1,12 @@
 import PropTypes from "prop-types";
-import { useEffect, useMemo, useState } from "react";
-import { Autocomplete, TextField } from "@mui/material";
+import {
+  useEffect,
+  useMemo,
+  useState } from "react";
+import { Autocomplete,
+} from "@mui/material";
 import { useLazyGetAllProveedoresQuery } from "../../store/services/proveedorApi";
+import TextField from "../common/CompatTextField";
 
 function useDebounced(v, ms = 350) {
   const [s, setS] = useState(v);

@@ -1,11 +1,14 @@
 import PropTypes from "prop-types";
-import { Stack, Typography, Chip, IconButton, Tooltip } from "@mui/material";
+import { Chip, IconButton, Tooltip, useTheme } from "@mui/material";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import Edit from "@mui/icons-material/Edit";
 import Save from "@mui/icons-material/Save";
 import Close from "@mui/icons-material/Close";
 import DeleteOutlineOutlined from "@mui/icons-material/DeleteOutlineOutlined";
 import CheckCircle from "@mui/icons-material/CheckCircle";
+import Stack from "../common/CompatStack";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 const ProveedorHeader = ({
   proveedor,
@@ -15,6 +18,7 @@ const ProveedorHeader = ({
   onToggleEdit,
   onDelete,
 }) => {
+  const theme = useTheme();
   const activo = proveedor?.activo === true;
   return (
     <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1 }}>
@@ -41,11 +45,11 @@ const ProveedorHeader = ({
       {!edit ? (
         <Tooltip title="Editar">
           <IconButton
-            color="primary"
             onClick={onToggleEdit}
             aria-label="Editar proveedor"
+            sx={getActionIconButtonSx(theme, "primary")}
           >
-            <Edit />
+            <Edit fontSize="small" />
           </IconButton>
         </Tooltip>
       ) : (
@@ -77,11 +81,11 @@ const ProveedorHeader = ({
 
       <Tooltip title="Eliminar">
         <IconButton
-          color="error"
           onClick={onDelete}
           aria-label="Eliminar proveedor"
+          sx={getActionIconButtonSx(theme, "error")}
         >
-          <DeleteOutlineOutlined />
+          <DeleteOutlineOutlined fontSize="small" />
         </IconButton>
       </Tooltip>
     </Stack>

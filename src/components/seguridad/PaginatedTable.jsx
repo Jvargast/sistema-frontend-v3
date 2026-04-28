@@ -1,15 +1,7 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from "@mui/material";
 import LoaderComponent from "../common/LoaderComponent";
 import PropTypes from "prop-types";
+import Typography from "../common/CompatTypography";
 
 const PaginatedTable = ({
   title,

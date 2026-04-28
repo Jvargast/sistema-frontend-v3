@@ -1,16 +1,13 @@
-import {
-  Box,
-  TextField,
-  IconButton,
-  Typography,
-  Tooltip,
-  Divider,
-  Paper,
-} from "@mui/material";
+import { IconButton, Tooltip, Divider, Paper, useTheme } from "@mui/material";
 import { AddCircleOutlineOutlined, DeleteOutlineOutlined } from "@mui/icons-material";
 import PropTypes from "prop-types";
+import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
+import { getActionIconButtonSx } from "../common/tableStyles";
 
 const DefectosList = ({ fallas, onChange, maxCantidad }) => {
+  const theme = useTheme();
   const total = fallas.reduce((sum, f) => sum + (f.cantidad || 0), 0);
   const restante = maxCantidad - total;
 
@@ -71,8 +68,12 @@ const DefectosList = ({ fallas, onChange, maxCantidad }) => {
               fullWidth
             />
             <Tooltip title="Eliminar este defecto">
-              <IconButton onClick={() => removeFalla(idx)} color="error">
-                <DeleteOutlineOutlined />
+              <IconButton
+                aria-label="Eliminar defecto"
+                onClick={() => removeFalla(idx)}
+                sx={getActionIconButtonSx(theme, "error")}
+              >
+                <DeleteOutlineOutlined fontSize="small" />
               </IconButton>
             </Tooltip>
           </Box>

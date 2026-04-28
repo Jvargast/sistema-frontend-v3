@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import { Box, Typography, Chip, useTheme } from "@mui/material";
+import { Chip, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import Box from "../common/CompatBox";
+import Typography from "../common/CompatTypography";
+import { CustomPagination } from "../common/CustomPagination";
+import { getStandardDataGridSx } from "../common/tableStyles";
 
 function getCantidadEnSucursal(inventario, id_sucursal) {
   if (!Array.isArray(inventario))
@@ -16,9 +20,6 @@ export default function InventarioMatrizInsumos({
   sucursales = [],
 }) {
   const theme = useTheme();
-
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
 
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
@@ -115,24 +116,20 @@ export default function InventarioMatrizInsumos({
   const totalRows = Array.isArray(rows) ? rows.length : 0;
 
   useEffect(() => {
-    const totalItems = Array.isArray(rows) ? rows.length : 0;
-    const totalPages = Math.max(1, Math.ceil(totalItems / (pageSize || 25)));
+    const totalPages = Math.max(
+      1,
+      Math.ceil(totalRows / (paginationModel.pageSize || 25))
+    );
     const maxPage = totalPages - 1;
-    if (page > maxPage) setPage(maxPage);
-    //eslint-disable-next-line
-  }, [rows?.length, pageSize, page]);
+    if (paginationModel.page > maxPage) {
+      setPaginationModel((prev) => ({ ...prev, page: maxPage }));
+    }
+  }, [paginationModel.page, paginationModel.pageSize, totalRows]);
 
   return (
     <Box
       sx={{
         height: "70vh",
-        "& .MuiDataGrid-columnHeaders": {
-          backgroundColor:
-            theme.palette.mode === "light"
-              ? theme.palette.grey[200]
-              : theme.palette.grey[800],
-          fontWeight: 700,
-        },
       }}
     >
       <DataGrid
@@ -143,7 +140,9 @@ export default function InventarioMatrizInsumos({
         onPaginationModelChange={setPaginationModel}
         pageSizeOptions={[10, 25, 50, 100]}
         getRowId={(row) => row.id}
+        slots={{ pagination: CustomPagination }}
         slotProps={{ pagination: { count: totalRows } }}
+        sx={getStandardDataGridSx(theme)}
       />
     </Box>
   );
