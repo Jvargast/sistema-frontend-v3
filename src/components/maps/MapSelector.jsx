@@ -5,6 +5,7 @@ import Box from "../common/CompatBox";
 import Typography from "../common/CompatTypography";
 
 const DEFAULT_CENTER = { lat: -27.0676, lng: -70.8172 };
+const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP?.trim();
 
 function isValidLatLng(obj) {
   return (
@@ -18,11 +19,7 @@ function isValidLatLng(obj) {
 
 function clearMarker(markerRef) {
   if (!markerRef.current) return;
-  if (typeof markerRef.current.setMap === "function") {
-    markerRef.current.setMap(null);
-  } else {
-    markerRef.current.map = null;
-  }
+  markerRef.current.map = null;
   markerRef.current = null;
 }
 
@@ -39,6 +36,7 @@ export default function MapSelectorGoogle({ coords, setCoords, setDireccion }) {
     mapInstance.current = new window.google.maps.Map(mapRef.current, {
       center: isValidLatLng(coords) ? coords : DEFAULT_CENTER,
       zoom: isValidLatLng(coords) ? 16 : 13,
+      mapId: GOOGLE_MAPS_MAP_ID || undefined,
       fullscreenControl: false,
       mapTypeControl: false,
       streetViewControl: false,
@@ -71,17 +69,18 @@ export default function MapSelectorGoogle({ coords, setCoords, setDireccion }) {
     clearMarker(markerInstance);
 
     if (isValidLatLng(coords)) {
-      markerInstance.current = new window.google.maps.Marker({
+      markerInstance.current = new window.google.maps.marker.AdvancedMarkerElement({
         position: coords,
         map: mapInstance.current,
-        draggable: true,
+        gmpDraggable: true,
+        title: "Ubicación seleccionada",
       });
 
-      markerInstance.current.addListener("dragend", (event) => {
-        const pos = event?.latLng || markerInstance.current.getPosition();
+      markerInstance.current.addListener("dragend", () => {
+        const pos = markerInstance.current.position;
         const lat = typeof pos.lat === "function" ? pos.lat() : pos.lat;
         const lng = typeof pos.lng === "function" ? pos.lng() : pos.lng;
-        setCoords({ lat, lng });
+        setCoords({ lat: Number(lat), lng: Number(lng) });
         if (setDireccion) {
           getAddressFromCoords(lat, lng);
         }

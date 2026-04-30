@@ -1,53 +1,64 @@
+import {
+  buildFallbackRoutePath,
+  computeGoogleRoute,
+  isValidRoutePoint,
+} from "./googleRoutesApi";
+
+const PRIORIDAD_RANK = {
+  urgente: 1,
+  alta: 1,
+  normal: 2,
+  media: 2,
+  baja: 3,
+};
+
+function getPrioridadRank(destino) {
+  const prioridad = String(destino?.prioridad || "normal").toLowerCase();
+  return PRIORIDAD_RANK[prioridad] || 99;
+}
+
+function getFechaCreacionTime(destino) {
+  const time = new Date(destino?.fecha_creacion || 0).getTime();
+  return Number.isFinite(time) ? time : 0;
+}
+
+function ordenarPorPrioridadYFecha(a, b) {
+  return (
+    getPrioridadRank(a) - getPrioridadRank(b) ||
+    getFechaCreacionTime(a) - getFechaCreacionTime(b)
+  );
+}
+
 export async function ordenarDestinosConGoogle(destinos, origen) {
-  if (!destinos?.length || !origen || !window?.google?.maps) {
-    return { ordenados: destinos, directions: null };
+  if (!destinos?.length || !isValidRoutePoint(origen)) {
+    return { ordenados: destinos, routePath: [] };
   }
 
-  const destinosValidos = destinos.filter(
-    (d) =>
-      typeof d.lat === "number" &&
-      isFinite(d.lat) &&
-      typeof d.lng === "number" &&
-      isFinite(d.lng)
+  const destinosOrdenados = destinos.slice().sort(ordenarPorPrioridadYFecha);
+  const destinosValidos = destinosOrdenados.filter(isValidRoutePoint);
+  const destinosInvalidos = destinosOrdenados.filter(
+    (destino) => !isValidRoutePoint(destino)
   );
   if (!destinosValidos.length) {
-    return { ordenados: destinos, directions: null };
+    return { ordenados: destinos, routePath: [] };
   }
 
-  const directionsService = new window.google.maps.DirectionsService();
-
-  const destination = destinos[destinos.length - 1];
-  const waypoints = destinos.slice(0, -1).map((d) => ({
-    location: new window.google.maps.LatLng(d.lat, d.lng),
-    stopover: true,
-  }));
-
-  const result = await new Promise((resolve, reject) => {
-    directionsService.route(
-      {
-        origin: new window.google.maps.LatLng(origen.lat, origen.lng),
-        destination: new window.google.maps.LatLng(
-          destination.lat,
-          destination.lng
-        ),
-        waypoints,
-        optimizeWaypoints: true,
-        travelMode: window.google.maps.TravelMode.DRIVING,
-      },
-      (response, status) => {
-        if (status === "OK") resolve(response);
-        else reject(new Error("Error en Directions API: " + status));
-      }
-    );
+  const destination = destinosValidos[destinosValidos.length - 1];
+  const intermediates = destinosValidos.slice(0, -1);
+  const result = await computeGoogleRoute({
+    origin: origen,
+    destination,
+    intermediates,
+    optimizeWaypointOrder: false,
   });
 
-  if (!result.routes[0].waypoint_order) {
-    return { ordenados: destinos, directions: result };
-  }
+  const reordenados = destinosValidos;
 
-  const order = result.routes[0].waypoint_order;
-  const reordenados = order.map((i) => destinos[i]);
-  reordenados.push(destination);
-
-  return { ordenados: reordenados, directions: result };
+  return {
+    ordenados: [...reordenados, ...destinosInvalidos],
+    routePath:
+      result.path.length > 0
+        ? result.path
+        : buildFallbackRoutePath([origen, ...reordenados]),
+  };
 }

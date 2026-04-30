@@ -18,6 +18,8 @@ import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 import Box from "../../components/common/CompatBox";
 import Typography from "../../components/common/CompatTypography";
 import CompactCatalogCard from "../../components/common/CompactCatalogCard";
+import SearchBar from "../../components/common/SearchBar";
+import { filterBySearch } from "../../utils/searchUtils";
 
 const catalogGridSx = {
   display: "grid",
@@ -43,6 +45,8 @@ const TipoInsumoManagement = () => {
   const [open, setOpen] = useState(false);
   const [openAlert, setOpenAlert] = useState(false);
   const [selectedTipoInsumoId, setSelectedTipoInsumoId] = useState(null);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
 
   const crearTipoInsumo = useHasPermission("inventario.tipoinsumo.crear");
   const editarTipoInsumo = useHasPermission("inventario.tipoinsumo.editar");
@@ -155,6 +159,16 @@ const TipoInsumoManagement = () => {
     [tiposInsumos]
   );
 
+  const tiposFiltrados = useMemo(
+    () =>
+      filterBySearch(tiposOrdenados, search, [
+        "id_tipo_insumo",
+        "nombre_tipo",
+        "descripcion",
+      ]),
+    [tiposOrdenados, search]
+  );
+
   if (isLoading || isLoadingTipoInsumo) return <LoaderComponent />;
 
   if (isError) {
@@ -202,8 +216,18 @@ const TipoInsumoManagement = () => {
         <Header title="Tipo de Insumos" subtitle="Gestión de tipo de insumos" />
       </Box>
 
+      <Box sx={{ mb: 2, maxWidth: { xs: "100%", sm: 420 } }}>
+        <SearchBar
+          value={searchInput}
+          onChange={setSearchInput}
+          onSearch={setSearch}
+          placeholder="Buscar tipos de insumo..."
+          width={{ xs: "100%", sm: 420 }}
+        />
+      </Box>
+
       <Box sx={catalogGridSx}>
-        {tiposOrdenados.map((tipo) => (
+        {tiposFiltrados.map((tipo) => (
           <CompactCatalogCard
             key={tipo.id_tipo_insumo}
             id={tipo.id_tipo_insumo}
@@ -227,7 +251,7 @@ const TipoInsumoManagement = () => {
         )}
       </Box>
 
-      {tiposOrdenados.length === 0 && !crearTipoInsumo && (
+      {tiposFiltrados.length === 0 && (search || !crearTipoInsumo) && (
         <Box
           sx={{
             py: 8,
@@ -239,7 +263,9 @@ const TipoInsumoManagement = () => {
             bgcolor: "background.paper",
           }}
         >
-          No hay tipos de insumo registrados.
+          {search
+            ? "No hay tipos de insumo que coincidan con la búsqueda."
+            : "No hay tipos de insumo registrados."}
         </Box>
       )}
 

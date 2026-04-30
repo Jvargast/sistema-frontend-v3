@@ -3,6 +3,7 @@ import Select from "../../components/common/CompatSelect";
 import { useMemo, useState, useEffect } from "react";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { IconButton, Pagination, Tooltip, useTheme, Tab, Chip } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { getImageUrl } from "../../store/services/apiBase";
 import { Add } from "@mui/icons-material";
 import EditIcon from "@mui/icons-material/Edit";
@@ -26,6 +27,7 @@ import Header from "../../components/common/Header";
 import ModalForm from "../../components/common/ModalForm";
 import AlertDialog from "../../components/common/AlertDialog";
 import DataGridCustomToolbar from "../../components/common/DataGridCustomToolBar";
+import SearchBar from "../../components/common/SearchBar";
 import { CustomPagination } from "../../components/common/CustomPagination";
 import { useHasPermission } from "../../utils/useHasPermission";
 import { useIsMobile } from "../../utils/useIsMobile";
@@ -45,6 +47,7 @@ import {
   getStandardDataGridSx
 } from "../../components/common/tableStyles";
 import { normalizeDataGridSelection } from "../../utils/dataGridSelection";
+import { filterBySearch } from "../../utils/searchUtils";
 
 const Productos = () => {
   const location = useLocation();
@@ -67,13 +70,13 @@ const Productos = () => {
 
   const [vista, setVista] = useState(0);
   const shouldFetchAll = vista === 1 || vista === 2 || vista === 3;
+  const isSearching = Boolean(search.trim());
 
   const { data, isLoading, isError, refetch } = useGetAllProductosQuery(
     {
       estado: "Disponible - Bodega",
-      search,
-      page: page + 1,
-      limit: pageSize
+      page: isSearching ? 1 : page + 1,
+      limit: isSearching ? 1000 : pageSize
     },
     { refetchOnFocus: true, refetchOnReconnect: true }
   );
@@ -84,7 +87,10 @@ const Productos = () => {
     isError: isErrorTodos,
     refetch: refetchAllProductos
   } = useGetAllProductosQuery(
-    { estado: "Disponible - Bodega", limit: 1000 },
+    {
+      estado: "Disponible - Bodega",
+      limit: 1000
+    },
     { skip: !shouldFetchAll }
   );
 
@@ -122,30 +128,64 @@ const Productos = () => {
   const [deleteProductos, { isLoading: isDeleting }] =
   useDeleteProductosMutation();
 
-  const rows =
-  data?.productos?.map((row) => {
-    const stockTotal = Array.isArray(row.inventario) ?
-    rol !== "administrador" && sucursalActiva?.id_sucursal ?
-    row.inventario.find(
-      (inv) => inv.id_sucursal === sucursalActiva.id_sucursal
-    )?.cantidad || 0 :
-    row.inventario.reduce((acc, inv) => acc + (inv.cantidad || 0), 0) :
-    0;
+  const rawRows = useMemo(
+    () =>
+      data?.productos?.map((row) => {
+        const stockTotal = Array.isArray(row.inventario) ?
+        rol !== "administrador" && sucursalActiva?.id_sucursal ?
+        row.inventario.find(
+          (inv) => inv.id_sucursal === sucursalActiva.id_sucursal
+        )?.cantidad || 0 :
+        row.inventario.reduce((acc, inv) => acc + (inv.cantidad || 0), 0) :
+        0;
 
-    return {
-      id: row.id_producto,
-      nombre: row.nombre_producto,
-      marca: row.marca || "",
-      codigo_barra: row.codigo_barra || "",
-      precio: row.precio,
-      descripcion: row.descripcion || "",
-      stock: stockTotal,
-      categoria: row.categoria?.nombre_categoria || "Sin categoría",
-      estado: row.estado?.nombre_estado || "Sin estado",
-      es_para_venta: Boolean(row.es_para_venta),
-      image_url: row.image_url
-    };
-  }) || [];
+        return {
+          id: row.id_producto,
+          nombre: row.nombre_producto,
+          marca: row.marca || "",
+          codigo_barra: row.codigo_barra || "",
+          precio: row.precio,
+          descripcion: row.descripcion || "",
+          stock: stockTotal,
+          categoria: row.categoria?.nombre_categoria || "Sin categoría",
+          estado: row.estado?.nombre_estado || "Sin estado",
+          es_para_venta: Boolean(row.es_para_venta),
+          image_url: row.image_url
+        };
+      }) || [],
+    [data?.productos, rol, sucursalActiva]
+  );
+
+  const filteredRows = useMemo(
+    () =>
+      filterBySearch(rawRows, search, [
+        "id",
+        "nombre",
+        "marca",
+        "codigo_barra",
+        "descripcion",
+        "categoria",
+        "estado"
+      ]),
+    [rawRows, search]
+  );
+
+  const rows = useMemo(() => {
+    if (!isSearching) return rawRows;
+    const start = page * pageSize;
+    return filteredRows.slice(start, start + pageSize);
+  }, [filteredRows, isSearching, page, pageSize, rawRows]);
+
+  const listPagination = useMemo(
+    () =>
+      isSearching ?
+      {
+        totalItems: filteredRows.length,
+        totalPages: Math.max(1, Math.ceil(filteredRows.length / pageSize))
+      } :
+      paginacion,
+    [filteredRows.length, isSearching, pageSize, paginacion]
+  );
 
   const productosFiltradosPorSucursal = useMemo(() => {
     if (rol === "administrador" || !sucursalActiva?.id_sucursal) {
@@ -159,6 +199,33 @@ const Productos = () => {
       )
     }));
   }, [dataTodosProductos?.productos, rol, sucursalActiva]);
+
+  const productosBuscadosParaVistas = useMemo(
+    () =>
+      filterBySearch(productosFiltradosPorSucursal, search, [
+        "id_producto",
+        "nombre_producto",
+        "marca",
+        "codigo_barra",
+        "descripcion",
+        "categoria.nombre_categoria",
+        "estado.nombre_estado",
+        (producto) =>
+          producto.inventario
+            ?.map(
+              (item) =>
+                item?.sucursal?.nombre ||
+                item?.Sucursal?.nombre ||
+                item?.nombre_sucursal
+            )
+            .join(" ")
+      ]),
+    [productosFiltradosPorSucursal, search]
+  );
+
+  useEffect(() => {
+    setPage(0);
+  }, [search]);
 
   useEffect(() => {
     if (location.state?.refetch) {
@@ -323,35 +390,20 @@ const Productos = () => {
 
         {canDeleteProducto && (
         isMobile ?
-        <Box
-          sx={{
-            width: 48,
-            height: 48,
-            borderRadius: 1,
-            background: `linear-gradient(145deg, ${theme.palette.error.light} 60%, ${theme.palette.error.main} 100%)`,
-            boxShadow: `0 2px 12px 0 ${theme.palette.error.main}22, 0 1.5px 8px 0 #0001`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor:
-            selectedRows.length === 0 || isDeleting ?
-            "not-allowed" :
-            "pointer",
-            opacity: selectedRows.length === 0 || isDeleting ? 0.6 : 1,
-            transition: "all 0.15s",
-            "&:hover": {
-              background: `linear-gradient(120deg, ${theme.palette.error.main} 70%, ${theme.palette.error.dark} 100%)`,
-              transform: "scale(1.08)",
-              boxShadow: `0 4px 24px 0 ${theme.palette.error.dark}33`
-            }
-          }}
+        <IconButton
+          aria-label="Eliminar seleccionados"
+          disabled={selectedRows.length === 0 || isDeleting}
           onClick={() => {
             if (selectedRows.length > 0 && !isDeleting) setOpenAlert(true);
           }}
-          title="Eliminar seleccionados">
+          sx={getActionIconButtonSx(theme, "error", {
+            width: 40,
+            height: 40,
+            minWidth: 40
+          })}>
 
-              <DeleteForeverIcon sx={{ color: "#fff", fontSize: 28 }} />
-            </Box> :
+              <DeleteForeverIcon fontSize="small" />
+            </IconButton> :
 
         <DangerActionButton
           label="Eliminar seleccionados"
@@ -364,29 +416,17 @@ const Productos = () => {
 
         {canCreateProducto && (
         isMobile ?
-        <Box
-          sx={{
-            width: 48,
-            height: 48,
-            borderRadius: 1,
-            background: `linear-gradient(145deg, ${theme.palette.primary.light} 60%, ${theme.palette.primary.main} 100%)`,
-            boxShadow: `0 2px 12px 0 ${theme.palette.primary.main}22, 0 1.5px 8px 0 #0001`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            transition: "all 0.15s",
-            "&:hover": {
-              background: `linear-gradient(120deg, ${theme.palette.primary.main} 70%, ${theme.palette.primary.dark} 100%)`,
-              transform: "scale(1.08)",
-              boxShadow: `0 4px 24px 0 ${theme.palette.primary.dark}33`
-            }
-          }}
+        <IconButton
+          aria-label="Nuevo producto"
           onClick={() => setOpen(true)}
-          title="Nuevo Producto">
+          sx={getActionIconButtonSx(theme, "primary", {
+            width: 40,
+            height: 40,
+            minWidth: 40
+          })}>
 
-              <Add sx={{ color: "#fff", fontSize: 28 }} />
-            </Box> :
+              <Add fontSize="small" />
+            </IconButton> :
 
         <PrimaryActionButton
           label="Nuevo producto"
@@ -397,18 +437,65 @@ const Productos = () => {
       </Box>
 
       <Box sx={{ mb: 3 }}>
-        <Tabs
-          value={vista}
-          onChange={handleTabChange}
-          variant="scrollable"
-          allowScrollButtonsMobile
-          sx={{ mb: 2 }}>
+        <Box
+          sx={{
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 1,
+            bgcolor: "background.paper",
+            mb: 2,
+            px: 0.5,
+            boxShadow:
+              theme.palette.mode === "light"
+                ? "0 6px 18px rgba(15, 23, 42, 0.04)"
+                : "0 6px 18px rgba(0,0,0,0.2)"
+          }}>
+          <Tabs
+            value={vista}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+            TabIndicatorProps={{
+              sx: { height: 2, bgcolor: "primary.main" }
+            }}
+            sx={{
+              minHeight: 42,
+              "& .MuiTab-root": {
+                minHeight: 42,
+                px: 1.5,
+                textTransform: "none",
+                fontWeight: 650,
+                fontSize: 13,
+                letterSpacing: 0,
+                color: "text.secondary",
+                borderRadius: 1,
+                "&.Mui-selected": {
+                  color: "primary.main",
+                  bgcolor:
+                    theme.palette.mode === "light"
+                      ? alpha(theme.palette.primary.main, 0.06)
+                      : alpha(theme.palette.primary.light, 0.1)
+                }
+              }
+            }}>
 
-          <Tab label="Listado" />
-          <Tab label="Matriz Global" />
-          <Tab label="Por Sucursal" />
-          <Tab label="Por Producto" />
-        </Tabs>
+            <Tab label="Listado" />
+            <Tab label="Matriz Global" />
+            <Tab label="Por Sucursal" />
+            <Tab label="Por Producto" />
+          </Tabs>
+        </Box>
+
+        <Box sx={{ mb: 2, maxWidth: { xs: "100%", sm: 420 } }}>
+            <SearchBar
+            value={searchInput}
+            onChange={setSearchInput}
+            onSearch={setSearch}
+            placeholder="Buscar productos por nombre, categoría o código..."
+            width={{ xs: "100%", sm: 420 }} />
+
+          </Box>
 
         {vista === 0 && (
         isMobile ?
@@ -556,7 +643,7 @@ const Productos = () => {
             )}
                   <Box display="flex" justifyContent="center" mt={3}>
                     <Pagination
-                count={paginacion.totalPages || 1}
+                count={listPagination.totalPages || 1}
                 page={page + 1}
                 onChange={(_, value) => setPage(value - 1)}
                 color="primary"
@@ -577,7 +664,7 @@ const Productos = () => {
             getRowId={(row) => row.id}
             pageSize={pageSize}
             paginationMode="server"
-            rowCount={paginacion?.totalItems || rows.length}
+            rowCount={listPagination?.totalItems || rows.length}
             paginationModel={{ page: page, pageSize: pageSize }}
             pageSizeOptions={rowsPerPageOptions}
             onPaginationModelChange={(model) => {
@@ -593,7 +680,13 @@ const Productos = () => {
               pagination: CustomPagination
             }}
             slotProps={{
-              toolbar: { searchInput, setSearchInput, setSearch }
+              toolbar: {
+                searchInput,
+                setSearchInput,
+                setSearch,
+                placeholder: "Buscar productos por nombre, categoría o código...",
+                showSearch: false
+              }
             }}
             disableRowSelectionOnClick
             disableRowSelectionExcludeModel
@@ -606,7 +699,7 @@ const Productos = () => {
         <LoaderComponent /> :
 
         <InventarioMatriz
-          productos={productosFiltradosPorSucursal}
+          productos={productosBuscadosParaVistas}
           sucursales={
           rol === "administrador" ?
           sucursales || [] :
@@ -622,7 +715,7 @@ const Productos = () => {
         <LoaderComponent /> :
 
         <InventarioTabsPorSucursal
-          productos={productosFiltradosPorSucursal}
+          productos={productosBuscadosParaVistas}
           sucursales={
           rol === "administrador" ?
           sucursales || [] :
@@ -638,7 +731,7 @@ const Productos = () => {
         <LoaderComponent /> :
 
         <InventarioAccordionPorProducto
-          productos={productosFiltradosPorSucursal}
+          productos={productosBuscadosParaVistas}
           sucursales={
           rol === "administrador" ?
           sucursales || [] :

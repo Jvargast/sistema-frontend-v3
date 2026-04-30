@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {
@@ -18,6 +18,8 @@ import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 import Box from "../../components/common/CompatBox";
 import Typography from "../../components/common/CompatTypography";
 import CompactCatalogCard from "../../components/common/CompactCatalogCard";
+import SearchBar from "../../components/common/SearchBar";
+import { filterBySearch } from "../../utils/searchUtils";
 
 const catalogGridSx = {
   display: "grid",
@@ -46,6 +48,8 @@ const CategoriaManagement = () => {
   const [open, setOpen] = useState(false);
   const [openAlert, setOpenAlert] = useState(false);
   const [selectedCategoriaId, setSelectedCategoriaId] = useState(null);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
 
   const crearCategoria = useHasPermission("inventario.categoriaproducto.crear");
   const editarCategoria = useHasPermission(
@@ -74,6 +78,16 @@ const CategoriaManagement = () => {
       return true;
     },
     [refetch]
+  );
+
+  const categoriasFiltradas = useMemo(
+    () =>
+      filterBySearch(categorias || [], search, [
+        "id_categoria",
+        "nombre_categoria",
+        "descripcion",
+      ]),
+    [categorias, search]
   );
 
   const handleEdit = (id) => {
@@ -196,8 +210,24 @@ const CategoriaManagement = () => {
         <Header title="Categorías" subtitle="Gestión de Categorías" />
       </Box>
 
+      <Box sx={{ mb: 2, maxWidth: { xs: "100%", sm: 420 } }}>
+        <SearchBar
+          value={searchInput}
+          onChange={setSearchInput}
+          onSearch={setSearch}
+          placeholder="Buscar categorías por nombre o descripción..."
+          width={{ xs: "100%", sm: 420 }}
+        />
+      </Box>
+
+      {categoriasFiltradas.length === 0 && search && (
+        <Box sx={{ mb: 2, color: "text.secondary", fontSize: 14 }}>
+          No hay categorías que coincidan con la búsqueda.
+        </Box>
+      )}
+
       <Box sx={catalogGridSx}>
-        {categorias?.map((categoria) => (
+        {categoriasFiltradas.map((categoria) => (
           <CompactCatalogCard
             key={categoria.id_categoria}
             id={categoria.id_categoria}

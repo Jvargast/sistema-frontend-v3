@@ -1,24 +1,21 @@
 import {
-  Search } from "@mui/icons-material";
-import { IconButton,
-  InputAdornment,
-  useTheme,
-} from "@mui/material";
-import {
   GridToolbarDensitySelector,
   GridToolbarContainer,
   GridToolbarColumnsButton,
 } from "@mui/x-data-grid";
 import PropTypes from "prop-types";
 import FlexBetween from "../layout/FlexBetween";
-import TextField from "./CompatTextField";
+import SearchBar from "./SearchBar";
 
-const DataGridCustomToolbar = ({ searchInput, setSearchInput, setSearch }) => {
-  const theme = useTheme();
-
-  const handleSearch = () => {
-    setSearch(searchInput.trim());
-    setSearchInput("");
+const DataGridCustomToolbar = ({
+  searchInput,
+  setSearchInput,
+  setSearch,
+  placeholder = "Buscar por nombre, código o descripción...",
+  showSearch = true,
+}) => {
+  const handleSearch = (value = searchInput) => {
+    setSearch(String(value || "").trim());
   };
 
   return (
@@ -29,51 +26,20 @@ const DataGridCustomToolbar = ({ searchInput, setSearchInput, setSearch }) => {
           <GridToolbarDensitySelector />
         </FlexBetween>
 
-        <TextField
-          placeholder="Buscar..."
-          size="small"
-          sx={{
-            width: { xs: "10rem", sm: "12rem" },
-            backgroundColor: theme.palette.background.paper,
-            borderRadius: "20px",
-            "& .MuiInputBase-root": {
-              paddingLeft: "10px",
-              fontSize: "0.85rem",
-              color: theme.palette.text.primary,
-            },
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-                borderColor: theme.palette.divider,
+        {showSearch && (
+          <SearchBar
+            placeholder={placeholder}
+            value={searchInput}
+            onChange={setSearchInput}
+            onSearch={handleSearch}
+            width={{ xs: "13rem", sm: 360 }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                minHeight: 36,
               },
-              "&:hover fieldset": {
-                borderColor: theme.palette.primary.main,
-              },
-            },
-          }}
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          variant="outlined"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleSearch();
-          }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={handleSearch}
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    "&:hover": {
-                      color: theme.palette.primary.main,
-                    },
-                  }}
-                >
-                  <Search />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
+            }}
+          />
+        )}
       </FlexBetween>
     </GridToolbarContainer>
   );
@@ -83,6 +49,8 @@ DataGridCustomToolbar.propTypes = {
   searchInput: PropTypes.string.isRequired,
   setSearchInput: PropTypes.func.isRequired,
   setSearch: PropTypes.func.isRequired,
+  placeholder: PropTypes.string,
+  showSearch: PropTypes.bool,
 };
 
 export default DataGridCustomToolbar;

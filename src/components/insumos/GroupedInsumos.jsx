@@ -6,6 +6,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { useGetAllInsumosQuery } from "../../store/services/insumoApi";
 import LoaderComponent from "../common/LoaderComponent";
 import DataGridCustomToolbar from "../common/DataGridCustomToolBar";
+import SearchBar from "../common/SearchBar";
 import { CustomPagination } from "../common/CustomPagination";
 import { useDispatch, useSelector } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
@@ -24,6 +25,7 @@ import {
   getStandardDataGridSx
 } from "../common/tableStyles";
 import { normalizeDataGridSelection } from "../../utils/dataGridSelection";
+import { filterBySearch } from "../../utils/searchUtils";
 
 const GroupedInsumos = ({
   tipo,
@@ -39,6 +41,7 @@ const GroupedInsumos = ({
   const theme = useTheme();
   const navigate = useNavigate();
   const [pagination, setPagination] = useState({ page: 0, pageSize: 10 });
+  const isSearching = Boolean(search.trim());
 
   const canEditInsumo = useHasPermission("inventario.insumo.editar");
 
@@ -47,9 +50,8 @@ const GroupedInsumos = ({
 
   const { data, isLoading, isError } = useGetAllInsumosQuery({
     tipo,
-    page: pagination.page + 1,
-    limit: pagination.pageSize,
-    search,
+    page: isSearching ? 1 : pagination.page + 1,
+    limit: isSearching ? 1000 : pagination.pageSize,
     includeInventario: true,
     ...(rol === "administrador" && sucursalActiva?.id_sucursal ?
     { id_sucursal: sucursalActiva.id_sucursal } :
@@ -59,6 +61,12 @@ const GroupedInsumos = ({
   const handlePaginationChange = (model) => {
     setPagination({ page: model.page, pageSize: model.pageSize });
   };
+
+  useEffect(() => {
+    setPagination((prev) =>
+      prev.page === 0 ? prev : { ...prev, page: 0 }
+    );
+  }, [search]);
 
   useEffect(() => {
     if (isError) {
@@ -71,7 +79,7 @@ const GroupedInsumos = ({
     }
   }, [isError, dispatch]);
 
-  const rows = useMemo(() => {
+  const rawRows = useMemo(() => {
     const items = data?.data?.items || [];
     return items.map((row) => {
       let stockTotal = 0;
@@ -102,11 +110,50 @@ const GroupedInsumos = ({
     });
   }, [data?.data?.items, rol, sucursalActiva]);
 
+  const filteredRows = useMemo(
+    () =>
+      filterBySearch(rawRows, search, [
+        "id_insumo",
+        "nombre_insumo",
+        "codigo_barra",
+        "unidad_de_medida",
+        "descripcion",
+        "tipo.nombre_tipo",
+        "TipoInsumo.nombre_tipo"
+      ]),
+    [rawRows, search]
+  );
+
+  const rows = useMemo(() => {
+    if (!isSearching) return rawRows;
+    const start = pagination.page * pagination.pageSize;
+    return filteredRows.slice(start, start + pagination.pageSize);
+  }, [filteredRows, isSearching, pagination.page, pagination.pageSize, rawRows]);
+
+  const totalItems = isSearching ?
+  filteredRows.length :
+  Math.max(0, parseInt(data?.data?.totalItems, 10) || 0);
+  const totalPages = Math.max(1, Math.ceil(totalItems / pagination.pageSize));
+
   if (isLoading) return <LoaderComponent />;
+
+  const searchControl = (
+    <Box sx={{ mb: 1.5, maxWidth: { xs: "100%", sm: 420 } }}>
+      <SearchBar
+        value={searchInput}
+        onChange={setSearchInput}
+        onSearch={setSearch}
+        placeholder={`Buscar insumos en ${tipo}...`}
+        width={{ xs: "100%", sm: 420 }} />
+
+    </Box>
+  );
 
   if (isMobile) {
     return (
       <Box>
+        {searchControl}
+
         {rows.length === 0 ?
         <Box
           sx={{
@@ -115,7 +162,7 @@ const GroupedInsumos = ({
             color: theme.palette.text.secondary
           }}>
 
-            No hay insumos.
+            {search ? "No hay insumos que coincidan." : "No hay insumos."}
           </Box> :
 
         rows.map((row) =>
@@ -255,9 +302,7 @@ const GroupedInsumos = ({
         </Box>
         <Box display="flex" justifyContent="center" mt={2}>
           <Pagination
-            count={Math.ceil(
-              (data?.data?.totalItems || 0) / pagination.pageSize
-            )}
+            count={totalPages}
             page={pagination.page + 1}
             onChange={(_, value) =>
             setPagination((prev) => ({ ...prev, page: value - 1 }))
@@ -273,6 +318,8 @@ const GroupedInsumos = ({
   // --- Vista Desktop (DataGrid) ---
   return (
     <Box>
+      {searchControl}
+
       <Box sx={{ height: "600px" }}>
 
         <DataGrid
@@ -374,7 +421,7 @@ const GroupedInsumos = ({
           }
           getRowId={(row) => row.id_insumo}
           paginationMode="server"
-          rowCount={Math.max(0, parseInt(data?.data?.totalItems, 10) || 0)}
+          rowCount={totalItems}
           paginationModel={pagination}
           checkboxSelection
           onRowSelectionModelChange={(selectedIds) => {
@@ -398,7 +445,13 @@ const GroupedInsumos = ({
             pagination: CustomPagination
           }}
           slotProps={{
-            toolbar: { searchInput, setSearchInput, setSearch }
+            toolbar: {
+              searchInput,
+              setSearchInput,
+              setSearch,
+              placeholder: `Buscar insumos en ${tipo}...`,
+              showSearch: false
+            }
           }}
           disableRowSelectionOnClick
           disableRowSelectionExcludeModel />

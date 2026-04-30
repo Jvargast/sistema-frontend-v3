@@ -14,8 +14,10 @@ import { useDispatch } from "react-redux";
 import AlertDialog from "../../components/common/AlertDialog";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 import PrimaryActionButton from "../../components/common/PrimaryActionButton";
+import SearchBar from "../../components/common/SearchBar";
 import Box from "../../components/common/CompatBox";
 import { getActionIconButtonSx } from "../../components/common/tableStyles";
+import { filterBySearch } from "../../utils/searchUtils";
 
 const ListarFormulasProductos = () => {
   const theme = useTheme();
@@ -25,12 +27,19 @@ const ListarFormulasProductos = () => {
   const [formulaSel, setFormulaSel] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+
+  const formulaQueryParams = useMemo(
+    () => ({
+      page: search ? 1 : page + 1,
+      limit: search ? 1000 : rowsPerPage,
+    }),
+    [page, rowsPerPage, search]
+  );
 
   const { data, isLoading, refetch } = useGetAllFormulasQuery(
-    {
-      page: page + 1,
-      limit: rowsPerPage,
-    },
+    formulaQueryParams,
     { refetchOnMountOrArgChange: true }
   );
 
@@ -47,10 +56,35 @@ const ListarFormulasProductos = () => {
 
   useEffect(() => {
     refetch();
-  }, [page, rowsPerPage, refetch]);
+  }, [page, rowsPerPage, search, refetch]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [search]);
 
   const formulas = useMemo(() => data?.formulas || [], [data]);
-  const totalItems = useMemo(() => data?.paginacion?.totalItems || 0, [data]);
+  const serverTotalItems = useMemo(
+    () => data?.paginacion?.totalItems || 0,
+    [data]
+  );
+  const formulasFiltradas = useMemo(
+    () =>
+      filterBySearch(formulas, search, [
+        "id_formula",
+        "nombre_formula",
+        "Producto.nombre_producto",
+        "Producto.unidad_de_medida",
+        "cantidad_requerida",
+        (formula) => (formula.activo ? "activa activo" : "inactiva inactivo"),
+      ]),
+    [formulas, search]
+  );
+  const rows = useMemo(() => {
+    if (!search) return formulas;
+    const start = page * rowsPerPage;
+    return formulasFiltradas.slice(start, start + rowsPerPage);
+  }, [formulas, formulasFiltradas, page, rowsPerPage, search]);
+  const totalItems = search ? formulasFiltradas.length : serverTotalItems;
 
   const pedirConfirmacion = (row) => {
     setFormulaSel(row);
@@ -94,13 +128,13 @@ const ListarFormulasProductos = () => {
     {
       id: "Producto",
       label: "Producto Final",
-      render: (row) => row.Producto.nombre_producto,
+      render: (row) => row.Producto?.nombre_producto || "Sin producto",
     },
     {
       id: "cantidad_requerida",
       label: "Cantidad Final",
       render: (row) =>
-        `${row.cantidad_requerida} ${row.Producto.unidad_de_medida || "u."}`,
+        `${row.cantidad_requerida} ${row.Producto?.unidad_de_medida || "u."}`,
     },
     {
       id: "estado",
@@ -137,7 +171,7 @@ const ListarFormulasProductos = () => {
     },
   ];
 
-  if (!isLoading && formulas.length === 0) {
+  if (!isLoading && !search && formulas.length === 0) {
     return (
       <EmptyState
         title="Aún no tienes fórmulas registradas"
@@ -152,11 +186,21 @@ const ListarFormulasProductos = () => {
     <Box
       sx={{
         display: "flex",
-        justifyContent: "flex-end",
+        flexDirection: { xs: "column", sm: "row" },
+        justifyContent: "space-between",
+        alignItems: { xs: "stretch", sm: "center" },
+        gap: 1.5,
         mt: 1,
         mb: 2,
       }}
     >
+      <SearchBar
+        value={searchInput}
+        onChange={setSearchInput}
+        onSearch={setSearch}
+        placeholder="Buscar fórmulas por nombre, producto o estado..."
+        width={{ xs: "100%", sm: 420 }}
+      />
       <PrimaryActionButton
         label="Crear fórmula"
         startIcon={<AddCircleOutlineOutlined />}
@@ -172,7 +216,7 @@ const ListarFormulasProductos = () => {
         subtitle="Gestión de Fórmulas"
         headerAction={botonCrear}
         columns={columns}
-        rows={formulas}
+        rows={rows}
         totalItems={totalItems}
         rowsPerPage={rowsPerPage}
         page={page}
@@ -182,7 +226,11 @@ const ListarFormulasProductos = () => {
           setPage(0);
         }}
         loading={isLoading}
-        errorMessage="No se pudieron cargar las fórmulas o no existen datos disponibles."
+        errorMessage={
+          search
+            ? "No hay fórmulas que coincidan con la búsqueda."
+            : "No se pudieron cargar las fórmulas o no existen datos disponibles."
+        }
         showBackButton={false}
       />
 

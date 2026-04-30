@@ -9,12 +9,9 @@ import {
   AccountCircle,
   LogoutOutlined,
 } from "@mui/icons-material";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import PropTypes from "prop-types";
-import FlexBetween from "./FlexBetween";
 import logoImage from "../../assets/images/logo_aguas_valentino2.png";
 import { modulesData } from "../../utils/modulesData";
 import { resetCacheAndLogout } from "../../store/reducers/authSlice";
@@ -108,7 +105,6 @@ const navActionSx = (t, isActive) => ({
 });
 
 const Sidebar = ({
-  user,
   rol,
   drawerWidth,
   isSidebarOpen,
@@ -322,32 +318,6 @@ const Sidebar = ({
           </List>
 
           {/* Footer */}
-          <Box bottom="2rem">
-            <Divider />
-            <FlexBetween m="1.5rem 2rem 0 3rem" gap="1rem">
-              <Box>
-                <AccountCircleIcon fontSize="large" />
-              </Box>
-              <Box textAlign="left">
-                <Typography
-                  fontWeight={700}
-                  fontSize="0.92rem"
-                  sx={{ color: theme.palette.text.primary }}
-                >
-                  {user?.nombre || ""}
-                </Typography>
-                <Typography
-                  fontSize="0.78rem"
-                  sx={{ color: theme.palette.text.secondary }}
-                >
-                  {rol || ""}
-                </Typography>
-              </Box>
-              <SettingsOutlined
-                sx={{ fontSize: 22, color: theme.palette.text.secondary }}
-              />
-            </FlexBetween>
-          </Box>
           <Box
             sx={{
               mt: 1.25,
@@ -458,7 +428,6 @@ const Sidebar = ({
 };
 
 Sidebar.propTypes = {
-  user: PropTypes.object,
   drawerWidth: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
     .isRequired,
   rol: PropTypes.string,

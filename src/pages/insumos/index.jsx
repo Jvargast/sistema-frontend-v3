@@ -1,6 +1,6 @@
 import Tabs from "../../components/common/CompatTabs";
 import { useEffect, useMemo, useState } from "react";
-import { Button, ListItemText, MenuItem, Tab, useTheme } from "@mui/material";
+import { Button, IconButton, ListItemText, MenuItem, Tab, useTheme } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { Add, KeyboardArrowDown } from "@mui/icons-material";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -28,9 +28,12 @@ import InventarioAccordionInsumosPorInsumo from "../../components/insumos/Invent
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 import DangerActionButton from "../../components/common/DangerActionButton";
 import PrimaryActionButton from "../../components/common/PrimaryActionButton";
+import SearchBar from "../../components/common/SearchBar";
 import Box from "../../components/common/CompatBox";
 import Menu from "../../components/common/CompatMenu";
 import Typography from "../../components/common/CompatTypography";
+import { getActionIconButtonSx } from "../../components/common/tableStyles";
+import { filterBySearch } from "../../utils/searchUtils";
 
 const VIEW_OPTIONS = [
   {
@@ -110,6 +113,8 @@ const Insumos = () => {
 
   const [searchInputs, setSearchInputs] = useState({});
   const [searches, setSearches] = useState({});
+  const [inventorySearchInput, setInventorySearchInput] = useState("");
+  const [inventorySearch, setInventorySearch] = useState("");
   const [selectedRows, setSelectedRows] = useState({});
   const [openModal, setOpenModal] = useState(false);
   const [openAlert, setOpenAlert] = useState(false);
@@ -149,6 +154,29 @@ const Insumos = () => {
     }));
   }, [insumosAll, rol, sucursalActiva]);
 
+  const insumosBuscadosParaVistas = useMemo(
+    () =>
+      filterBySearch(insumosFiltradosPorSucursal, inventorySearch, [
+        "id_insumo",
+        "nombre_insumo",
+        "codigo_barra",
+        "unidad_de_medida",
+        "descripcion",
+        "tipo.nombre_tipo",
+        "TipoInsumo.nombre_tipo",
+        (insumo) =>
+          insumo.inventario
+            ?.map(
+              (item) =>
+                item?.sucursal?.nombre ||
+                item?.Sucursal?.nombre ||
+                item?.nombre_sucursal
+            )
+            .join(" ")
+      ]),
+    [insumosFiltradosPorSucursal, inventorySearch]
+  );
+
   const sucursalesParaVistas = useMemo(
     () => rol === "administrador" ? sucursales || [] : [],
     [rol, sucursales]
@@ -163,8 +191,11 @@ const Insumos = () => {
   const handleSearchInputChange = (tipo, value) =>
   setSearchInputs((prev) => ({ ...prev, [tipo]: value }));
 
-  const handleSearch = (tipo) =>
-  setSearches((prev) => ({ ...prev, [tipo]: searchInputs[tipo] }));
+  const handleSearch = (tipo, value) =>
+  setSearches((prev) => ({
+    ...prev,
+    [tipo]: String(value ?? searchInputs[tipo] ?? "").trim()
+  }));
 
   const handleEdit = (row) => {
     navigate(`/insumos/editar/${row.id_insumo}`, { state: { refetch: true } });
@@ -265,133 +296,97 @@ const Insumos = () => {
   }
 
   return (
-    <Box sx={{ padding: "2rem" }}>
+    <Box
+      sx={{
+        mt: "1.5rem",
+        mb: "1.5rem",
+        p: 2,
+        overflow: "hidden"
+      }}>
       <Header title="Insumos" subtitle="Gestión de Insumos" />
 
-      {/* Acciones */}
       <Box
         sx={{
           display: "flex",
-          justifyContent: isMobile ? "center" : "space-between",
+          justifyContent: "space-between",
           alignItems: "center",
-          mb: 2,
-          gap: isMobile ? 3 : 0
-        }}>
-
-        {canDeleteInsumo && (
-        isMobile ?
-        <Box
-          sx={{
-            width: 48,
-            height: 48,
-            borderRadius: 1,
-            bgcolor: "error.main",
-            boxShadow: `0 6px 16px ${alpha(theme.palette.error.main, 0.22)}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor:
-            Object.values(selectedRows).flat().length === 0 || isDeleting ?
-            "not-allowed" :
-            "pointer",
-            opacity:
-            Object.values(selectedRows).flat().length === 0 || isDeleting ?
-            0.6 :
-            1,
-            transition: "all 0.15s",
-            "&:hover": {
-              bgcolor: "error.dark",
-              transform: "translateY(-1px)",
-              boxShadow: `0 8px 20px ${alpha(theme.palette.error.dark, 0.28)}`
-            }
-          }}
-          onClick={() => {
-            if (
-            Object.values(selectedRows).flat().length > 0 &&
-            !isDeleting)
-            {
-              setOpenAlert(true);
-            }
-          }}
-          title="Eliminar Seleccionados">
-
-              <DeleteForeverIcon sx={{ color: "#fff", fontSize: 28 }} />
-            </Box> :
-
-        <DangerActionButton
-          label="Eliminar seleccionados"
-          startIcon={<DeleteForeverIcon />}
-          onClick={() => setOpenAlert(true)}
-          disabled={!hasSelected}
-          loading={isDeleting} />)
-
-        }
-
-        {canCreateInsumo && (
-        isMobile ?
-        <Box
-          sx={{
-            width: 48,
-            height: 48,
-            borderRadius: 1,
-            bgcolor: "primary.main",
-            boxShadow: `0 6px 16px ${alpha(theme.palette.primary.main, 0.22)}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            transition: "all 0.15s",
-            "&:hover": {
-              bgcolor: "primary.dark",
-              transform: "translateY(-1px)",
-              boxShadow: `0 8px 20px ${alpha(theme.palette.primary.dark, 0.28)}`
-            }
-          }}
-          onClick={() => setOpenModal(true)}
-          title="Nuevo Insumo">
-
-              <Add sx={{ color: "#fff", fontSize: 28 }} />
-            </Box> :
-
-        <PrimaryActionButton
-          label="Nuevo insumo"
-          startIcon={<Add />}
-          onClick={() => setOpenModal(true)} />)
-
-        }
-      </Box>
-
-      <Box
-        sx={{
-          mb: 1.75,
-          p: 1,
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: 1,
-          bgcolor:
-            theme.palette.mode === "light"
-              ? alpha(theme.palette.grey[900], 0.025)
-              : alpha(theme.palette.common.white, 0.04),
-          boxShadow:
-            theme.palette.mode === "light"
-              ? "0 10px 24px rgba(15, 23, 42, 0.05)"
-              : "0 10px 24px rgba(0,0,0,0.24)",
-          width: "fit-content",
-          maxWidth: "100%",
-          ml: "auto",
-          display: "flex",
-          justifyContent: "flex-end",
-          alignItems: "center",
-          gap: 1
+          flexWrap: "wrap",
+          gap: 1.5,
+          mb: 1.75
         }}>
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 0.8,
-            justifyContent: "flex-end",
-            whiteSpace: "nowrap"
+            gap: 1,
+            flexWrap: "wrap"
           }}>
+          {canDeleteInsumo && (
+          isMobile ?
+          <IconButton
+            aria-label="Eliminar seleccionados"
+            disabled={!hasSelected || isDeleting}
+            onClick={() => {
+              if (hasSelected && !isDeleting) setOpenAlert(true);
+            }}
+            sx={getActionIconButtonSx(theme, "error", {
+              width: 40,
+              height: 40,
+              minWidth: 40
+            })}>
+
+                <DeleteForeverIcon fontSize="small" />
+              </IconButton> :
+
+          <DangerActionButton
+            label="Eliminar seleccionados"
+            startIcon={<DeleteForeverIcon />}
+            onClick={() => setOpenAlert(true)}
+            disabled={!hasSelected}
+            loading={isDeleting} />)
+
+          }
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            flexWrap: "wrap",
+            gap: 1,
+            ml: "auto"
+          }}>
+          <Box
+            sx={{
+            p: 1,
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 1,
+            bgcolor:
+              theme.palette.mode === "light"
+                ? alpha(theme.palette.grey[900], 0.025)
+                : alpha(theme.palette.common.white, 0.04),
+            boxShadow:
+              theme.palette.mode === "light"
+                ? "0 10px 24px rgba(15, 23, 42, 0.05)"
+                : "0 10px 24px rgba(0,0,0,0.24)",
+            width: "fit-content",
+            maxWidth: "100%",
+            ml: "auto",
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            gap: 1
+            }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.8,
+              justifyContent: "flex-end",
+              whiteSpace: "nowrap"
+            }}>
           <Typography
             variant="caption"
             color="text.secondary"
@@ -432,76 +427,111 @@ const Insumos = () => {
             }}>
             {currentView?.label}
           </Button>
-        </Box>
+          </Box>
 
-        <Menu
-          anchorEl={vistaMenuAnchor}
-          open={Boolean(vistaMenuAnchor)}
-          onClose={() => setVistaMenuAnchor(null)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          transformOrigin={{ vertical: "top", horizontal: "right" }}
-          slotProps={{
-            paper: {
-              sx: {
-                mt: 0.5,
-                minWidth: 240,
-                borderRadius: 1,
-                border: "1px solid",
-                borderColor: "divider",
-                boxShadow:
-                  theme.palette.mode === "light"
-                    ? "0 16px 36px rgba(15, 23, 42, 0.12)"
-                    : "0 16px 36px rgba(0,0,0,0.45)"
-              }
-            }
-          }}>
-          {VIEW_OPTIONS.map((option) =>
-          <MenuItem
-            key={option.value}
-            selected={vista === option.value}
-            onClick={() => handleVistaSelect(option.value)}
-            sx={{
-              alignItems: "flex-start",
-              borderRadius: 0.75,
-              mx: 0.75,
-              my: 0.15,
-              py: 0.75,
-              "&.Mui-selected": {
-                bgcolor:
-                  theme.palette.mode === "light"
-                    ? alpha(theme.palette.primary.main, 0.08)
-                    : alpha(theme.palette.primary.light, 0.12),
-                color: "primary.main",
-                "&:hover": {
-                  bgcolor:
+          <Menu
+            anchorEl={vistaMenuAnchor}
+            open={Boolean(vistaMenuAnchor)}
+            onClose={() => setVistaMenuAnchor(null)}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+            slotProps={{
+              paper: {
+                sx: {
+                  mt: 0.5,
+                  minWidth: 240,
+                  borderRadius: 1,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  boxShadow:
                     theme.palette.mode === "light"
-                      ? alpha(theme.palette.primary.main, 0.12)
-                      : alpha(theme.palette.primary.light, 0.16)
+                      ? "0 16px 36px rgba(15, 23, 42, 0.12)"
+                      : "0 16px 36px rgba(0,0,0,0.45)"
                 }
               }
             }}>
-              <ListItemText
-              primary={option.label}
-              secondary={option.description}
-              slotProps={{
-                primary: {
-                  sx: {
-                    fontSize: 13.5,
-                    fontWeight: 700,
-                    lineHeight: 1.25
-                  }
-                },
-                secondary: {
-                  sx: {
-                    fontSize: 11.5,
-                    lineHeight: 1.3
+            {VIEW_OPTIONS.map((option) =>
+            <MenuItem
+              key={option.value}
+              selected={vista === option.value}
+              onClick={() => handleVistaSelect(option.value)}
+              sx={{
+                alignItems: "flex-start",
+                borderRadius: 0.75,
+                mx: 0.75,
+                my: 0.15,
+                py: 0.75,
+                "&.Mui-selected": {
+                  bgcolor:
+                    theme.palette.mode === "light"
+                      ? alpha(theme.palette.primary.main, 0.08)
+                      : alpha(theme.palette.primary.light, 0.12),
+                  color: "primary.main",
+                  "&:hover": {
+                    bgcolor:
+                      theme.palette.mode === "light"
+                        ? alpha(theme.palette.primary.main, 0.12)
+                        : alpha(theme.palette.primary.light, 0.16)
                   }
                 }
-              }} />
-            </MenuItem>
-          )}
-        </Menu>
+              }}>
+                <ListItemText
+                primary={option.label}
+                secondary={option.description}
+                slotProps={{
+                  primary: {
+                    sx: {
+                      fontSize: 13.5,
+                      fontWeight: 700,
+                      lineHeight: 1.25
+                    }
+                  },
+                  secondary: {
+                    sx: {
+                      fontSize: 11.5,
+                      lineHeight: 1.3
+                    }
+                  }
+                }} />
+              </MenuItem>
+            )}
+          </Menu>
+          </Box>
+
+          {canCreateInsumo && (
+          isMobile ?
+          <IconButton
+            aria-label="Nuevo insumo"
+            onClick={() => setOpenModal(true)}
+            sx={getActionIconButtonSx(theme, "primary", {
+              width: 40,
+              height: 40,
+              minWidth: 40
+            })}>
+
+                <Add fontSize="small" />
+              </IconButton> :
+
+          <PrimaryActionButton
+            label="Nuevo insumo"
+            startIcon={<Add />}
+            onClick={() => setOpenModal(true)} />)
+
+          }
+        </Box>
       </Box>
+
+      {vista !== 0 && (
+      <Box sx={{ mb: 2, maxWidth: { xs: "100%", sm: 420 }, ml: "auto" }}>
+          <SearchBar
+          value={inventorySearchInput}
+          onChange={setInventorySearchInput}
+          onSearch={setInventorySearch}
+          placeholder="Buscar insumos por nombre, tipo o código..."
+          width={{ xs: "100%", sm: 420 }} />
+
+        </Box>
+      )}
 
       {/* Vista 0: listado por tipo (tu GroupedInsumos actual) */}
       {vista === 0 &&
@@ -569,7 +599,7 @@ const Insumos = () => {
             setSearchInput={(value) =>
             handleSearchInputChange(tipo, value)
             }
-            setSearch={() => handleSearch(tipo)}
+            setSearch={(value) => handleSearch(tipo, value)}
             handleEdit={handleEdit}
             setSelectedRows={setSelectedRows}
             isMobile={isMobile} />
@@ -586,7 +616,7 @@ const Insumos = () => {
       <LoaderComponent /> :
 
       <InventarioMatrizInsumos
-        insumos={insumosFiltradosPorSucursal}
+        insumos={insumosBuscadosParaVistas}
         sucursales={
         rol === "administrador" ?
         sucursales || [] :
@@ -603,7 +633,7 @@ const Insumos = () => {
       <LoaderComponent /> :
 
       <InventarioTabsInsumosPorSucursal
-        insumos={insumosFiltradosPorSucursal}
+        insumos={insumosBuscadosParaVistas}
         sucursales={sucursalesParaVistas} />)
 
       }
@@ -614,7 +644,7 @@ const Insumos = () => {
       <LoaderComponent /> :
 
       <InventarioAccordionInsumosPorInsumo
-        insumos={insumosFiltradosPorSucursal}
+        insumos={insumosBuscadosParaVistas}
         sucursales={sucursalesParaVistas} />)
 
       }

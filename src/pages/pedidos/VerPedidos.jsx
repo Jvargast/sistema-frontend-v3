@@ -45,6 +45,46 @@ const userOperaEnSucursal = (u, targetId) =>
     (c) => Number(c.id_sucursal) === Number(targetId)
   );
 
+const BOARD_STATE_IDS = new Set([1, 4, 5]);
+const BOARD_STATE_NAMES = new Set([
+  "pendiente",
+  "pendiente de confirmacion",
+  "pendiente confirmacion",
+  "confirmado",
+]);
+
+const normalizeEstadoPedido = (estado) =>
+  String(estado || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
+
+const isHiddenFromBoard = (pedido) =>
+  pedido?.mostrar_en_tablero === false ||
+  pedido?.mostrar_en_tablero === 0 ||
+  pedido?.mostrar_en_tablero === "false";
+
+const canShowPedidoOnBoard = (pedido) => {
+  if (isHiddenFromBoard(pedido)) return false;
+
+  const estadoId = Number(
+    pedido?.id_estado_pedido ??
+      pedido?.EstadoPedido?.id_estado_pedido ??
+      pedido?.estadoPedido?.id_estado_pedido
+  );
+
+  if (BOARD_STATE_IDS.has(estadoId)) return true;
+
+  const estadoNombre = normalizeEstadoPedido(
+    pedido?.EstadoPedido?.nombre_estado ??
+      pedido?.estadoPedido?.nombre_estado ??
+      pedido?.estado
+  );
+
+  return BOARD_STATE_NAMES.has(estadoNombre);
+};
+
 const PedidosBoard = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -87,9 +127,8 @@ const PedidosBoard = () => {
         id_sucursal: targetSucursalId,
         page: 1,
         limit: 200,
-        soloTablero: true,
       };
-    if (mode === "global") return { page: 1, limit: 200, soloTablero: true };
+    if (mode === "global") return { page: 1, limit: 200 };
     return skipToken;
   }, [targetSucursalId, mode]);
 
@@ -310,20 +349,13 @@ const PedidosBoard = () => {
       next[ch.rut] = [];
     });
 
-    const estadosPermitidos = [
-      "Pendiente de Confirmación",
-      "Confirmado",
-      "Pendiente",
-    ];
-
     const pedidosFiltradosScope = allPedidos.filter(
-      (p) => Number(getPedidoSucursalId(p)) === Number(targetSucursalId)
+      (p) =>
+        Number(getPedidoSucursalId(p)) === Number(targetSucursalId) &&
+        canShowPedidoOnBoard(p)
     );
 
     pedidosFiltradosScope.forEach((pedido) => {
-      const estadoNombre = pedido?.EstadoPedido?.nombre_estado;
-      if (!estadosPermitidos.includes(estadoNombre)) return;
-
       const rutChofer = pedido?.Chofer?.rut;
 
       if (!pedido.id_chofer) {

@@ -1,5 +1,9 @@
 import { useEffect, useRef } from "react";
 import { socket } from "../socket";
+import {
+  canUseGeolocation,
+  getGeolocationBlockedMessage,
+} from "../utils/geolocation";
 
 export function useChoferTracking({ viajeActivo, rut }) {
   const watcherRef = useRef(null);
@@ -12,8 +16,15 @@ export function useChoferTracking({ viajeActivo, rut }) {
       return;
     }
 
-    if (!("geolocation" in navigator)) return;
-    console.log("useChoferTracking - entrada")
+    if (!canUseGeolocation()) {
+      console.warn(
+        "Tracking de chofer desactivado:",
+        getGeolocationBlockedMessage()
+      );
+      return;
+    }
+
+    console.log("useChoferTracking - entrada");
 
     watcherRef.current = navigator.geolocation.watchPosition(
       (pos) => {

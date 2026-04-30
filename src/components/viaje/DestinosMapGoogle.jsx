@@ -1,7 +1,6 @@
 import {
   GoogleMap,
-  Marker,
-  DirectionsRenderer,
+  Polyline,
   InfoWindow,
 } from "@react-google-maps/api";
 import PropTypes from "prop-types";
@@ -10,6 +9,7 @@ import Typography from "../common/CompatTypography";
 
 import { convertirFechaLocal } from "../../utils/fechaUtils";
 import Box from "../common/CompatBox";
+import AdvancedMarker from "./AdvancedMarker";
 
 const mapContainerStyle = {
   height: "300px",
@@ -18,10 +18,37 @@ const mapContainerStyle = {
   marginBottom: "24px",
 };
 
-function isEntregado(d, entregados) {
-  return entregados.some(
-    (e) => Number(e.lat) === Number(d.lat) && Number(e.lng) === Number(d.lng)
-  );
+const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP?.trim();
+const CURRENT_ROUTE_COLOR = "#38bdf8";
+const FUTURE_ROUTE_COLOR = "#94a3b8";
+
+function isValidPoint(point) {
+  return isValidCoord(point?.lat) && isValidCoord(point?.lng);
+}
+
+function getDestinoKey(point) {
+  if (point?.id_pedido != null) return `pedido-${point.id_pedido}`;
+
+  const lat = Number(point?.lat);
+  const lng = Number(point?.lng);
+  const address = point?.direccion || "";
+  return `coords-${lat.toFixed(6)}-${lng.toFixed(6)}-${address}`;
+}
+
+function isEntregado(d, entregados = []) {
+  if (!isValidPoint(d)) return false;
+  const destinoKey = getDestinoKey(d);
+  return entregados.filter(isValidPoint).some((e) => {
+    if (e?.id_pedido != null || d?.id_pedido != null) {
+      return getDestinoKey(e) === destinoKey;
+    }
+
+    return (
+      Number(e.lat) === Number(d.lat) &&
+      Number(e.lng) === Number(d.lng) &&
+      (e.direccion || "") === (d.direccion || "")
+    );
+  });
 }
 
 const infoWindowStyle = {
@@ -182,11 +209,154 @@ const checkDotStyle = {
 };
 
 function isValidCoord(val) {
-  return typeof val === "number" && isFinite(val);
+  return Number.isFinite(Number(val));
 }
 
-export default function DestinosMapGoogle({ ruta, recorridoReal, directions }) {
+function toLatLng(point) {
+  return {
+    lat: Number(point.lat),
+    lng: Number(point.lng),
+  };
+}
+
+function getSquaredDistance(a, b) {
+  const latDiff = Number(a.lat) - Number(b.lat);
+  const lngDiff = Number(a.lng) - Number(b.lng);
+  return latDiff * latDiff + lngDiff * lngDiff;
+}
+
+function appendUniquePoint(path, point) {
+  const normalizedPoint = toLatLng(point);
+  const lastPoint = path[path.length - 1];
+
+  if (!lastPoint || getSquaredDistance(lastPoint, normalizedPoint) > 0) {
+    path.push(normalizedPoint);
+  }
+
+  return path;
+}
+
+function splitRoutePathByFirstDestination(path = [], firstDestination) {
+  const normalizedPath = path.filter(isValidPoint).map(toLatLng);
+
+  if (normalizedPath.length < 2 || !isValidPoint(firstDestination)) {
+    return {
+      currentLegPath: normalizedPath,
+      futureLegPath: [],
+    };
+  }
+
+  const destination = toLatLng(firstDestination);
+  let closestIndex = 1;
+  let closestDistance = Infinity;
+
+  normalizedPath.forEach((point, index) => {
+    if (index === 0) return;
+    const distance = getSquaredDistance(point, destination);
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestIndex = index;
+    }
+  });
+
+  const currentLegPath = normalizedPath.slice(0, closestIndex + 1);
+  appendUniquePoint(currentLegPath, destination);
+
+  const futureLegPath = [destination];
+  normalizedPath.slice(closestIndex + 1).forEach((point) => {
+    appendUniquePoint(futureLegPath, point);
+  });
+
+  return {
+    currentLegPath,
+    futureLegPath: futureLegPath.length > 1 ? futureLegPath : [],
+  };
+}
+
+function getFutureRouteLineOptions() {
+  return {
+    strokeColor: FUTURE_ROUTE_COLOR,
+    strokeOpacity: 0,
+    strokeWeight: 4,
+    zIndex: 1,
+    icons: [
+      {
+        icon: {
+          path: "M 0,-1 0,1",
+          strokeColor: FUTURE_ROUTE_COLOR,
+          strokeOpacity: 1,
+          scale: 3,
+        },
+        offset: "0",
+        repeat: "18px",
+      },
+    ],
+  };
+}
+
+function getCoordKey(point) {
+  return `${Number(point.lat).toFixed(6)}:${Number(point.lng).toFixed(6)}`;
+}
+
+function getOffsetPosition(point, duplicateIndex, duplicateTotal) {
+  if (duplicateTotal <= 1) return toLatLng(point);
+
+  const angle = (Math.PI * 2 * duplicateIndex) / duplicateTotal;
+  const radius = 0.000035;
+  return {
+    lat: Number(point.lat) + Math.sin(angle) * radius,
+    lng: Number(point.lng) + Math.cos(angle) * radius,
+  };
+}
+
+function withMarkerPositions(points = []) {
+  const totals = new Map();
+  const seen = new Map();
+
+  points.forEach((point) => {
+    const key = getCoordKey(point);
+    totals.set(key, (totals.get(key) || 0) + 1);
+  });
+
+  return points.map((point) => {
+    const key = getCoordKey(point);
+    const duplicateIndex = seen.get(key) || 0;
+    seen.set(key, duplicateIndex + 1);
+
+    return {
+      point,
+      markerPosition: getOffsetPosition(point, duplicateIndex, totals.get(key)),
+    };
+  });
+}
+
+function createMarkerContent({ text, background, color = "#fff", size = 34 }) {
+  const marker = document.createElement("div");
+  marker.textContent = text;
+  marker.style.width = `${size}px`;
+  marker.style.height = `${size}px`;
+  marker.style.borderRadius = "50%";
+  marker.style.background = background;
+  marker.style.color = color;
+  marker.style.border = "3px solid #fff";
+  marker.style.boxShadow = "0 2px 8px 0 #22223b44";
+  marker.style.display = "flex";
+  marker.style.alignItems = "center";
+  marker.style.justifyContent = "center";
+  marker.style.fontSize = text === "🏠" ? "18px" : "16px";
+  marker.style.fontWeight = "800";
+  marker.style.cursor = "pointer";
+  return marker;
+}
+
+export default function DestinosMapGoogle({
+  destinos = [],
+  ruta = [],
+  recorridoReal = [],
+  routePath = [],
+}) {
   const [activeMarker, setActiveMarker] = useState(null);
+  const [mapInstance, setMapInstance] = useState(null);
 
   useEffect(() => {
     const style = document.createElement("style");
@@ -211,26 +381,108 @@ export default function DestinosMapGoogle({ ruta, recorridoReal, directions }) {
     return () => document.head.removeChild(style);
   }, []);
 
+  const puntosRecorrido = useMemo(
+    () =>
+      Array.isArray(recorridoReal) ? recorridoReal.filter(isValidPoint) : [],
+    [recorridoReal]
+  );
+  const puntosRuta = useMemo(
+    () => (Array.isArray(ruta) ? ruta.filter(isValidPoint) : []),
+    [ruta]
+  );
+  const puntosDestino = useMemo(
+    () => (Array.isArray(destinos) ? destinos.filter(isValidPoint) : []),
+    [destinos]
+  );
+  const puntosPendientes = useMemo(() => {
+    const ordered = new Map();
+
+    puntosRuta.slice(1).forEach((punto) => {
+      ordered.set(getDestinoKey(punto), punto);
+    });
+    puntosDestino.forEach((punto) => {
+      const key = getDestinoKey(punto);
+      if (!ordered.has(key)) ordered.set(key, punto);
+    });
+
+    return Array.from(ordered.values()).filter(
+      (punto) => !isEntregado(punto, puntosRecorrido)
+    );
+  }, [puntosDestino, puntosRecorrido, puntosRuta]);
+  const marcadoresPendientes = useMemo(
+    () => withMarkerPositions(puntosPendientes),
+    [puntosPendientes]
+  );
+  const puntosEntregados = useMemo(
+    () => puntosRecorrido.slice(1).filter(isValidPoint),
+    [puntosRecorrido]
+  );
+  const marcadoresEntregados = useMemo(
+    () => withMarkerPositions(puntosEntregados),
+    [puntosEntregados]
+  );
+  const primerDestinoPendiente = puntosPendientes[0] || null;
+  const { currentLegPath, futureLegPath } = useMemo(
+    () => splitRoutePathByFirstDestination(routePath, primerDestinoPendiente),
+    [primerDestinoPendiente, routePath]
+  );
   const ultimoEntregado =
-    recorridoReal?.length > 1 ? recorridoReal[recorridoReal.length - 1] : null;
+    puntosRecorrido.length > 1
+      ? puntosRecorrido[puntosRecorrido.length - 1]
+      : null;
 
   const center = useMemo(() => {
-    if (
-      ruta?.length > 0 &&
-      isValidCoord(ruta[0]?.lat) &&
-      isValidCoord(ruta[0]?.lng)
-    ) {
-      return { lat: ruta[0].lat, lng: ruta[0].lng };
+    if (puntosRuta.length > 0) {
+      return toLatLng(puntosRuta[0]);
+    }
+    if (puntosDestino.length > 0) {
+      return toLatLng(puntosDestino[0]);
     }
     if (
       ultimoEntregado &&
       isValidCoord(ultimoEntregado.lat) &&
       isValidCoord(ultimoEntregado.lng)
     ) {
-      return { lat: ultimoEntregado.lat, lng: ultimoEntregado.lng };
+      return toLatLng(ultimoEntregado);
     }
     return { lat: -27.0676, lng: -70.8172 };
-  }, [ruta, ultimoEntregado]);
+  }, [puntosDestino, puntosRuta, ultimoEntregado]);
+
+  useEffect(() => {
+    if (!mapInstance || !window.google?.maps?.LatLngBounds) return;
+
+    const puntosVisibles = [
+      ...puntosRuta,
+      ...puntosDestino,
+      ...puntosRecorrido,
+      ...(Array.isArray(routePath) ? routePath : []),
+    ].filter(isValidPoint);
+
+    if (!puntosVisibles.length) return;
+
+    if (puntosVisibles.length === 1) {
+      mapInstance.setCenter(toLatLng(puntosVisibles[0]));
+      mapInstance.setZoom(15);
+      return;
+    }
+
+    const bounds = new window.google.maps.LatLngBounds();
+    puntosVisibles.forEach((punto) => bounds.extend(toLatLng(punto)));
+
+    if (!bounds.isEmpty?.() && typeof mapInstance.fitBounds === "function") {
+      mapInstance.fitBounds(bounds, 56);
+      window.setTimeout(() => {
+        if (typeof mapInstance.getZoom !== "function") return;
+        const currentZoom = mapInstance.getZoom();
+        if (typeof currentZoom === "number" && currentZoom < 13) {
+          mapInstance.setZoom(13);
+        }
+        if (typeof currentZoom === "number" && currentZoom > 16) {
+          mapInstance.setZoom(16);
+        }
+      }, 0);
+    }
+  }, [mapInstance, puntosDestino, puntosRecorrido, puntosRuta, routePath]);
 
   return (
     <>
@@ -342,12 +594,14 @@ export default function DestinosMapGoogle({ ruta, recorridoReal, directions }) {
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           center={center}
-          zoom={13}
+          zoom={15}
           options={{
             disableDefaultUI: true,
+            mapId: GOOGLE_MAPS_MAP_ID || undefined,
           }}
+          onLoad={setMapInstance}
         >
-          {ruta.length === 0 && (
+          {puntosPendientes.length === 0 && (
             <Box
               sx={{
                 position: "absolute",
@@ -366,42 +620,48 @@ export default function DestinosMapGoogle({ ruta, recorridoReal, directions }) {
               </Typography>
             </Box>
           )}
-          {directions && (
-            <DirectionsRenderer
-              directions={directions}
-              options={{ suppressMarkers: true }}
+          {futureLegPath.length > 1 && (
+            <Polyline
+              path={futureLegPath}
+              options={getFutureRouteLineOptions()}
+            />
+          )}
+          {currentLegPath.length > 1 && (
+            <Polyline
+              path={currentLegPath}
+              options={{
+                strokeColor: CURRENT_ROUTE_COLOR,
+                strokeOpacity: 0.85,
+                strokeWeight: 5,
+                zIndex: 2,
+              }}
             />
           )}
 
           {/* Marcador origen */}
-          {ruta?.length > 0 && (
+          {mapInstance && puntosRuta.length > 0 && (
             <div>
-              <Marker
+              <AdvancedMarker
+                map={mapInstance}
                 onClick={() => setActiveMarker("origen")}
-                position={{ lat: ruta[0].lat, lng: ruta[0].lng }}
-                icon={{
-                  path: window.google.maps.SymbolPath.CIRCLE,
-                  scale: 10,
-                  fillColor: "#ef476f",
-                  fillOpacity: 1,
-                  strokeWeight: 2,
-                  strokeColor: "#fff",
-                }}
-                label={{
+                position={toLatLng(puntosRuta[0])}
+                content={createMarkerContent({
                   text: "🏠",
-                  color: "#fff",
-                  fontSize: "16px",
-                }}
+                  background: "#ef476f",
+                })}
+                title="Origen actual"
               />
               {activeMarker === "origen" && (
                 <InfoWindow
-                  position={{ lat: ruta[0].lat, lng: ruta[0].lng }}
+                  position={toLatLng(puntosRuta[0])}
                   onCloseClick={() => setActiveMarker(null)}
                   options={{ pixelOffset: new window.google.maps.Size(0, -30) }}
                 >
                   <div style={infoWindowStyle}>
                     <strong style={strongStyle}>Origen actual</strong>
-                    <div>{ruta[0].direccion || "Sin dirección registrada"}</div>
+                    <div>
+                      {puntosRuta[0].direccion || "Sin dirección registrada"}
+                    </div>
                   </div>
                 </InfoWindow>
               )}
@@ -409,137 +669,130 @@ export default function DestinosMapGoogle({ ruta, recorridoReal, directions }) {
           )}
 
           {/* Marcadores pendientes */}
-          {ruta
-            ?.slice(1)
-            .filter(
-              (d) =>
-                !isEntregado(d, recorridoReal) &&
-                isValidCoord(d.lat) &&
-                isValidCoord(d.lng)
-            )
-            .map((d, i) => (
-              <Box key={`pendiente-wrap-${i}`}>
-                <Marker
-                  key={`pendiente-${i}`}
-                  position={{ lat: d.lat, lng: d.lng }}
-                  onClick={() => setActiveMarker(`pendiente-${i}`)}
-                  icon={{
-                    url: `data:image/svg+xml;utf-8,
-      <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34">
-        <circle cx="17" cy="17" r="16" fill="%234361ee" stroke="white" stroke-width="3"/>
-        <text x="50%" y="56%" text-anchor="middle" fill="white" font-size="16" font-family="Roboto" font-weight="bold" dy=".3em">${
-          i + 1
-        }</text>
-      </svg>`,
-                    scaledSize: new window.google.maps.Size(34, 34),
-                    anchor: new window.google.maps.Point(17, 5),
-                  }}
-                />
-                {activeMarker === `pendiente-${i}` && (
-                  <InfoWindow
-                    position={{ lat: d.lat, lng: d.lng }}
-                    onCloseClick={() => setActiveMarker(null)}
-                  >
-                    <div style={infoWindowStyle}>
-                      <button
-                        onClick={() => setActiveMarker(null)}
-                        style={buttonClose}
-                        aria-label="Cerrar"
-                        tabIndex={0}
-                        onMouseOver={(e) =>
-                          (e.currentTarget.style.color = "#e53935")
-                        }
-                        onMouseOut={(e) =>
-                          (e.currentTarget.style.color = "#bdbdbd")
-                        }
-                      >
-                        ×
-                      </button>
-                      <span style={badgeStyle}>Pedido pendiente</span>
-                      <span style={idStyle}>#{d.id_pedido}</span>
-                      <span style={nameStyle}>{d.nombre_cliente}</span>
-                      <span style={addressStyle}>{d.direccion}</span>
-                      <div style={estadoStyle}>
-                        <span style={dotStyle}></span>
-                        <span
-                          style={{
-                            fontSize: 12,
-                            color: "#fbc02d",
-                            fontWeight: 600,
-                          }}
+          {mapInstance &&
+            marcadoresPendientes.map(({ point: d, markerPosition }, i) => {
+              const markerKey = getDestinoKey(d);
+              const activeKey = `pendiente-${markerKey}`;
+
+              return (
+                <Box key={`pendiente-wrap-${markerKey}`}>
+                  <AdvancedMarker
+                    key={`pendiente-${markerKey}`}
+                    map={mapInstance}
+                    position={markerPosition}
+                    onClick={() => setActiveMarker(activeKey)}
+                    content={createMarkerContent({
+                      text: String(i + 1),
+                      background: "#4361ee",
+                    })}
+                    title={`Pedido pendiente #${d.id_pedido || i + 1}`}
+                    zIndex={1000 + i}
+                  />
+                  {activeMarker === activeKey && (
+                    <InfoWindow
+                      position={markerPosition}
+                      onCloseClick={() => setActiveMarker(null)}
+                    >
+                      <div style={infoWindowStyle}>
+                        <button
+                          onClick={() => setActiveMarker(null)}
+                          style={buttonClose}
+                          aria-label="Cerrar"
+                          tabIndex={0}
+                          onMouseOver={(e) =>
+                            (e.currentTarget.style.color = "#e53935")
+                          }
+                          onMouseOut={(e) =>
+                            (e.currentTarget.style.color = "#bdbdbd")
+                          }
                         >
-                          Pendiente
-                        </span>{" "}
+                          ×
+                        </button>
+                        <span style={badgeStyle}>Pedido pendiente</span>
+                        <span style={idStyle}>#{d.id_pedido}</span>
+                        <span style={nameStyle}>{d.nombre_cliente}</span>
+                        <span style={addressStyle}>{d.direccion}</span>
+                        <div style={estadoStyle}>
+                          <span style={dotStyle}></span>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              color: "#fbc02d",
+                              fontWeight: 600,
+                            }}
+                          >
+                            Pendiente
+                          </span>{" "}
+                        </div>
                       </div>
-                    </div>
-                  </InfoWindow>
-                )}
-              </Box>
-            ))}
+                    </InfoWindow>
+                  )}
+                </Box>
+              );
+            })}
 
           {/* Marcadores entregados */}
-          {recorridoReal
-            ?.slice(1)
-            .filter((d) => isValidCoord(d.lat) && isValidCoord(d.lng))
-            .map((d, i) => (
-              <Box key={`entregado-${i}`}>
-                <Marker
-                  onClick={() => setActiveMarker(`entregado-${i}`)}
-                  position={{ lat: d.lat, lng: d.lng }}
-                  icon={{
-                    url: `data:image/svg+xml;utf-8,
-      <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34">
-        <circle cx="17" cy="17" r="16" fill="%234caf50" stroke="white" stroke-width="3"/>
-        <text x="50%" y="56%" text-anchor="middle" fill="white" font-size="16" font-family="Roboto" font-weight="bold" dy=".3em">${
-          i + 1
-        }</text>
-      </svg>`,
-                    scaledSize: new window.google.maps.Size(34, 34),
-                    anchor: new window.google.maps.Point(17, 5),
-                  }}
-                />
-                {activeMarker === `entregado-${i}` && (
-                  <InfoWindow
-                    position={{ lat: d.lat, lng: d.lng }}
-                    onCloseClick={() => setActiveMarker(null)}
-                    options={{
-                      pixelOffset: new window.google.maps.Size(0, -30),
-                    }}
-                  >
-                    <div style={entregadoInfoWindowStyle}>
-                      <button
-                        onClick={() => setActiveMarker(null)}
-                        style={buttonClose}
-                        aria-label="Cerrar"
-                        tabIndex={0}
-                        onMouseOver={(e) =>
-                          (e.currentTarget.style.color = "#e53935")
-                        }
-                        onMouseOut={(e) =>
-                          (e.currentTarget.style.color = "#bdbdbd")
-                        }
-                      >
-                        ×
-                      </button>
-                      <span style={badgeEntregadoStyle}>Entregado</span>
-                      <strong style={strongEntregadoStyle}>
-                        {d.nombre_cliente}
-                      </strong>
-                      <div style={addressEntregadoStyle}>{d.direccion}</div>
-                      {d.hora && (
-                        <div style={horaEntregadoStyle}>
-                          <span style={checkDotStyle}></span>
-                          <span>
-                            <b>Entregado:</b>{" "}
-                            {convertirFechaLocal(d.hora, "DD-MM-YYYY HH:mm")}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </InfoWindow>
-                )}
-              </Box>
-            ))}
+          {mapInstance &&
+            marcadoresEntregados.map(({ point: d, markerPosition }, i) => {
+              const markerKey = getDestinoKey(d);
+              const activeKey = `entregado-${markerKey}`;
+
+              return (
+                <Box key={`entregado-${markerKey}`}>
+                  <AdvancedMarker
+                    map={mapInstance}
+                    onClick={() => setActiveMarker(activeKey)}
+                    position={markerPosition}
+                    content={createMarkerContent({
+                      text: String(i + 1),
+                      background: "#4caf50",
+                    })}
+                    title={`Entrega realizada #${d.id_pedido || i + 1}`}
+                    zIndex={500 + i}
+                  />
+                  {activeMarker === activeKey && (
+                    <InfoWindow
+                      position={markerPosition}
+                      onCloseClick={() => setActiveMarker(null)}
+                      options={{
+                        pixelOffset: new window.google.maps.Size(0, -30),
+                      }}
+                    >
+                      <div style={entregadoInfoWindowStyle}>
+                        <button
+                          onClick={() => setActiveMarker(null)}
+                          style={buttonClose}
+                          aria-label="Cerrar"
+                          tabIndex={0}
+                          onMouseOver={(e) =>
+                            (e.currentTarget.style.color = "#e53935")
+                          }
+                          onMouseOut={(e) =>
+                            (e.currentTarget.style.color = "#bdbdbd")
+                          }
+                        >
+                          ×
+                        </button>
+                        <span style={badgeEntregadoStyle}>Entregado</span>
+                        <strong style={strongEntregadoStyle}>
+                          {d.nombre_cliente}
+                        </strong>
+                        <div style={addressEntregadoStyle}>{d.direccion}</div>
+                        {d.hora && (
+                          <div style={horaEntregadoStyle}>
+                            <span style={checkDotStyle}></span>
+                            <span>
+                              <b>Entregado:</b>{" "}
+                              {convertirFechaLocal(d.hora, "DD-MM-YYYY HH:mm")}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </InfoWindow>
+                  )}
+                </Box>
+              );
+            })}
         </GoogleMap>
       </Box>
     </>
@@ -547,7 +800,8 @@ export default function DestinosMapGoogle({ ruta, recorridoReal, directions }) {
 }
 
 DestinosMapGoogle.propTypes = {
+  destinos: PropTypes.array,
   ruta: PropTypes.array,
   recorridoReal: PropTypes.array,
-  directions: PropTypes.object,
+  routePath: PropTypes.array,
 };

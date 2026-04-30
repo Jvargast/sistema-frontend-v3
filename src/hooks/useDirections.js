@@ -1,55 +1,45 @@
 import { useEffect, useState } from "react";
-
-function isValidLatLng(lat, lng) {
-  return (
-    typeof lat === "number" &&
-    typeof lng === "number" &&
-    !isNaN(lat) &&
-    !isNaN(lng)
-  );
-}
+import {
+  buildFallbackRoutePath,
+  computeGoogleRoute,
+  isValidRoutePoint,
+} from "../utils/googleRoutesApi";
 
 export function useDirections(ruta) {
-  const [directions, setDirections] = useState(null);
+  const [routePath, setRoutePath] = useState([]);
 
   useEffect(() => {
     if (
       !ruta ||
       ruta.length < 2 ||
-      !window.google ||
-      ruta.some((p) => !isValidLatLng(p.lat, p.lng))
+      ruta.some((point) => !isValidRoutePoint(point))
     ) {
-      setDirections(null);
+      setRoutePath([]);
       return;
     }
 
-    const directionsService = new window.google.maps.DirectionsService();
+    const controller = new AbortController();
+    const origin = ruta[0];
+    const destination = ruta[ruta.length - 1];
+    const intermediates = ruta.slice(1, -1);
 
-    const origin = { lat: Number(ruta[0].lat), lng: Number(ruta[0].lng) };
-    const destination = {
-      lat: Number(ruta[ruta.length - 1].lat),
-      lng: Number(ruta[ruta.length - 1].lng),
-    };
-    const waypoints = ruta.slice(1, -1).map((p) => ({
-      location: { lat: Number(p.lat), lng: Number(p.lng) },
-      stopover: true,
-    }));
+    computeGoogleRoute({
+      origin,
+      destination,
+      intermediates,
+      signal: controller.signal,
+    })
+      .then(({ path }) => {
+        setRoutePath(path.length ? path : buildFallbackRoutePath(ruta));
+      })
+      .catch((error) => {
+        if (error?.name === "AbortError") return;
+        console.warn("Error al calcular ruta con Google Routes API:", error);
+        setRoutePath(buildFallbackRoutePath(ruta));
+      });
 
-
-    directionsService.route(
-      {
-        origin,
-        destination,
-        waypoints,
-        optimizeWaypoints: false,
-        travelMode: window.google.maps.TravelMode.DRIVING,
-      },
-      (result, status) => {
-        if (status === "OK") setDirections(result);
-        else setDirections(null);
-      }
-    );
+    return () => controller.abort();
   }, [ruta]);
 
-  return directions;
+  return routePath;
 }

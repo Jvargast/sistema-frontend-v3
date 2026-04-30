@@ -3,6 +3,7 @@ import {
   useState,
   useEffect,
   useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Paper, Button, CircularProgress, Chip, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import TextField from "../common/CompatTextField";
@@ -10,16 +11,31 @@ import Box from "../common/CompatBox";
 import Grid from "../common/CompatGrid";
 import Typography from "../common/CompatTypography";
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import PropTypes from "prop-types";
 import { useConfirmarCargaCamionMutation } from "../../store/services/agendaCargaApi";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import reverseGeocode from "../../utils/reverseGeocode";
 import AutocompleteDireccion from "../pedido/AutocompleteDireccion";
 import GoogleOrigenSelector from "../viaje/GoogleOrigenSelector";
+import { emitRefetchAgendaViajes } from "../../utils/eventBus";
+
+const getGeneratedViajeId = (response) =>
+  response?.id_agenda_viaje ??
+  response?.data?.id_agenda_viaje ??
+  response?.viaje?.id_agenda_viaje ??
+  response?.data?.viaje?.id_agenda_viaje ??
+  response?.agendaViaje?.id_agenda_viaje ??
+  response?.data?.agendaViaje?.id_agenda_viaje ??
+  response?.agenda_viaje?.id_agenda_viaje ??
+  response?.data?.agenda_viaje?.id_agenda_viaje;
 
 const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const roleName = useSelector(
+    (state) => state?.auth?.rol?.nombre || state?.auth?.rol
+  );
   const [confirmarCarga, { isLoading }] = useConfirmarCargaCamionMutation();
   const [productosCargados, setProductosCargados] = useState({});
   const [notasChofer, setNotasChofer] = useState("");
@@ -141,16 +157,26 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
         }
       };
 
-      await confirmarCarga(payload).unwrap();
+      const response = await confirmarCarga(payload).unwrap();
+      const viajeId = getGeneratedViajeId(response);
       dispatch(
         showNotification({
           message: "Carga confirmada con éxito.",
           severity: "success"
         })
       );
+      emitRefetchAgendaViajes();
       handleClose();
       setNotasChofer("");
       setProductosCargados({});
+      if (roleName === "administrador") {
+        navigate(
+          viajeId ? `/admin/viajes/ver/${viajeId}` : "/admin/viajes",
+          { replace: true }
+        );
+      } else {
+        navigate("/viajes", { replace: true });
+      }
     } catch (error) {
       dispatch(
         showNotification({

@@ -25,6 +25,7 @@ import Typography from "../../components/common/CompatTypography";
 import { normalizeDataGridSelection } from "../../utils/dataGridSelection";
 import { getActionIconButtonSx } from "../../components/common/tableStyles";
 import { getSucursalTagSx } from "../../components/common/sucursalTagStyles";
+import { filterBySearch } from "../../utils/searchUtils";
 
 const getPageActionButtonSx = (theme, variant = "primary") => ({
   borderRadius: 1,
@@ -72,18 +73,26 @@ const Clientes = () => {
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
+  const isSearching = Boolean(search.trim());
 
   useEffect(() => {
     setPage(0);
   }, [mode, activeSucursalId]);
 
+  useEffect(() => {
+    setPage(0);
+  }, [search]);
+
   const clienteParams = useMemo(() => {
-    const base = { search, page: page + 1, limit: pageSize };
+    const base = {
+      page: isSearching ? 1 : page + 1,
+      limit: isSearching ? 1000 : pageSize,
+    };
     if (mode !== "global" && Number(activeSucursalId)) {
       base.id_sucursal = Number(activeSucursalId);
     }
     return base;
-  }, [search, page, pageSize, mode, activeSucursalId]);
+  }, [isSearching, page, pageSize, mode, activeSucursalId]);
 
   const { data, isLoading, isError, error, refetch } =
     useGetAllClientesQuery(clienteParams);
@@ -100,7 +109,7 @@ const Clientes = () => {
   );
 
   const paginacion = useMemo(() => data?.paginacion || {}, [data?.paginacion]);
-  const rows = useMemo(
+  const rawRows = useMemo(
     () =>
       data?.clientes?.map((row) => ({
         ...row,
@@ -108,6 +117,25 @@ const Clientes = () => {
       })) || [],
     [data?.clientes]
   );
+  const filteredRows = useMemo(
+    () =>
+      filterBySearch(rawRows, search, [
+        "id_cliente",
+        "sequentialId",
+        "nombre",
+        "direccion",
+        "tipo_cliente",
+        (cliente) =>
+          cliente.Sucursales?.map((sucursal) => sucursal?.nombre).join(" "),
+      ]),
+    [rawRows, search]
+  );
+  const rows = useMemo(() => {
+    if (!isSearching) return rawRows;
+    const start = page * pageSize;
+    return filteredRows.slice(start, start + pageSize);
+  }, [filteredRows, isSearching, page, pageSize, rawRows]);
+  const totalItems = isSearching ? filteredRows.length : paginacion?.totalItems;
 
   const apiRef = useGridApiRef();
   const gridContainerRef = useRef(null);
@@ -477,7 +505,7 @@ const Clientes = () => {
           rows={rows}
           columns={columns}
           paginationMode="server"
-          rowCount={paginacion?.totalItems || rows.length}
+          rowCount={totalItems || rows.length}
           paginationModel={{
             page: page,
             pageSize: pageSize,
@@ -499,7 +527,12 @@ const Clientes = () => {
             pagination: CustomPagination,
           }}
           slotProps={{
-            toolbar: { searchInput, setSearchInput, setSearch },
+            toolbar: {
+              searchInput,
+              setSearchInput,
+              setSearch,
+              placeholder: "Buscar clientes por nombre, dirección o sucursal...",
+            },
           }}
           sx={{
             height: "100%",

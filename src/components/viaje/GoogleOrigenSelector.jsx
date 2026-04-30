@@ -2,8 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { CircularProgress, IconButton, Tooltip } from "@mui/material";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
+import {
+  canUseGeolocation,
+  getGeolocationBlockedMessage,
+} from "../../utils/geolocation";
 
 const DEFAULT_CENTER = { lat: -27.0676, lng: -70.8172 };
+const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP?.trim();
 
 function isValidLatLng(obj) {
   return (
@@ -21,8 +26,19 @@ export default function GoogleOrigenSelector({ origen, setOrigen }) {
   const markerInstance = useRef();
   const [locating, setLocating] = useState(false);
 
+  const clearMarker = () => {
+    if (markerInstance.current) {
+      markerInstance.current.map = null;
+      markerInstance.current = null;
+    }
+  };
+
   const handleMyLocation = () => {
-    if (!("geolocation" in navigator)) return;
+    if (!canUseGeolocation()) {
+      alert(getGeolocationBlockedMessage());
+      return;
+    }
+
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -38,9 +54,8 @@ export default function GoogleOrigenSelector({ origen, setOrigen }) {
         }
       },
       (err) => {
-        console.log(err)
         setLocating(false);
-        alert("No se pudo obtener tu ubicación.");
+        alert(`No se pudo obtener tu ubicación: ${err.message}`);
       }
     );
   };
@@ -51,7 +66,7 @@ export default function GoogleOrigenSelector({ origen, setOrigen }) {
     mapInstance.current = new window.google.maps.Map(mapRef.current, {
       center: isValidLatLng(origen) ? origen : DEFAULT_CENTER,
       zoom: isValidLatLng(origen) ? 16 : 13,
-      mapId: import.meta.env.VITE_GOOGLE_MAPS_MAP || undefined,
+      mapId: GOOGLE_MAPS_MAP_ID || undefined,
       disableDefaultUI: true,
       zoomControl: true,
     });
@@ -65,10 +80,7 @@ export default function GoogleOrigenSelector({ origen, setOrigen }) {
     });
 
     return () => {
-      if (markerInstance.current) {
-        markerInstance.current.setMap(null);
-        markerInstance.current = null;
-      }
+      clearMarker();
       if (mapInstance.current) {
         mapInstance.current = null;
       }
@@ -79,22 +91,25 @@ export default function GoogleOrigenSelector({ origen, setOrigen }) {
   useEffect(() => {
     if (!window.google?.maps || !mapInstance.current) return;
 
-    if (markerInstance.current) {
-      markerInstance.current.setMap(null);
-      markerInstance.current = null;
-    }
+    clearMarker();
 
     if (isValidLatLng(origen)) {
-      markerInstance.current = new window.google.maps.Marker({
+      markerInstance.current = new window.google.maps.marker.AdvancedMarkerElement({
         position: origen,
         map: mapInstance.current,
-        draggable: true,
+        gmpDraggable: true,
+        title: "Origen seleccionado",
       });
 
-      markerInstance.current.addListener("dragend", (e) => {
+      markerInstance.current.addListener("dragend", () => {
+        const position = markerInstance.current.position;
+        const lat =
+          typeof position.lat === "function" ? position.lat() : position.lat;
+        const lng =
+          typeof position.lng === "function" ? position.lng() : position.lng;
         setOrigen({
-          lat: e.latLng.lat(),
-          lng: e.latLng.lng(),
+          lat: Number(lat),
+          lng: Number(lng),
         });
       });
 

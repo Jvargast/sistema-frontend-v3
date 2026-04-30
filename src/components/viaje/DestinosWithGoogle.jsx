@@ -1,7 +1,6 @@
 import {
   GoogleMap,
   Polyline,
-  DirectionsRenderer,
 } from "@react-google-maps/api";
 import Typography from "../common/CompatTypography";
 
@@ -11,6 +10,8 @@ import Box from "../common/CompatBox";
 /* import { convertirFechaLocal } from "../../utils/fechaUtils"; */
 import { useDirections } from "../../hooks/useDirections";
 import AdvancedMarker from "./AdvancedMarker";
+
+const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP?.trim();
 
 function isEntregado(destino, entregados) {
   if (!destino?.id_pedido) return false;
@@ -68,7 +69,7 @@ export default function DestinosWithGoogle({
 }) {
   const [mapInstance, setMapInstance] = useState(null);
   const [infoIdx, setInfoIdx] = useState(null);
-  const directions = useDirections(ruta);
+  const routePath = useDirections(ruta);
   const center = useMemo(() => {
     if (ruta?.length) return getMapCenter(ruta);
     if (recorridoReal?.length) return getMapCenter(recorridoReal);
@@ -92,7 +93,14 @@ export default function DestinosWithGoogle({
       }
     });
     if (!bounds.isEmpty?.() && typeof mapInstance.fitBounds === "function") {
-      mapInstance.fitBounds(bounds, 64);
+      mapInstance.fitBounds(bounds, 48);
+      window.setTimeout(() => {
+        if (typeof mapInstance.getZoom !== "function") return;
+        const currentZoom = mapInstance.getZoom();
+        if (typeof currentZoom === "number" && currentZoom < 14) {
+          mapInstance.setZoom(14);
+        }
+      }, 0);
     }
   }, [mapInstance, ruta, recorridoReal]);
 
@@ -122,13 +130,25 @@ export default function DestinosWithGoogle({
           marginBottom: 24,
         }}
         center={center}
-        zoom={13}
+        zoom={15}
         options={{
           disableDefaultUI: true,
-          mapId: `${import.meta.env.VITE_GOOGLE_MAPS_MAP}`,
+          mapId: GOOGLE_MAPS_MAP_ID || undefined,
         }}
         onLoad={setMapInstance}
       >
+        {/* Ruta planificada */}
+        {routePath?.length > 1 && (
+          <Polyline
+            path={routePath}
+            options={{
+              strokeColor: "#38bdf8",
+              strokeOpacity: 0.82,
+              strokeWeight: 5,
+            }}
+          />
+        )}
+
         {/* Polyline de entregados */}
         {recorridoReal?.length > 1 && (
           <Polyline
@@ -138,17 +158,10 @@ export default function DestinosWithGoogle({
               lng: Number(p.lng),
             }))}
             options={{
-              strokeColor: "#00b894",
-              strokeOpacity: 0.7,
-              strokeWeight: 7,
+              strokeColor: "#22d3ee",
+              strokeOpacity: 0.9,
+              strokeWeight: 6,
             }}
-          />
-        )}
-        {/* Directions */}
-        {directions && (
-          <DirectionsRenderer
-            directions={directions}
-            options={{ suppressMarkers: true }}
           />
         )}
 

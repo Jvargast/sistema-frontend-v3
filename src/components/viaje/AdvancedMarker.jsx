@@ -1,7 +1,14 @@
 import { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 
-export default function AdvancedMarker({ map, position, content, onClick }) {
+export default function AdvancedMarker({
+  map,
+  position,
+  content,
+  onClick,
+  title,
+  zIndex,
+}) {
   const markerRef = useRef();
 
   useEffect(() => {
@@ -15,18 +22,25 @@ export default function AdvancedMarker({ map, position, content, onClick }) {
       map,
       position,
       content,
+      title,
+      zIndex,
+      gmpClickable: Boolean(onClick),
     });
 
-    if (onClick) {
-      marker.addListener("click", onClick);
+    const handleClick = onClick ? (event) => onClick(event) : null;
+    if (handleClick) {
+      marker.addEventListener("gmp-click", handleClick);
     }
 
     markerRef.current = marker;
 
     return () => {
+      if (handleClick) {
+        marker.removeEventListener("gmp-click", handleClick);
+      }
       marker.map = null;
     };
-  }, [map, position, content, onClick]);
+  }, [map, position, content, onClick, title, zIndex]);
   return null;
 }
 
@@ -35,4 +49,6 @@ AdvancedMarker.propTypes = {
   position: PropTypes.object,
   content: PropTypes.object,
   onClick: PropTypes.func,
+  title: PropTypes.string,
+  zIndex: PropTypes.number,
 };

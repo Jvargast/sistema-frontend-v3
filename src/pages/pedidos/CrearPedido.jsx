@@ -336,6 +336,7 @@ const CrearPedido = () => {
       notas: formState.notas,
       tipo_documento: formState.tipoDocumento,
       prioridad: formState.prioridad,
+      mostrar_en_tablero: true,
       productos: cart.map((item) => ({
         cantidad: item.cantidad,
         tipo: item.tipo,

@@ -84,10 +84,15 @@ const ViajeChofer = ({ viaje }) => {
     return (
       <SpeedDialAction
         icon={icono}
-        tooltipTitle={titulo}
-        onClick={onClick}
-        tabIndex={0}
-        aria-hidden={false} />);
+        slotProps={{
+          tooltip: { title: titulo },
+          fab: {
+            onClick,
+            tabIndex: 0,
+            "aria-hidden": false,
+            "aria-label": titulo
+          }
+        }} />);
 
 
   };
