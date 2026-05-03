@@ -2,9 +2,13 @@ import Tabs from "../../components/common/CompatTabs";
 import Select from "../../components/common/CompatSelect";
 import { useEffect, useMemo, useState } from "react";
 import { skipToken } from "@reduxjs/toolkit/query";
-import { Paper, Divider, Button, CircularProgress, Alert, Tab, MenuItem, FormControl, InputLabel, ListItemIcon, ListItemText, FormHelperText } from "@mui/material";
+import { Button, CircularProgress, Alert, Tab, MenuItem, FormControl, InputLabel, ListItemIcon, ListItemText, FormHelperText, Chip } from "@mui/material";
+import PropTypes from "prop-types";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import { useGetAllChoferesQuery } from "../../store/services/usuariosApi";
 import { useGetAllCamionesQuery } from "../../store/services/camionesApi";
 import { useGetAvailabreProductosQuery } from "../../store/services/productoApi";
@@ -32,6 +36,78 @@ import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 import Box from "../../components/common/CompatBox";
 import Grid from "../../components/common/CompatGrid";
 import Typography from "../../components/common/CompatTypography";
+
+const agendaSectionSx = {
+  p: { xs: 2, sm: 2.5 },
+  borderRadius: 2,
+  border: "1px solid",
+  borderColor: "divider",
+  bgcolor: "background.paper",
+  boxShadow: "0 1px 2px rgba(2,6,23,0.04)",
+};
+
+const AgendaSection = ({ icon, title, subtitle, action, children }) =>
+  <Box component="section" sx={agendaSectionSx}>
+    <Box
+      display="flex"
+      alignItems={{ xs: "flex-start", sm: "center" }}
+      justifyContent="space-between"
+      gap={2}
+      flexWrap="wrap"
+      mb={2}>
+
+      <Box display="flex" alignItems="flex-start" gap={1.5} minWidth={0}>
+        {icon &&
+        <Box
+          sx={(theme) => ({
+            width: 34,
+            height: 34,
+            borderRadius: 1.5,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color:
+            theme.palette.mode === "dark" ?
+            theme.palette.primary.light :
+            theme.palette.primary.main,
+            bgcolor:
+            theme.palette.mode === "dark" ?
+            "rgba(90,141,213,0.14)" :
+            "rgba(90,141,213,0.1)",
+            flex: "0 0 auto"
+          })}>
+
+            {icon}
+          </Box>
+        }
+        <Box minWidth={0}>
+          <Typography variant="h6" fontWeight={800} sx={{ letterSpacing: 0 }}>
+            {title}
+          </Typography>
+          {subtitle &&
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.3 }}>
+              {subtitle}
+            </Typography>
+          }
+        </Box>
+      </Box>
+      {action}
+    </Box>
+    {children}
+  </Box>;
+
+AgendaSection.propTypes = {
+  icon: PropTypes.node,
+  title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string,
+  action: PropTypes.node,
+  children: PropTypes.node.isRequired
+};
+
+const normalizeRut = (rut) => String(rut ?? "").trim();
+
+const isCamionDisponible = (camion) =>
+  String(camion?.estado ?? "").trim().toLowerCase() === "disponible";
 
 const CreateAgendaCargaForm = () => {
   const auth = useSelector((s) => s.auth);
@@ -149,7 +225,7 @@ const CreateAgendaCargaForm = () => {
   const { data: cajaAsignada, isLoading: loadingCaja } =
   useGetCajaAsignadaQuery(
     { rutUsuario: idChofer, id_sucursal: sucursalId },
-    { skip: !idChofer }
+    { skip: !idChofer || !sucursalReady }
   );
 
   useRegisterRefresh(
@@ -165,6 +241,89 @@ const CreateAgendaCargaForm = () => {
     },
     [refetchCamiones, refetchChoferes, refetchProductos, refetchInventario]
   );
+
+  const capacidadAdicionales = useMemo(() => {
+    const inventario = inventarioData?.data;
+    if (!inventario) {
+      return {
+        maxProductosAdicionales: null,
+        cantidadProductosAdicionales: 0,
+        espaciosRestantes: 0,
+        cantidadProductosReservados: 0,
+        espacioUsadoActual: 0
+      };
+    }
+
+    const cantidadProductosReservados = (productosReservados ?? []).reduce(
+      (total, prod) => total + (Number(prod.cantidad) || 0),
+      0
+    );
+
+    const espacioUsadoActual =
+    (Number(inventario.reservados_retornables) || 0) +
+    (Number(inventario.disponibles) || 0) +
+    (Number(inventario.retorno) || 0);
+
+    const maxProductosAdicionales = Math.max(
+      0,
+      (Number(inventario.capacidad_total) || 0) -
+      espacioUsadoActual -
+      cantidadProductosReservados
+    );
+
+    const cantidadProductosAdicionales = (productos ?? []).reduce(
+      (total, prod) =>
+      prod.es_retornable ?
+      total + (Number(prod.cantidad) || 0) :
+      total,
+      0
+    );
+
+    return {
+      maxProductosAdicionales,
+      cantidadProductosAdicionales,
+      espaciosRestantes: Math.max(
+        0,
+        maxProductosAdicionales - cantidadProductosAdicionales
+      ),
+      cantidadProductosReservados,
+      espacioUsadoActual
+    };
+  }, [inventarioData, productosReservados, productos]);
+
+  const cantidadMaximaPorFila = useMemo(() => {
+    const { maxProductosAdicionales } = capacidadAdicionales;
+    if (maxProductosAdicionales === null) return productos.map(() => null);
+
+    return productos.map((prod, index) => {
+      if (!prod.es_retornable) return null;
+
+      const totalOtrasFilas = productos.reduce((total, item, itemIndex) => {
+        if (itemIndex === index || !item.es_retornable) return total;
+        return total + (Number(item.cantidad) || 0);
+      }, 0);
+
+      return Math.max(0, maxProductosAdicionales - totalOtrasFilas);
+    });
+  }, [capacidadAdicionales, productos]);
+
+  const limitarCantidadProducto = (listaProductos, index, cantidad, esRetornable) => {
+    const cantidadNumerica = Number(cantidad);
+    if (!Number.isFinite(cantidadNumerica) || cantidadNumerica < 0) return null;
+
+    const { maxProductosAdicionales } = capacidadAdicionales;
+    if (!esRetornable || maxProductosAdicionales === null) {
+      return cantidadNumerica;
+    }
+
+    const cantidadOtrasFilas = listaProductos.reduce((total, prod, i) => {
+      if (i === index || !prod.es_retornable) return total;
+      return total + (Number(prod.cantidad) || 0);
+    }, 0);
+
+    const maximoFila = Math.max(0, maxProductosAdicionales - cantidadOtrasFilas);
+    return Math.min(cantidadNumerica, maximoFila);
+  };
 
   const opcionesSucursales = useMemo(() => {
     const rawApi = shouldFetchSucursales ?
@@ -196,12 +355,37 @@ const CreateAgendaCargaForm = () => {
     sort((a, b) => a.id_sucursal - b.id_sucursal);
   }, [shouldFetchSucursales, sucursalesApi, userSucursalId, auth]);
 
+  const camionesFiltrados = useMemo(
+    () =>
+    (camiones ?? []).filter(
+      (c) => Number(c.id_sucursal) === Number(sucursalId)
+    ),
+    [camiones, sucursalId]
+  );
+
+  const rutsChoferesConCamionDisponible = useMemo(() => {
+    const disponibles = camionesFiltrados.filter(isCamionDisponible);
+    return new Set(
+      disponibles.
+      map((camion) => normalizeRut(camion.id_chofer_asignado)).
+      filter(Boolean)
+    );
+  }, [camionesFiltrados]);
+
   const choferesFiltrados = useMemo(() => {
     const sid = Number(sucursalId);
-    let list = (choferes ?? []).filter(
-      (c) => Number(c?.id_sucursal ?? c?.Sucursal?.id_sucursal) === sid
-    );
-    if (isChofer && !list.some((c) => c.rut === rutAuth)) {
+    let list = (choferes ?? []).filter((c) => {
+      const rutChofer = normalizeRut(c?.rut);
+      const perteneceSucursal =
+      Number(c?.id_sucursal ?? c?.Sucursal?.id_sucursal) === sid;
+      return perteneceSucursal && rutsChoferesConCamionDisponible.has(rutChofer);
+    });
+
+    if (
+    isChofer &&
+    rutsChoferesConCamionDisponible.has(normalizeRut(rutAuth)) &&
+    !list.some((c) => normalizeRut(c.rut) === normalizeRut(rutAuth)))
+    {
       list = [
       ...list,
       {
@@ -213,11 +397,18 @@ const CreateAgendaCargaForm = () => {
 
     }
     return list;
-  }, [choferes, sucursalId, isChofer, rutAuth, user]);
+  }, [
+    choferes,
+    sucursalId,
+    isChofer,
+    rutAuth,
+    user,
+    rutsChoferesConCamionDisponible
+  ]);
 
   const safeIdChofer = useMemo(
     () =>
-    choferesFiltrados.some((c) => String(c.rut) === String(idChofer)) ?
+    choferesFiltrados.some((c) => normalizeRut(c.rut) === normalizeRut(idChofer)) ?
     idChofer :
     "",
     [choferesFiltrados, idChofer]
@@ -231,40 +422,40 @@ const CreateAgendaCargaForm = () => {
       trim() || "Mi usuario";
       return { nombre, rut: rutAuth };
     }
-    const ch = choferesFiltrados.find((c) => c.rut === idChofer);
+    const ch = choferesFiltrados.find(
+      (c) => normalizeRut(c.rut) === normalizeRut(idChofer)
+    );
     const nombre = `${ch?.nombre ?? ch?.nombres ?? ""} ${
     ch?.apellido ?? ch?.apellidos ?? ""}`.
     trim();
     return { nombre: nombre || ch?.rut || "", rut: ch?.rut || idChofer };
   }, [isChofer, auth, rutAuth, choferesFiltrados, idChofer]);
 
-  const camionesFiltrados = useMemo(
-    () =>
-    (camiones ?? []).filter(
-      (c) => Number(c.id_sucursal) === Number(sucursalId)
-    ),
-    [camiones, sucursalId]
-  );
-
   const choferSeleccionado = useMemo(() => {
-    return choferesFiltrados.find((c) => c.rut === idChofer) || null;
+    return (
+      choferesFiltrados.find(
+        (c) => normalizeRut(c.rut) === normalizeRut(idChofer)
+      ) || null
+    );
   }, [choferesFiltrados, idChofer]);
 
   const camionesDisponibles = useMemo(() => {
     const base = camionesFiltrados;
     if (!base.length) return [];
-    const visibles = isChofer ?
-    base.filter((c) => c.id_chofer_asignado === rutAuth) :
-    base;
+    const rutSeleccionado = normalizeRut(isChofer ? rutAuth : idChofer);
+    if (!rutSeleccionado) return [];
+    const visibles = base.filter(
+      (c) => normalizeRut(c.id_chofer_asignado) === rutSeleccionado
+    );
     return visibles.
-    filter((c) => c.estado !== "En Ruta" && c.estado !== "En Tránsito").
+    filter(isCamionDisponible).
     map((c) => ({
       ...c,
       tieneAgenda:
       agendaCarga?.data?.id_camion &&
       agendaCarga.data.id_camion === c.id_camion
     }));
-  }, [camionesFiltrados, agendaCarga, isChofer, rutAuth]);
+  }, [camionesFiltrados, agendaCarga, isChofer, rutAuth, idChofer]);
 
   const camionSeleccionado = useMemo(() => {
     if (!camionesDisponibles) return null;
@@ -305,6 +496,16 @@ const CreateAgendaCargaForm = () => {
   }, [sucursalId, isChofer, rutAuth]);
 
   useEffect(() => {
+    setIdCamion("");
+    setProductos([]);
+    setProductosReservados([]);
+    setTabIndex(0);
+    setPrioridad("Media");
+    setNotas("");
+    setDescargarRetornables(false);
+  }, [idChofer]);
+
+  useEffect(() => {
     if (idChofer && !loadingCaja && cajaAsignada?.asignada === false) {
       setOpenNoCajaModal(true);
       setIdChofer("");
@@ -331,7 +532,9 @@ const CreateAgendaCargaForm = () => {
     if (
     !isChofer &&
     idChofer &&
-    !choferesFiltrados.some((c) => String(c.rut) === String(idChofer)))
+    !choferesFiltrados.some(
+      (c) => normalizeRut(c.rut) === normalizeRut(idChofer)
+    ))
     {
       setIdChofer("");
     }
@@ -347,46 +550,45 @@ const CreateAgendaCargaForm = () => {
   }, [idCamion, camionesDisponibles]);
 
   useEffect(() => {
-    if (!inventarioData?.data) return;
+    const { maxProductosAdicionales, cantidadProductosAdicionales } =
+    capacidadAdicionales;
+    if (maxProductosAdicionales === null) return;
 
-    const cantidadTotalProductosReservados = productosReservados.reduce(
-      (total, prod) => total + prod.cantidad,
-      0
-    );
-
-    const espacioUsadoActual =
-    inventarioData.data.reservados_retornables +
-    inventarioData.data.disponibles +
-    inventarioData.data.retorno;
-
-    const espaciosDisponiblesParaRetornables =
-    inventarioData.data.capacidad_total -
-    espacioUsadoActual -
-    cantidadTotalProductosReservados;
-
-    const productosRetornables = productos.filter(
-      (p) => p.es_retornable && Number(p.cantidad) > 0
-    );
-
-    const cantidadProductosRetornables = productosRetornables.reduce(
-      (total, p) => total + (Number(p.cantidad) || 0),
-      0
-    );
-
-    const cantidadNegativa = productosRetornables.some(
-      (p) => Number(p.cantidad) < 0
-    );
-
+    const cantidadNegativa = productos.some((p) => Number(p.cantidad) < 0);
     const excedeEspaciosDisponibles =
-    cantidadProductosRetornables > espaciosDisponiblesParaRetornables;
+    cantidadProductosAdicionales > maxProductosAdicionales;
 
-    const sinEspacio = espaciosDisponiblesParaRetornables <= 0;
-
-    const esValido =
-    !cantidadNegativa && !excedeEspaciosDisponibles && !sinEspacio;
+    const esValido = !cantidadNegativa && !excedeEspaciosDisponibles;
 
     setPuedeCrearAgenda(esValido);
-  }, [productos, productosReservados, inventarioData]);
+  }, [productos, capacidadAdicionales]);
+
+  useEffect(() => {
+    const { maxProductosAdicionales } = capacidadAdicionales;
+    if (maxProductosAdicionales === null) return;
+
+    setProductos((prev) => {
+      let restante = maxProductosAdicionales;
+      let changed = false;
+
+      const next = prev.map((prod) => {
+        if (!prod.es_retornable) return prod;
+
+        const cantidadActual = Number(prod.cantidad) || 0;
+        const cantidadPermitida = Math.min(cantidadActual, Math.max(0, restante));
+        restante -= cantidadPermitida;
+
+        if (cantidadPermitida !== cantidadActual) {
+          changed = true;
+          return { ...prod, cantidad: cantidadPermitida };
+        }
+
+        return prod;
+      });
+
+      return changed ? next : prev;
+    });
+  }, [capacidadAdicionales.maxProductosAdicionales]);
 
   const hayPedidosConfirmados = useMemo(() => {
     if (Array.isArray(productosReservados) && productosReservados.length > 0)
@@ -399,6 +601,27 @@ const CreateAgendaCargaForm = () => {
   }, [productosReservados]);
 
   const handleAddProductRow = () => {
+    if (!idCamion || capacidadAdicionales.maxProductosAdicionales === null) {
+      dispatch(
+        showNotification({
+          message: "Selecciona un camión para calcular la capacidad disponible.",
+          severity: "warning"
+        })
+      );
+      return;
+    }
+
+    if (capacidadAdicionales.espaciosRestantes <= 0) {
+      dispatch(
+        showNotification({
+          message:
+          "No quedan espacios disponibles para productos adicionales en este camión.",
+          severity: "warning"
+        })
+      );
+      return;
+    }
+
     setProductos((prev) => [
     ...prev,
     { id_producto: "", cantidad: 0, notas: "", es_retornable: false }]
@@ -406,21 +629,30 @@ const CreateAgendaCargaForm = () => {
   };
 
   const handleChangeProduct = (index, newProductId) => {
-    const selectedProduct = productosDisponibles?.productos.find(
+    const selectedProduct = productosDisponibles?.productos?.find(
       (prod) => prod.id_producto === Number(newProductId)
     );
     setProductos((prev) =>
-    prev.map((prod, i) =>
-    i === index ?
-    {
-      ...prod,
-      id_producto: Number(newProductId),
-      es_retornable: selectedProduct ?
+    prev.map((prod, i) => {
+      if (i !== index) return prod;
+
+      const esRetornable = selectedProduct ?
       selectedProduct.es_retornable :
-      false
-    } :
-    prod
-    )
+      false;
+      const cantidadLimitada = limitarCantidadProducto(
+        prev,
+        index,
+        prod.cantidad,
+        esRetornable
+      );
+
+      return {
+        ...prod,
+        id_producto: Number(newProductId),
+        cantidad: cantidadLimitada === null ? prod.cantidad : cantidadLimitada,
+        es_retornable: esRetornable
+      };
+    })
     );
   };
 
@@ -430,11 +662,21 @@ const CreateAgendaCargaForm = () => {
     if (isNaN(cantidadNumerica) || cantidadNumerica < 0) {
       return;
     }
-    setProductos((prev) =>
-    prev.map((prod, i) =>
-    i === index ? { ...prod, cantidad: Number(newCantidad) } : prod
-    )
-    );
+    setProductos((prev) => {
+      const prodActual = prev[index];
+      const cantidadLimitada = limitarCantidadProducto(
+        prev,
+        index,
+        cantidadNumerica,
+        prodActual?.es_retornable
+      );
+
+      if (cantidadLimitada === null) return prev;
+
+      return prev.map((prod, i) =>
+      i === index ? { ...prod, cantidad: cantidadLimitada } : prod
+      );
+    });
   };
 
   const handleChangeNotas = (index, newNotas) => {
@@ -470,9 +712,26 @@ const CreateAgendaCargaForm = () => {
       return;
     }
 
+    if (
+    capacidadAdicionales.maxProductosAdicionales !== null &&
+    capacidadAdicionales.cantidadProductosAdicionales >
+    capacidadAdicionales.maxProductosAdicionales
+    ) {
+      dispatch(
+        showNotification({
+          message:
+          `La carga adicional supera la capacidad disponible del camión. ` +
+          `Máximo permitido: ${capacidadAdicionales.maxProductosAdicionales}.`,
+          severity: "warning"
+        })
+      );
+      setPuedeCrearAgenda(false);
+      return;
+    }
+
     const payload = {
       id_sucursal: sucursalId,
-      id_usuario_chofer: idChofer,
+      id_usuario_chofer: safeIdChofer,
       id_camion: Number(idCamion),
       prioridad,
       notas,
@@ -544,379 +803,431 @@ const CreateAgendaCargaForm = () => {
   const { productos: listaProductosOriginal = [] } = productosDisponibles || {};
   const listaProductos = listaProductosOriginal.filter((p) => p.es_retornable);
 
-  if (idCamion && loadingInventario) {
-    return (
-      <Box
-        mt={3}
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        minHeight={140}>
+  const hayAgendaPendiente =
+  !loadingAgenda &&
+  (isChofer || !isChofer && idChofer) &&
+  !isError &&
+  agendaCarga &&
+  agendaCarga?.data?.validada_por_chofer === false;
 
-        <CircularProgress />
-      </Box>);
-
-  }
-
-  if (idCamion && errorInventario) {
-    return (
-      <Alert severity="error" sx={{ mt: 3 }}>
-        Error al cargar el inventario del camión.
-      </Alert>);
-
-  }
+  const submitDisabled =
+  loadingCreate ||
+  !puedeCrearAgenda ||
+  !safeIdChofer ||
+  !idCamion ||
+  productos.length === 0 && !hayPedidosConfirmados ||
+  productos.some((p) => !p.id_producto || p.cantidad <= 0) ||
+  camionSeleccionado?.estado === "En Ruta" ||
+  isChofer &&
+  camionSeleccionado &&
+  camionSeleccionado.id_chofer_asignado !== rutAuth ||
+              !isChofer &&
+              camionSeleccionado?.id_chofer_asignado &&
+              normalizeRut(camionSeleccionado.id_chofer_asignado) !==
+              normalizeRut(safeIdChofer);
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="flex-start" p={4}>
-      <Paper
-        elevation={3}
+    <Box
+      sx={{
+        width: "100%",
+        px: { xs: 2, sm: 3, md: 4 },
+        py: { xs: 2, sm: 3 },
+      }}>
+
+      <Box
         sx={{
           width: "100%",
-          maxWidth: 800,
-          p: 3,
-          borderRadius: 2
+          maxWidth: 1180,
+          mx: "auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2
         }}>
 
         <Box
           display="flex"
-          alignItems="center"
-          gap={1}
-          mb={2}
-          pb={1}
-          borderBottom={(theme) => `1.5px solid ${theme.palette.divider}`}>
-
-          <CalendarTodayIcon
-            fontSize="medium"
-            sx={{ color: (theme) => theme.palette.primary.main }} />
-
-          <Typography
-            variant="h6"
-            fontWeight={600}
-            letterSpacing={0.5}
-            sx={{
-              color: (theme) => theme.palette.text.primary,
-              textTransform: "uppercase",
-              fontSize: { xs: "1rem", sm: "1.15rem" },
-              fontFamily: "inherit"
-            }}>
-
-            Crear Agenda de Carga
-          </Typography>
-        </Box>
-
-        {shouldFetchSucursales &&
-        <Box sx={{ px: 1, mb: 2 }}>
-            <Typography
-            variant="subtitle2"
-            sx={{
-              mb: 1,
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              color: (t) => t.palette.text.secondary
-            }}>
-
-              <StorefrontIcon fontSize="small" sx={{ color: "primary.main" }} />
-              Sucursal
-            </Typography>
-
-            <Paper
-            variant="outlined"
-            sx={{
-              p: 2,
-              borderRadius: 2,
-              bgcolor: (t) =>
-              t.palette.mode === "dark" ?
-              t.palette.background.default :
-              t.palette.background.paper,
-              borderColor: (t) =>
-              t.palette.mode === "dark" ?
-              t.palette.grey[800] :
-              t.palette.grey[200]
-            }}>
-
-              <FormControl
-              fullWidth
-              size="small"
-              error={Boolean(errorSucursales)}
-              disabled={loadingSucursales}>
-
-                <InputLabel id="sucursal-label">
-                  {loadingSucursales ?
-                "Cargando sucursales..." :
-                "Selecciona una sucursal"}
-                </InputLabel>
-
-                <Select
-                labelId="sucursal-label"
-                label={
-                loadingSucursales ?
-                "Cargando sucursales..." :
-                "Selecciona una sucursal"
-                }
-                value={String(sucursalFiltro)}
-                onChange={(e) => setSucursalFiltro(e.target.value)}
-                sx={{
-                  borderRadius: 1.5,
-                  "& .MuiSelect-select": {
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    py: 1
-                  }
-                }}
-                renderValue={(selected) => {
-                  if (!selected)
-                  return <span style={{ opacity: 0.6 }}>-- Elegir --</span>;
-                  const s = opcionesSucursales.find(
-                    (x) => String(x.id_sucursal) === String(selected)
-                  );
-                  return (
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-
-                        <StorefrontIcon
-                        fontSize="small"
-                        sx={{ color: "primary.main" }} />
-
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {s?.nombre ?? selected}
-                        </Typography>
-                      </Box>);
-
-                }}>
-
-                  <MenuItem value="">
-                    <em>-- Elegir --</em>
-                  </MenuItem>
-
-                  {opcionesSucursales.map((s) =>
-                <MenuItem key={s.id_sucursal} value={String(s.id_sucursal)}>
-                      <ListItemIcon>
-                        <StorefrontIcon fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText
-                    primary={s.nombre}
-                    secondary={`ID: ${s.id_sucursal}`} />
-
-                    </MenuItem>
-                )}
-                </Select>
-
-                <FormHelperText>
-                  {errorSucursales ?
-                "No se pudieron cargar las sucursales." :
-                "Esto filtra choferes, camiones y productos por la sucursal seleccionada."}
-                </FormHelperText>
-              </FormControl>
-            </Paper>
-          </Box>
-        }
-
-        {!loadingAgenda && (
-        isChofer || !isChofer && idChofer) &&
-        !isError &&
-        agendaCarga &&
-        agendaCarga?.data?.validada_por_chofer === false &&
-        <Box
-          display="flex"
-          alignItems="center"
+          alignItems={{ xs: "flex-start", sm: "center" }}
           justifyContent="space-between"
           flexWrap="wrap"
           gap={2}
-          mb={3}
-          px={1}
-          py={1}
-          sx={(theme) => ({
-            backgroundColor: "transparent",
+          sx={{
+            pb: 1,
             borderBottom: "1px solid",
+            borderColor: "divider"
+          }}>
+
+          <Box display="flex" alignItems="center" gap={1.5} minWidth={0}>
+            <Box
+              sx={(theme) => ({
+                width: 40,
+                height: 40,
+                borderRadius: 1.5,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color:
+                theme.palette.mode === "dark" ?
+                theme.palette.primary.light :
+                theme.palette.primary.main,
+                bgcolor:
+                theme.palette.mode === "dark" ?
+                "rgba(90,141,213,0.14)" :
+                "rgba(90,141,213,0.1)",
+                flex: "0 0 auto"
+              })}>
+
+              <CalendarTodayIcon fontSize="small" />
+            </Box>
+            <Box minWidth={0}>
+              <Typography variant="h4" fontWeight={800} sx={{ letterSpacing: 0 }}>
+                Crear agenda de carga
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Planifica chofer, camión, pedidos confirmados y productos adicionales.
+              </Typography>
+            </Box>
+          </Box>
+
+          <Chip
+            label={isChofer ? "Vista chofer" : "Planificación"}
+            size="small"
+            color="primary"
+            variant="outlined" />
+        </Box>
+
+        {shouldFetchSucursales &&
+        <AgendaSection
+          icon={<StorefrontIcon fontSize="small" />}
+          title="Sucursal"
+          subtitle="Filtra choferes, camiones y productos antes de armar la carga.">
+
+          <FormControl
+            fullWidth
+            size="small"
+            error={Boolean(errorSucursales)}
+            disabled={loadingSucursales}>
+
+            <InputLabel id="sucursal-label">
+              {loadingSucursales ?
+              "Cargando sucursales..." :
+              "Selecciona una sucursal"}
+            </InputLabel>
+
+            <Select
+              labelId="sucursal-label"
+              label={
+              loadingSucursales ?
+              "Cargando sucursales..." :
+              "Selecciona una sucursal"
+              }
+              value={String(sucursalFiltro)}
+              onChange={(e) => setSucursalFiltro(e.target.value)}
+              sx={{
+                borderRadius: 1.5,
+                "& .MuiSelect-select": {
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  py: 1
+                }
+              }}
+              renderValue={(selected) => {
+                if (!selected)
+                return <span style={{ opacity: 0.6 }}>-- Elegir --</span>;
+                const s = opcionesSucursales.find(
+                  (x) => String(x.id_sucursal) === String(selected)
+                );
+                return (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <StorefrontIcon fontSize="small" sx={{ color: "primary.main" }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {s?.nombre ?? selected}
+                    </Typography>
+                  </Box>);
+
+              }}>
+
+              <MenuItem value="">
+                <em>-- Elegir --</em>
+              </MenuItem>
+
+              {opcionesSucursales.map((s) =>
+              <MenuItem key={s.id_sucursal} value={String(s.id_sucursal)}>
+                  <ListItemIcon>
+                    <StorefrontIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={s.nombre}
+                    secondary={`ID: ${s.id_sucursal}`} />
+
+                </MenuItem>
+              )}
+            </Select>
+
+            <FormHelperText>
+              {errorSucursales ?
+              "No se pudieron cargar las sucursales." :
+              "La selección actual define el universo de datos disponibles."}
+            </FormHelperText>
+          </FormControl>
+        </AgendaSection>
+        }
+
+        {hayAgendaPendiente &&
+        <Box
+          display="flex"
+          alignItems={{ xs: "flex-start", sm: "center" }}
+          justifyContent="space-between"
+          flexWrap="wrap"
+          gap={2}
+          sx={(theme) => ({
+            p: 2,
+            borderRadius: 2,
+            border: "1px solid",
             borderColor:
             theme.palette.mode === "dark" ?
-            theme.palette.grey[800] :
-            theme.palette.grey[200]
+            theme.palette.primary.main :
+            "rgba(90,141,213,0.28)",
+            bgcolor:
+            theme.palette.mode === "dark" ?
+            "rgba(90,141,213,0.1)" :
+            "rgba(90,141,213,0.06)"
           })}>
 
-              <Button
+          <Box>
+            <Typography variant="subtitle2" fontWeight={800}>
+              Hay una agenda pendiente para hoy
+            </Typography>
+            {agendaCarga?.data?.fecha_hora &&
+            <Typography variant="body2" color="text.secondary">
+                Agenda del día: {convertirFechaLocal(agendaCarga.data.fecha_hora)}
+              </Typography>
+            }
+          </Box>
+          <Button
             onClick={() => setOpenModal(true)}
-            size="medium"
+            size="small"
             variant="outlined"
-            sx={(theme) => ({
-              textTransform: "none",
-              fontWeight: 500,
-              px: 2.5,
-              py: 1.2,
-              mb: 1,
-              borderRadius: 2,
-              color:
-              theme.palette.mode === "dark" ?
-              theme.palette.grey[100] :
-              theme.palette.grey[900],
-              borderColor:
-              theme.palette.mode === "dark" ?
-              theme.palette.grey[700] :
-              theme.palette.grey[300],
-              backgroundColor:
-              theme.palette.mode === "dark" ?
-              theme.palette.grey[900] :
-              "#fff",
-              "&:hover": {
-                backgroundColor:
-                theme.palette.mode === "dark" ?
-                theme.palette.grey[800] :
-                theme.palette.grey[50],
-                borderColor:
-                theme.palette.mode === "dark" ?
-                theme.palette.grey[500] :
-                theme.palette.grey[400]
-              }
-            })}>
+            startIcon={<CheckCircleOutlineOutlinedIcon fontSize="small" />}>
 
-                Ver mi Agenda de Hoy
-              </Button>
-
-              {agendaCarga?.data?.fecha_hora &&
-          <Typography
-            variant="body2"
-            sx={(theme) => ({
-              color:
-              theme.palette.mode === "dark" ?
-              theme.palette.grey[400] :
-              theme.palette.grey[700],
-              fontStyle: "italic"
-            })}>
-
-                  Agenda del día:&nbsp;
-                  <Typography
-              component="span"
-              fontWeight="medium"
-              color="text.primary"
-              sx={{ fontStyle: "normal" }}>
-
-                    {convertirFechaLocal(agendaCarga.data.fecha_hora)}
-                  </Typography>
-                </Typography>
-          }
-            </Box>
+            Ver agenda
+          </Button>
+        </Box>
         }
 
         {!loadingAgenda && isError &&
-        <Alert severity="info" sx={{ mb: 2 }}>
+        <Alert severity="info">
             {error?.data?.error || "No hay agenda de carga pendiente para hoy."}
           </Alert>
         }
 
         <form onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
-            <AgendaCargaFormInputs
-              isChofer={isChofer}
-              choferes={choferesFiltrados}
-              camiones={camionesDisponibles}
-              idChofer={safeIdChofer}
-              /* choferes={choferes}
-              camiones={camionesDisponibles} */
-              setIdChofer={setIdChofer}
-              idCamion={idCamion === "" ? "" : Number(idCamion)}
-              setIdCamion={(value) =>
-              setIdCamion(value === "" ? "" : Number(value))
+          <Box display="flex" flexDirection="column" gap={2}>
+            <AgendaSection
+              icon={<AssignmentTurnedInOutlinedIcon fontSize="small" />}
+              title="Datos principales"
+              subtitle="Elige responsable, camión y prioridad antes de revisar capacidad.">
+
+              {sucursalReady && choferesFiltrados.length === 0 &&
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                  No hay choferes con camión disponible para esta sucursal.
+                </Alert>
               }
-              prioridad={prioridad}
-              setPrioridad={setPrioridad}
-              notas={notas}
-              setNotas={setNotas}
-              descargarRetornables={descargarRetornables}
-              setDescargarRetornables={setDescargarRetornables}
-              choferDisplay={choferDisplay} />
 
-          </Grid>
-          {camionSeleccionado?.estado === "En Ruta" &&
-          <Alert severity="warning" sx={{ mt: 2 }}>
-              Este camión está en ruta. No puedes crear una agenda hasta que
-              finalice su viaje.
-            </Alert>
-          }
-          {safeIdChofer &&
-          <PedidosConfirmadosList
-            idChofer={safeIdChofer}
-            setProductosReservados={setProductosReservados} />
-
-          }
-          <Divider sx={{ my: 3 }} />
-          {idCamion && inventarioData &&
-          <Box mt={3}>
-              <Tabs
-              value={tabIndex}
-              onChange={(_, newValue) => setTabIndex(newValue)}
-              sx={{ mb: 2 }}>
-
-                <Tab label="Vista Gráfica" />
-                <Tab label="Detalle Capacidad" />
-              </Tabs>
-              {tabIndex === 0 &&
-            <InventarioCamion
-              inventarioData={inventarioData.data}
-              productos={productos}
-              productosReservados={productosReservados}
-              modo="simulacion" />
-
-            }
-              {tabIndex === 1 &&
-            <CapacidadCargaCamion
-              capacidadTotal={inventarioData.data.capacidad_total}
-              reservadosRetornables={
-              inventarioData.data.reservados_retornables
+              {safeIdChofer && camionesDisponibles.length === 0 &&
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                  El chofer seleccionado no tiene camiones disponibles asociados.
+                </Alert>
               }
-              disponibles={inventarioData.data.disponibles}
-              retorno={inventarioData.data.retorno}
-              productos={productos}
-              productosReservados={productosReservados}
-              onValidezCambio={setPuedeCrearAgenda} />
 
+              <Grid container spacing={2}>
+                <AgendaCargaFormInputs
+                  isChofer={isChofer}
+                  choferes={choferesFiltrados}
+                  camiones={camionesDisponibles}
+                  idChofer={isChofer ? idChofer : safeIdChofer}
+                  disableChofer={!sucursalReady || choferesFiltrados.length === 0}
+                  disableCamion={!safeIdChofer || camionesDisponibles.length === 0}
+                  disableCargaFields={!idCamion}
+                  setIdChofer={setIdChofer}
+                  idCamion={idCamion === "" ? "" : Number(idCamion)}
+                  setIdCamion={(value) =>
+                  setIdCamion(value === "" ? "" : Number(value))
+                  }
+                  prioridad={prioridad}
+                  setPrioridad={setPrioridad}
+                  notas={notas}
+                  setNotas={setNotas}
+                  descargarRetornables={descargarRetornables}
+                  setDescargarRetornables={setDescargarRetornables}
+                  choferDisplay={choferDisplay} />
+
+              </Grid>
+
+              {camionSeleccionado?.estado === "En Ruta" &&
+              <Alert severity="warning" sx={{ mt: 2 }}>
+                  Este camión está en ruta. No puedes crear una agenda hasta que
+                  finalice su viaje.
+                </Alert>
+              }
+            </AgendaSection>
+
+            {safeIdChofer &&
+            <AgendaSection
+              icon={<CheckCircleOutlineOutlinedIcon fontSize="small" />}
+              title="Pedidos confirmados"
+              subtitle="Estos productos reservados se consideran en la capacidad del camión.">
+
+              <PedidosConfirmadosList
+                idChofer={safeIdChofer}
+                setProductosReservados={setProductosReservados} />
+            </AgendaSection>
             }
+
+            <AgendaSection
+              icon={<LocalShippingOutlinedIcon fontSize="small" />}
+              title="Inventario y capacidad"
+              subtitle={
+              idCamion ?
+              "Revisa el estado actual del camión antes de agregar productos." :
+              "Selecciona un camión para ver la simulación de carga."
+              }>
+
+              {!idCamion &&
+              <Alert severity="info">
+                  Selecciona un camión para visualizar inventario y disponibilidad.
+                </Alert>
+              }
+
+              {idCamion && loadingInventario &&
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                gap={1.5}
+                minHeight={140}>
+
+                <CircularProgress size={24} />
+                <Typography variant="body2" color="text.secondary">
+                  Cargando inventario del camión...
+                </Typography>
+              </Box>
+              }
+
+              {idCamion && errorInventario &&
+              <Alert severity="error">
+                  Error al cargar el inventario del camión.
+                </Alert>
+              }
+
+              {idCamion && inventarioData && !loadingInventario && !errorInventario &&
+              <>
+                  <Tabs
+                  value={tabIndex}
+                  onChange={(_, newValue) => setTabIndex(newValue)}
+                  sx={{
+                    mb: 2,
+                    borderBottom: "1px solid",
+                    borderColor: "divider",
+                    minHeight: 40
+                  }}>
+
+                    <Tab label="Vista gráfica" />
+                    <Tab label="Detalle capacidad" />
+                  </Tabs>
+                  {tabIndex === 0 &&
+                <InventarioCamion
+                  inventarioData={inventarioData.data}
+                  productos={productos}
+                  productosReservados={productosReservados}
+                  modo="simulacion" />
+
+                }
+                  {tabIndex === 1 &&
+                <CapacidadCargaCamion
+                  capacidadTotal={inventarioData.data.capacidad_total}
+                  reservadosRetornables={
+                  inventarioData.data.reservados_retornables
+                  }
+                  disponibles={inventarioData.data.disponibles}
+                  retorno={inventarioData.data.retorno}
+                  productos={productos}
+                  productosReservados={productosReservados}
+                  onValidezCambio={setPuedeCrearAgenda} />
+
+                }
+                </>
+              }
+            </AgendaSection>
+
+            <AgendaCargaProductsSection
+              productos={productos}
+              productosDisponibles={listaProductos}
+              maxProductosAdicionales={capacidadAdicionales.maxProductosAdicionales}
+              cantidadProductosAdicionales={
+              capacidadAdicionales.cantidadProductosAdicionales
+              }
+              espaciosRestantes={capacidadAdicionales.espaciosRestantes}
+              cantidadMaximaPorFila={cantidadMaximaPorFila}
+              puedeAgregarProducto={
+              Boolean(idCamion) &&
+              capacidadAdicionales.maxProductosAdicionales !== null &&
+              capacidadAdicionales.espaciosRestantes > 0
+              }
+              handleAddProductRow={handleAddProductRow}
+              handleChangeProduct={handleChangeProduct}
+              handleChangeCantidad={handleChangeCantidad}
+              handleChangeNotas={handleChangeNotas}
+              handleRemoveRow={handleRemoveRow} />
+
+            <Box
+              display="flex"
+              alignItems={{ xs: "stretch", sm: "center" }}
+              justifyContent="space-between"
+              flexDirection={{ xs: "column", sm: "row" }}
+              gap={2}
+              sx={(theme) => ({
+                p: 2,
+                borderRadius: 2,
+                border: "1px solid",
+                borderColor: "divider",
+                bgcolor:
+                theme.palette.mode === "dark" ?
+                theme.palette.grey[900] :
+                "#f8fafc"
+              })}>
+
+              <Box>
+                <Typography variant="subtitle2" fontWeight={800}>
+                  Crear agenda
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Revisa chofer, camión, pedidos y productos antes de confirmar.
+                </Typography>
+              </Box>
+
+              <Button
+                type="submit"
+                variant="contained"
+                color="success"
+                size="large"
+                disabled={submitDisabled}
+                startIcon={
+                loadingCreate ?
+                undefined :
+                <CheckCircleOutlineOutlinedIcon fontSize="small" />
+                }
+                sx={{
+                  textTransform: "none",
+                  minWidth: { xs: "100%", sm: 180 }
+                }}>
+
+                {loadingCreate ? "Creando..." : "Crear agenda"}
+              </Button>
             </Box>
-          }
-
-          <Divider sx={{ my: 3 }} />
-
-          {/* Sección de productos */}
-          <AgendaCargaProductsSection
-            productos={productos}
-            productosDisponibles={listaProductos}
-            handleAddProductRow={handleAddProductRow}
-            handleChangeProduct={handleChangeProduct}
-            handleChangeCantidad={handleChangeCantidad}
-            handleChangeNotas={handleChangeNotas}
-            handleRemoveRow={handleRemoveRow} />
-
-
-          {/* Botón SUBMIT */}
-          <Box mt={4}>
-            <Button
-              type="submit"
-              variant="contained"
-              color="success"
-              size="large"
-              disabled={
-              loadingCreate ||
-              !puedeCrearAgenda ||
-              !idChofer ||
-              !idCamion ||
-              productos.length === 0 && !hayPedidosConfirmados ||
-              productos.some((p) => !p.id_producto || p.cantidad <= 0) ||
-              camionSeleccionado?.estado === "En Ruta" ||
-              isChofer &&
-              camionSeleccionado &&
-              camionSeleccionado.id_chofer_asignado !== rutAuth ||
-              !isChofer &&
-              camionSeleccionado?.id_chofer_asignado &&
-              camionSeleccionado.id_chofer_asignado !== idChofer
-              }
-              sx={{ textTransform: "none" }}>
-
-              {loadingCreate ? "Creando..." : "Crear Agenda"}
-            </Button>
           </Box>
         </form>
-      </Paper>
+
       <ConfirmarCargaModal
         open={openModal}
         handleClose={() => setOpenModal(false)}
@@ -936,6 +1247,7 @@ const CreateAgendaCargaForm = () => {
         undefined
         } />
 
+      </Box>
     </Box>);
 
 };

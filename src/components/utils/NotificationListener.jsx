@@ -7,13 +7,18 @@ import {
   emitRefetchAgendaViajes,
 } from "../../utils/eventBus";
 import { agendaViajesApi } from "../../store/services/agendaViajesApi";
-import { playNotificationSound } from "../../utils/playNotificationSound";
+import {
+  playNotificationSound,
+  setupNotificationSoundUnlock,
+} from "../../utils/playNotificationSound";
 import { vibrateNotification } from "../../utils/vibrateNotification";
 import { entregasApi } from "../../store/services/entregasApi";
 
 function NotificationListener() {
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+
+  useEffect(() => setupNotificationSoundUnlock(), []);
 
   useEffect(() => {
     console.log("NotificationListener useEffect corriendo...");

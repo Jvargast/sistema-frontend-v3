@@ -1,10 +1,9 @@
 import Select from "../common/CompatSelect";
 import PropTypes from "prop-types";
-import { IconButton, FormControl, InputLabel, MenuItem, useTheme } from "@mui/material";
+import { Chip, IconButton, FormControl, InputLabel, MenuItem, useTheme } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import TextField from "../common/CompatTextField";
 import Grid from "../common/CompatGrid";
-import Typography from "../common/CompatTypography";
 import { getActionIconButtonSx } from "../common/tableStyles";
 
 const ProductSelectorRow = ({
@@ -14,14 +13,17 @@ const ProductSelectorRow = ({
   onChangeProduct,
   onChangeCantidad,
   onChangeNotas,
-  onRemoveRow
+  onRemoveRow,
+  maxCantidad
 }) => {
   const theme = useTheme();
   const isRetornable = !!selectedProduct?.es_retornable;
+  const hasProduct = Boolean(selectedProduct?.id_producto);
+  const mostrarLimite = isRetornable && typeof maxCantidad === "number";
 
   return (
-    <Grid container spacing={2} alignItems="center">
-      <Grid item xs={12} sm={4}>
+    <Grid container spacing={1.5} alignItems="flex-start">
+      <Grid item xs={12} md={5}>
         <FormControl fullWidth size="small">
           <InputLabel id={`producto-label-${index}`}>Producto</InputLabel>
           <Select
@@ -30,7 +32,7 @@ const ProductSelectorRow = ({
             label="Producto"
             onChange={(e) => onChangeProduct(index, e.target.value)}
             sx={{
-              borderRadius: 2,
+              borderRadius: 1.5,
               backgroundColor:
               theme.palette.mode === "dark" ?
               theme.palette.background.paper :
@@ -39,7 +41,7 @@ const ProductSelectorRow = ({
             MenuProps={{
               PaperProps: {
                 sx: {
-                  borderRadius: 2,
+                  borderRadius: 1.5,
                   backgroundColor:
                   theme.palette.mode === "dark" ?
                   theme.palette.background.paper :
@@ -58,38 +60,41 @@ const ProductSelectorRow = ({
         </FormControl>
       </Grid>
 
-      <Grid item xs={12} sm={2}>
-        <Typography
-          variant="body2"
+      <Grid item xs={12} sm={4} md={2}>
+        <Chip
+          label={!hasProduct ? "Sin producto" : isRetornable ? "Retornable" : "No retornable"}
+          color={isRetornable ? "success" : "default"}
+          variant={isRetornable ? "filled" : "outlined"}
+          size="small"
           sx={{
-            fontWeight: 500,
-            textAlign: "center",
-            color: isRetornable ? theme.palette.success.paper :
-            theme.palette.background.default,
-            bgcolor: isRetornable ?
-            theme.palette.success.light :
-            theme.palette.background.default,
-            px: 1,
-            borderRadius: 2,
-            transition: "background .3s"
-          }}>
-
-          {isRetornable ? "♻️ Retornable" : "No retornable"}
-        </Typography>
+            width: "100%",
+            height: 38,
+            borderRadius: 1.5,
+            justifyContent: "center",
+            fontWeight: 800
+          }} />
       </Grid>
 
-      <Grid item xs={12} sm={2}>
+      <Grid item xs={12} sm={4} md={2}>
         <TextField
           label="Cantidad"
-          inputProps={{ min: 0, inputMode: "numeric", pattern: "[0-9]*" }}
+          inputProps={{
+            min: 0,
+            max: mostrarLimite ? maxCantidad : undefined,
+            inputMode: "numeric",
+            pattern: "[0-9]*"
+          }}
           type="number"
-          value={selectedProduct?.cantidad || ""}
+          value={selectedProduct?.cantidad ?? ""}
           onChange={(e) => onChangeCantidad(index, e.target.value)}
           size="small"
           fullWidth
+          helperText={
+          mostrarLimite ? `Máx. por fila: ${maxCantidad}` : " "
+          }
           sx={{
             "& .MuiOutlinedInput-root": {
-              borderRadius: 2,
+              borderRadius: 1.5,
               backgroundColor:
               theme.palette.mode === "dark" ?
               theme.palette.background.default :
@@ -99,16 +104,17 @@ const ProductSelectorRow = ({
 
       </Grid>
 
-      <Grid item xs={12} sm={3}>
+      <Grid item xs={12} sm={4} md={2}>
         <TextField
           label="Notas"
           value={selectedProduct?.notas || ""}
           onChange={(e) => onChangeNotas(index, e.target.value)}
           size="small"
           fullWidth
+          helperText=" "
           sx={{
             "& .MuiOutlinedInput-root": {
-              borderRadius: 2,
+              borderRadius: 1.5,
               backgroundColor:
               theme.palette.mode === "dark" ?
               theme.palette.background.default :
@@ -118,7 +124,13 @@ const ProductSelectorRow = ({
 
       </Grid>
 
-      <Grid item xs={12} sm={1} textAlign="center">
+      <Grid
+        item
+        xs={12}
+        md={1}
+        textAlign={{ xs: "right", md: "center" }}
+        sx={{ pt: { md: 0.2 } }}>
+
         <IconButton
           onClick={() => onRemoveRow(index)}
           aria-label="Eliminar producto"
@@ -147,6 +159,7 @@ ProductSelectorRow.propTypes = {
     notas: PropTypes.string,
     es_retornable: PropTypes.bool
   }),
+  maxCantidad: PropTypes.number,
   onChangeProduct: PropTypes.func.isRequired,
   onChangeCantidad: PropTypes.func.isRequired,
   onChangeNotas: PropTypes.func.isRequired,

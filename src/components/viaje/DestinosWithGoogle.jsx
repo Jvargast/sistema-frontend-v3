@@ -10,18 +10,59 @@ import Box from "../common/CompatBox";
 /* import { convertirFechaLocal } from "../../utils/fechaUtils"; */
 import { useDirections } from "../../hooks/useDirections";
 import AdvancedMarker from "./AdvancedMarker";
+import { isValidRoutePoint } from "../../utils/googleRoutesApi";
 
 const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP?.trim();
+const START_MARKER_COLOR = "#ef476f";
+const PENDING_MARKER_COLOR = "#4361ee";
+const DELIVERED_MARKER_COLOR = "#4caf50";
+const DRIVER_MARKER_COLOR = "#009688";
 
 function isEntregado(destino, entregados) {
   if (!destino?.id_pedido) return false;
   return entregados.some((d) => d.id_pedido === destino.id_pedido);
 }
 function getMapCenter(points) {
-  if (!points?.length) return { lat: -33.45, lng: -70.65 };
-  const lat = points.reduce((s, p) => s + Number(p.lat), 0) / points.length;
-  const lng = points.reduce((s, p) => s + Number(p.lng), 0) / points.length;
+  const validPoints = points?.filter(isValidRoutePoint) || [];
+  if (!validPoints.length) return { lat: -33.45, lng: -70.65 };
+  const lat =
+    validPoints.reduce((s, p) => s + Number(p.lat), 0) / validPoints.length;
+  const lng =
+    validPoints.reduce((s, p) => s + Number(p.lng), 0) / validPoints.length;
   return { lat, lng };
+}
+
+function toLatLng(point) {
+  return {
+    lat: Number(point.lat),
+    lng: Number(point.lng),
+  };
+}
+
+function createMarkerContent({
+  text,
+  background,
+  color = "#fff",
+  size = 34,
+  borderColor = "#fff",
+}) {
+  const div = document.createElement("div");
+  div.style.background = background;
+  div.style.color = color;
+  div.style.borderRadius = "50%";
+  div.style.width = `${size}px`;
+  div.style.height = `${size}px`;
+  div.style.display = "flex";
+  div.style.alignItems = "center";
+  div.style.justifyContent = "center";
+  div.style.fontSize = text === "🚚" ? "28px" : "16px";
+  div.style.fontWeight = "bold";
+  div.style.border = `${
+    text === "🚚" ? "3.5px" : "2.5px"
+  } solid ${borderColor}`;
+  div.style.boxShadow = "0 2px 8px 0 #22223b44";
+  div.innerText = text;
+  return div;
 }
 
 const markerBaseStyle = {
@@ -41,9 +82,9 @@ const markerBaseStyle = {
 };
 
 const styles = {
-  origen: { ...markerBaseStyle, background: "#ef476f", fontSize: 22 },
-  entregado: { ...markerBaseStyle, background: "#4caf50" },
-  pendiente: { ...markerBaseStyle, background: "#4361ee" },
+  origen: { ...markerBaseStyle, background: START_MARKER_COLOR, fontSize: 22 },
+  entregado: { ...markerBaseStyle, background: DELIVERED_MARKER_COLOR },
+  pendiente: { ...markerBaseStyle, background: PENDING_MARKER_COLOR },
   popup: {
     minWidth: 180,
     background: "#fff",
@@ -68,8 +109,12 @@ export default function DestinosWithGoogle({
   terminado,
 }) {
   const [mapInstance, setMapInstance] = useState(null);
-  const [infoIdx, setInfoIdx] = useState(null);
+  const [, setInfoIdx] = useState(null);
   const routePath = useDirections(ruta);
+  const puntoPartida = useMemo(
+    () => (isValidRoutePoint(ruta?.[0]) ? ruta[0] : null),
+    [ruta]
+  );
   const center = useMemo(() => {
     if (ruta?.length) return getMapCenter(ruta);
     if (recorridoReal?.length) return getMapCenter(recorridoReal);
@@ -87,10 +132,8 @@ export default function DestinosWithGoogle({
   useEffect(() => {
     if (!mapInstance || !window.google?.maps?.LatLngBounds) return;
     const bounds = new window.google.maps.LatLngBounds();
-    [...ruta, ...recorridoReal].forEach((p) => {
-      if (p && Number.isFinite(+p.lat) && Number.isFinite(+p.lng)) {
-        bounds.extend({ lat: Number(p.lat), lng: Number(p.lng) });
-      }
+    [...ruta, ...recorridoReal, ubicacionActualChofer].forEach((p) => {
+      if (isValidRoutePoint(p)) bounds.extend(toLatLng(p));
     });
     if (!bounds.isEmpty?.() && typeof mapInstance.fitBounds === "function") {
       mapInstance.fitBounds(bounds, 48);
@@ -102,32 +145,40 @@ export default function DestinosWithGoogle({
         }
       }, 0);
     }
-  }, [mapInstance, ruta, recorridoReal]);
+  }, [mapInstance, ruta, recorridoReal, ubicacionActualChofer]);
 
   return (
     <>
       {/* Leyenda */}
-      <Box sx={{ display: "flex", gap: 2, mb: 1, alignItems: "center", ml: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: { xs: 1, sm: 1.5 },
+          mb: 1,
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <div style={styles.origen}>🏠</div>
-          <Typography variant="body2">Origen actual</Typography>
+          <div style={styles.origen}>🏁</div>
+          <Typography variant="caption">Punto de partida</Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <div style={styles.entregado}>✓</div>
-          <Typography variant="body2">Entregados</Typography>
+          <Typography variant="caption">Entregados</Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <div style={styles.pendiente}>#</div>
-          <Typography variant="body2">Pendiente</Typography>
+          <Typography variant="caption">Pendiente</Typography>
         </Box>
       </Box>
       <GoogleMap
         key={`map-${lastEntregaAt}`}
         mapContainerStyle={{
-          height: 320,
+          height: "clamp(340px, 52vh, 560px)",
           width: "100%",
-          borderRadius: 14,
-          marginBottom: 24,
+          borderRadius: 10,
+          marginBottom: 0,
         }}
         center={center}
         zoom={15}
@@ -165,20 +216,17 @@ export default function DestinosWithGoogle({
           />
         )}
 
-        {/* {mapInstance && ruta?.length > 0 && (
+        {mapInstance && puntoPartida && (
           <AdvancedMarker
             map={mapInstance}
-            position={{ lat: Number(ruta[0].lat), lng: Number(ruta[0].lng) }}
-            content={(() => {
-              const div = document.createElement("div");
-              div.style =
-                "background: #ef476f; color: #fff; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; border: 2.5px solid #fff;";
-              div.innerHTML = "🏠";
-              return div;
-            })()}
-            onClick={() => setInfoIdx("origen")}
+            position={toLatLng(puntoPartida)}
+            content={createMarkerContent({
+              text: "🏁",
+              background: START_MARKER_COLOR,
+            })}
+            title="Punto de partida"
           />
-        )} */}
+        )}
 
         {mapInstance &&
           !terminado &&
@@ -189,14 +237,11 @@ export default function DestinosWithGoogle({
               <AdvancedMarker
                 key={d.id_pedido}
                 map={mapInstance}
-                position={{ lat: Number(d.lat), lng: Number(d.lng) }}
-                content={(() => {
-                  const div = document.createElement("div");
-                  div.style =
-                    "background: #4361ee; color: #fff; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; border: 2.5px solid #fff;";
-                  div.innerText = i + 1;
-                  return div;
-                })()}
+                position={toLatLng(d)}
+                content={createMarkerContent({
+                  text: String(i + 1),
+                  background: PENDING_MARKER_COLOR,
+                })}
                 onClick={() => setInfoIdx(`pendiente-${d.id_pedido}`)}
               />
             ))}
@@ -207,14 +252,11 @@ export default function DestinosWithGoogle({
             <AdvancedMarker
               key={d.id_pedido}
               map={mapInstance}
-              position={{ lat: Number(d.lat), lng: Number(d.lng) }}
-              content={(() => {
-                const div = document.createElement("div");
-                div.style =
-                  "background: #4caf50; color: #fff; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; border: 2.5px solid #fff;";
-                div.innerText = i + 1;
-                return div;
-              })()}
+              position={toLatLng(d)}
+              content={createMarkerContent({
+                text: String(i + 1),
+                background: DELIVERED_MARKER_COLOR,
+              })}
               onClick={() => setInfoIdx(`entregado-${d.id_pedido}`)}
             />
           ))}
@@ -222,18 +264,16 @@ export default function DestinosWithGoogle({
         {mapInstance && ubicacionActualChofer && !terminado && (
           <AdvancedMarker
             map={mapInstance}
-            position={{
-              lat: Number(ubicacionActualChofer.lat),
-              lng: Number(ubicacionActualChofer.lng),
-            }}
-            content={(() => {
-              const div = document.createElement("div");
-              div.style =
-                "background: #fff; color: #009688; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; border: 3.5px solid #009688; box-shadow: 0 2px 8px 0 #00968844;";
-              div.innerHTML = "🚚";
-              return div;
-            })()}
+            position={toLatLng(ubicacionActualChofer)}
+            content={createMarkerContent({
+              text: "🚚",
+              background: "#fff",
+              color: DRIVER_MARKER_COLOR,
+              borderColor: DRIVER_MARKER_COLOR,
+              size: 42,
+            })}
             onClick={() => setInfoIdx("chofer")}
+            title="Ubicación actual del chofer"
           />
         )}
       </GoogleMap>

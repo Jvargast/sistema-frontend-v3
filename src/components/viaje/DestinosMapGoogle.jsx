@@ -12,15 +12,17 @@ import Box from "../common/CompatBox";
 import AdvancedMarker from "./AdvancedMarker";
 
 const mapContainerStyle = {
-  height: "300px",
+  height: "clamp(320px, 52vh, 540px)",
   width: "100%",
-  borderRadius: "12px",
-  marginBottom: "24px",
+  borderRadius: "10px",
+  marginBottom: "20px",
 };
 
 const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP?.trim();
 const CURRENT_ROUTE_COLOR = "#38bdf8";
-const FUTURE_ROUTE_COLOR = "#94a3b8";
+const FUTURE_ROUTE_COLOR = "#f472b6";
+const START_MARKER_COLOR = "#ef476f";
+const CURRENT_ORIGIN_COLOR = "#0ea5e9";
 
 function isValidPoint(point) {
   return isValidCoord(point?.lat) && isValidCoord(point?.lng);
@@ -209,7 +211,19 @@ const checkDotStyle = {
 };
 
 function isValidCoord(val) {
+  if (val === null || val === undefined) return false;
+  if (typeof val === "boolean") return false;
+  if (typeof val === "string" && val.trim() === "") return false;
   return Number.isFinite(Number(val));
+}
+
+function isSamePosition(a, b) {
+  return (
+    isValidPoint(a) &&
+    isValidPoint(b) &&
+    Number(a.lat) === Number(b.lat) &&
+    Number(a.lng) === Number(b.lng)
+  );
 }
 
 function toLatLng(point) {
@@ -343,7 +357,7 @@ function createMarkerContent({ text, background, color = "#fff", size = 34 }) {
   marker.style.display = "flex";
   marker.style.alignItems = "center";
   marker.style.justifyContent = "center";
-  marker.style.fontSize = text === "🏠" ? "18px" : "16px";
+  marker.style.fontSize = ["🏁", "▶"].includes(text) ? "18px" : "16px";
   marker.style.fontWeight = "800";
   marker.style.cursor = "pointer";
   return marker;
@@ -353,7 +367,10 @@ export default function DestinosMapGoogle({
   destinos = [],
   ruta = [],
   recorridoReal = [],
+  origenInicial,
   routePath = [],
+  currentLegPath = [],
+  futureLegPath = [],
 }) {
   const [activeMarker, setActiveMarker] = useState(null);
   const [mapInstance, setMapInstance] = useState(null);
@@ -394,6 +411,10 @@ export default function DestinosMapGoogle({
     () => (Array.isArray(destinos) ? destinos.filter(isValidPoint) : []),
     [destinos]
   );
+  const puntoPartida = useMemo(() => {
+    if (isValidPoint(origenInicial)) return origenInicial;
+    return puntosRecorrido[0] || null;
+  }, [origenInicial, puntosRecorrido]);
   const puntosPendientes = useMemo(() => {
     const ordered = new Map();
 
@@ -422,14 +443,39 @@ export default function DestinosMapGoogle({
     [puntosEntregados]
   );
   const primerDestinoPendiente = puntosPendientes[0] || null;
-  const { currentLegPath, futureLegPath } = useMemo(
+  const fallbackRouteSegments = useMemo(
     () => splitRoutePathByFirstDestination(routePath, primerDestinoPendiente),
     [primerDestinoPendiente, routePath]
   );
+  const routePathActual = useMemo(
+    () =>
+      Array.isArray(currentLegPath)
+        ? currentLegPath.filter(isValidPoint).map(toLatLng)
+        : [],
+    [currentLegPath]
+  );
+  const routePathSiguiente = useMemo(
+    () =>
+      Array.isArray(futureLegPath)
+        ? futureLegPath.filter(isValidPoint).map(toLatLng)
+        : [],
+    [futureLegPath]
+  );
+  const tramoActualPath =
+    routePathActual.length > 1
+      ? routePathActual
+      : fallbackRouteSegments.currentLegPath;
+  const tramosSiguientesPath =
+    routePathSiguiente.length > 1
+      ? routePathSiguiente
+      : fallbackRouteSegments.futureLegPath;
   const ultimoEntregado =
     puntosRecorrido.length > 1
       ? puntosRecorrido[puntosRecorrido.length - 1]
       : null;
+  const origenActualRuta = puntosRuta[0] || null;
+  const mostrarPuntoPartida =
+    puntoPartida && !isSamePosition(puntoPartida, origenActualRuta);
 
   const center = useMemo(() => {
     if (puntosRuta.length > 0) {
@@ -455,7 +501,10 @@ export default function DestinosMapGoogle({
       ...puntosRuta,
       ...puntosDestino,
       ...puntosRecorrido,
+      puntoPartida,
       ...(Array.isArray(routePath) ? routePath : []),
+      ...tramoActualPath,
+      ...tramosSiguientesPath,
     ].filter(isValidPoint);
 
     if (!puntosVisibles.length) return;
@@ -482,7 +531,16 @@ export default function DestinosMapGoogle({
         }
       }, 0);
     }
-  }, [mapInstance, puntosDestino, puntosRecorrido, puntosRuta, routePath]);
+  }, [
+    mapInstance,
+    puntosDestino,
+    puntosRecorrido,
+    puntosRuta,
+    puntoPartida,
+    routePath,
+    tramoActualPath,
+    tramosSiguientesPath,
+  ]);
 
   return (
     <>
@@ -499,7 +557,7 @@ export default function DestinosMapGoogle({
           borderRadius: 3,
           bgcolor: "#f9fafb",
           boxShadow: "0 2px 10px 0 #00000011",
-          width: "fit-content",
+          width: { xs: "100%", sm: "fit-content" },
           flexWrap: "wrap",
         }}
       >
@@ -509,7 +567,7 @@ export default function DestinosMapGoogle({
               width: 32,
               height: 32,
               borderRadius: "50%",
-              bgcolor: "#ef476f",
+              bgcolor: START_MARKER_COLOR,
               color: "#fff",
               display: "flex",
               justifyContent: "center",
@@ -520,13 +578,39 @@ export default function DestinosMapGoogle({
               mr: 0.5,
             }}
           >
-            🏠
+            🏁
           </Box>
           <Typography
             variant="body2"
             sx={{ fontWeight: 600, color: "#2d3142" }}
           >
-            Origen actual
+            Punto de partida
+          </Typography>
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              bgcolor: CURRENT_ORIGIN_COLOR,
+              color: "#fff",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              fontSize: 20,
+              fontWeight: 900,
+              boxShadow: "0 0 0 3px #fff",
+              mr: 0.5,
+            }}
+          >
+            ▶
+          </Box>
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 600, color: "#2d3142" }}
+          >
+            Inicio próximo tramo
           </Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -581,6 +665,36 @@ export default function DestinosMapGoogle({
             Pendiente
           </Typography>
         </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box
+            sx={{
+              width: 34,
+              borderTop: `5px solid ${CURRENT_ROUTE_COLOR}`,
+              borderRadius: 4,
+            }}
+          />
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 600, color: "#2d3142" }}
+          >
+            Tramo actual
+          </Typography>
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box
+            sx={{
+              width: 34,
+              borderTop: `4px dashed ${FUTURE_ROUTE_COLOR}`,
+              borderRadius: 4,
+            }}
+          />
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 600, color: "#2d3142" }}
+          >
+            Siguientes
+          </Typography>
+        </Box>
       </Box>
 
       <Box
@@ -620,15 +734,15 @@ export default function DestinosMapGoogle({
               </Typography>
             </Box>
           )}
-          {futureLegPath.length > 1 && (
+          {tramosSiguientesPath.length > 1 && (
             <Polyline
-              path={futureLegPath}
+              path={tramosSiguientesPath}
               options={getFutureRouteLineOptions()}
             />
           )}
-          {currentLegPath.length > 1 && (
+          {tramoActualPath.length > 1 && (
             <Polyline
-              path={currentLegPath}
+              path={tramoActualPath}
               options={{
                 strokeColor: CURRENT_ROUTE_COLOR,
                 strokeOpacity: 0.85,
@@ -636,6 +750,37 @@ export default function DestinosMapGoogle({
                 zIndex: 2,
               }}
             />
+          )}
+
+          {/* Punto de partida fijo */}
+          {mapInstance && mostrarPuntoPartida && (
+            <div>
+              <AdvancedMarker
+                map={mapInstance}
+                onClick={() => setActiveMarker("punto-partida")}
+                position={toLatLng(puntoPartida)}
+                content={createMarkerContent({
+                  text: "🏁",
+                  background: START_MARKER_COLOR,
+                })}
+                title="Punto de partida"
+                zIndex={700}
+              />
+              {activeMarker === "punto-partida" && (
+                <InfoWindow
+                  position={toLatLng(puntoPartida)}
+                  onCloseClick={() => setActiveMarker(null)}
+                  options={{ pixelOffset: new window.google.maps.Size(0, -30) }}
+                >
+                  <div style={infoWindowStyle}>
+                    <strong style={strongStyle}>Punto de partida</strong>
+                    <div>
+                      {puntoPartida.direccion || "Sin dirección registrada"}
+                    </div>
+                  </div>
+                </InfoWindow>
+              )}
+            </div>
           )}
 
           {/* Marcador origen */}
@@ -646,10 +791,17 @@ export default function DestinosMapGoogle({
                 onClick={() => setActiveMarker("origen")}
                 position={toLatLng(puntosRuta[0])}
                 content={createMarkerContent({
-                  text: "🏠",
-                  background: "#ef476f",
+                  text: mostrarPuntoPartida ? "▶" : "🏁",
+                  background: mostrarPuntoPartida
+                    ? CURRENT_ORIGIN_COLOR
+                    : START_MARKER_COLOR,
                 })}
-                title="Origen actual"
+                title={
+                  mostrarPuntoPartida
+                    ? "Inicio del próximo tramo"
+                    : "Punto de partida"
+                }
+                zIndex={800}
               />
               {activeMarker === "origen" && (
                 <InfoWindow
@@ -658,7 +810,11 @@ export default function DestinosMapGoogle({
                   options={{ pixelOffset: new window.google.maps.Size(0, -30) }}
                 >
                   <div style={infoWindowStyle}>
-                    <strong style={strongStyle}>Origen actual</strong>
+                    <strong style={strongStyle}>
+                      {mostrarPuntoPartida
+                        ? "Inicio del próximo tramo"
+                        : "Punto de partida"}
+                    </strong>
                     <div>
                       {puntosRuta[0].direccion || "Sin dirección registrada"}
                     </div>
@@ -803,5 +959,8 @@ DestinosMapGoogle.propTypes = {
   destinos: PropTypes.array,
   ruta: PropTypes.array,
   recorridoReal: PropTypes.array,
+  origenInicial: PropTypes.object,
   routePath: PropTypes.array,
+  currentLegPath: PropTypes.array,
+  futureLegPath: PropTypes.array,
 };

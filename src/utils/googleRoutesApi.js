@@ -1,9 +1,15 @@
 export function isValidRoutePoint(point) {
-  return (
-    point &&
-    Number.isFinite(Number(point.lat)) &&
-    Number.isFinite(Number(point.lng))
-  );
+  if (
+    !point ||
+    !isValidCoordinateValue(point.lat) ||
+    !isValidCoordinateValue(point.lng)
+  ) {
+    return false;
+  }
+
+  const lat = Number(point.lat);
+  const lng = Number(point.lng);
+  return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
 }
 
 export function buildFallbackRoutePath(points = []) {
@@ -13,6 +19,50 @@ export function buildFallbackRoutePath(points = []) {
       lat: Number(point.lat),
       lng: Number(point.lng),
     }));
+}
+
+export function mergeRoutePaths(...paths) {
+  return paths
+    .flat()
+    .filter(isValidRoutePoint)
+    .reduce((merged, point) => {
+      const normalizedPoint = toLatLngLiteral(point);
+      const lastPoint = merged[merged.length - 1];
+
+      if (
+        !lastPoint ||
+        lastPoint.lat !== normalizedPoint.lat ||
+        lastPoint.lng !== normalizedPoint.lng
+      ) {
+        merged.push(normalizedPoint);
+      }
+
+      return merged;
+    }, []);
+}
+
+export function buildFallbackRouteSegments(origin, destinations = []) {
+  const validDestinations = destinations.filter(isValidRoutePoint);
+  const currentLegPath = validDestinations.length
+    ? buildFallbackRoutePath([origin, validDestinations[0]])
+    : [];
+  const futureLegPath =
+    validDestinations.length > 1
+      ? buildFallbackRoutePath(validDestinations)
+      : [];
+
+  return {
+    currentLegPath,
+    futureLegPath,
+    routePath: mergeRoutePaths(currentLegPath, futureLegPath),
+  };
+}
+
+function isValidCoordinateValue(value) {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "boolean") return false;
+  if (typeof value === "string" && value.trim() === "") return false;
+  return Number.isFinite(Number(value));
 }
 
 function toLatLngLiteral(point) {

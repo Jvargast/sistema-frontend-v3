@@ -1,6 +1,7 @@
 import Select from "../../components/common/CompatSelect";
 import {
   useEffect,
+  useRef,
   useState } from "react";
 import { Button, MenuItem, InputLabel, FormControl, CircularProgress, Divider, FormControlLabel, Switch, useTheme, IconButton, createFilterOptions, Autocomplete } from "@mui/material";
 import { useDropzone } from "react-dropzone";
@@ -27,6 +28,7 @@ const EditarProducto = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const theme = useTheme();
+  const insumoRetornoFieldRef = useRef(null);
 
   const { data, isLoading, isError, refetch } = useGetProductoByIdQuery(id);
   const { data: insumosResp, isLoading: loadingInsumos } =
@@ -127,6 +129,21 @@ const EditarProducto = () => {
       refetch();
     }
   }, [location.state, refetch, navigate, id]);
+
+  useEffect(() => {
+    if (location.state?.focus !== "id_insumo_retorno" || !formData.es_retornable)
+    return undefined;
+
+    const timer = window.setTimeout(() => {
+      insumoRetornoFieldRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+      insumoRetornoFieldRef.current?.querySelector("input")?.focus();
+    }, 250);
+
+    return () => window.clearTimeout(timer);
+  }, [location.state?.focus, formData.es_retornable]);
 
   useEffect(() => {
     if (
@@ -628,6 +645,7 @@ const EditarProducto = () => {
             </Grid>
             {formData.es_retornable &&
             <Grid item xs={12} md={6}>
+              <Box ref={insumoRetornoFieldRef}>
                 <Autocomplete
                 options={insumoOptions}
                 groupBy={(opt) => opt.grupo}
@@ -689,6 +707,7 @@ const EditarProducto = () => {
 
 
                 }} />
+              </Box>
 
               </Grid>
             }

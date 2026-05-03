@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CircularProgress, Button, Fade, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import {
+  Button,
+  Chip,
+  CircularProgress,
+  Fade,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
   useGetPendientesQuery,
@@ -11,12 +18,40 @@ import Header from "../../components/common/Header";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import SucursalPickerHeader from "../../components/common/SucursalPickerHeader";
-import { InfoOutlined, StorefrontOutlined } from "@mui/icons-material";
+import {
+  CheckCircleOutlineOutlined,
+  InfoOutlined,
+  Inventory2Outlined,
+  StorefrontOutlined,
+} from "@mui/icons-material";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 import Box from "../../components/common/CompatBox";
-import Stack from "../../components/common/CompatStack";
-import Grid from "../../components/common/CompatGrid";
 import Typography from "../../components/common/CompatTypography";
+
+const inspectionGridSx = (isSingle) => ({
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "minmax(0, 1fr)",
+    md: "minmax(0, 900px)",
+    lg: isSingle ? "minmax(0, 900px)" : "repeat(2, minmax(0, 1fr))",
+  },
+  gap: 1.5,
+  alignItems: "stretch",
+  justifyContent: "center",
+});
+
+const toolbarSx = {
+  p: 1.5,
+  borderRadius: 1,
+  border: "1px solid",
+  borderColor: "divider",
+  bgcolor: "background.paper",
+  display: "flex",
+  flexDirection: { xs: "column", md: "row" },
+  alignItems: { xs: "stretch", md: "center" },
+  justifyContent: "space-between",
+  gap: 1.5,
+};
 
 const InspeccionRetornables = () => {
   const dispatch = useDispatch();
@@ -249,6 +284,36 @@ const InspeccionRetornables = () => {
     );
   }, [sucursales, idSucursal]);
 
+  const resumenInspeccion = useMemo(() => {
+    const totalRegistros = agrupados.reduce(
+      (total, grupo) => total + (grupo.items?.length || 0),
+      0
+    );
+    const totalUnidades = agrupados.reduce(
+      (total, grupo) =>
+        total +
+        (grupo.items || []).reduce(
+          (subtotal, item) => subtotal + (Number(item.cantidad) || 0),
+          0
+        ),
+      0
+    );
+
+    return {
+      grupos: agrupados.length,
+      registros: totalRegistros,
+      unidades: totalUnidades,
+    };
+  }, [agrupados]);
+
+  const faltanInsumosRetorno = useMemo(
+    () =>
+      agrupados.some((grupo) =>
+        (grupo.items || []).some((item) => !item._insumoDestinoFijo)
+      ),
+    [agrupados]
+  );
+
   const sucursalBar = (
     <Box sx={{ mb: 2 }}>
       <SucursalPickerHeader
@@ -262,23 +327,41 @@ const InspeccionRetornables = () => {
   );
 
   const filtrosBar = (
-    <Stack
-      direction={{ xs: "column", sm: "row" }}
-      spacing={2}
-      alignItems={{ xs: "stretch", sm: "center" }}
-      justifyContent="flex-start"
-      sx={{ mb: 3 }}
-    >
+    <Box sx={{ ...toolbarSx, mb: 2 }}>
+      <Box>
+        <Typography variant="subtitle2" fontWeight={900}>
+          Origen de retorno
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Filtra la bandeja según el origen operativo.
+        </Typography>
+      </Box>
       <ToggleButtonGroup
         value={origen}
         exclusive
         onChange={(_, v) => v && setOrigen(v)}
         size="small"
+        sx={{
+          "& .MuiToggleButton-root": {
+            px: 1.5,
+            borderRadius: 1,
+            textTransform: "none",
+            fontWeight: 800,
+            whiteSpace: "nowrap",
+            "&.Mui-selected": {
+              bgcolor: "#0F172A",
+              color: "#fff",
+              "&:hover": {
+                bgcolor: "#111827",
+              },
+            },
+          },
+        }}
       >
-        <ToggleButton value="ventas">Por Ventas</ToggleButton>
-        <ToggleButton value="entregas">Por Entregas</ToggleButton>
+        <ToggleButton value="ventas">Ventas</ToggleButton>
+        <ToggleButton value="entregas">Entregas</ToggleButton>
       </ToggleButtonGroup>
-    </Stack>
+    </Box>
   );
 
   if (!idSucursal && !canChooseSucursal) {
@@ -290,7 +373,7 @@ const InspeccionRetornables = () => {
             p: 3,
             border: "1px dashed",
             borderColor: "divider",
-            borderRadius: 2,
+            borderRadius: 1,
             textAlign: "center",
             bgcolor: "background.paper",
           }}
@@ -353,58 +436,153 @@ const InspeccionRetornables = () => {
   const isSingle = agrupados.length === 1;
 
   return (
-    <Box sx={{ p: 3, mx: "auto" }}>
-      <Header
-        title="Inspección de Productos Retornables"
-        subtitle="Gestión de Productos Retornables"
-      />
+    <Box sx={{ p: { xs: 2, md: 3 }, mx: "auto", maxWidth: 1240 }}>
+      <Box
+        display="flex"
+        alignItems={{ xs: "flex-start", md: "center" }}
+        justifyContent="space-between"
+        gap={2}
+        flexWrap="wrap"
+        mb={2}
+      >
+        <Header
+          title="Gestión de retorno"
+          subtitle="Inspección de productos retornables"
+        />
+        <Chip
+          icon={<Inventory2Outlined />}
+          label={`${resumenInspeccion.unidades} unidades pendientes`}
+          variant="outlined"
+          sx={{ borderRadius: 1, fontWeight: 900, bgcolor: "background.paper" }}
+        />
+      </Box>
+
       {sucursalBar}
       {filtrosBar}
 
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(3, minmax(0, 1fr))",
+          },
+          gap: 1.5,
+          mb: 2,
+        }}
+      >
+        {[
+          { label: "Productos", value: resumenInspeccion.grupos },
+          { label: "Registros", value: resumenInspeccion.registros },
+          { label: "Unidades", value: resumenInspeccion.unidades },
+        ].map((item) => (
+          <Box
+            key={item.label}
+            sx={{
+              p: 1.5,
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 1,
+              bgcolor: "background.paper",
+            }}
+          >
+            <Typography variant="caption" color="text.secondary" fontWeight={800}>
+              {item.label}
+            </Typography>
+            <Typography variant="h5" fontWeight={900} sx={{ lineHeight: 1.15 }}>
+              {item.value}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+
+      {isFetching && (
+        <Box display="flex" alignItems="center" gap={1} mb={1.5}>
+          <CircularProgress size={16} />
+          <Typography variant="body2" color="text.secondary">
+            Actualizando pendientes...
+          </Typography>
+        </Box>
+      )}
+
       {agrupados.length === 0 ? (
-        <Typography color="text.secondary">
-          No hay productos por inspeccionar.
-        </Typography>
+        <Box
+          sx={{
+            p: 3,
+            border: "1px dashed",
+            borderColor: "divider",
+            borderRadius: 1,
+            bgcolor: "background.paper",
+            textAlign: "center",
+          }}
+        >
+          <CheckCircleOutlineOutlined
+            sx={{ fontSize: 38, color: "text.secondary", mb: 1 }}
+          />
+          <Typography variant="subtitle2" fontWeight={900}>
+            No hay productos por inspeccionar
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            La bandeja de retorno está al día para el filtro seleccionado.
+          </Typography>
+        </Box>
       ) : (
         <Fade in>
-          {isSingle ? (
-            <Box sx={{ display: "flex", justifyContent: "center" }}>
-              <Box sx={{ width: { xs: "100%", sm: 560, md: 680 } }}>
-                <ProductoRetornableCard
-                  grupo={agrupados[0]}
-                  onUpdate={handleUpdate}
-                  useProductoDestino
-                />
-              </Box>
-            </Box>
-          ) : (
-            <Grid
-              container
-              spacing={2}
-              alignItems="stretch"
-              justifyContent="center"
-            >
-              {agrupados.map((grupo) => (
-                <Grid item key={grupo.id} xs={12} md={6} xl={4}>
-                  <ProductoRetornableCard
-                    grupo={grupo}
-                    onUpdate={handleUpdate}
-                    useProductoDestino
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          )}
+          <Box sx={inspectionGridSx(isSingle)}>
+            {agrupados.map((grupo) => (
+              <ProductoRetornableCard
+                key={grupo.id}
+                grupo={grupo}
+                onUpdate={handleUpdate}
+              />
+            ))}
+          </Box>
         </Fade>
       )}
-      <Box mt={2} textAlign="center">
+
+      <Box
+        mt={2}
+        sx={{
+          p: 1.5,
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 1,
+          bgcolor: "background.paper",
+          display: "flex",
+          alignItems: { xs: "stretch", sm: "center" },
+          justifyContent: "space-between",
+          gap: 1.5,
+          flexDirection: { xs: "column", sm: "row" },
+        }}
+      >
+        <Box>
+          <Typography variant="subtitle2" fontWeight={900}>
+            {faltanInsumosRetorno
+              ? "Falta configurar el insumo de retorno"
+              : "Registrar inspección"}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {faltanInsumosRetorno
+              ? "Completa la configuración del producto antes de guardar esta inspección."
+              : "Asigna reutilizables y defectuosos antes de guardar."}
+          </Typography>
+        </Box>
         <Button
           variant="contained"
           size="large"
           onClick={handleSubmit}
-          disabled={enviando}
+          disabled={enviando || agrupados.length === 0 || faltanInsumosRetorno}
+          sx={{
+            borderRadius: 1,
+            minWidth: { xs: "100%", sm: 190 },
+            fontWeight: 900,
+            bgcolor: "#0F172A",
+            "&:hover": {
+              bgcolor: "#111827",
+            },
+          }}
         >
-          {enviando ? "Guardando..." : "Guardar Inspección"}
+          {enviando ? "Guardando..." : "Guardar inspección"}
         </Button>
       </Box>
     </Box>

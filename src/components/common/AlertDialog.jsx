@@ -25,6 +25,7 @@ const AlertDialog = ({
   message,
   confirmLoading = false,
   confirmLabel = "Confirmar",
+  confirmLoadingLabel = "Procesando...",
   cancelLabel = "Cancelar"
 }) => {
   const theme = useTheme();
@@ -98,7 +99,7 @@ const AlertDialog = ({
             "&:hover": { backgroundColor: "#2E7D32" }
           }}>
 
-          {confirmLoading ? "Eliminando..." : confirmLabel}
+          {confirmLoading ? confirmLoadingLabel : confirmLabel}
         </Button>
       </DialogActions>
     </Dialog>);
@@ -113,6 +114,7 @@ AlertDialog.propTypes = {
   message: PropTypes.string.isRequired,
   confirmLoading: PropTypes.bool,
   confirmLabel: PropTypes.string,
+  confirmLoadingLabel: PropTypes.string,
   cancelLabel: PropTypes.string
 };
 

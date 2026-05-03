@@ -1,4 +1,5 @@
-import { Card, CardContent, CardActions, Button, Chip, Divider, IconButton, Tooltip, useTheme } from "@mui/material";
+import { Card, CardContent, CardActions, Button, Chip, IconButton, Tooltip, useTheme } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import {
   Edit,
   Delete,
@@ -21,6 +22,30 @@ import { useGetEstadoInventarioCamionQuery } from "../../store/services/inventar
 import Box from "../common/CompatBox";
 import Typography from "../common/CompatTypography";
 import { getActionIconButtonSx } from "../common/tableStyles";
+
+const getStatusChipSx = (theme, estado) => {
+  const tone =
+    estado === "Disponible" ? "success" : estado === "En Ruta" ? "warning" : "error";
+  const color = theme.palette[tone].main;
+
+  return {
+    height: 30,
+    borderRadius: 1,
+    color: theme.palette.mode === "dark" ? theme.palette.common.white : color,
+    bgcolor: alpha(color, theme.palette.mode === "dark" ? 0.24 : 0.11),
+    fontWeight: 800,
+    fontSize: 13,
+    boxShadow: "none",
+    "& .MuiChip-icon": {
+      color: "inherit",
+      ml: 0.75,
+    },
+    "& .MuiChip-label": {
+      px: 1,
+    },
+    flex: "0 0 auto",
+  };
+};
 
 const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
   const theme = useTheme();
@@ -65,230 +90,274 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
 
   return (
     <Card
-      sx={{
-        borderRadius: 4,
-        boxShadow: "0 4px 16px 0 #21305208",
-        p: 2,
-        minHeight: 250,
+      elevation={0}
+      sx={(theme) => ({
+        height: "100%",
+        minWidth: 0,
+        borderRadius: 1,
+        border: "1px solid",
+        borderColor: "divider",
+        boxShadow:
+          theme.palette.mode === "light"
+            ? "0 8px 22px rgba(15, 23, 42, 0.06)"
+            : "0 8px 22px rgba(0, 0, 0, 0.28)",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
         alignItems: "stretch",
         position: "relative",
-        overflow: "visible",
-        border: "1px solid black",
-      }}
+        overflow: "hidden",
+        bgcolor: "background.paper",
+        transition: "border-color 0.18s ease, box-shadow 0.18s ease",
+        "&:hover": {
+          borderColor: alpha("#0F172A", theme.palette.mode === "dark" ? 0.42 : 0.18),
+          boxShadow:
+            theme.palette.mode === "light"
+              ? "0 12px 28px rgba(15, 23, 42, 0.1)"
+              : "0 12px 28px rgba(0, 0, 0, 0.36)",
+        },
+      })}
     >
-      <Box
+      <CardContent
         sx={{
-          position: "static",
-          top: { sm: 18 },
-          right: { sm: 18 },
-          mb: { xs: 1.5, sm: 0 },
+          p: { xs: 1.5, sm: 2 },
+          pb: { xs: 1.25, sm: 1.5 },
+          flex: "1 1 auto",
           display: "flex",
-          justifyContent: { xs: "flex-end", sm: "unset" },
-          width: { xs: "100%", sm: "auto" },
-          zIndex: 2,
+          flexDirection: "column",
+          minWidth: 0,
         }}
       >
-        <Chip
-          icon={
-            camion.estado === "Disponible" ? (
-              <LocalShipping fontSize="small" />
-            ) : camion.estado === "En Ruta" ? (
-              <Visibility fontSize="small" />
-            ) : (
-              <Edit fontSize="small" />
-            )
-          }
-          label={camion.estado}
-          sx={{
-            fontSize: 14,
-            fontWeight: 700,
-            px: 2,
-            py: 0.5,
-            borderRadius: 2,
-            color:
-              camion.estado === "Disponible"
-                ? theme.palette.success.dark
-                : camion.estado === "En Ruta"
-                ? theme.palette.warning.dark
-                : theme.palette.error.dark,
-            backgroundColor:
-              camion.estado === "Disponible"
-                ? theme.palette.success.light + "44"
-                : camion.estado === "En Ruta"
-                ? theme.palette.warning.light + "44"
-                : theme.palette.error.light + "44",
-            letterSpacing: 1,
-            textTransform: "capitalize",
-            boxShadow: "0 1px 5px #0001",
-          }}
-        />
-      </Box>
-      <CardContent sx={{ pb: 1.5, pt: 2, flex: "1 1 auto" }}>
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
+            alignItems: "flex-start",
             justifyContent: "space-between",
-            mb: 2,
-            gap: 1,
-            flexWrap: "wrap",
+            gap: 1.25,
+            mb: 1.5,
+            minWidth: 0,
           }}
         >
-          <Box display="flex" alignItems="center" gap={1.2}>
-            <LocalShipping
-              sx={{ color: theme.palette.primary.main, fontSize: 28 }}
-            />
-            <Typography
-              variant="subtitle2"
-              sx={{
-                fontWeight: 700,
-                color: theme.palette.text.secondary,
-                fontSize: 16,
-              }}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.25,
+              minWidth: 0,
+              flex: "1 1 auto",
+            }}
+          >
+            <Box
+              sx={(theme) => ({
+                width: 40,
+                height: 40,
+                borderRadius: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: alpha("#0F172A", theme.palette.mode === "dark" ? 0.28 : 0.07),
+                color: theme.palette.mode === "dark" ? theme.palette.common.white : "#0F172A",
+                flex: "0 0 auto",
+              })}
             >
-              ID: {camion.id_camion}
+              <LocalShipping fontSize="small" />
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight={800}
+                sx={{ display: "block", lineHeight: 1.2 }}
+              >
+                Camión #{camion.id_camion}
+              </Typography>
+              <Typography
+                variant="h6"
+                title={camion.placa}
+                noWrap
+                sx={{
+                  fontWeight: 900,
+                  color: "text.primary",
+                  fontSize: { xs: "1rem", sm: "1.12rem" },
+                  lineHeight: 1.2,
+                  textTransform: "uppercase",
+                }}
+              >
+                Patente {camion.placa}
+              </Typography>
+            </Box>
+          </Box>
+          <Chip
+            icon={
+              camion.estado === "Disponible" ? (
+                <LocalShipping fontSize="small" />
+              ) : camion.estado === "En Ruta" ? (
+                <Visibility fontSize="small" />
+              ) : (
+                <Edit fontSize="small" />
+              )
+            }
+            label={camion.estado}
+            size="small"
+            sx={getStatusChipSx(theme, camion.estado)}
+          />
+        </Box>
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "minmax(0, 0.85fr) minmax(0, 1.15fr)" },
+            gap: 1,
+            alignItems: "stretch",
+            mb: 1.5,
+          }}
+        >
+          <Box
+            sx={(theme) => ({
+              minHeight: 44,
+              borderRadius: 1,
+              bgcolor: alpha("#0F172A", theme.palette.mode === "dark" ? 0.2 : 0.04),
+              px: 1.25,
+              py: 0.85,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            })}
+          >
+            <Typography variant="caption" color="text.secondary" fontWeight={800}>
+              Capacidad
+            </Typography>
+            <Typography variant="body2" fontWeight={900} color="text.primary">
+              {camion.capacidad} elementos
             </Typography>
           </Box>
+
           {camion.id_chofer_asignado ? (
             <Box
-              sx={{
-                mb: 1.5,
-                px: 1.2,
-                py: 0.7,
-                borderRadius: 2,
-                bgcolor: theme.palette.info.light + "22",
-                color: theme.palette.info.dark,
+              sx={(theme) => ({
+                minHeight: 44,
+                px: 1.25,
+                py: 0.85,
+                borderRadius: 1,
+                bgcolor: alpha(theme.palette.info.main, theme.palette.mode === "dark" ? 0.22 : 0.08),
+                color: theme.palette.mode === "dark" ? theme.palette.info.light : theme.palette.info.dark,
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
-                minHeight: 36,
-              }}
+                minWidth: 0,
+              })}
             >
-              <PersonAdd fontSize="small" sx={{ mr: 0.5 }} />
-              <Typography fontWeight={500} fontSize={15} noWrap>
-                {camion.chofer?.nombre}
-              </Typography>
+              <PersonAdd fontSize="small" sx={{ flex: "0 0 auto" }} />
+              <Box sx={{ minWidth: 0, flex: "1 1 auto" }}>
+                <Typography variant="caption" fontWeight={800} sx={{ display: "block" }}>
+                  Chofer asignado
+                </Typography>
+                <Typography fontWeight={800} fontSize={14} noWrap title={camion.chofer?.nombre || ""}>
+                  {camion.chofer?.nombre || "Sin nombre"}
+                </Typography>
+              </Box>
               <Tooltip title="Remover chofer">
-                <IconButton size="small" onClick={() => setOpen(true)}>
-                  <RemoveCircleOutlineOutlinedIcon
-                    sx={{ color: theme.palette.error.main }}
-                  />
+                <IconButton
+                  size="small"
+                  onClick={() => setOpen(true)}
+                  aria-label="Remover chofer"
+                  sx={{ flex: "0 0 auto", color: theme.palette.error.main }}
+                >
+                  <RemoveCircleOutlineOutlinedIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
             </Box>
           ) : (
             <Button
-              variant="text"
+              variant="outlined"
               startIcon={<PersonAdd />}
               onClick={() => setOpenModal(true)}
+              fullWidth
               sx={{
-                fontWeight: 600,
-                color: theme.palette.primary.main,
+                minHeight: 44,
+                borderRadius: 1,
                 textTransform: "none",
-                fontSize: 15,
-                my: 1,
+                fontWeight: 800,
+                justifyContent: "flex-start",
               }}
             >
-              Asignar Chofer
+              Asignar chofer
             </Button>
           )}
         </Box>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: "bold",
-            color: theme.palette.primary.dark,
-            textTransform: "uppercase",
-            wordBreak: "break-word",
-            fontSize: 19,
-            mb: 0.5,
-            letterSpacing: 1,
-          }}
-        >
-          Patente: {camion.placa}
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{ color: theme.palette.text.secondary, mt: 0.5, fontSize: 15 }}
-        >
-          Capacidad:{" "}
-          <b style={{ color: theme.palette.info.dark }}>{camion.capacidad}</b>{" "}
-          elementos
-        </Typography>
-        <Box sx={{ mt: 2 }}>
+
+        <Box sx={{ mt: "auto" }}>
           <InventarioCamion ref={inventarioRef} id_camion={camion.id_camion} />
         </Box>
-        <Box display="flex" justifyContent="center" mt={2}>
+        <Box display="flex" mt={1.5}>
           <Tooltip title="Ver detalle visual" arrow>
             <Button
               variant="text"
               size="small"
               onClick={() => setOpenInventarioVisual(true)}
               startIcon={<Visibility />}
-              sx={{
-                color: theme.palette.info.main,
-                fontWeight: 600,
+              fullWidth
+              sx={(theme) => ({
+                minHeight: 38,
+                color: theme.palette.mode === "dark" ? theme.palette.common.white : "#0F172A",
+                bgcolor: alpha("#0F172A", theme.palette.mode === "dark" ? 0.18 : 0.04),
+                fontWeight: 800,
                 textTransform: "none",
-                px: 2,
-                borderRadius: 2,
-                "&:hover": { background: theme.palette.info.light + "33" },
-              }}
+                px: 1.5,
+                borderRadius: 1,
+                "&:hover": {
+                  bgcolor: alpha("#0F172A", theme.palette.mode === "dark" ? 0.24 : 0.08),
+                },
+              })}
             >
-              Ver Detalle Visual
+              Ver detalle visual
             </Button>
           </Tooltip>
         </Box>
       </CardContent>
 
-      <Divider />
-
       <CardActions
         disableSpacing
-        sx={{
+        sx={(theme) => ({
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
           alignItems: "center",
           gap: 1,
-          background:
-            theme.palette.mode === "dark"
-              ? theme.palette.grey[900]
-              : theme.palette.grey[50],
-          zIndex: 1,
-          p: { xs: 1, sm: 2 },
+          bgcolor: alpha("#0F172A", theme.palette.mode === "dark" ? 0.18 : 0.025),
+          p: { xs: 1, sm: 1.25 },
           width: "100%",
           borderTop: `1px solid ${theme.palette.divider}`,
-          borderBottomLeftRadius: 12,
-          borderBottomRightRadius: 12,
           boxShadow: "none",
-        }}
+        })}
       >
-        <Tooltip title="Editar">
-          <IconButton
-            size="small"
-            onClick={() => setOpenEdit(true)}
-            aria-label="Editar camión"
-            sx={getActionIconButtonSx(theme, "primary")}
-          >
-            <Edit fontSize="small" />
-          </IconButton>
-        </Tooltip>
-
-        <Tooltip title={isDeleting ? "Eliminando..." : "Eliminar"}>
-          <span>
+        <Typography variant="caption" color="text.secondary" fontWeight={800}>
+          Acciones
+        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+          <Tooltip title="Editar">
             <IconButton
               size="small"
-              onClick={() => onDelete(camion.id_camion)}
-              aria-label="Eliminar camión"
-              disabled={isDeleting}
-              sx={getActionIconButtonSx(theme, "error")}
+              onClick={() => setOpenEdit(true)}
+              aria-label="Editar camión"
+              sx={getActionIconButtonSx(theme, "primary")}
             >
-              <Delete fontSize="small" />
+              <Edit fontSize="small" />
             </IconButton>
-          </span>
-        </Tooltip>
+          </Tooltip>
+
+          <Tooltip title={isDeleting ? "Eliminando..." : "Eliminar"}>
+            <span>
+              <IconButton
+                size="small"
+                onClick={() => onDelete(camion.id_camion)}
+                aria-label="Eliminar camión"
+                disabled={isDeleting}
+                sx={getActionIconButtonSx(theme, "error")}
+              >
+                <Delete fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </Box>
       </CardActions>
 
       <AsignarChoferModal
@@ -321,6 +390,7 @@ const CamionCard = ({ camion, onDelete, isDeleting, onCamionUpdated }) => {
         isLoading={isLoadingInventario}
         error={errorInventario}
         id_camion={camion.id_camion}
+        estadoCamion={camion.estado}
         onInventarioUpdated={refetchInventario}
       />
     </Card>

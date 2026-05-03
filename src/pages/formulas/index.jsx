@@ -154,6 +154,7 @@ const ListarFormulasProductos = () => {
         <>
           <IconButton
             aria-label="Ver fórmula"
+            color="info"
             onClick={() => navigate(`/formulas/ver/${row.id_formula}`)}
             sx={getActionIconButtonSx(theme, "info")}
           >
@@ -161,6 +162,7 @@ const ListarFormulasProductos = () => {
           </IconButton>
           <IconButton
             aria-label="Eliminar fórmula"
+            color="error"
             onClick={() => pedirConfirmacion(row)}
             sx={getActionIconButtonSx(theme, "error")}
           >

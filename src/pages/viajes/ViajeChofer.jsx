@@ -1,13 +1,23 @@
 import Dialog from "../../components/common/CompatDialog";
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
-import { useTheme, useMediaQuery, IconButton, DialogTitle } from "@mui/material";
+import {
+  useTheme,
+  useMediaQuery,
+  IconButton,
+  DialogTitle,
+  Button,
+  Container,
+  Paper,
+} from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { useDispatch } from "react-redux";
-import { Container } from "@mui/material";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import CloseIcon from "@mui/icons-material/Close";
+import InventoryOutlinedIcon from "@mui/icons-material/InventoryOutlined";
 import Box from "../../components/common/CompatBox";
+import Stack from "../../components/common/CompatStack";
 import Typography from "../../components/common/CompatTypography";
 
 import InventarioCargado from "../../components/viaje/InventarioCargado";
@@ -39,6 +49,46 @@ import { useChoferTracking } from "../../hooks/useChoferTracking";
 import { useSelector } from "react-redux";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 
+const driverActionButtonSx = (theme, variant = "primary") => ({
+  flex: 1,
+  minWidth: 0,
+  minHeight: 48,
+  px: 1,
+  borderRadius: 1,
+  textTransform: "none",
+  fontWeight: 800,
+  boxShadow: "none",
+  ...(variant === "primary"
+    ? {
+        bgcolor: "#0F172A",
+        color: theme.palette.common.white,
+        border: "1px solid #0F172A",
+        "&:hover": {
+          bgcolor: theme.palette.common.black,
+          borderColor: theme.palette.common.black,
+          boxShadow: "none",
+        },
+      }
+    : {
+        color: "#0F172A",
+        bgcolor: alpha("#0F172A", 0.03),
+        borderColor: alpha("#0F172A", 0.28),
+        "&:hover": {
+          borderColor: "#0F172A",
+          bgcolor: alpha("#0F172A", 0.07),
+          boxShadow: "none",
+        },
+      }),
+});
+
+const blurActiveElement = () => {
+  if (typeof document === "undefined") return;
+  const activeElement = document.activeElement;
+  if (activeElement && typeof activeElement.blur === "function") {
+    activeElement.blur();
+  }
+};
+
 const ViajeChofer = ({ viaje }) => {
   const dispatch = useDispatch();
   const [fabOpen, setFabOpen] = useState(false);
@@ -69,6 +119,8 @@ const ViajeChofer = ({ viaje }) => {
   }, [viaje]);
 
   const handleAbrirDialogoFinalizar = () => {
+    blurActiveElement();
+    setFabOpen(false);
     setConfirmDialogOpen(true);
   };
 
@@ -84,34 +136,37 @@ const ViajeChofer = ({ viaje }) => {
     return (
       <SpeedDialAction
         icon={icono}
+        sx={(theme) => ({
+          "& .MuiSpeedDialAction-fab": {
+            borderRadius: 1.25,
+            color: "#0F172A",
+            bgcolor: theme.palette.background.paper,
+            border: `1px solid ${alpha("#0F172A", 0.24)}`,
+            boxShadow:
+              theme.palette.mode === "light"
+                ? "0 8px 20px rgba(15, 23, 42, 0.12)"
+                : "0 8px 20px rgba(0, 0, 0, 0.32)",
+            "&:hover": {
+              bgcolor: alpha("#0F172A", 0.06),
+              borderColor: "#0F172A",
+              boxShadow: "none",
+            },
+          },
+        })}
         slotProps={{
           tooltip: { title: titulo },
           fab: {
-            onClick,
+            onClick: () => {
+              blurActiveElement();
+              onClick();
+            },
             tabIndex: 0,
-            "aria-hidden": false,
             "aria-label": titulo
           }
         }} />);
 
 
   };
-
-  useEffect(() => {
-    if (!openInventarioModal) {
-      const root = document.getElementById("root");
-      if (root?.getAttribute("aria-hidden") === "true") {
-        root.setAttribute("aria-hidden", "false");
-      }
-    }
-  }, [openInventarioModal]);
-
-  useEffect(() => {
-    if (!openInventarioModal && fabRef.current) {
-      fabRef.current.blur();
-      setTimeout(() => fabRef.current.focus(), 50);
-    }
-  }, [openInventarioModal]);
 
   const {
     data: entregasData,
@@ -252,6 +307,7 @@ const ViajeChofer = ({ viaje }) => {
   }, [viaje, entregasData, errorEntregas]);
 
   const handleOpenEntrega = (destino) => {
+    blurActiveElement();
     setDestinoSeleccionado(destino);
     setModalOpen(true);
   };
@@ -301,6 +357,7 @@ const ViajeChofer = ({ viaje }) => {
     }
   };
   const handleVerDetallePedido = (destino) => {
+    blurActiveElement();
     setPedidoSeleccionadoId(destino.id_pedido);
     setDetallePedidoOpen(true);
   };
@@ -325,7 +382,14 @@ const ViajeChofer = ({ viaje }) => {
     return <Typography color="error">{relevantError.message}</Typography>;
   }
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, pb: 8 }}>
+    <Container
+      maxWidth="lg"
+      sx={{
+        mt: { xs: 2, md: 4 },
+        px: { xs: 1.25, sm: 2, md: 3 },
+        pb: { xs: 14, md: 8 },
+      }}
+    >
       <InfoGeneral viaje={viaje} />
       <ResumenDelDia
         totalDestinos={viaje.destinos.length}
@@ -371,15 +435,29 @@ const ViajeChofer = ({ viaje }) => {
       <SpeedDial
         ref={fabRef}
         ariaLabel="Acciones del viaje"
-        sx={{
+        sx={(theme) => ({
+          display: { xs: "none", md: "flex" },
           position: "fixed",
           bottom: 60,
           right: 24,
           zIndex: 1200,
+          "& .MuiSpeedDial-fab": {
+            borderRadius: 1.5,
+            bgcolor: "#0F172A",
+            color: theme.palette.common.white,
+            boxShadow:
+              theme.palette.mode === "light"
+                ? "0 10px 24px rgba(15, 23, 42, 0.2)"
+                : "0 10px 24px rgba(0, 0, 0, 0.36)",
+            "&:hover": {
+              bgcolor: theme.palette.common.black,
+              boxShadow: "none",
+            },
+          },
           "& .MuiSpeedDialAction-fab": {
             transition: "none !important"
           }
-        }}
+        })}
         icon={<SpeedDialIcon onClick={toggleFab} />}
         direction="up"
         open={fabOpen}
@@ -390,14 +468,20 @@ const ViajeChofer = ({ viaje }) => {
           fabOpen,
           <Inventory2Icon />,
           "Ver Inventario",
-          () => setOpenInventarioModal(true)
+          () => {
+            setFabOpen(false);
+            setOpenInventarioModal(true);
+          }
         )}
 
         {renderSpeedDialAction(
           fabOpen && viaje?.estado === "En Tránsito",
           <PointOfSaleIcon />,
           "Venta Rápida",
-          () => setModalVentaRapidaOpen(true)
+          () => {
+            setFabOpen(false);
+            setModalVentaRapidaOpen(true);
+          }
         )}
 
         {renderSpeedDialAction(
@@ -409,10 +493,90 @@ const ViajeChofer = ({ viaje }) => {
         )}
       </SpeedDial>
 
+      <Box
+        sx={{
+          display: { xs: "block", md: "none" },
+          position: "fixed",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: (theme) => theme.zIndex.appBar + 1,
+          p: 1,
+          pb: "calc(8px + env(safe-area-inset-bottom))",
+          bgcolor: "background.paper",
+          borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+        }}
+      >
+        <Paper
+          elevation={0}
+          sx={(theme) => ({
+            p: 1,
+            borderRadius: 1.5,
+            border: "1px solid",
+            borderColor: "divider",
+            boxShadow:
+              theme.palette.mode === "light"
+                ? "0 8px 24px rgba(15, 23, 42, 0.12)"
+                : "0 8px 24px rgba(0, 0, 0, 0.32)",
+          })}
+        >
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="contained"
+              startIcon={<Inventory2Icon />}
+              onClick={() => {
+                blurActiveElement();
+                setOpenInventarioModal(true);
+              }}
+              sx={(theme) => driverActionButtonSx(theme, "primary")}
+            >
+              Inventario
+            </Button>
+            {viaje?.estado === "En Tránsito" && (
+              <Button
+                variant="outlined"
+                startIcon={<PointOfSaleIcon />}
+                onClick={() => {
+                  blurActiveElement();
+                  setModalVentaRapidaOpen(true);
+                }}
+                sx={(theme) => driverActionButtonSx(theme, "secondary")}
+              >
+                Venta
+              </Button>
+            )}
+            {(viaje?.destinos?.length === 0 || todasEntregasCompletadas) && (
+              <Button
+                variant="contained"
+                color="success"
+                startIcon={<DoneIcon />}
+                onClick={handleAbrirDialogoFinalizar}
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  minHeight: 48,
+                  px: 1,
+                  borderRadius: 1,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  boxShadow: "none",
+                  "&:hover": { boxShadow: "none" },
+                }}
+              >
+                Finalizar
+              </Button>
+            )}
+          </Stack>
+        </Paper>
+      </Box>
+
       {modalVentaRapidaOpen &&
       <ModalVentaRapida
         open={modalVentaRapidaOpen}
-        onClose={() => setModalVentaRapidaOpen(false)}
+        onClose={() => {
+          blurActiveElement();
+          setModalVentaRapidaOpen(false);
+        }}
         viaje={viaje}
         onSuccess={() => {
           dispatch(
@@ -427,64 +591,109 @@ const ViajeChofer = ({ viaje }) => {
       }
       <Dialog
         fullScreen={isTabletOrMobile}
-        hideBackdrop
-        disableEnforceFocus
-        disableRestoreFocus
-        disableAutoFocus
         open={openInventarioModal}
         onClose={() => {
+          blurActiveElement();
           setOpenInventarioModal(false);
           setFabOpen(false);
-          document.activeElement.blur();
         }}
-        keepMounted={false}>
+        keepMounted={false}
+        PaperProps={{
+          sx: (theme) => ({
+            borderRadius: isTabletOrMobile ? 0 : 2,
+            boxShadow: "0 18px 48px rgba(15, 23, 42, 0.18)",
+            overflow: "hidden",
+          }),
+        }}>
 
         <DialogTitle
           sx={(theme) => ({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor:
-            theme.palette.mode === "dark" ?
-            theme.palette.primary.dark + "22" :
-            theme.palette.primary.light + "44",
-            color: theme.palette.primary.main,
-            fontWeight: "bold",
-            fontSize: { xs: 18, sm: 22 },
-            borderTopLeftRadius: 16,
-            borderTopRightRadius: 16,
-            px: { xs: 2, sm: 4 },
-            py: { xs: 1.5, sm: 2 },
-            borderBottom: `1.5px solid ${
-            theme.palette.mode === "dark" ?
-            theme.palette.primary.dark :
-            theme.palette.primary.light}`
-
+            gap: 1.5,
+            bgcolor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            px: { xs: 2, sm: 2.5 },
+            py: { xs: 1.5, sm: 1.75 },
+            borderBottom: `1px solid ${theme.palette.divider}`,
           })}>
-
-          Detalle Visual del Inventario del Camión
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: { xs: 1, sm: 1.25 },
+              minWidth: 0,
+              flex: "1 1 auto",
+              flexWrap: "wrap",
+              pr: 1,
+            }}
+          >
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: (theme) =>
+                  alpha("#0F172A", theme.palette.mode === "dark" ? 0.28 : 0.08),
+                color: (theme) =>
+                  theme.palette.mode === "dark" ? theme.palette.common.white : "#0F172A",
+                flex: "0 0 auto",
+              }}
+            >
+              <InventoryOutlinedIcon fontSize="small" />
+            </Box>
+            <Typography
+              variant="h6"
+              component="h2"
+              fontWeight={900}
+              sx={{
+                fontSize: { xs: "1.18rem", sm: "1.34rem" },
+                lineHeight: 1.15,
+                whiteSpace: { xs: "normal", sm: "nowrap" },
+              }}
+            >
+              Detalle visual del inventario
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={(theme) => ({
+                px: 0.85,
+                py: 0.25,
+                borderRadius: 1,
+                bgcolor: alpha("#0F172A", theme.palette.mode === "dark" ? 0.18 : 0.06),
+                color: theme.palette.text.secondary,
+                fontWeight: 800,
+                whiteSpace: "nowrap",
+              })}
+            >
+              Camión #{viaje.id_camion}
+            </Typography>
+          </Box>
           <IconButton
             onClick={() => {
+              blurActiveElement();
               setOpenInventarioModal(false);
               setFabOpen(false);
-              document.activeElement.blur();
             }}
             size="small"
-            sx={{
-              color: (theme) => theme.palette.primary.main,
+            sx={(theme) => ({
+              borderRadius: 1,
+              color: theme.palette.text.secondary,
               "&:hover": {
-                backgroundColor: (theme) =>
-                theme.palette.mode === "dark" ?
-                theme.palette.primary.dark + "1A" :
-                theme.palette.primary.light + "1A"
-              }
-            }}>
+                color: theme.palette.text.primary,
+                backgroundColor: alpha("#0F172A", theme.palette.mode === "dark" ? 0.22 : 0.07),
+              },
+            })}>
 
-            <CloseIcon />
+            <CloseIcon fontSize="small" />
           </IconButton>
         </DialogTitle>
 
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ p: { xs: 1.25, sm: 2 }, bgcolor: "background.paper" }}>
           <InventarioCamion
             idCamion={viaje.id_camion}
             modo="visual"

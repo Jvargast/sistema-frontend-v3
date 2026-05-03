@@ -1,11 +1,26 @@
-import { Card, CardContent, List, ListItem, Divider, Button, Paper, Chip } from "@mui/material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Card,
+  CardContent,
+  List,
+  ListItem,
+  Divider,
+  Button,
+  Paper,
+  Chip,
+} from "@mui/material";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import NavigationIcon from "@mui/icons-material/Navigation";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
 import { ordenarDestinosConGoogle } from "../../utils/ordenRutas";
 import {
-  buildFallbackRoutePath,
+  buildFallbackRouteSegments,
   isValidRoutePoint,
 } from "../../utils/googleRoutesApi";
 import {
@@ -19,6 +34,49 @@ import Typography from "../common/CompatTypography";
 
 const PENDING_MARKER_COLOR = "#4361ee";
 const DELIVERED_MARKER_COLOR = "#4caf50";
+const DESTINATION_LIST_MAX_HEIGHT = {
+  xs: "34vh",
+  sm: 320,
+  md: 420,
+};
+
+const destinationSectionSx = {
+  m: "0 !important",
+  border: "1px solid",
+  borderColor: "divider",
+  borderRadius: 1.5,
+  boxShadow: "none",
+  overflow: "hidden",
+  bgcolor: "background.paper",
+  "&:before": { display: "none" },
+  "&.Mui-expanded": { m: "0 !important" },
+};
+
+const destinationSectionsContainerSx = {
+  display: "flex",
+  flexDirection: "column",
+  gap: { xs: 1.75, sm: 2.25 },
+};
+
+const destinationSummarySx = {
+  minHeight: 52,
+  px: { xs: 1.25, sm: 2 },
+  bgcolor: "rgba(15, 23, 42, 0.02)",
+  "&.Mui-expanded": { minHeight: 52 },
+  "& .MuiAccordionSummary-content": {
+    my: 1,
+    alignItems: "center",
+  },
+};
+
+const destinationScrollSx = {
+  maxHeight: DESTINATION_LIST_MAX_HEIGHT,
+  overflowY: "auto",
+  pr: { xs: 0.25, sm: 0.75 },
+  pb: 0.25,
+  overscrollBehavior: "contain",
+  WebkitOverflowScrolling: "touch",
+};
 
 function getDestinoKey(destino) {
   if (destino?.id_pedido != null) return `pedido-${destino.id_pedido}`;
@@ -42,6 +100,13 @@ function buildMarkerIndexByPedido(primary = [], fallback = []) {
     }
     return acc;
   }, new Map());
+}
+
+function getGoogleMapsDirectionsUrl(destino) {
+  if (!isValidRoutePoint(destino)) return null;
+  return `https://www.google.com/maps/dir/?api=1&destination=${Number(
+    destino.lat
+  )},${Number(destino.lng)}&travelmode=driving`;
 }
 
 function PedidoMarkerBadge({ number, color, label }) {
@@ -78,6 +143,57 @@ PedidoMarkerBadge.propTypes = {
   number: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   color: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
+};
+
+function PedidoTimelineMarker({
+  number,
+  color,
+  label,
+  showTopConnector,
+  showBottomConnector,
+}) {
+  const showConnector = showTopConnector || showBottomConnector;
+
+  return (
+    <Box
+      sx={{
+        position: "relative",
+        flex: "0 0 36px",
+        width: 36,
+        minHeight: 64,
+        alignSelf: "stretch",
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
+      {showConnector && (
+        <Box
+          aria-hidden="true"
+          sx={{
+            position: "absolute",
+            top: showTopConnector ? 0 : 40,
+            bottom: showBottomConnector ? 0 : "calc(100% - 18px)",
+            left: "50%",
+            transform: "translateX(-50%)",
+            borderLeft: "2px dashed",
+            borderColor: "rgba(100, 116, 139, 0.34)",
+            pointerEvents: "none",
+          }}
+        />
+      )}
+      <Box sx={{ position: "relative", zIndex: 1 }}>
+        <PedidoMarkerBadge number={number} color={color} label={label} />
+      </Box>
+    </Box>
+  );
+}
+
+PedidoTimelineMarker.propTypes = {
+  number: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  color: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  showTopConnector: PropTypes.bool,
+  showBottomConnector: PropTypes.bool,
 };
 
 const ListaDestinos = ({
@@ -147,6 +263,8 @@ const ListaDestinos = ({
   const [usarGeolocalizacion, setUsarGeolocalizacion] = useState(false);
   const [rutaOptimizada, setRutaOptimizada] = useState([]);
   const [routePath, setRoutePath] = useState([]);
+  const [currentLegPath, setCurrentLegPath] = useState([]);
+  const [futureLegPath, setFutureLegPath] = useState([]);
   const [userLocation, setUserLocation] = useState(null);
 
   const solicitarGeolocalizacion = () => {
@@ -190,6 +308,8 @@ const ListaDestinos = ({
       lastParamsRef.current = { origen: null, pendientesKey: "" };
       if (rutaOptimizada.length > 0) setRutaOptimizada([]);
       if (routePath.length > 0) setRoutePath([]);
+      if (currentLegPath.length > 0) setCurrentLegPath([]);
+      if (futureLegPath.length > 0) setFutureLegPath([]);
       return;
     }
     if (
@@ -209,15 +329,23 @@ const ListaDestinos = ({
 
     let cancelado = false;
     const rutaBase = [origenPendiente, ...destinosPendientesRuteables];
+    const fallbackSegments = buildFallbackRouteSegments(
+      origenPendiente,
+      destinosPendientesRuteables
+    );
 
     setRutaOptimizada(rutaBase);
-    setRoutePath(buildFallbackRoutePath(rutaBase));
+    setRoutePath(fallbackSegments.routePath);
+    setCurrentLegPath(fallbackSegments.currentLegPath);
+    setFutureLegPath(fallbackSegments.futureLegPath);
 
     ordenarDestinosConGoogle(destinosPendientesRuteables, origenPendiente)
-      .then(({ ordenados, routePath }) => {
+      .then(({ ordenados, routePath, currentLegPath, futureLegPath }) => {
         if (cancelado) return;
         setRutaOptimizada([origenPendiente, ...ordenados]);
         setRoutePath(routePath || []);
+        setCurrentLegPath(currentLegPath || []);
+        setFutureLegPath(futureLegPath || []);
         // ...el resto igual, si necesitas
       })
       .catch((e) => {
@@ -228,7 +356,9 @@ const ListaDestinos = ({
           e
         );
         setRutaOptimizada(fallbackRoute);
-        setRoutePath(buildFallbackRoutePath(fallbackRoute));
+        setRoutePath(fallbackSegments.routePath);
+        setCurrentLegPath(fallbackSegments.currentLegPath);
+        setFutureLegPath(fallbackSegments.futureLegPath);
       });
 
     return () => {
@@ -248,6 +378,9 @@ const ListaDestinos = ({
     destinosEntregados,
     []
   );
+  const proximoDestino =
+    rutaPendiente[0] || destinosPendientesOrdenados[0] || null;
+  const proximoDestinoUrl = getGoogleMapsDirectionsUrl(proximoDestino);
 
   return (
     <>
@@ -255,6 +388,12 @@ const ListaDestinos = ({
         <Button
           variant={usarGeolocalizacion ? "contained" : "outlined"}
           color="primary"
+          sx={{
+            width: { xs: "100%", sm: "auto" },
+            minHeight: 44,
+            textTransform: "none",
+            fontWeight: 700,
+          }}
           onClick={() => {
             if (usarGeolocalizacion) {
               setUsarGeolocalizacion(false);
@@ -269,296 +408,513 @@ const ListaDestinos = ({
         </Button>
       </Box>
 
+      {proximoDestino && (
+        <Paper
+          variant="outlined"
+          sx={{
+            p: { xs: 1.5, sm: 2 },
+            mb: 2,
+            borderRadius: 1.5,
+            borderColor: "divider",
+            backgroundColor: "background.paper",
+          }}
+        >
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            spacing={2}
+            alignItems={{ xs: "stretch", md: "center" }}
+            justifyContent="space-between"
+          >
+            <Stack direction="row" spacing={1.5} alignItems="flex-start">
+              <PedidoMarkerBadge
+                number={pendingMarkerIndexByPedido.get(
+                  proximoDestino.id_pedido
+                )}
+                color={PENDING_MARKER_COLOR}
+                label={`Puntero del mapa para pedido ${proximoDestino.id_pedido}`}
+              />
+              <Box sx={{ minWidth: 0 }}>
+                <Chip
+                  label="Próxima parada"
+                  size="small"
+                  sx={{
+                    mb: 0.75,
+                    fontWeight: 700,
+                    bgcolor: "rgba(15, 23, 42, 0.06)",
+                    color: "#0F172A",
+                  }}
+                />
+                <Typography variant="subtitle1" fontWeight={700}>
+                  {proximoDestino.nombre_cliente}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Pedido: {proximoDestino.id_pedido}
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 0.5 }}>
+                  {proximoDestino.direccion}
+                </Typography>
+              </Box>
+            </Stack>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1}
+              sx={{ minWidth: { md: 390 } }}
+            >
+              <Button
+                variant="contained"
+                color="info"
+                size="large"
+                startIcon={<LocalShippingIcon />}
+                onClick={() => onOpenEntrega(proximoDestino)}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 700,
+                  minHeight: 46,
+                  flex: 1,
+                }}
+              >
+                Entregar
+              </Button>
+              <Button
+                variant="outlined"
+                color="inherit"
+                size="large"
+                startIcon={<ReceiptLongIcon />}
+                onClick={() => onVerDetallePedido(proximoDestino)}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 700,
+                  minHeight: 46,
+                  flex: 1,
+                }}
+              >
+                Detalle
+              </Button>
+              {proximoDestinoUrl && (
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  size="large"
+                  startIcon={<NavigationIcon />}
+                  href={proximoDestinoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 700,
+                    minHeight: 46,
+                    flex: 1,
+                  }}
+                >
+                  Navegar
+                </Button>
+              )}
+            </Stack>
+          </Stack>
+        </Paper>
+      )}
+
       <DestinosMapGoogle
         destinos={destinosPendientesRuteables}
         ruta={rutaOptimizada}
         recorridoReal={recorridoReal}
         origenInicial={origenInicial}
         routePath={routePath}
+        currentLegPath={currentLegPath}
+        futureLegPath={futureLegPath}
       />
 
-      <Card elevation={3} sx={{ mb: 4 }}>
-        <CardContent>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            📍 Destinos de Entrega
+      <Card
+        elevation={0}
+        sx={{
+          mb: 4,
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 1.5,
+          boxShadow: "0 8px 24px rgba(15, 23, 42, 0.07)",
+        }}
+      >
+        <CardContent
+          sx={{
+            p: { xs: 1.5, sm: 2 },
+            "&:last-child": { pb: { xs: 1.5, sm: 2 } },
+          }}
+        >
+          <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5 }}>
+            Destinos de Entrega
           </Typography>
-          <List disablePadding>
-            {/* --- PENDIENTES --- */}
+          <Box sx={destinationSectionsContainerSx}>
             {destinosPendientesOrdenados.length > 0 && (
-              <>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ mt: 2, mb: 1, color: "#2d72d9", fontWeight: 700 }}
+              <Accordion
+                defaultExpanded
+                disableGutters
+                elevation={0}
+                sx={destinationSectionSx}
+              >
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  sx={destinationSummarySx}
                 >
-                  Pendientes ({destinosPendientesOrdenados.length})
-                </Typography>
-                {destinosPendientesOrdenados.map((destino, index) => (
-                  <Box key={destino.id_pedido}>
-                    <ListItem sx={{ px: 0, py: 2 }}>
-                      <Paper
-                        variant="outlined"
-                        sx={{
-                          width: "100%",
-                          p: 2,
-                          borderRadius: 2,
-                          backgroundColor: "#fffde7",
-                          border: "1.5px solid #2d72d911",
-                          boxShadow: "0 2px 8px 0 #22223b11",
-                        }}
-                      >
-                        <Stack
-                          direction={{ xs: "column", sm: "row" }}
-                          justifyContent="space-between"
-                          alignItems={{ xs: "stretch", sm: "center" }}
-                          spacing={2}
-                          sx={{ width: "100%" }}
-                        >
-                          <Stack
-                            direction="row"
-                            spacing={1.5}
-                            alignItems="flex-start"
-                            sx={{ minWidth: 0, flex: 1 }}
-                          >
-                            <PedidoMarkerBadge
-                              number={pendingMarkerIndexByPedido.get(
-                                destino.id_pedido
-                              )}
-                              color={PENDING_MARKER_COLOR}
-                              label={`Puntero del mapa para pedido ${destino.id_pedido}`}
-                            />
-                            <Box sx={{ minWidth: 0 }}>
-                              {/* Badge de prioridad */}
-                              <Chip
-                                label={`Prioridad: ${
-                                  destino.prioridad?.toUpperCase() || "N/A"
-                                }`}
-                                size="small"
-                                color={
-                                  destino.prioridad === "alta"
-                                    ? "error"
-                                    : destino.prioridad === "baja"
-                                    ? "default"
-                                    : "warning"
-                                }
-                                sx={{
-                                  fontWeight: 600,
-                                  mr: 1,
-                                  mb: 0.5,
-                                  fontSize: "0.85rem",
-                                  letterSpacing: 1,
-                                }}
-                              />
-                              <Typography variant="body2">
-                                Pedido: {destino.id_pedido}
-                              </Typography>
-                              <Typography
-                                variant="subtitle1"
-                                fontWeight={600}
-                                gutterBottom
-                              >
-                                {destino?.nombre_cliente}
-                              </Typography>
-                              <Typography variant="body2">
-                                Dirección: {destino.direccion}
-                              </Typography>
-                              {destino.notas && (
-                                <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                  Notas: {destino.notas}
-                                </Typography>
-                              )}
-                              <Typography
-                                variant="caption"
-                                sx={{ color: "#777" }}
-                              >
-                                Creado:{" "}
-                                {new Date(
-                                  destino.fecha_creacion
-                                ).toLocaleString("es-CL")}
-                              </Typography>
-                            </Box>
-                          </Stack>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              flexDirection: "row",
-                              gap: 2,
-                              alignItems: "center",
-                              justifyContent: {
-                                xs: "flex-start",
-                                sm: "flex-end",
-                              },
-                              mt: { xs: 2, sm: 0 },
-                            }}
-                          >
-                            <Button
-                              size="small"
-                              variant="contained"
-                              color="info"
-                              startIcon={<LocalShippingIcon />}
-                              onClick={() => onOpenEntrega(destino)}
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    spacing={1}
+                    sx={{ width: "100%", minWidth: 0 }}
+                  >
+                    <Typography fontWeight={800}>Pendientes</Typography>
+                    <Chip
+                      label={`${destinosPendientesOrdenados.length} destinos`}
+                      size="small"
+                      variant="outlined"
+                      sx={{
+                        fontWeight: 700,
+                        color: "text.secondary",
+                        borderColor: "divider",
+                      }}
+                    />
+                  </Stack>
+                </AccordionSummary>
+                <AccordionDetails
+                  sx={{
+                    p: { xs: 1, sm: 1.25 },
+                    borderTop: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Box sx={destinationScrollSx}>
+                    <List disablePadding>
+                      {destinosPendientesOrdenados.map((destino, index) => (
+                        <Box key={destino.id_pedido}>
+                          <ListItem sx={{ px: 0, py: 1.25 }}>
+                            <Paper
+                              elevation={0}
                               sx={{
-                                textTransform: "none",
-                                fontWeight: 500,
-                                mr: 1,
+                                width: "100%",
+                                p: { xs: 1.5, sm: 2 },
+                                borderRadius: 1,
+                                backgroundColor: "rgba(15, 23, 42, 0.025)",
+                                boxShadow: "none",
                               }}
                             >
-                              Registrar Entrega
-                            </Button>
-                            <Button
-                              size="small"
-                              variant="contained"
-                              color="inherit"
-                              sx={{ textTransform: "none", fontWeight: 500 }}
-                              onClick={() => onVerDetallePedido(destino)}
-                            >
-                              Ver Detalle
-                            </Button>
-                          </Box>
-                        </Stack>
-                      </Paper>
-                    </ListItem>
-                    {index < destinosPendientesOrdenados.length - 1 && (
-                      <Divider />
-                    )}
+                              <Stack
+                                direction={{ xs: "column", sm: "row" }}
+                                justifyContent="space-between"
+                                alignItems={{ xs: "stretch", sm: "center" }}
+                                spacing={2}
+                                sx={{ width: "100%" }}
+                              >
+                                <Stack
+                                  direction="row"
+                                  spacing={1.5}
+                                  alignItems="flex-start"
+                                  sx={{ minWidth: 0, flex: 1 }}
+                                >
+                                  <PedidoTimelineMarker
+                                    number={pendingMarkerIndexByPedido.get(
+                                      destino.id_pedido
+                                    )}
+                                    color={PENDING_MARKER_COLOR}
+                                    label={`Puntero del mapa para pedido ${destino.id_pedido}`}
+                                    showTopConnector={index > 0}
+                                    showBottomConnector={
+                                      index <
+                                      destinosPendientesOrdenados.length - 1
+                                    }
+                                  />
+                                  <Box sx={{ minWidth: 0 }}>
+                                    <Chip
+                                      label={`Prioridad: ${
+                                        destino.prioridad?.toUpperCase() ||
+                                        "N/A"
+                                      }`}
+                                      size="small"
+                                      color={
+                                        destino.prioridad === "alta"
+                                          ? "error"
+                                          : destino.prioridad === "baja"
+                                          ? "default"
+                                          : "warning"
+                                      }
+                                      sx={{
+                                        fontWeight: 600,
+                                        mr: 1,
+                                        mb: 0.5,
+                                        fontSize: "0.85rem",
+                                        letterSpacing: 1,
+                                      }}
+                                    />
+                                    <Typography variant="body2">
+                                      Pedido: {destino.id_pedido}
+                                    </Typography>
+                                    <Typography
+                                      variant="subtitle1"
+                                      fontWeight={600}
+                                      gutterBottom
+                                    >
+                                      {destino?.nombre_cliente}
+                                    </Typography>
+                                    <Typography variant="body2">
+                                      Dirección: {destino.direccion}
+                                    </Typography>
+                                    {destino.notas && (
+                                      <Typography
+                                        variant="body2"
+                                        sx={{ mt: 0.5 }}
+                                      >
+                                        Notas: {destino.notas}
+                                      </Typography>
+                                    )}
+                                    <Typography
+                                      variant="caption"
+                                      sx={{ color: "#777" }}
+                                    >
+                                      Creado:{" "}
+                                      {new Date(
+                                        destino.fecha_creacion
+                                      ).toLocaleString("es-CL")}
+                                    </Typography>
+                                  </Box>
+                                </Stack>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    flexDirection: { xs: "column", sm: "row" },
+                                    gap: 1,
+                                    alignItems: {
+                                      xs: "stretch",
+                                      sm: "center",
+                                    },
+                                    justifyContent: {
+                                      xs: "flex-start",
+                                      sm: "flex-end",
+                                    },
+                                    mt: { xs: 2, sm: 0 },
+                                  }}
+                                >
+                                  <Button
+                                    size="small"
+                                    variant="contained"
+                                    color="info"
+                                    startIcon={<LocalShippingIcon />}
+                                    onClick={() => onOpenEntrega(destino)}
+                                    sx={{
+                                      textTransform: "none",
+                                      fontWeight: 700,
+                                      minHeight: 44,
+                                      width: { xs: "100%", sm: "auto" },
+                                    }}
+                                  >
+                                    Registrar Entrega
+                                  </Button>
+                                  <Button
+                                    size="small"
+                                    variant="contained"
+                                    color="inherit"
+                                    sx={{
+                                      textTransform: "none",
+                                      fontWeight: 700,
+                                      minHeight: 44,
+                                      width: { xs: "100%", sm: "auto" },
+                                    }}
+                                    onClick={() => onVerDetallePedido(destino)}
+                                  >
+                                    Ver Detalle
+                                  </Button>
+                                </Box>
+                              </Stack>
+                            </Paper>
+                          </ListItem>
+                          {index < destinosPendientesOrdenados.length - 1 && (
+                            <Divider />
+                          )}
+                        </Box>
+                      ))}
+                    </List>
                   </Box>
-                ))}
-              </>
+                </AccordionDetails>
+              </Accordion>
             )}
 
-            {/* --- ENTREGADOS --- */}
             {destinosEntregados.length > 0 && (
-              <>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ mt: 3, mb: 1, color: "#3bb273", fontWeight: 700 }}
+              <Accordion
+                disableGutters
+                elevation={0}
+                sx={destinationSectionSx}
+              >
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  sx={destinationSummarySx}
                 >
-                  Entregados ({destinosEntregados.length})
-                </Typography>
-                {destinosEntregados.map((destino, index) => (
-                  <Box key={destino.id_pedido}>
-                    <ListItem sx={{ px: 0, py: 2 }}>
-                      <Paper
-                        variant="outlined"
-                        sx={{
-                          width: "100%",
-                          p: 2,
-                          borderRadius: 2,
-                          backgroundColor: (theme) =>
-                            theme.palette.success.light,
-                          color: (theme) =>
-                            theme.palette.getContrastText(
-                              theme.palette.success.light
-                            ),
-                          border: (theme) =>
-                            `1.5px solid ${theme.palette.divider}`,
-                        }}
-                      >
-                        <Stack
-                          direction={{ xs: "column", sm: "row" }}
-                          justifyContent="space-between"
-                          alignItems={{ xs: "stretch", sm: "center" }}
-                          spacing={2}
-                          sx={{ width: "100%" }}
-                        >
-                          <Stack
-                            direction="row"
-                            spacing={1.5}
-                            alignItems="flex-start"
-                            sx={{ minWidth: 0, flex: 1 }}
-                          >
-                            <PedidoMarkerBadge
-                              number={deliveredMarkerIndexByPedido.get(
-                                destino.id_pedido
-                              )}
-                              color={DELIVERED_MARKER_COLOR}
-                              label={`Puntero entregado del mapa para pedido ${destino.id_pedido}`}
-                            />
-                            <Box sx={{ minWidth: 0 }}>
-                              <Chip
-                                icon={<CheckCircleOutlineOutlinedIcon />}
-                                label="Entregado"
-                                color="success"
-                                sx={{
-                                  fontWeight: 500,
-                                  mr: 1,
-                                  px: 1.5,
-                                  py: 0.5,
-                                  fontSize: "0.875rem",
-                                  height: 32,
-                                }}
-                              />
-                              <Typography variant="body2">
-                                Pedido: {destino.id_pedido}
-                              </Typography>
-                              <Typography
-                                variant="subtitle1"
-                                fontWeight={600}
-                                gutterBottom
-                              >
-                                {destino?.nombre_cliente}
-                              </Typography>
-                              <Typography variant="body2">
-                                Dirección: {destino.direccion}
-                              </Typography>
-                              {destino.notas && (
-                                <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                  Notas: {destino.notas}
-                                </Typography>
-                              )}
-                              <Typography
-                                variant="caption"
-                                sx={{ color: "#777" }}
-                              >
-                                Entregado:{" "}
-                                {destino.hora
-                                  ? new Date(destino.hora).toLocaleString(
-                                      "es-CL"
-                                    )
-                                  : "-"}
-                              </Typography>
-                            </Box>
-                          </Stack>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              flexDirection: "row",
-                              gap: 2,
-                              alignItems: "center",
-                              justifyContent: {
-                                xs: "flex-start",
-                                sm: "flex-end",
-                              },
-                              mt: { xs: 2, sm: 0 },
-                            }}
-                          >
-                            <Button
-                              size="medium"
-                              variant="contained"
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    spacing={1}
+                    sx={{ width: "100%", minWidth: 0 }}
+                  >
+                    <Typography fontWeight={800}>Entregados</Typography>
+                    <Chip
+                      label={`${destinosEntregados.length} entregas`}
+                      size="small"
+                      variant="outlined"
+                      sx={{
+                        fontWeight: 700,
+                        color: "text.secondary",
+                        borderColor: "divider",
+                      }}
+                    />
+                  </Stack>
+                </AccordionSummary>
+                <AccordionDetails
+                  sx={{
+                    p: { xs: 1, sm: 1.25 },
+                    borderTop: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Box sx={destinationScrollSx}>
+                    <List disablePadding>
+                      {destinosEntregados.map((destino, index) => (
+                        <Box key={destino.id_pedido}>
+                          <ListItem sx={{ px: 0, py: 1.25 }}>
+                            <Paper
+                              elevation={0}
                               sx={{
-                                textTransform: "none",
-                                fontWeight: 500,
-                                ml: 1,
-                                color: "inherit",
-                                borderColor: "success.main",
-                                "&:hover": {
-                                  borderColor: "success.dark",
-                                  backgroundColor: "rgba(46, 125, 50, 0.08)",
-                                },
+                                width: "100%",
+                                p: { xs: 1.5, sm: 2 },
+                                borderRadius: 1,
+                                backgroundColor: "rgba(15, 23, 42, 0.025)",
+                                boxShadow: "none",
                               }}
-                              onClick={() => onVerDetallePedido(destino)}
                             >
-                              Ver Detalle
-                            </Button>
-                          </Box>
-                        </Stack>
-                      </Paper>
-                    </ListItem>
-                    {index < destinosEntregados.length - 1 && <Divider />}
+                              <Stack
+                                direction={{ xs: "column", sm: "row" }}
+                                justifyContent="space-between"
+                                alignItems={{ xs: "stretch", sm: "center" }}
+                                spacing={2}
+                                sx={{ width: "100%" }}
+                              >
+                                <Stack
+                                  direction="row"
+                                  spacing={1.5}
+                                  alignItems="flex-start"
+                                  sx={{ minWidth: 0, flex: 1 }}
+                                >
+                                  <PedidoTimelineMarker
+                                    number={deliveredMarkerIndexByPedido.get(
+                                      destino.id_pedido
+                                    )}
+                                    color={DELIVERED_MARKER_COLOR}
+                                    label={`Puntero entregado del mapa para pedido ${destino.id_pedido}`}
+                                    showTopConnector={index > 0}
+                                    showBottomConnector={
+                                      index < destinosEntregados.length - 1
+                                    }
+                                  />
+                                  <Box sx={{ minWidth: 0 }}>
+                                    <Chip
+                                      icon={
+                                        <CheckCircleOutlineOutlinedIcon />
+                                      }
+                                      label="Entregado"
+                                      color="success"
+                                      sx={{
+                                        fontWeight: 500,
+                                        mr: 1,
+                                        px: 1.5,
+                                        py: 0.5,
+                                        fontSize: "0.875rem",
+                                        height: 32,
+                                      }}
+                                    />
+                                    <Typography variant="body2">
+                                      Pedido: {destino.id_pedido}
+                                    </Typography>
+                                    <Typography
+                                      variant="subtitle1"
+                                      fontWeight={600}
+                                      gutterBottom
+                                    >
+                                      {destino?.nombre_cliente}
+                                    </Typography>
+                                    <Typography variant="body2">
+                                      Dirección: {destino.direccion}
+                                    </Typography>
+                                    {destino.notas && (
+                                      <Typography
+                                        variant="body2"
+                                        sx={{ mt: 0.5 }}
+                                      >
+                                        Notas: {destino.notas}
+                                      </Typography>
+                                    )}
+                                    <Typography
+                                      variant="caption"
+                                      sx={{ color: "#777" }}
+                                    >
+                                      Entregado:{" "}
+                                      {destino.hora
+                                        ? new Date(
+                                            destino.hora
+                                          ).toLocaleString("es-CL")
+                                        : "-"}
+                                    </Typography>
+                                  </Box>
+                                </Stack>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    flexDirection: { xs: "column", sm: "row" },
+                                    gap: 1,
+                                    alignItems: {
+                                      xs: "stretch",
+                                      sm: "center",
+                                    },
+                                    justifyContent: {
+                                      xs: "flex-start",
+                                      sm: "flex-end",
+                                    },
+                                    mt: { xs: 2, sm: 0 },
+                                  }}
+                                >
+                                  <Button
+                                    size="medium"
+                                    variant="contained"
+                                    sx={{
+                                      textTransform: "none",
+                                      fontWeight: 700,
+                                      minHeight: 44,
+                                      width: { xs: "100%", sm: "auto" },
+                                      color: "inherit",
+                                      borderColor: "success.main",
+                                      "&:hover": {
+                                        borderColor: "success.dark",
+                                        backgroundColor:
+                                          "rgba(46, 125, 50, 0.08)",
+                                      },
+                                    }}
+                                    onClick={() =>
+                                      onVerDetallePedido(destino)
+                                    }
+                                  >
+                                    Ver Detalle
+                                  </Button>
+                                </Box>
+                              </Stack>
+                            </Paper>
+                          </ListItem>
+                          {index < destinosEntregados.length - 1 && (
+                            <Divider />
+                          )}
+                        </Box>
+                      ))}
+                    </List>
                   </Box>
-                ))}
-              </>
+                </AccordionDetails>
+              </Accordion>
             )}
-          </List>
+          </Box>
         </CardContent>
       </Card>
     </>

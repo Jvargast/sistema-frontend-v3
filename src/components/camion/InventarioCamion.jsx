@@ -68,10 +68,14 @@ const InventarioCamion = forwardRef(({ id_camion }, ref) => {
     >
       <CardHeader
         title="Inventario del Camión"
-        titleTypographyProps={{
-          fontSize: { xs: "0.95rem", sm: "1.1rem", md: "1.18rem" },
-          fontWeight: "bold",
-          color: theme.palette.primary.main,
+        slotProps={{
+          title: {
+            sx: {
+              fontSize: { xs: "0.95rem", sm: "1.1rem", md: "1.18rem" },
+              fontWeight: "bold",
+              color: theme.palette.primary.main,
+            },
+          },
         }}
         sx={{
           backgroundColor:

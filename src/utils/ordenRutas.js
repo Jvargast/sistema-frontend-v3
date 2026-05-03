@@ -1,7 +1,8 @@
 import {
-  buildFallbackRoutePath,
+  buildFallbackRouteSegments,
   computeGoogleRoute,
   isValidRoutePoint,
+  mergeRoutePaths,
 } from "./googleRoutesApi";
 
 const PRIORIDAD_RANK = {
@@ -44,21 +45,40 @@ export async function ordenarDestinosConGoogle(destinos, origen) {
   }
 
   const destination = destinosValidos[destinosValidos.length - 1];
-  const intermediates = destinosValidos.slice(0, -1);
-  const result = await computeGoogleRoute({
+  const firstDestination = destinosValidos[0];
+  const remainingDestinations = destinosValidos.slice(1);
+  const fallbackSegments = buildFallbackRouteSegments(origen, destinosValidos);
+
+  const currentLegResult = await computeGoogleRoute({
     origin: origen,
-    destination,
-    intermediates,
+    destination: firstDestination,
     optimizeWaypointOrder: false,
   });
+  const currentLegPath = currentLegResult.path.length
+    ? currentLegResult.path
+    : fallbackSegments.currentLegPath;
+
+  let futureLegPath = [];
+  if (remainingDestinations.length > 0) {
+    const futureResult = await computeGoogleRoute({
+      origin: firstDestination,
+      destination,
+      intermediates: remainingDestinations.slice(0, -1),
+      optimizeWaypointOrder: false,
+    });
+
+    futureLegPath = futureResult.path.length
+      ? futureResult.path
+      : fallbackSegments.futureLegPath;
+  }
 
   const reordenados = destinosValidos;
+  const routePath = mergeRoutePaths(currentLegPath, futureLegPath);
 
   return {
     ordenados: [...reordenados, ...destinosInvalidos],
-    routePath:
-      result.path.length > 0
-        ? result.path
-        : buildFallbackRoutePath([origen, ...reordenados]),
+    currentLegPath,
+    futureLegPath,
+    routePath: routePath.length ? routePath : fallbackSegments.routePath,
   };
 }

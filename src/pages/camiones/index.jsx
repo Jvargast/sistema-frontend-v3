@@ -374,10 +374,14 @@ const CamionesManagement = () => {
         ) : (
           <Box
             sx={{
-              display: "flex",
-              flexWrap: "wrap",
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "minmax(0, 1fr)",
+                sm: "repeat(auto-fit, minmax(320px, 420px))",
+              },
               justifyContent: "center",
-              gap: 3,
+              alignItems: "stretch",
+              gap: { xs: 2, md: 2.5 },
               mt: 2,
             }}
           >
@@ -385,14 +389,9 @@ const CamionesManagement = () => {
               <Box
                 key={camion.id_camion}
                 sx={{
-                  flex: "1 1 330px",
-                  maxWidth: "440px",
-                  minWidth: "300px",
                   width: "100%",
-                  transition: "transform 0.18s",
-                  "&:hover": {
-                    transform: "translateY(-2px) scale(1.015)",
-                  },
+                  minWidth: 0,
+                  height: "100%",
                 }}
               >
                 <CamionCard

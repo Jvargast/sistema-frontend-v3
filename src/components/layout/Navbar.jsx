@@ -39,6 +39,65 @@ const rolColors = {
   default: "#ECEFF1"
 };
 
+const parseNotificationData = (datos) => {
+  if (!datos) return {};
+  if (typeof datos === "string") {
+    try {
+      return JSON.parse(datos);
+    } catch {
+      return {};
+    }
+  }
+  return typeof datos === "object" ? datos : {};
+};
+
+const getPedidoIdFromNotification = (notif) => {
+  const datos = parseNotificationData(notif?.datos_adicionales);
+  const idDesdeMensaje = String(notif?.mensaje || "").match(
+    /pedido\s*#?\s*(\d+)/i
+  )?.[1];
+
+  return (
+    datos?.id_pedido ??
+    datos?.pedido_id ??
+    datos?.idPedido ??
+    datos?.pedidoId ??
+    datos?.pedido?.id_pedido ??
+    datos?.pedido?.id ??
+    datos?.entrega?.id_pedido ??
+    datos?.entrega?.pedido_id ??
+    notif?.id_pedido ??
+    notif?.pedido_id ??
+    notif?.idPedido ??
+    notif?.pedidoId ??
+    notif?.pedido?.id_pedido ??
+    notif?.pedido?.id ??
+    notif?.entrega?.id_pedido ??
+    idDesdeMensaje
+  );
+};
+
+const getAgendaViajeIdFromNotification = (notif) => {
+  const datos = parseNotificationData(notif?.datos_adicionales);
+  return (
+    datos?.id_agenda_viaje ??
+    datos?.agenda_viaje_id ??
+    datos?.idAgendaViaje ??
+    datos?.agendaViajeId ??
+    datos?.agenda?.id_agenda_viaje ??
+    datos?.agenda?.id ??
+    datos?.viaje?.id_agenda_viaje ??
+    datos?.viaje?.id ??
+    notif?.id_agenda_viaje ??
+    notif?.agenda_viaje_id ??
+    notif?.idAgendaViaje ??
+    notif?.agendaViajeId ??
+    notif?.agenda?.id_agenda_viaje ??
+    notif?.agenda?.id ??
+    notif?.viaje?.id_agenda_viaje
+  );
+};
+
 const Navbar = ({ user, rol, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -139,15 +198,31 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
       case "entrega_realizada":
         navigate("/entregas");
         break;
-      case "viaje_finalizado":
-        if (notif?.datos_adicionales?.id_agenda_viaje) {
-          navigate(
-            `/admin/viajes/ver/${notif.datos_adicionales.id_agenda_viaje}`
-          );
+      case "pedido_entregado":
+      case "entrega_registrada": {
+        const idPedido = getPedidoIdFromNotification(notif);
+        const idAgendaViaje = getAgendaViajeIdFromNotification(notif);
+
+        if (idPedido) {
+          navigate(`/admin-pedidos/ver/${idPedido}`, {
+            state: { from: "/admin-pedidos" }
+          });
+        } else if (idAgendaViaje) {
+          navigate(`/admin/viajes/ver/${idAgendaViaje}`);
+        } else {
+          navigate("/admin-pedidos");
+        }
+        break;
+      }
+      case "viaje_finalizado": {
+        const idAgendaViaje = getAgendaViajeIdFromNotification(notif);
+        if (idAgendaViaje) {
+          navigate(`/admin/viajes/ver/${idAgendaViaje}`);
         } else {
           navigate("/admin/viajes");
         }
         break;
+      }
 
       default:
         console.warn("🔔 Tipo de notificación no manejado:", notif.tipo);

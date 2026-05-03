@@ -1,4 +1,5 @@
 import { Alert, Paper } from "@mui/material";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import PropTypes from "prop-types";
 import { useEffect } from "react";
 import Box from "../common/CompatBox";
@@ -14,14 +15,16 @@ const CapacidadCargaCamion = ({
   onValidezCambio,
 }) => {
   const cantidadTotalProductosReservados = productosReservados.reduce(
-    (total, prod) => total + prod.cantidad,
+    (total, prod) => total + (Number(prod.cantidad) || 0),
     0
   );
 
   const espacioUsadoActual = reservadosRetornables + disponibles + retorno;
 
-  const espaciosDisponiblesParaRetornables =
-    capacidadTotal - espacioUsadoActual - cantidadTotalProductosReservados;
+  const espaciosDisponiblesParaRetornables = Math.max(
+    0,
+    capacidadTotal - espacioUsadoActual - cantidadTotalProductosReservados
+  );
 
   const productosRetornables = productos.filter(
     (p) => p.es_retornable && Number(p.cantidad) > 0
@@ -40,25 +43,27 @@ const CapacidadCargaCamion = ({
     cantidadProductosRetornables > espaciosDisponiblesParaRetornables;
 
   const sinEspacio = espaciosDisponiblesParaRetornables <= 0;
+  const hayProductosAdicionales = cantidadProductosRetornables > 0;
 
   useEffect(() => {
-    const esValido =
-      !cantidadNegativa && !excedeEspaciosDisponibles && !sinEspacio;
+    const esValido = !cantidadNegativa && !excedeEspaciosDisponibles;
     onValidezCambio(esValido);
   }, [
     cantidadNegativa,
     excedeEspaciosDisponibles,
-    sinEspacio,
     onValidezCambio,
   ]);
 
   return (
     <Paper
+      elevation={0}
       sx={{
         p: { xs: 2, sm: 3 },
         borderRadius: 2,
         textAlign: "center",
-        boxShadow: 2,
+        boxShadow: "none",
+        border: "1px solid",
+        borderColor: "divider",
       }}
     >
       <Box display="flex" alignItems="center" gap={1.5} mb={3} px={1}>
@@ -72,12 +77,11 @@ const CapacidadCargaCamion = ({
             alignItems: "center",
             justifyContent: "center",
             color: "#fff",
-            fontSize: 22,
             fontWeight: "bold",
-            boxShadow: 2,
+            boxShadow: "none",
           }}
         >
-          📦
+          <Inventory2OutlinedIcon fontSize="small" />
         </Box>
         <Typography
           variant="h6"
@@ -180,21 +184,25 @@ const CapacidadCargaCamion = ({
       {/* Mensajes claros según la validación */}
       {cantidadNegativa && (
         <Alert severity="error" sx={{ mt: 2 }}>
-          ❌ Error: Cantidades negativas no permitidas.
+          Las cantidades negativas no están permitidas.
         </Alert>
       )}
-      {sinEspacio ? (
+      {sinEspacio && !hayProductosAdicionales ? (
+        <Alert severity="info" sx={{ mt: 2, fontWeight: "bold" }}>
+          No quedan espacios para productos adicionales; puedes continuar solo
+          con los pedidos ya reservados.
+        </Alert>
+      ) : sinEspacio ? (
         <Alert severity="warning" sx={{ mt: 2, fontWeight: "bold" }}>
-          ⚠️ ¡No hay espacio disponible en el camión para retornables!
+          No hay espacio disponible en el camión para retornables.
         </Alert>
       ) : excedeEspaciosDisponibles ? (
         <Alert severity="error" sx={{ mt: 2, fontWeight: "bold" }}>
-          ❌ ¡No hay suficiente espacio para los productos retornables
-          seleccionados!
+          No hay suficiente espacio para los productos retornables seleccionados.
         </Alert>
       ) : (
         <Alert severity="success" sx={{ mt: 2, fontWeight: "bold" }}>
-          ✅ ¡Todo bien! Puedes cargar estos productos retornables.
+          Todo bien. Puedes cargar estos productos retornables.
         </Alert>
       )}
     </Paper>

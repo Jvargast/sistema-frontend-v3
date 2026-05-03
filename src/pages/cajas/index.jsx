@@ -8,10 +8,14 @@ import {
   Chip,
   IconButton,
   Tab,
+  Tooltip,
   useTheme,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { useGetAllCajasQuery } from "../../store/services/cajaApi";
+import {
+  useGetAllCajasQuery,
+  useUpdateCajaMutation,
+} from "../../store/services/cajaApi";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import AsignarUsuarioModal from "../../components/caja/AsignarUsuarioModal";
 import DetalleCajaModal from "../../components/caja/DetalleCajaModal";
@@ -22,12 +26,16 @@ import {
   Add,
   InfoOutlined,
   PersonAddAltOutlined,
+  PersonRemoveAlt1Outlined,
   PointOfSale,
   StorefrontOutlined,
   VisibilityOutlined,
 } from "@mui/icons-material";
 import MovimientosCajaList from "../../components/caja/MovimientosCajaList";
 import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
+import { useDispatch } from "react-redux";
+import AlertDialog from "../../components/common/AlertDialog";
+import { showNotification } from "../../store/reducers/notificacionSlice";
 import TextField from "../../components/common/CompatTextField";
 import Box from "../../components/common/CompatBox";
 import Typography from "../../components/common/CompatTypography";
@@ -75,11 +83,17 @@ const getEstadoMeta = (estado, theme) => {
 
 const formatAssignedUser = (caja) => {
   const usuario = caja?.usuarioAsignado;
-  if (!usuario) return "No asignado";
+  if (!usuario) {
+    return caja?.usuario_asignado ? `Usuario ${caja.usuario_asignado}` : "No asignado";
+  }
 
   const rol = usuario?.rol?.nombre || usuario?.rol;
-  return `${usuario.nombre || "Usuario"}${rol ? ` - ${rol}` : ""}`;
+  const nombre = `${usuario.nombre || ""} ${usuario.apellido || ""}`.trim();
+  return `${nombre || "Usuario"}${rol ? ` - ${rol}` : ""}`;
 };
+
+const hasAssignedUser = (caja) =>
+  Boolean(caja?.usuario_asignado || caja?.usuarioAsignado);
 
 const actionButtonSx = (theme, variant = "primary") => ({
   borderRadius: 1,
@@ -107,10 +121,13 @@ const actionButtonSx = (theme, variant = "primary") => ({
 
 const ListarCajas = () => {
   const theme = useTheme();
+  const dispatch = useDispatch();
   const { data: cajasData, isLoading, error, refetch } = useGetAllCajasQuery();
+  const [updateCaja, { isLoading: isUnassigning }] = useUpdateCajaMutation();
   const [selectedCaja, setSelectedCaja] = useState(null);
   const [detalleCajaId, setDetalleCajaId] = useState(null);
   const [movimientosCajaId, setMovimientosCajaId] = useState(null);
+  const [cajaParaDesasignar, setCajaParaDesasignar] = useState(null);
   const [search, setSearch] = useState("");
   const [openCrearCajaModal, setOpenCrearCajaModal] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
@@ -132,6 +149,39 @@ const ListarCajas = () => {
       String(caja?.estado || "").toLowerCase().includes(term)
     );
   });
+
+  const handleDesasignarUsuario = async () => {
+    if (!cajaParaDesasignar?.id_caja) return;
+
+    try {
+      await updateCaja({
+        id: cajaParaDesasignar.id_caja,
+        updatedCaja: { usuario_asignado: null },
+      }).unwrap();
+
+      dispatch(
+        showNotification({
+          message: `Usuario removido de la caja #${cajaParaDesasignar.id_caja}`,
+          severity: "success",
+        })
+      );
+      setCajaParaDesasignar(null);
+      setSelectedCaja((prev) =>
+        prev?.id_caja === cajaParaDesasignar.id_caja ? null : prev
+      );
+      await refetch();
+    } catch (err) {
+      dispatch(
+        showNotification({
+          message:
+            err?.data?.message ||
+            err?.data?.error ||
+            "No se pudo quitar el usuario asignado.",
+          severity: "error",
+        })
+      );
+    }
+  };
 
   if (isLoading) return <LoaderComponent />;
   if (error) return <Typography>Error al cargar las cajas.</Typography>;
@@ -279,11 +329,16 @@ const ListarCajas = () => {
                         </Box>
                       </Box>
 
-                      <Box display="flex" gap={1} sx={{ minWidth: 0 }}>
+                      <Box
+                      display="flex"
+                      alignItems="flex-start"
+                      gap={1}
+                      sx={{ minWidth: 0 }}>
+
                         <PersonAddAltOutlined
                         fontSize="small"
                         sx={{ color: "text.secondary", mt: 0.15 }} />
-                        <Box sx={{ minWidth: 0 }}>
+                        <Box sx={{ minWidth: 0, flex: 1 }}>
                           <Typography variant="caption" color="text.secondary">
                             Usuario asignado
                           </Typography>
@@ -291,6 +346,25 @@ const ListarCajas = () => {
                             {formatAssignedUser(caja)}
                           </Typography>
                         </Box>
+                        {hasAssignedUser(caja) &&
+                        <Tooltip title="Quitar usuario asignado">
+                            <span>
+                              <IconButton
+                            size="small"
+                            aria-label="Quitar usuario asignado"
+                            disabled={isUnassigning}
+                            onClick={() => setCajaParaDesasignar(caja)}
+                            sx={getActionIconButtonSx(theme, "error", {
+                              width: 30,
+                              height: 30,
+                              minWidth: 30
+                            })}>
+
+                                <PersonRemoveAlt1Outlined fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        }
                       </Box>
 
                       <Typography variant="caption" color="text.secondary">
@@ -378,6 +452,20 @@ const ListarCajas = () => {
         onClose={() => setMovimientosCajaId(null)} />
 
       }
+
+      <AlertDialog
+        openAlert={Boolean(cajaParaDesasignar)}
+        onCloseAlert={() => setCajaParaDesasignar(null)}
+        onConfirm={handleDesasignarUsuario}
+        confirmLoading={isUnassigning}
+        confirmLabel="Quitar usuario"
+        confirmLoadingLabel="Quitando..."
+        title="Quitar usuario de caja"
+        message={
+        cajaParaDesasignar ?
+        `¿Quieres quitar a ${formatAssignedUser(cajaParaDesasignar)} de la caja #${cajaParaDesasignar.id_caja}?` :
+        ""
+        } />
     </Box>);
 
 };

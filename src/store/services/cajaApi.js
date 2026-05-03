@@ -113,7 +113,7 @@ export const cajaApi = createApi({
         method: "PUT",
         body: updatedCaja,
       }),
-      invalidatesTags: ["Caja"],
+      invalidatesTags: ["Caja", "CajaUsuario", { type: "Caja", id: "estado" }],
     }),
 
     deleteCaja: builder.mutation({

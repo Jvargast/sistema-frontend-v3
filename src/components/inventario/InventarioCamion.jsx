@@ -1,4 +1,5 @@
 import { Paper, useMediaQuery, Tooltip, ToggleButtonGroup, ToggleButton, Chip } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -6,6 +7,52 @@ import Box from "../common/CompatBox";
 import Typography from "../common/CompatTypography";
 
 const MotionBox = motion.create(Box);
+
+const inventoryColors = {
+  capacidad: "#475569",
+  reservadoRetornable: "#F59E0B",
+  reservadoNoRetornable: "#8B5CF6",
+  disponible: "#16A34A",
+  retorno: "#2563EB",
+  vacio: "#94A3B8",
+  reservadoParaCarga: "#EF4444",
+  cargarAhora: "#0097A7",
+  default: "#64748B",
+};
+
+const statusChipSx = (color) => (theme) => ({
+  bgcolor: alpha(color, theme.palette.mode === "dark" ? 0.18 : 0.11),
+  color: theme.palette.mode === "dark" ? theme.palette.common.white : color,
+  border: 0,
+  fontWeight: 800,
+  borderRadius: 1,
+  boxShadow: "none",
+  "& .MuiChip-label": {
+    px: 1,
+  },
+});
+
+const metricChipSx = (color) => (theme) => ({
+  ...statusChipSx(color)(theme),
+  minWidth: { xs: "auto", sm: 158 },
+  justifyContent: "center",
+});
+
+const statusDotSx = (color) => (theme) => ({
+  width: 9,
+  height: 9,
+  borderRadius: "50%",
+  bgcolor: color,
+  boxShadow: `0 0 0 3px ${alpha(color, theme.palette.mode === "dark" ? 0.18 : 0.12)}`,
+});
+
+const chipWithDotSx = (color) => (theme) => ({
+  ...statusChipSx(color)(theme),
+  "& .MuiChip-icon": {
+    ml: 1,
+    mr: -0.35,
+  },
+});
 
 const InventarioCamion = ({
   inventarioData,
@@ -118,7 +165,7 @@ const InventarioCamion = ({
       ...arrayReservadosCarga,
     ];
 
-    // 🔁 CAMBIO: tampoco usamos "orden" aquí
+    
     const usados = bloquesBase.length;
     const faltantes = Math.max(capacidad_total - usados, 0);
 
@@ -134,107 +181,127 @@ const InventarioCamion = ({
   const getColor = (tipo) => {
     switch (tipo) {
       case "ReservadoRetornable":
-        return "orange";
+        return inventoryColors.reservadoRetornable;
       case "ReservadoNoRetornable":
-        return "purple";
+        return inventoryColors.reservadoNoRetornable;
       case "Disponible":
-        return "green";
+        return inventoryColors.disponible;
       case "Retorno":
-        return "blue";
+        return inventoryColors.retorno;
       case "ReservadoParaCarga":
-        return "#e57373";
+        return inventoryColors.reservadoParaCarga;
       case "Vacío":
-        return "lightgray";
+        return inventoryColors.vacio;
       case "ACargarAhora":
-        return "#0097a7";
+        return inventoryColors.cargarAhora;
       default:
-        return "gray";
+        return inventoryColors.default;
     }
   };
 
+  const legendItems = [
+    {
+      label: "Reservado retornable",
+      value: reservados_retornables,
+      color: inventoryColors.reservadoRetornable,
+    },
+    {
+      label: "Reservado no retornable",
+      value: reservados_no_retornables,
+      color: inventoryColors.reservadoNoRetornable,
+    },
+    {
+      label: "Disponible",
+      value: disponibles,
+      color: inventoryColors.disponible,
+    },
+    {
+      label: "Retorno",
+      value: retorno,
+      color: inventoryColors.retorno,
+    },
+    ...(modo === "simulacion"
+      ? [
+          {
+            label: "A cargar proyectado",
+            value: espaciosReservadosProyectados,
+            color: inventoryColors.reservadoParaCarga,
+          },
+        ]
+      : []),
+    {
+      label: "Vacío",
+      value: vaciosCalculados,
+      color: inventoryColors.vacio,
+    },
+    ...(modo === "simulacion"
+      ? [
+          {
+            label: "Retornables a cargar ahora",
+            value: retornablesACargarAhora,
+            color: inventoryColors.cargarAhora,
+          },
+        ]
+      : []),
+  ];
+
   return (
     <Paper
+      elevation={0}
       sx={{
-        p: 2,
-        borderRadius: 2,
+        p: 0,
+        borderRadius: 0,
         textAlign: "center",
-        mt: 2,
+        mt: 0,
         overflowX: "auto",
+        bgcolor: "transparent",
+        boxShadow: "none",
       }}
     >
-      {/* HEADER */}
       <Box
         display="flex"
         alignItems="center"
-        justifyContent="space-between"
+        justifyContent="flex-end"
         flexWrap="wrap"
         mb={2}
-        px={1}
-        gap={1.5}
+        gap={1}
       >
-        <Box display="flex" alignItems="center" gap={1}>
-          <Box
-            sx={{
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              backgroundColor: "primary.main",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              fontWeight: "bold",
-              fontSize: 18,
-              boxShadow: 2,
-            }}
-          >
-            🚛
-          </Box>
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            sx={{
-              color: "text.primary",
-              fontSize: { xs: "1.05rem", sm: "1.25rem" },
-              letterSpacing: 0.5,
-            }}
-          >
-            Inventario del Camión
-          </Typography>
-        </Box>
-
         <Box
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
-            alignItems: { xs: "flex-start", sm: "center" },
+            flexDirection: { xs: "row" },
+            alignItems: "center",
+            justifyContent: { xs: "space-between", sm: "flex-end" },
             gap: 1,
+            flexWrap: "wrap",
+            width: "100%",
           }}
         >
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-              fontStyle: "italic",
-            }}
-          >
-            Capacidad total:{" "}
-            <Typography
-              component="span"
-              color="primary"
-              fontWeight="bold"
-              sx={{ fontStyle: "normal" }}
-            >
-              {capacidad_total} espacios
-            </Typography>
-          </Typography>
+          <Chip
+            label={`Capacidad total: ${capacidad_total} espacios`}
+            size="small"
+            icon={<Box component="span" sx={statusDotSx(inventoryColors.capacidad)} />}
+            sx={(theme) => ({
+              ...metricChipSx(inventoryColors.capacidad)(theme),
+              "& .MuiChip-icon": {
+                ml: 1,
+                mr: -0.35,
+              },
+            })}
+          />
 
-          {/* 🔹 NUEVO: Toggle de vista */}
           <ToggleButtonGroup
             value={vista}
             exclusive
             size="small"
             onChange={(_, v) => v && setVista(v)}
+            sx={{
+              ml: { sm: "auto" },
+              "& .MuiToggleButton-root": {
+                textTransform: "none",
+                whiteSpace: "nowrap",
+              },
+            }}
           >
             <ToggleButton value="slots">Por espacios</ToggleButton>
             <ToggleButton value="productos">Por producto</ToggleButton>
@@ -242,13 +309,12 @@ const InventarioCamion = ({
         </Box>
       </Box>
 
-      {/* ========== VISTA POR ESPACIOS (SLOTS) ========== */}
       {vista === "slots" && (
         <Box
           sx={{
-            borderRadius: 3,
-            border: "2px dashed rgba(0,0,0,0.12)",
-            p: 2,
+            borderRadius: 2,
+            border: "2px dashed rgba(100, 116, 139, 0.28)",
+            p: { xs: 1.25, sm: 2 },
             backgroundColor: "background.paper",
           }}
         >
@@ -259,7 +325,6 @@ const InventarioCamion = ({
             justifyContent="center"
           >
             {espaciosCamion.map((item, index) => {
-              // 🔁 CAMBIO: numeración secuencial global
               const slotNumber = index + 1;
               const prefix = (
                 item.nombre_producto?.slice(0, 2) || item.tipo.charAt(0)
@@ -373,29 +438,17 @@ const InventarioCamion = ({
                         <Chip
                           label={`Disp: ${prod.disponible}`}
                           size="small"
-                          sx={{
-                            bgcolor: "rgba(76,175,80,0.12)",
-                            color: "green",
-                            fontWeight: 600,
-                          }}
+                          sx={statusChipSx(inventoryColors.disponible)}
                         />
                         <Chip
                           label={`Retorno: ${prod.retorno}`}
                           size="small"
-                          sx={{
-                            bgcolor: "rgba(33,150,243,0.12)",
-                            color: "blue",
-                            fontWeight: 600,
-                          }}
+                          sx={statusChipSx(inventoryColors.retorno)}
                         />
                         <Chip
                           label={`Reservado: ${prod.reservado}`}
                           size="small"
-                          sx={{
-                            bgcolor: "rgba(255,152,0,0.12)",
-                            color: "orange",
-                            fontWeight: 600,
-                          }}
+                          sx={statusChipSx(inventoryColors.reservadoRetornable)}
                         />
                       </>
                     )}
@@ -404,11 +457,7 @@ const InventarioCamion = ({
                       <Chip
                         label={`No Ret.: ${prod.reservadoNoRetornable}`}
                         size="small"
-                        sx={{
-                          bgcolor: "rgba(156,39,176,0.12)",
-                          color: "purple",
-                          fontWeight: 600,
-                        }}
+                        sx={statusChipSx(inventoryColors.reservadoNoRetornable)}
                       />
                     )}
                   </Box>
@@ -424,45 +473,17 @@ const InventarioCamion = ({
         display="flex"
         justifyContent="center"
         flexWrap="wrap"
-        gap={2}
+        gap={1}
       >
-        <Typography variant="body2">
-          <strong style={{ color: "orange" }}>
-            ■ Reservado Retornable: {reservados_retornables}
-          </strong>
-        </Typography>
-        <Typography variant="body2">
-          <strong style={{ color: "purple" }}>
-            ■ Reservado No Retornable: {reservados_no_retornables}
-          </strong>
-        </Typography>
-        <Typography variant="body2">
-          <strong style={{ color: "green" }}>
-            ■ Disponible: {disponibles}
-          </strong>
-        </Typography>
-        <Typography variant="body2">
-          <strong style={{ color: "blue" }}>■ Retorno: {retorno}</strong>
-        </Typography>
-        {modo === "simulacion" && (
-          <Typography variant="body2">
-            <strong style={{ color: "#e57373" }}>
-              ■ A cargar (Proyectado): {espaciosReservadosProyectados}
-            </strong>
-          </Typography>
-        )}
-        <Typography variant="body2">
-          <strong style={{ color: "lightgray" }}>
-            ■ Vacío: {vaciosCalculados}
-          </strong>
-        </Typography>
-        {modo === "simulacion" && (
-          <Typography variant="body2">
-            <strong style={{ color: "#0097a7" }}>
-              ■ Retornables a Cargar Ahora: {retornablesACargarAhora}
-            </strong>
-          </Typography>
-        )}
+        {legendItems.map((item) => (
+          <Chip
+            key={item.label}
+            label={`${item.label}: ${item.value}`}
+            size="small"
+            icon={<Box component="span" sx={statusDotSx(item.color)} />}
+            sx={chipWithDotSx(item.color)}
+          />
+        ))}
       </Box>
     </Paper>
   );
