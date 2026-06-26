@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import { Card, CardContent, CircularProgress, Alert, Divider, Chip } from "@mui/material";
 import { CheckCircle } from "@mui/icons-material";
@@ -9,33 +9,33 @@ import Typography from "../common/CompatTypography";
 
 const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
   const {
-    data: pedidos,
+    currentData: pedidosData,
     isLoading,
     isError,
   } = useGetPedidosConfirmadosQuery(idChofer, {
     skip: !idChofer,
   });
 
-  const [pedidosConfirmados, setPedidosConfirmados] = useState([]);
+  const pedidosConfirmados = useMemo(() => {
+    if (Array.isArray(pedidosData)) return pedidosData;
+    return pedidosData?.data ?? [];
+  }, [pedidosData]);
 
   useEffect(() => {
-    if (pedidos) {
-      setPedidosConfirmados(pedidos);
-      const productosReservadosDetalle = pedidos.flatMap((pedido) =>
-        pedido.productos
-          .filter((prod) => prod.es_retornable)
-          .map((prod) => ({
-            id_pedido: pedido.id_pedido,
-            id_producto: prod.id_producto,
-            nombre_producto: prod.nombre_producto,
-            cantidad: prod.cantidad,
-            es_retornable: prod.es_retornable,
-          }))
-      );
+    const productosReservadosDetalle = pedidosConfirmados.flatMap((pedido) =>
+      (pedido.productos ?? [])
+        .filter((prod) => prod.es_retornable)
+        .map((prod) => ({
+          id_pedido: pedido.id_pedido,
+          id_producto: prod.id_producto,
+          nombre_producto: prod.nombre_producto,
+          cantidad: prod.cantidad,
+          es_retornable: prod.es_retornable,
+        }))
+    );
 
-      setProductosReservados(productosReservadosDetalle);
-    }
-  }, [pedidos, setProductosReservados]);
+    setProductosReservados(productosReservadosDetalle);
+  }, [pedidosConfirmados, setProductosReservados]);
 
   if (!idChofer) return null;
 
@@ -114,7 +114,9 @@ const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
                     overflow: "hidden"
                   }}>
 
-                  {pedido.cliente.direccion}
+                  {pedido.cliente?.direccion ||
+                    pedido.Cliente?.direccion ||
+                    "Dirección no registrada"}
                 </Typography>
 
                 <Divider sx={{ my: 1.2 }} />
@@ -122,7 +124,7 @@ const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
                 <Typography variant="caption" fontWeight={800} color="text.secondary">
                   Productos
                 </Typography>
-                {pedido.productos.map((prod, index) => {
+                {(pedido.productos ?? []).map((prod, index) => {
                   const nombre =
                     prod.nombre_producto ||
                     prod.nombre_insumo ||
@@ -145,7 +147,10 @@ const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
                 <Divider sx={{ my: 1.2 }} />
 
                 <Typography variant="body2" color="text.secondary">
-                  Fecha pedido: {new Date(pedido.fecha_pedido).toLocaleDateString()}
+                  Fecha pedido:{" "}
+                  {pedido.fecha_pedido
+                    ? new Date(pedido.fecha_pedido).toLocaleDateString()
+                    : "Sin fecha"}
                 </Typography>
               </CardContent>
             </Card>

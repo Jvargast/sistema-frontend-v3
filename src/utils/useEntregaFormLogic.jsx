@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { skipToken } from "@reduxjs/toolkit/query";
 import { useCreateEntregaMutation } from "../store/services/entregasApi";
 import { useGetDetalleConTotalQuery } from "../store/services/pedidosApi";
 import { showNotification } from "../store/reducers/notificacionSlice";
@@ -19,8 +20,16 @@ function useEntregaFormLogic({
   const [productosSeleccionados, setProductosSeleccionados] = useState([]);
 
   const [createEntrega, { isLoading }] = useCreateEntregaMutation();
-  const { data: detallePedido } = useGetDetalleConTotalQuery(
-    destino?.id_pedido
+  const {
+    data: detallePedido,
+    isFetching: isDetalleLoading,
+    isError: isDetalleError,
+  } = useGetDetalleConTotalQuery(
+    open && destino?.id_pedido ? destino.id_pedido : skipToken
+  );
+  const montoTotalPedido = useMemo(
+    () => Number(detallePedido?.monto_total) || 0,
+    [detallePedido?.monto_total]
   );
 
   const {
@@ -54,10 +63,14 @@ function useEntregaFormLogic({
   const enviarEntrega = useCallback(
     async (formData, retornables) => {
       try {
+        if (!destino?.id_pedido || !detallePedido?.detalle?.length) {
+          throw new Error("No se pudo cargar el detalle del pedido.");
+        }
+
         const productos_entregados = [];
         const insumo_entregados = [];
 
-        detallePedido?.detalle.forEach((item) => {
+        detallePedido.detalle.forEach((item) => {
           if (item.id_producto) {
             productos_entregados.push({
               id_producto: item.id_producto,
@@ -106,7 +119,7 @@ function useEntregaFormLogic({
           productos_entregados,
           insumo_entregados,
           botellones_retorno: botellonesRetorno,
-          monto_total: detallePedido?.monto_total || 0,
+          monto_total: montoTotalPedido,
           id_metodo_pago:
             destino?.tipo_documento === "factura"
               ? null
@@ -123,7 +136,7 @@ function useEntregaFormLogic({
           pago_recibido: isFactura
             ? null
             : isEfectivo
-            ? detallePedido?.monto_total || 0
+            ? montoTotalPedido
             : null,
         };
 
@@ -151,11 +164,13 @@ function useEntregaFormLogic({
       }
     },
     [
+      clienteTrae,
       createEntrega,
       detallePedido,
       destino,
       id_agenda_viaje,
       dispatch,
+      montoTotalPedido,
       onClose,
       onSuccess,
       reset,
@@ -185,6 +200,9 @@ function useEntregaFormLogic({
     watch,
     reset,
     isLoading,
+    isDetalleLoading,
+    isDetalleError,
+    montoTotalPedido,
     onSubmit,
     clienteTrae,
     setClienteTrae,

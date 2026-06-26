@@ -1,5 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { baseQueryWithReauthEnhanced } from "./fettchQuery"; // tu baseQuery con manejo de reauth
+import { baseQueryWithReauthEnhanced } from "./fettchQuery";
 
 export const agendaCargaApi = createApi({
   reducerPath: "agendaCargaApi",
@@ -19,7 +19,10 @@ export const agendaCargaApi = createApi({
     }),
 
     getAgendaCargaDelDia: builder.query({
-      query: () => `/agendas/agenda/hoy`,
+      query: (params = {}) => ({
+        url: "/agendas/agenda/hoy",
+        params,
+      }),
       providesTags: ["AgendaCarga"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {

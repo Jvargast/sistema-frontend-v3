@@ -23,6 +23,7 @@ const stepBadgeStyles = {
 };
 
 const fieldInputSx = (theme) => ({
+  minWidth: 0,
   bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[900] : "#fff",
   color:
   theme.palette.mode === "dark" ?
@@ -32,9 +33,20 @@ const fieldInputSx = (theme) => ({
   "& .MuiSelect-select": {
     display: "flex",
     alignItems: "center",
+    minWidth: 0,
     minHeight: 24
   }
 });
+
+const selectMenuProps = {
+  disableScrollLock: true,
+  PaperProps: {
+    sx: {
+      maxHeight: 320,
+      maxWidth: "calc(100vw - 32px)"
+    }
+  }
+};
 
 const menuItemSx = {
   alignItems: "center",
@@ -61,10 +73,10 @@ const listItemTextProps = {
 };
 
 const FieldShell = ({ step, title, children }) =>
-  <Box display="flex" flexDirection="column" gap={1}>
-    <Box display="flex" alignItems="center" gap={1}>
+  <Box display="flex" flexDirection="column" gap={1.25} minWidth={0}>
+    <Box display="flex" alignItems="center" gap={1} minWidth={0}>
       <Box sx={stepBadgeStyles}>{step}</Box>
-      <Typography variant="subtitle2" fontWeight={800}>
+      <Typography variant="subtitle2" fontWeight={800} sx={{ lineHeight: 1.25 }}>
         {title}
       </Typography>
     </Box>
@@ -113,7 +125,7 @@ const AgendaCargaFormInputs = ({
       alignItems="center"
       gap={1}
       minWidth={0}
-      sx={{ lineHeight: 1.2 }}>
+      sx={{ width: "100%", lineHeight: 1.2 }}>
 
       {icon}
       <Typography variant="body2" fontWeight={800} noWrap sx={{ lineHeight: 1.2 }}>
@@ -124,7 +136,7 @@ const AgendaCargaFormInputs = ({
 
   return (
     <>
-      <Grid item xs={12} sm={6}>
+      <Grid item xs={12} md={6}>
         <FieldShell step={1} title="Chofer">
           {isChofer ?
           <TextField
@@ -145,7 +157,7 @@ const AgendaCargaFormInputs = ({
 
             }} /> :
 
-          <FormControl fullWidth required disabled={disableChofer} sx={{ minWidth: 200 }}>
+          <FormControl fullWidth required disabled={disableChofer} sx={{ minWidth: 0 }}>
               <InputLabel id="chofer-label">Chofer</InputLabel>
               <Select
               labelId="chofer-label"
@@ -155,6 +167,7 @@ const AgendaCargaFormInputs = ({
               size="small"
               disabled={disableChofer}
               sx={fieldInputSx}
+              MenuProps={selectMenuProps}
               renderValue={() =>
               renderSelectValue({
                 icon: <PersonIcon fontSize="small" sx={{ flex: "0 0 auto" }} />,
@@ -192,9 +205,9 @@ const AgendaCargaFormInputs = ({
         </FieldShell>
       </Grid>
 
-      <Grid item xs={12} sm={6}>
+      <Grid item xs={12} md={6}>
         <FieldShell step={2} title="Camión">
-          <FormControl fullWidth required disabled={disableCamion} sx={{ minWidth: 200 }}>
+          <FormControl fullWidth required disabled={disableCamion} sx={{ minWidth: 0 }}>
             <InputLabel id="camion-label">Camión</InputLabel>
             <Select
               labelId="camion-label"
@@ -204,6 +217,7 @@ const AgendaCargaFormInputs = ({
               size="small"
               disabled={disableCamion}
               sx={fieldInputSx}
+              MenuProps={selectMenuProps}
               renderValue={() =>
               renderSelectValue({
                 icon: (
@@ -262,13 +276,13 @@ const AgendaCargaFormInputs = ({
         </FieldShell>
       </Grid>
 
-      <Grid item xs={12} sm={6}>
+      <Grid item xs={12} md={6}>
         <FieldShell step={3} title="Prioridad">
           <FormControl
             fullWidth
             required
             disabled={disableCargaFields}
-            sx={{ minWidth: 200 }}>
+            sx={{ minWidth: 0 }}>
             <InputLabel id="prioridad-label">Prioridad</InputLabel>
             <Select
               labelId="prioridad-label"
@@ -277,7 +291,8 @@ const AgendaCargaFormInputs = ({
               onChange={(e) => setPrioridad(e.target.value)}
               size="small"
               disabled={disableCargaFields}
-              sx={fieldInputSx}>
+              sx={fieldInputSx}
+              MenuProps={selectMenuProps}>
 
               <MenuItem value="Baja">Baja</MenuItem>
               <MenuItem value="Media">Media</MenuItem>
@@ -290,7 +305,7 @@ const AgendaCargaFormInputs = ({
         </FieldShell>
       </Grid>
 
-      <Grid item xs={12} sm={6}>
+      <Grid item xs={12} md={6}>
         <FieldShell step={4} title="Notas">
           <TextField
             label="Notas"

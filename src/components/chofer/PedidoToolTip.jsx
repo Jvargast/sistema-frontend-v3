@@ -2,6 +2,7 @@ import { Paper, CircularProgress, Divider, Chip } from "@mui/material";
 import { useGetPedidoByIdQuery } from "../../store/services/pedidosApi";
 import PropTypes from "prop-types";
 import Typography from "../common/CompatTypography";
+import { formatCLP } from "../../utils/formatUtils";
 
 const PedidoTooltip = ({ idPedido }) => {
   const { data: pedido, isLoading, isError } = useGetPedidoByIdQuery(idPedido);
@@ -91,9 +92,8 @@ const PedidoTooltip = ({ idPedido }) => {
               sx={{ fontSize: "0.75rem", height: "20px" }}
             />
             <Typography variant="body2">
-              {nombre} ({item.cantidad} x $
-              {Number(item.precio_unitario).toFixed(0)}) = $
-              {Number(item.subtotal).toFixed(0)}
+              {nombre} ({item.cantidad} x {formatCLP(item.precio_unitario)}) ={" "}
+              {formatCLP(item.subtotal)}
             </Typography>
           </div>
         );
@@ -105,7 +105,7 @@ const PedidoTooltip = ({ idPedido }) => {
         variant="subtitle1"
         className="font-semibold text-right text-indigo-700"
       >
-        Total: ${pedido.total}
+        Total: {formatCLP(pedido.total)}
       </Typography>
 
       {pedido.notas && (

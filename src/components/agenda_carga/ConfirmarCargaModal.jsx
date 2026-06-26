@@ -42,13 +42,14 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
   const DEFAULT_ORIGEN = { lat: -27.0675, lng: -70.8189 };
   const [origen, setOrigen] = useState(DEFAULT_ORIGEN);
   const [direccion, setDireccion] = useState("");
+  const agenda = agendaCarga?.data ?? agendaCarga;
 
   const productosAgrupados = useMemo(() => {
-    if (!agendaCarga) return [];
+    if (!agenda?.detallesCarga) return [];
 
     const agrupados = {};
 
-    agendaCarga.data.detallesCarga.forEach((detalle) => {
+    agenda.detallesCarga.forEach((detalle) => {
       const isProducto = detalle.producto?.id_producto !== undefined;
       const id = isProducto ?
       detalle.producto.id_producto :
@@ -90,7 +91,7 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
     });
 
     return Object.values(agrupados);
-  }, [agendaCarga]);
+  }, [agenda]);
 
   const productosCargadosInicial = useMemo(() => {
     const inicial = {};
@@ -115,9 +116,19 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
   };
 
   useEffect(() => {
+    let active = true;
+
     if (origen?.lat && origen?.lng) {
-      reverseGeocode(origen).then(setDireccion);
+      reverseGeocode(origen)
+        .then((value) => {
+          if (active) setDireccion(value);
+        })
+        .catch(() => {});
     }
+
+    return () => {
+      active = false;
+    };
   }, [origen]);
 
   const handleConfirmar = async () => {
@@ -134,7 +145,7 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
 
     try {
       const payload = {
-        id_agenda_carga: agendaCarga.data.id_agenda_carga,
+        id_agenda_carga: agenda.id_agenda_carga,
         productosCargados: Object.entries(productosCargados).map(
           ([key, cantidad]) => {
             const item = productosAgrupados.find(
@@ -189,17 +200,25 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
     }
   };
 
-  if (!agendaCarga) return null;
+  const handleSafeClose = () => {
+    if (isLoading) return;
+    handleClose();
+  };
+
+  if (!agenda) return null;
 
   return (
-    <Modal open={open} onClose={handleClose}>
+    <Modal
+      open={open}
+      onClose={handleSafeClose}
+      disableEscapeKeyDown={isLoading}>
       <Box
         sx={{
-          width: { xs: "100vw", sm: 500, md: 640 },
-          maxWidth: "98vw",
-          maxHeight: { xs: "99vh", sm: "90vh" },
+          width: { xs: "100vw", sm: "min(94vw, 720px)" },
+          maxWidth: { xs: "100vw", sm: "94vw" },
+          maxHeight: { xs: "100dvh", sm: "92dvh" },
           mx: "auto",
-          my: { xs: 1, sm: 4 },
+          my: { xs: 0, sm: 2 },
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -210,9 +229,9 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
         <Paper
           sx={{
             width: "100%",
-            maxWidth: 640,
-            maxHeight: { xs: "99vh", sm: "90vh" },
-            minHeight: 320,
+            maxWidth: 720,
+            maxHeight: { xs: "100dvh", sm: "92dvh" },
+            minHeight: { xs: "100dvh", sm: 320 },
             display: "flex",
             flexDirection: "column",
             bgcolor: "background.paper",
@@ -234,12 +253,17 @@ const ConfirmarCargaModal = ({ open, handleClose, agendaCarga }) => {
             <Typography
               variant="h5"
               fontWeight="bold"
-              textAlign="center"
-              color="text.primary">
+              textAlign="left"
+              color="text.primary"
+              sx={{
+                fontSize: { xs: "1.1rem", sm: "1.5rem" },
+                lineHeight: 1.2,
+                pr: 1
+              }}>
 
               Confirmar Carga del Camión
             </Typography>
-            <IconButton onClick={handleClose} size="small">
+            <IconButton onClick={handleSafeClose} size="small" disabled={isLoading}>
               <CloseIcon />
             </IconButton>
           </Box>

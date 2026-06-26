@@ -54,6 +54,9 @@ const FormularioEntregaModal = ({
     errors,
     watch,
     isLoading,
+    isDetalleLoading,
+    isDetalleError,
+    montoTotalPedido,
     onSubmit,
     clienteTrae,
     setClienteTrae,
@@ -66,12 +69,15 @@ const FormularioEntregaModal = ({
     onSuccess
   });
 
-  const montoFmt = (n) =>
-  typeof n === "number" ?
-  n.toLocaleString("es-CL", { style: "currency", currency: "CLP" }) :
-  "-";
+  const montoFmt = (n) => {
+    const value = Number(n);
+    return Number.isFinite(value) ?
+    value.toLocaleString("es-CL", { style: "currency", currency: "CLP" }) :
+    "-";
+  };
 
   const pagado = Boolean(detallePedido?.pagado);
+  const detalleNoDisponible = isDetalleLoading || isDetalleError || !detallePedido;
 
   return (
     <Dialog
@@ -88,7 +94,6 @@ const FormularioEntregaModal = ({
         }
       }}>
 
-      {/* Header con gradiente e icono */}
       <DialogTitle sx={{ p: 0 }}>
         <Box
           sx={{
@@ -138,7 +143,6 @@ const FormularioEntregaModal = ({
           pb: 0
         }}>
 
-        {/* Resumen pedido */}
         <Paper
           variant="outlined"
           sx={{
@@ -166,8 +170,13 @@ const FormularioEntregaModal = ({
               Monto total del pedido
             </Typography>
             <Typography variant="h6" fontWeight={800}>
-              {montoFmt(detallePedido?.monto_total)}
+              {isDetalleLoading ? "-" : montoFmt(montoTotalPedido)}
             </Typography>
+            {isDetalleError &&
+            <Typography variant="caption" color="error">
+                No se pudo cargar el detalle del pedido.
+              </Typography>
+            }
           </Box>
           <Chip
             label={pagado ? "Pagado" : "Pendiente"}
@@ -178,7 +187,6 @@ const FormularioEntregaModal = ({
 
         </Paper>
 
-        {/* Stepper */}
         <Stepper activeStep={(paso || 1) - 1} alternativeLabel sx={{ mb: 2 }}>
           <Step>
             <StepLabel StepIconComponent={PagoStepIcon}>Pago</StepLabel>
@@ -192,7 +200,6 @@ const FormularioEntregaModal = ({
 
         <Divider sx={{ mb: 2 }} />
 
-        {/* Form */}
         <form id="entrega-form" onSubmit={handleSubmit(onSubmit)}>
           {paso === 1 &&
           <EntregaPagoStep
@@ -216,7 +223,6 @@ const FormularioEntregaModal = ({
         </form>
       </DialogContent>
 
-      {/* Footer pegajoso */}
       <DialogActions
         sx={{
           position: "sticky",
@@ -232,11 +238,12 @@ const FormularioEntregaModal = ({
         </Button>
 
         {paso === 1 && !pagado &&
-        <Button
-          onClick={() => setPaso(2)}
-          variant="contained"
-          endIcon={<ArrowForwardIcon />}
-          sx={{ textTransform: "none", fontWeight: 700 }}>
+          <Button
+            onClick={() => setPaso(2)}
+            variant="contained"
+            endIcon={<ArrowForwardIcon />}
+            disabled={detalleNoDisponible}
+            sx={{ textTransform: "none", fontWeight: 700 }}>
 
             Siguiente
           </Button>
@@ -248,6 +255,7 @@ const FormularioEntregaModal = ({
           form="entrega-form"
           variant="contained"
           loading={isLoading}
+          disabled={detalleNoDisponible}
           loadingIndicator={<CircularProgress size={20} />}
           sx={{ textTransform: "none", fontWeight: 700 }}>
 

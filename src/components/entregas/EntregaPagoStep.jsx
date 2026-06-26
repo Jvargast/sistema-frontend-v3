@@ -3,8 +3,12 @@ import PropTypes from "prop-types";
 import TextField from "../common/CompatTextField";
 import Box from "../common/CompatBox";
 import Typography from "../common/CompatTypography";
+import { formatCLP } from "../../utils/formatUtils";
 
 const EntregaPagoStep = ({ register, errors, detallePedido, watch }) => {
+  const montoTotal = Number(detallePedido?.monto_total) || 0;
+  const metodoPagoSeleccionado = Number(watch("id_metodo_pago") || 1);
+
   return (
     <Paper
       elevation={3}
@@ -36,17 +40,17 @@ const EntregaPagoStep = ({ register, errors, detallePedido, watch }) => {
           <MenuItem value={3}>💳 Tarjeta Crédito</MenuItem>
           <MenuItem value={4}>💳 Tarjeta Débito</MenuItem>
         </TextField>
-        {watch("id_metodo_pago") === 1 && (
+        {metodoPagoSeleccionado === 1 && (
           <TextField
             label="Pago recibido"
             type="number"
             variant="outlined"
             fullWidth
-            defaultValue={detallePedido?.monto_total || 0}
+            defaultValue={montoTotal}
             {...register("pago_recibido", {
               required: "Debe ingresar el monto recibido",
               min: {
-                value: detallePedido?.monto_total || 1,
+                value: montoTotal || 1,
                 message: "El monto recibido no puede ser menor al total",
               },
             })}
@@ -95,7 +99,7 @@ const EntregaPagoStep = ({ register, errors, detallePedido, watch }) => {
         />
       </Box>
 
-      {detallePedido?.monto_total && (
+      {montoTotal > 0 && (
         <Box mt={4} textAlign="right">
           <Typography
             variant="subtitle1"
@@ -104,7 +108,7 @@ const EntregaPagoStep = ({ register, errors, detallePedido, watch }) => {
           >
             Total del Pedido:{" "}
             <span style={{ color: "#007AFF", fontSize: "1.25rem" }}>
-              ${detallePedido.monto_total.toLocaleString()}
+              {formatCLP(montoTotal)}
             </span>
           </Typography>
         </Box>

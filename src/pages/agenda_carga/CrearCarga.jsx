@@ -46,6 +46,16 @@ const agendaSectionSx = {
   boxShadow: "0 1px 2px rgba(2,6,23,0.04)",
 };
 
+const selectMenuProps = {
+  disableScrollLock: true,
+  PaperProps: {
+    sx: {
+      maxHeight: 320,
+      maxWidth: "calc(100vw - 32px)"
+    }
+  }
+};
+
 const AgendaSection = ({ icon, title, subtitle, action, children }) =>
   <Box component="section" sx={agendaSectionSx}>
     <Box
@@ -153,6 +163,7 @@ const CreateAgendaCargaForm = () => {
   } = useGetAgendaCargaDelDiaQuery(agendaArgs, {
     skip: !sucursalReady || !choferReady
   });
+  const agendaCargaActual = agendaCarga?.data;
   const dispatch = useDispatch();
   const choferesArg =
   !isChofer && sucursalReady ?
@@ -493,6 +504,9 @@ const CreateAgendaCargaForm = () => {
     setProductosReservados([]);
     setTabIndex(0);
     setIdChofer(isChofer ? rutAuth : "");
+    setOpenModal(false);
+    setOpenNoCajaModal(false);
+    setOpenNoUsuarioCamionModal(false);
   }, [sucursalId, isChofer, rutAuth]);
 
   useEffect(() => {
@@ -503,7 +517,18 @@ const CreateAgendaCargaForm = () => {
     setPrioridad("Media");
     setNotas("");
     setDescargarRetornables(false);
+    setOpenModal(false);
+    setOpenNoUsuarioCamionModal(false);
   }, [idChofer]);
+
+  useEffect(() => {
+    if (
+    openModal &&
+    (!agendaCargaActual || agendaCargaActual.validada_por_chofer !== false))
+    {
+      setOpenModal(false);
+    }
+  }, [openModal, agendaCargaActual]);
 
   useEffect(() => {
     if (idChofer && !loadingCaja && cajaAsignada?.asignada === false) {
@@ -807,8 +832,8 @@ const CreateAgendaCargaForm = () => {
   !loadingAgenda &&
   (isChofer || !isChofer && idChofer) &&
   !isError &&
-  agendaCarga &&
-  agendaCarga?.data?.validada_por_chofer === false;
+  agendaCargaActual &&
+  agendaCargaActual.validada_por_chofer === false;
 
   const submitDisabled =
   loadingCreate ||
@@ -922,6 +947,7 @@ const CreateAgendaCargaForm = () => {
               }
               value={String(sucursalFiltro)}
               onChange={(e) => setSucursalFiltro(e.target.value)}
+              MenuProps={selectMenuProps}
               sx={{
                 borderRadius: 1.5,
                 "& .MuiSelect-select": {
@@ -998,9 +1024,9 @@ const CreateAgendaCargaForm = () => {
             <Typography variant="subtitle2" fontWeight={800}>
               Hay una agenda pendiente para hoy
             </Typography>
-            {agendaCarga?.data?.fecha_hora &&
+            {agendaCargaActual?.fecha_hora &&
             <Typography variant="body2" color="text.secondary">
-                Agenda del día: {convertirFechaLocal(agendaCarga.data.fecha_hora)}
+                Agenda del día: {convertirFechaLocal(agendaCargaActual.fecha_hora)}
               </Typography>
             }
           </Box>
@@ -1231,7 +1257,7 @@ const CreateAgendaCargaForm = () => {
       <ConfirmarCargaModal
         open={openModal}
         handleClose={() => setOpenModal(false)}
-        agendaCarga={agendaCarga} />
+        agendaCarga={agendaCargaActual} />
 
       <NoCajaAsignadaDialog
         open={openNoCajaModal}
