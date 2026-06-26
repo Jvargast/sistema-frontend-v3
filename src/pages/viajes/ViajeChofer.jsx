@@ -196,7 +196,6 @@ const ViajeChofer = ({ viaje }) => {
     },
     [refetchEntregas, refetchInventario]
   );
-  // Refs
   const isMounted = useRef(false);
   const isInventarioReady = useRef(false);
   const isEntregasReady = useRef(false);
@@ -204,7 +203,6 @@ const ViajeChofer = ({ viaje }) => {
   const refetchEntregasRef = useRef(null);
   const fabRef = useRef(null);
 
-  // Montaje
   useEffect(() => {
     isMounted.current = true;
     return () => {
@@ -212,7 +210,6 @@ const ViajeChofer = ({ viaje }) => {
     };
   }, []);
 
-  // Guardar refs
   useEffect(() => {
     if (refetchInventario) {
       refetchInventarioRef.current = refetchInventario;
@@ -227,7 +224,6 @@ const ViajeChofer = ({ viaje }) => {
     }
   }, [refetchEntregas]);
 
-  // Listener WebSocket
   useEffect(() => {
     const refrescarDatos = () => {
       console.log("🔄 Refetch ejecutado en ViajeChofer");

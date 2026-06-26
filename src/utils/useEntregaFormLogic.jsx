@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { skipToken } from "@reduxjs/toolkit/query";
@@ -18,6 +18,7 @@ function useEntregaFormLogic({
   const [paso, setPaso] = useState(1);
   const [clienteTrae, setClienteTrae] = useState(true);
   const [productosSeleccionados, setProductosSeleccionados] = useState([]);
+  const submittingRef = useRef(false);
 
   const [createEntrega, { isLoading }] = useCreateEntregaMutation();
   const {
@@ -62,6 +63,9 @@ function useEntregaFormLogic({
 
   const enviarEntrega = useCallback(
     async (formData, retornables) => {
+      if (submittingRef.current) return;
+      submittingRef.current = true;
+
       try {
         if (!destino?.id_pedido || !detallePedido?.detalle?.length) {
           throw new Error("No se pudo cargar el detalle del pedido.");
@@ -161,6 +165,8 @@ function useEntregaFormLogic({
             severity: "error",
           })
         );
+      } finally {
+        submittingRef.current = false;
       }
     },
     [

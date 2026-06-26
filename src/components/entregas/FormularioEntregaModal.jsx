@@ -82,7 +82,7 @@ const FormularioEntregaModal = ({
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={isLoading ? undefined : onClose}
       fullWidth
       maxWidth="sm"
       keepMounted
@@ -126,6 +126,7 @@ const FormularioEntregaModal = ({
 
           <IconButton
             onClick={onClose}
+            disabled={isLoading}
             size="small"
             sx={{
               color: "#fff",
@@ -233,7 +234,11 @@ const FormularioEntregaModal = ({
           px: 2
         }}>
 
-        <Button onClick={onClose} sx={{ textTransform: "none" }}>
+        <Button
+          onClick={onClose}
+          disabled={isLoading}
+          sx={{ textTransform: "none" }}
+        >
           Cancelar
         </Button>
 
@@ -255,7 +260,7 @@ const FormularioEntregaModal = ({
           form="entrega-form"
           variant="contained"
           loading={isLoading}
-          disabled={detalleNoDisponible}
+          disabled={detalleNoDisponible || isLoading}
           loadingIndicator={<CircularProgress size={20} />}
           sx={{ textTransform: "none", fontWeight: 700 }}>
 

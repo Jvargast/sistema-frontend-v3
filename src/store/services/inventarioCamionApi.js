@@ -10,7 +10,10 @@ export const inventarioCamionApi = createApi({
       query: (id_camion) => ({
         url: `/inventario-camion/disponible/${id_camion}`,
       }),
-      providesTags: ["InventarioCamion"],
+      providesTags: (result, error, id_camion) => [
+        "InventarioCamion",
+        { type: "InventarioCamion", id: id_camion },
+      ],
     }),
 
     getInventarioDisponiblePorChofer: builder.query({
@@ -24,14 +27,20 @@ export const inventarioCamionApi = createApi({
       query: (id) => ({
         url: `/inventario-camion/${id}`,
       }),
-      providesTags: ["InventarioCamion"],
+      providesTags: (result, error, id) => [
+        "InventarioCamion",
+        { type: "InventarioCamion", id },
+      ],
     }),
 
     getInventarioPorChofer: builder.query({
       query: (id_chofer) => ({
         url: `/inventario-camion/inventario/chofer/${id_chofer}`,
       }),
-      providesTags: ["InventarioCamion"],
+      providesTags: (result, error, id_chofer) => [
+        "InventarioCamion",
+        { type: "InventarioCamion", id: `CHOFER-${id_chofer}` },
+      ],
     }),
 
     getEstadoInventarioCamion: builder.query({
@@ -39,7 +48,8 @@ export const inventarioCamionApi = createApi({
         url: `/inventario-camion/estado/${id_camion}`,
       }),
       providesTags: (result, error, id_camion) => [
-        { type: "Camion", id: id_camion },
+        "InventarioCamion",
+        { type: "InventarioCamion", id: id_camion },
       ],
     }),
 

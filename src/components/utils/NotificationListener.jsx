@@ -13,6 +13,8 @@ import {
 } from "../../utils/playNotificationSound";
 import { vibrateNotification } from "../../utils/vibrateNotification";
 import { entregasApi } from "../../store/services/entregasApi";
+import { inventarioCamionApi } from "../../store/services/inventarioCamionApi";
+import { pedidosApi } from "../../store/services/pedidosApi";
 
 function NotificationListener() {
   const dispatch = useDispatch();
@@ -43,6 +45,7 @@ function NotificationListener() {
           );
           dispatch(
             agendaViajesApi.util.invalidateTags([
+              "AgendaViajes",
               { type: "AgendaViajes", id: idAgenda },
             ])
           );
@@ -50,6 +53,10 @@ function NotificationListener() {
           dispatch(entregasApi.util.invalidateTags(["Entrega"]));
           dispatch(agendaViajesApi.util.invalidateTags(["AgendaViajes"]));
         }
+        dispatch(pedidosApi.util.invalidateTags(["Pedidos"]));
+        dispatch(
+          inventarioCamionApi.util.invalidateTags(["InventarioCamion"])
+        );
       }
       if (data?.tipo === "pedido_confirmado") {
         if (data?.datos_adicionales?.id_agenda_viaje) {
@@ -117,6 +124,8 @@ function NotificationListener() {
         ])
       );
       dispatch(agendaViajesApi.util.invalidateTags(["AgendaViajes"]));
+      dispatch(pedidosApi.util.invalidateTags(["Pedidos"]));
+      dispatch(inventarioCamionApi.util.invalidateTags(["InventarioCamion"]));
       dispatch(
         addNotificacion({
           ...data,

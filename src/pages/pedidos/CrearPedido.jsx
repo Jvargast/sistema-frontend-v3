@@ -364,11 +364,15 @@ const CrearPedido = () => {
       });
     } catch (err) {
       console.error("Error al crear el pedido:", err);
+      const rawMessage =
+        err?.data?.message || err?.data?.error || err.message || "";
+      const message = rawMessage.startsWith("Error al crear pedido")
+        ? rawMessage
+        : `Error al crear pedido: ${rawMessage || "No se pudo crear el pedido"}`;
+
       dispatch(
         showNotification({
-          message: `Error al crear pedido: ${
-          err?.data?.message || err.message}`,
-
+          message,
           severity: "error"
         })
       );

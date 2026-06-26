@@ -1,5 +1,8 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauthEnhanced } from "./fettchQuery";
+import { agendaViajesApi } from "./agendaViajesApi";
+import { inventarioCamionApi } from "./inventarioCamionApi";
+import { pedidosApi } from "./pedidosApi";
 
 export const entregasApi = createApi({
   reducerPath: "entregaApi",
@@ -13,12 +16,21 @@ export const entregasApi = createApi({
         method: "POST",
         body,
       }),
-      invalidatesTags: (result, error, { id_camion }) => [
-        { type: "Inventario", id: id_camion },
-      ],
-      async onQueryStarted(args, { queryFulfilled }) {
+      invalidatesTags: (result, error, { id_agenda_viaje }) =>
+        error
+          ? []
+          : [
+              { type: "Entrega", id: "LIST" },
+              { type: "Entrega", id: `AGENDA-${id_agenda_viaje}` },
+            ],
+      async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
+          dispatch(pedidosApi.util.invalidateTags(["Pedidos"]));
+          dispatch(agendaViajesApi.util.invalidateTags(["AgendaViajes"]));
+          dispatch(
+            inventarioCamionApi.util.invalidateTags(["InventarioCamion"])
+          );
         } catch (error) {
           console.error("Error al registrar la entrega:", error);
         }

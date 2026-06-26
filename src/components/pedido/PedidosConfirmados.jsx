@@ -6,6 +6,23 @@ import { useGetPedidosConfirmadosQuery } from "../../store/services/pedidosApi";
 import Box from "../common/CompatBox";
 import Grid from "../common/CompatGrid";
 import Typography from "../common/CompatTypography";
+import { formatCLP } from "../../utils/formatUtils";
+
+const getSubtotalItem = (item) => {
+  const cantidad = Number(item?.cantidad) || 0;
+  const precioUnitario = Number(item?.precio_unitario) || 0;
+  return Number(item?.subtotal) || cantidad * precioUnitario;
+};
+
+const getTotalPedido = (pedido) => {
+  const total = Number(pedido?.total);
+  if (Number.isFinite(total)) return total;
+
+  return (pedido?.productos ?? []).reduce(
+    (sum, item) => sum + getSubtotalItem(item),
+    0
+  );
+};
 
 const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
   const {
@@ -96,12 +113,22 @@ const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
                   <Typography variant="subtitle2" fontWeight={800}>
                     Pedido #{pedido.id_pedido}
                   </Typography>
-                  <Chip
-                    icon={<CheckCircle />}
-                    label="Confirmado"
-                    size="small"
-                    color="success"
-                    sx={{ fontWeight: 800 }} />
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="flex-end"
+                    gap={0.5}
+                  >
+                    <Chip
+                      icon={<CheckCircle />}
+                      label="Confirmado"
+                      size="small"
+                      color="success"
+                      sx={{ fontWeight: 800 }} />
+                    <Typography variant="subtitle2" fontWeight={900}>
+                      {formatCLP(getTotalPedido(pedido))}
+                    </Typography>
+                  </Box>
                 </Box>
 
                 <Typography
@@ -129,18 +156,44 @@ const PedidosConfirmadosList = ({ idChofer, setProductosReservados }) => {
                     prod.nombre_producto ||
                     prod.nombre_insumo ||
                     "Ítem desconocido";
+                  const subtotal = getSubtotalItem(prod);
+                  const precioUnitario = Number(prod.precio_unitario) || 0;
                   return (
-                    <Typography
-                      variant="body2"
+                    <Box
                       key={index}
                       sx={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
+                        py: 0.35,
                       }}
                     >
-                      {nombre} (x{prod.cantidad})
-                    </Typography>
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="flex-start"
+                        gap={1}
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            minWidth: 0,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {nombre} (x{prod.cantidad})
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          fontWeight={800}
+                          sx={{ flexShrink: 0 }}
+                        >
+                          {formatCLP(subtotal)}
+                        </Typography>
+                      </Box>
+                      <Typography variant="caption" color="text.secondary">
+                        P/U {formatCLP(precioUnitario)}
+                      </Typography>
+                    </Box>
                   );
                 })}
 
