@@ -1,5 +1,6 @@
 import { Button, CircularProgress, useTheme, Divider } from "@mui/material";
 import PropTypes from "prop-types";
+import { primaryActionButtonSx } from "../common/actionStyles";
 import Box from "../common/CompatBox";
 import Typography from "../common/CompatTypography";
 
@@ -36,14 +37,11 @@ const PedidoResumen = ({ total, isLoading, error, onSubmit, submitLabel }) => {
         fullWidth
         onClick={onSubmit}
         disabled={isLoading}
-        sx={{
+        sx={primaryActionButtonSx(theme, {
           mt: 2,
-          textTransform: "none",
-          fontWeight: "bold",
           fontSize: "1rem",
-          borderRadius: 2,
           py: 1.5,
-        }}
+        })}
       >
         {isLoading ? (
           <CircularProgress size={24} color="inherit" />

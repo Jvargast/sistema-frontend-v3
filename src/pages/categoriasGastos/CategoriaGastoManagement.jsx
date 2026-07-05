@@ -2,6 +2,7 @@ import Select from "../../components/common/CompatSelect";
 import Dialog from "../../components/common/CompatDialog";
 import * as React from "react";
 import { InputAdornment, MenuItem, FormControl, InputLabel, ToggleButtonGroup, ToggleButton, Switch, FormControlLabel, Button, DialogTitle, DialogContent, DialogActions, useTheme } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
 import Header from "../../components/common/Header";
 import LoaderComponent from "../../components/common/LoaderComponent";
@@ -23,6 +24,10 @@ import Box from "../../components/common/CompatBox";
 import Grid from "../../components/common/CompatGrid";
 import Stack from "../../components/common/CompatStack";
 import Typography from "../../components/common/CompatTypography";
+import {
+  darkSwitchSx,
+  secondaryActionButtonSx,
+} from "../../components/common/actionStyles";
 
 const TIPOS_CATEGORIA = [
 { id: "", label: "Todos" },
@@ -187,7 +192,17 @@ export default function CategoriaGastoManagement() {
         spacing={2}
         alignItems={{ xs: "stretch", md: "center" }}
         justifyContent="space-between"
-        sx={{ mb: 2 }}>
+        sx={{
+          mb: 2,
+          p: 2,
+          borderRadius: 2,
+          border: `1px solid ${alpha(theme.palette.divider, 0.7)}`,
+          bgcolor: theme.palette.background.paper,
+          boxShadow:
+          theme.palette.mode === "dark" ?
+          "0 10px 30px rgba(0,0,0,.24)" :
+          "0 10px 30px rgba(15,23,42,.06)"
+        }}>
 
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2} flex={1}>
           <TextField
@@ -224,7 +239,23 @@ export default function CategoriaGastoManagement() {
             exclusive
             value={deducible}
             onChange={(_, v) => v && setDeducible(v)}
-            size="small">
+            size="small"
+            sx={{
+              alignSelf: { xs: "stretch", sm: "center" },
+              "& .MuiToggleButton-root": {
+                px: 1.5,
+                textTransform: "none",
+                fontWeight: 800,
+                color: "text.secondary",
+                borderColor: alpha("#0F172A", 0.18)
+              },
+              "& .MuiToggleButton-root.Mui-selected": {
+                color: "#fff",
+                bgcolor: "#0F172A",
+                borderColor: "#0F172A",
+                "&:hover": { bgcolor: theme.palette.common.black }
+              }
+            }}>
 
             <ToggleButton value="all">Todos</ToggleButton>
             <ToggleButton value="si">Deducible</ToggleButton>
@@ -236,7 +267,8 @@ export default function CategoriaGastoManagement() {
             <Switch
               checked={soloActivos}
               onChange={(_, v) => setSoloActivos(v)}
-              size="small" />
+              size="small"
+              sx={darkSwitchSx} />
 
             }
             label="Solo activos"
@@ -283,7 +315,11 @@ export default function CategoriaGastoManagement() {
               <Typography sx={{ mb: 1.5 }}>
                 No hay categorías con los filtros actuales.
               </Typography>
-              <Button variant="outlined" onClick={() => setSearch("")}>
+              <Button
+                variant="outlined"
+                onClick={() => setSearch("")}
+                sx={(theme) => secondaryActionButtonSx(theme)}>
+
                 Limpiar filtros
               </Button>
             </Box>
@@ -302,8 +338,29 @@ export default function CategoriaGastoManagement() {
         isSaving={creating || updating} />
 
 
-      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>Eliminar categoría</DialogTitle>
+      <Dialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            overflow: "hidden",
+            boxShadow: 24
+          }
+        }}>
+
+        <DialogTitle
+          sx={{
+            color: "#fff",
+            fontWeight: 800,
+            background:
+            theme.palette.mode === "dark" ?
+            "linear-gradient(135deg, #020617 0%, #1f2937 100%)" :
+            "linear-gradient(135deg, #0F172A 0%, #1F2937 100%)"
+          }}>
+
+          Eliminar categoría
+        </DialogTitle>
         <DialogContent dividers>
           <Typography>
             ¿Seguro que deseas eliminar{" "}
@@ -311,15 +368,26 @@ export default function CategoriaGastoManagement() {
             puede deshacer.
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)} variant="outlined">
+        <DialogActions sx={{ px: 2.5, py: 2 }}>
+          <Button
+            onClick={() => setConfirmOpen(false)}
+            variant="outlined"
+            sx={(theme) => secondaryActionButtonSx(theme)}>
+
             Cancelar
           </Button>
           <Button
             onClick={doDelete}
             variant="contained"
             color="error"
-            disabled={deleting}>
+            disabled={deleting}
+            disableElevation
+            sx={{
+              borderRadius: 1,
+              textTransform: "none",
+              fontWeight: 800,
+              boxShadow: "none"
+            }}>
 
             {deleting ? "Eliminando..." : "Eliminar"}
           </Button>

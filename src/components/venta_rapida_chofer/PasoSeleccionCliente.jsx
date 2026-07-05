@@ -1,4 +1,6 @@
-import { List, ListItem, ListItemButton, ListItemText, Button, CircularProgress, FormControlLabel, Switch } from "@mui/material";
+import { List, ListItem, ListItemButton, ListItemText, IconButton, CircularProgress, FormControlLabel, Switch } from "@mui/material";
+import { alpha } from "@mui/material/styles";
+import AddIcon from "@mui/icons-material/Add";
 import { useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { useGetAllClientesQuery } from "../../store/services/clientesApi";
@@ -97,7 +99,7 @@ const PasoSeleccionCliente = ({
       {!ventaSinCliente && (
         <>
           <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
-            <Grid item xs={12} sm={9}>
+            <Grid item xs={10} sm={10}>
               <TextField
                 label="Buscar por nombre o RUT"
                 variant="outlined"
@@ -106,15 +108,29 @@ const PasoSeleccionCliente = ({
                 onChange={(e) => setSearch(e.target.value)}
               />
             </Grid>
-            <Grid item xs={12} sm={3}>
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
+            <Grid item xs={2} sm={2}>
+              <IconButton
+                aria-label="Crear cliente"
                 onClick={() => setModalCrearOpen(true)}
+                sx={(theme) => ({
+                  width: 44,
+                  height: 44,
+                  borderRadius: 1.25,
+                  bgcolor: "#0F172A",
+                  color: theme.palette.common.white,
+                  boxShadow: "none",
+                  "&:hover": {
+                    bgcolor: theme.palette.common.black,
+                    boxShadow: "none",
+                  },
+                  "&:focus-visible": {
+                    outline: `3px solid ${alpha("#0F172A", 0.24)}`,
+                    outlineOffset: 2,
+                  },
+                })}
               >
-                + Nuevo
-              </Button>
+                <AddIcon />
+              </IconButton>
             </Grid>
           </Grid>
           {isLoading ? (

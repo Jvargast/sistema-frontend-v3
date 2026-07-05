@@ -15,6 +15,10 @@ import { Close, Edit } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../store/reducers/notificacionSlice";
 import BackButton from "../../components/common/BackButton";
+import {
+  primaryActionButtonSx,
+  secondaryActionButtonSx,
+} from "../../components/common/actionStyles";
 import Box from "../../components/common/CompatBox";
 import Grid from "../../components/common/CompatGrid";
 import Stack from "../../components/common/CompatStack";
@@ -203,19 +207,14 @@ const PreviewCotizacion = () => {
               flexWrap="wrap"
             >
               <Button
-                variant={modoEdicion ? "contained" : "outlined"}
-                color={modoEdicion ? "error" : "info"}
+                variant="outlined"
                 startIcon={modoEdicion ? <Close /> : <Edit />}
                 onClick={() => setModoEdicion((prev) => !prev)}
-                sx={{
+                sx={(theme) => secondaryActionButtonSx(theme, {
                   px: 4,
                   py: 1,
-                  borderRadius: 2,
-                  fontWeight: "bold",
-                  textTransform: "none",
-                  boxShadow: modoEdicion ? 3 : 1,
                   minWidth: 200,
-                }}
+                })}
               >
                 {modoEdicion ? "Cancelar edición" : "Editar Cotización"}
               </Button>
@@ -223,19 +222,14 @@ const PreviewCotizacion = () => {
               {modoEdicion && (
                 <Button
                   variant="contained"
-                  color="success"
                   size="medium"
                   onClick={handlerUpdateCotizacion}
                   disabled={isUpdating}
-                  sx={{
+                  sx={(theme) => primaryActionButtonSx(theme, {
                     px: 4,
                     py: 1,
-                    borderRadius: 2,
-                    fontWeight: "bold",
-                    textTransform: "none",
-                    boxShadow: 3,
                     minWidth: 200,
-                  }}
+                  })}
                 >
                   Guardar cambios
                 </Button>
@@ -258,19 +252,11 @@ const PreviewCotizacion = () => {
                 cotizacion.id_cotizacion
               }/pdf?mostrar_impuestos=true`}
               target="_blank"
-              sx={{
+              sx={(theme) => primaryActionButtonSx(theme, {
                 px: 4,
                 py: 1.5,
-                borderRadius: 2,
-                fontWeight: "bold",
-                textTransform: "none",
-                boxShadow: 3,
                 minWidth: 220,
-                bgcolor: "#1e88e5",
-                "&:hover": {
-                  bgcolor: "#b9cee6",
-                },
-              }}
+              })}
             >
               Descargar con impuestos
             </Button>
@@ -283,19 +269,11 @@ const PreviewCotizacion = () => {
                 cotizacion.id_cotizacion
               }/pdf?mostrar_impuestos=false`}
               target="_blank"
-              sx={{
+              sx={(theme) => secondaryActionButtonSx(theme, {
                 px: 4,
                 py: 1.5,
-                borderRadius: 2,
-                fontWeight: "bold",
-                textTransform: "none",
-                boxShadow: 2,
                 minWidth: 220,
-                bgcolor: "#546e7a",
-                "&:hover": {
-                  bgcolor: "#455a64",
-                },
-              }}
+              })}
             >
               Descargar sin impuestos
             </Button>

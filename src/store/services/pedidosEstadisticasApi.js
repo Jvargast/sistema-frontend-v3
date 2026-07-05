@@ -16,7 +16,14 @@ export const pedidosEstadisticasApi = createApi({
     }),
 
     getPedidosEstadisticasPorMes: builder.query({
-      query: ({ mes, anio }) => `/analisis/pedidos?mes=${mes}&anio=${anio}`,
+      query: ({ mes, anio, id_sucursal } = {}) => ({
+        url: "/analisis/pedidos",
+        params: {
+          mes,
+          anio,
+          ...(id_sucursal != null ? { id_sucursal } : {}),
+        },
+      }),
       providesTags: ["PedidosEstadisticas"],
     }),
 

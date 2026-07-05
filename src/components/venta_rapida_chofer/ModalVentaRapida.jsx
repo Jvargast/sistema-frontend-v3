@@ -1,8 +1,10 @@
 import Dialog from "../common/CompatDialog";
 import StepLabel from "../common/CompatStepLabel";
 import { DialogContent, DialogTitle, Stepper, Step, Button, IconButton, useMediaQuery, useTheme } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import PropTypes from "prop-types";
 import CloseIcon from "@mui/icons-material/Close";
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import { useSelector } from "react-redux";
 import useVentaRapidaFormLogic from "../../utils/useVentaRapidaLogic";
 import { useRealizarVentaRapidaMutation } from "../../store/services/ventasChoferApi";
@@ -58,6 +60,11 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
   } = useVentaRapidaFormLogic();
 
   const [ventaRapida, { isLoading }] = useRealizarVentaRapidaMutation();
+  const totalVenta = getTotal();
+  const ventaConPagoValido =
+  metodoPago !== null &&
+  totalVenta > 0 &&
+  (Number(metodoPago) !== 1 || Number(montoRecibido) >= totalVenta);
 
   const handleCerrar = () => {
     resetForm();
@@ -65,7 +72,25 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
   };
 
   const handleConfirmarVenta = async () => {
+    if (!ventaConPagoValido) return;
+
     try {
+      const cantidadVendidaPorProducto = new Map(
+        productosSeleccionados.map((producto) => [
+          producto.id_producto,
+          Math.max(0, Number(producto.cantidad) || 0)
+        ])
+      );
+      const retornablesNormalizados = retornablesRecibidos
+        .map((retornable) => ({
+          ...retornable,
+          cantidad: Math.min(
+            Math.max(0, Number(retornable.cantidad) || 0),
+            cantidadVendidaPorProducto.get(retornable.id_producto) || 0
+          )
+        }))
+        .filter((retornable) => retornable.cantidad > 0);
+
       const payload = {
         id_chofer: usuario.id,
         id_cliente: clienteSeleccionado?.id_cliente ?? null,
@@ -76,7 +101,7 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
           cantidad: p.cantidad,
           precioUnitario: p.precioUnitario
         })),
-        retornables_recibidos: retornablesRecibidos,
+        retornables_recibidos: retornablesNormalizados,
         estadoPago: "pagado",
         monto_recibido: montoRecibido
       };
@@ -97,27 +122,57 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
       fullScreen={fullScreen}
       PaperProps={{
         sx: {
-          bgcolor: (theme) => theme.palette.background.paper
+          bgcolor: (theme) => theme.palette.background.paper,
+          borderRadius: fullScreen ? 0 : 3,
+          overflow: "hidden",
+          boxShadow: 24
         }
       }}>
 
-      <DialogTitle
-        sx={{
-          m: 0,
-          p: 2,
-          bgcolor: "#1976d2",
-          color: "white",
-          fontWeight: "bold"
-        }}>
+      <DialogTitle sx={{ m: 0, p: 0 }}>
+        <Box
+          sx={{
+            px: 2.5,
+            py: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            color: "#fff",
+            background:
+            theme.palette.mode === "dark" ?
+            "linear-gradient(135deg, #020617 0%, #1f2937 100%)" :
+            "linear-gradient(135deg, #0F172A 0%, #1F2937 100%)"
+          }}>
 
-        Venta Rápida
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
+            <PointOfSaleIcon sx={{ fontSize: 28, flex: "0 0 auto" }} />
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="h6" fontWeight={800} lineHeight={1.1}>
+                Venta rápida
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ opacity: 0.88, display: "block", fontWeight: 600 }}>
+
+                Registro directo desde el viaje
+              </Typography>
+            </Box>
+          </Box>
+
         <IconButton
           aria-label="close"
           onClick={handleCerrar}
-          sx={{ position: "absolute", right: 8, top: 8, color: "white" }}>
+          size="small"
+          sx={{
+            color: "#fff",
+            bgcolor: "rgba(255,255,255,.12)",
+            "&:hover": { bgcolor: "rgba(255,255,255,.2)" }
+          }}>
 
-          <CloseIcon />
+          <CloseIcon fontSize="small" />
         </IconButton>
+        </Box>
       </DialogTitle>
 
       <DialogContent dividers sx={{ px: { xs: 2, sm: 4 }, pt: 2, pb: 3 }}>
@@ -127,10 +182,13 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
           sx={{
             flexWrap: "wrap",
             "& .MuiStepIcon-root.Mui-completed": {
-              color: "#1976d2"
+              color: "#0F172A"
             },
             "& .MuiStepIcon-root.Mui-active": {
-              color: "#1565c0"
+              color: "#0F172A"
+            },
+            "& .MuiStepConnector-line": {
+              borderColor: alpha("#0F172A", 0.18)
             }
           }}>
 
@@ -180,18 +238,19 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
             setMetodoPago={setMetodoPago}
             montoRecibido={montoRecibido}
             setMontoRecibido={setMontoRecibido}
-            total={getTotal()} />
+            total={totalVenta} />
 
           }
           {activeStep === 4 &&
           <PasoResumenFinal
             cliente={clienteSeleccionado}
             productos={productosSeleccionados}
-            total={getTotal()}
+            total={totalVenta}
             metodoPago={metodoPago}
             montoRecibido={montoRecibido}
             onConfirmar={handleConfirmarVenta}
-            loading={isLoading} />
+            loading={isLoading}
+            disabled={!ventaConPagoValido} />
 
           }
         </Box>
@@ -210,15 +269,17 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
             disabled={activeStep === 0}
             onClick={handleBack}
             variant="outlined"
-            sx={{
-              borderColor: "#1976d2",
-              color: "#1976d2",
-              fontWeight: 500,
+            sx={(theme) => ({
+              borderColor: alpha("#0F172A", 0.28),
+              color: theme.palette.text.primary,
+              fontWeight: 800,
+              textTransform: "none",
+              borderRadius: 1,
               "&:hover": {
-                borderColor: "#1565c0",
-                backgroundColor: "#e3f2fd"
+                borderColor: "#0F172A",
+                backgroundColor: alpha("#0F172A", 0.04)
               }
-            }}>
+            })}>
 
             Atrás
           </Button>
@@ -232,13 +293,18 @@ const ModalVentaRapida = ({ open, onClose, onSuccess, viaje }) => {
             !(ventaSinCliente || clienteSeleccionado) :
             !isStepValid()
             }
-            sx={{
-              backgroundColor: "#1976d2",
-              fontWeight: 600,
+            sx={(theme) => ({
+              bgcolor: "#0F172A",
+              color: theme.palette.common.white,
+              fontWeight: 800,
+              textTransform: "none",
+              borderRadius: 1,
+              boxShadow: "none",
               "&:hover": {
-                backgroundColor: "#1565c0"
+                bgcolor: theme.palette.common.black,
+                boxShadow: "none"
               }
-            }}>
+            })}>
 
               Siguiente
             </Button>

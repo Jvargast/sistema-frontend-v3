@@ -16,6 +16,7 @@ export default function SucursalPickerHeader({
   canChoose,
   onChange,
   nombreSucursal,
+  sx,
 }) {
   const theme = useTheme();
   const sucursalesDisponibles = Array.isArray(sucursales) ? sucursales : [];
@@ -128,11 +129,14 @@ export default function SucursalPickerHeader({
 
   return (
     <Box
-      sx={{
-        display: "flex",
-        justifyContent: { xs: "stretch", sm: "flex-end" },
-        mb: 1.25,
-      }}
+      sx={[
+        {
+          display: "flex",
+          justifyContent: { xs: "stretch", sm: "flex-end" },
+          mb: 1.25,
+        },
+        sx,
+      ]}
     >
       {canChoose ? (
         <Select
@@ -204,4 +208,9 @@ SucursalPickerHeader.propTypes = {
   canChoose: PropTypes.bool,
   onChange: PropTypes.func,
   nombreSucursal: PropTypes.string,
+  sx: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.func,
+    PropTypes.object,
+  ]),
 };

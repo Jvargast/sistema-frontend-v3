@@ -5,7 +5,10 @@ import {
   Menu as MenuIcon,
   ArrowDropDownOutlined,
   ExpandLess,
-  ExpandMore } from
+  ExpandMore,
+  AccountCircleOutlined,
+  CloseRounded,
+  LogoutOutlined } from
 "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
@@ -110,6 +113,41 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
   const isAdmin = roleName === "administrador";
   const navbarColor = rolColors[roleName] || rolColors.default;
   const iconNavbarColor = isColorLight(navbarColor) ? "#2c3e50" : "#fff";
+  const isDarkMode = theme.palette.mode === "dark";
+  const drawerTokens = {
+    paperBg: isDarkMode
+      ? "linear-gradient(180deg, #020617 0%, #0F172A 100%)"
+      : "linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)",
+    paperColor: isDarkMode ? "#fff" : "#0F172A",
+    border: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.1)",
+    shadow: isDarkMode
+      ? "18px 0 44px rgba(2,6,23,0.38)"
+      : "18px 0 38px rgba(15,23,42,0.14)",
+    headerBg: isDarkMode
+      ? "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 100%)"
+      : "linear-gradient(135deg, rgba(15,23,42,0.035) 0%, rgba(15,23,42,0.01) 100%)",
+    headerBorder: isDarkMode
+      ? "rgba(255,255,255,0.08)"
+      : "rgba(15,23,42,0.08)",
+    avatarBg: isDarkMode ? "rgba(255,255,255,0.14)" : "#0F172A",
+    avatarColor: "#fff",
+    avatarShadow: isDarkMode
+      ? "inset 0 0 0 1px rgba(255,255,255,0.18)"
+      : "inset 0 0 0 1px rgba(15,23,42,0.1)",
+    subtleText: isDarkMode ? "rgba(255,255,255,0.72)" : alpha("#0F172A", 0.62),
+    closeBg: isDarkMode ? "rgba(255,255,255,0.1)" : alpha("#0F172A", 0.06),
+    closeBgHover: isDarkMode ? "rgba(255,255,255,0.18)" : alpha("#0F172A", 0.1),
+    closeColor: isDarkMode ? "#fff" : "#0F172A",
+    itemColor: isDarkMode ? "rgba(255,255,255,0.92)" : "#0F172A",
+    iconColor: isDarkMode ? "rgba(255,255,255,0.82)" : alpha("#0F172A", 0.68),
+    childIconColor: isDarkMode ? "rgba(255,255,255,0.62)" : alpha("#0F172A", 0.5),
+    itemHoverBg: isDarkMode ? "rgba(255,255,255,0.08)" : alpha("#0F172A", 0.06),
+    itemFocusBg: isDarkMode ? "rgba(255,255,255,0.1)" : alpha("#0F172A", 0.08),
+    itemFocusOutline: isDarkMode
+      ? "rgba(255,255,255,0.2)"
+      : alpha("#0F172A", 0.18),
+    footerBg: isDarkMode ? "rgba(2,6,23,0.18)" : alpha("#0F172A", 0.03)
+  };
 
   const iconBtnSx = (t) => ({
     color: iconNavbarColor,
@@ -161,6 +199,48 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
       [moduleName]: !prev[moduleName]
     }));
   };
+  const handleMobileNavigate = (path) => {
+    navigate(path);
+    setMobileMenuOpen(false);
+  };
+  const getVisibleChildren = (module) =>
+    (module.children || []).filter(
+      (child) => !child.permission || hasPermission(child.permission)
+    );
+  const drawerItemSx = (depth = 0) => ({
+    ml: depth ? 0.75 : 0,
+    mr: 1,
+    my: 0.25,
+    pr: 1.25,
+    pl: depth ? 2.25 : 2,
+    minHeight: depth ? 42 : 48,
+    borderRadius: "0 10px 10px 0",
+    color: drawerTokens.itemColor,
+    alignItems: "center",
+    "&:hover": {
+      bgcolor: drawerTokens.itemHoverBg
+    },
+    "&.Mui-focusVisible": {
+      bgcolor: drawerTokens.itemFocusBg,
+      outline: `2px solid ${drawerTokens.itemFocusOutline}`,
+      outlineOffset: 2
+    },
+    "& .MuiListItemIcon-root": {
+      minWidth: 36,
+      color: depth ? drawerTokens.childIconColor : drawerTokens.iconColor
+    },
+    "& .MuiSvgIcon-root": {
+      fontSize: depth ? 20 : 22
+    },
+    "& .MuiListItemText-primary": {
+      fontSize: depth ? 13.5 : 14,
+      fontWeight: depth ? 650 : 800,
+      lineHeight: 1.25
+    }
+  });
+  const formattedRoleName = roleName ?
+  roleName.charAt(0).toUpperCase() + roleName.slice(1) :
+  "";
 
   const notificaciones = useSelector((state) => state.notificaciones.items);
 
@@ -330,13 +410,15 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
 
               <MenuIcon />
             </IconButton>
-            <Box sx={{ flexGrow: 1, maxWidth: 600, mx: 2 }}>
-              <SearchBar
-              onResultSelect={(item) => {
-                console.log("Seleccionaste:", item);
-              }} />
+            {isAdmin && (
+              <Box sx={{ flexGrow: 1, maxWidth: 600, mx: 2 }}>
+                <SearchBar
+                onResultSelect={(item) => {
+                  console.log("Seleccionaste:", item);
+                }} />
 
-            </Box>
+              </Box>
+            )}
           </FlexBetween>
         }
 
@@ -405,26 +487,25 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
             onClick={handleClick}
             sx={(t) => ({
               textTransform: "none",
-              backgroundColor:
-              t.palette.mode === "light" ?
-              alpha("#000", 0.04) :
-              alpha("#fff", 0.06),
-              borderRadius: "999px",
-              border: `1px solid ${
-              t.palette.roles?.border || "rgba(2,6,23,0.08)"}`,
-
-              px: 1.25,
-              py: 0.5,
-              padding: "6px 12px",
+              backgroundColor: "transparent",
+              borderRadius: 1,
+              border: 0,
+              minWidth: 0,
+              px: 1,
+              py: 0.75,
               display: "flex",
               alignItems: "center",
-              gap: "0.75rem",
-              boxShadow: "0 2px 10px rgba(2,6,23,0.06)",
+              gap: 1,
+              boxShadow: "none",
               "&:hover": {
                 backgroundColor:
                 t.palette.mode === "light" ?
-                alpha("#000", 0.06) :
-                alpha("#fff", 0.1)
+                alpha("#000", 0.07) :
+                alpha("#fff", 0.12)
+              },
+              "&:focus, &:focus-visible": {
+                outline: "none",
+                boxShadow: `0 0 0 2px ${alpha(t.palette.primary.main, 0.28)}`
               }
             })}>
 
@@ -479,34 +560,110 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
             anchorEl={anchorEl}
             open={isOpen}
             onClose={handleClose}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
             slotProps={{
               paper: {
                 elevation: 0,
                 sx: (t) => ({
                   mt: 1,
-                  borderRadius: 2,
-                  border: `1px solid ${
-                  t.palette.roles?.border || "rgba(2,6,23,0.08)"}`,
-
-                  boxShadow: "0 12px 32px rgba(2,6,23,0.12)",
-                  overflow: "hidden",
+                  minWidth: 238,
+                  borderRadius: 1,
+                  border: 0,
+                  bgcolor: "background.paper",
+                  boxShadow:
+                    t.palette.mode === "light"
+                      ? "0 14px 34px rgba(15, 23, 42, 0.16)"
+                      : "0 14px 34px rgba(0, 0, 0, 0.38)",
+                  overflow: "visible",
+                  "& .MuiList-root": {
+                    p: 0.75
+                  },
                   "& .MuiMenuItem-root": {
+                    minHeight: 42,
+                    borderRadius: 1,
+                    px: 1.25,
                     fontSize: 14,
-                    fontWeight: 600
+                    fontWeight: 600,
+                    color: "text.primary",
+                    "&:hover": {
+                      bgcolor:
+                        t.palette.mode === "light"
+                          ? alpha(t.palette.primary.main, 0.08)
+                          : alpha(t.palette.primary.light, 0.14)
+                    }
+                  },
+                  "& .MuiListItemIcon-root": {
+                    minWidth: 34,
+                    color: "text.secondary"
                   }
                 })
               }
             }}>
 
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.25,
+                  px: 1.25,
+                  py: 1.25,
+                  mb: 0.5
+                }}
+              >
+                <Avatar
+                  sx={{
+                    width: 38,
+                    height: 38,
+                    bgcolor: "#3F51B5",
+                    fontSize: "0.95rem",
+                    fontWeight: 800
+                  }}
+                >
+                  {user?.nombre ? user.nombre.charAt(0).toUpperCase() : "U"}
+                </Avatar>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography fontWeight={800} fontSize="0.9rem" noWrap>
+                    {user?.nombre || "Usuario"}
+                  </Typography>
+                  <Typography
+                    fontSize="0.75rem"
+                    color="text.secondary"
+                    noWrap
+                  >
+                    {rol ? rol.charAt(0).toUpperCase() + rol.slice(1) : ""}
+                  </Typography>
+                </Box>
+              </Box>
+              <Divider sx={{ mb: 0.5 }} />
               <MenuItem
               onClick={() => {
                 handleClose();
                 openTabAndNavigate("miperfil", tabInfo);
               }}>
 
+                <ListItemIcon>
+                  <AccountCircleOutlined fontSize="small" />
+                </ListItemIcon>
                 Mi Perfil
               </MenuItem>
-              <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
+              <MenuItem
+                onClick={handleLogout}
+                sx={(t) => ({
+                  color: `${t.palette.error.main} !important`,
+                  "& .MuiListItemIcon-root": {
+                    color: `${t.palette.error.main} !important`
+                  },
+                  "&:hover": {
+                    bgcolor: `${alpha(t.palette.error.main, 0.08)} !important`
+                  }
+                })}
+              >
+                <ListItemIcon>
+                  <LogoutOutlined fontSize="small" />
+                </ListItemIcon>
+                Cerrar Sesión
+              </MenuItem>
             </Menu>
           </Box>
         }
@@ -522,49 +679,144 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
         anchor="left"
         open={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
+        ModalProps={{ keepMounted: true }}
         sx={{
           ".MuiDrawer-paper": {
-            width: 280,
-            backgroundColor: "#1E1E1E",
-            color: "white",
-            overflowY: "auto",
+            width: { xs: "min(88vw, 336px)", sm: 340 },
+            background: drawerTokens.paperBg,
+            color: drawerTokens.paperColor,
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            borderRight: `1px solid ${drawerTokens.border}`,
+            boxShadow: drawerTokens.shadow,
+            borderRadius: "0 16px 16px 0",
             scrollbarWidth: "none",
             "&::-webkit-scrollbar": { display: "none" }
           }
         }}>
 
-        <Box p={2} textAlign="center">
-          <Typography variant="h5" fontWeight="bold">
-            Menú
-          </Typography>
-          <Divider />
+        <Box
+          sx={{
+            px: 2,
+            pt: "calc(env(safe-area-inset-top, 0px) + 16px)",
+            pb: 1.5,
+            background: drawerTokens.headerBg,
+            borderBottom: `1px solid ${drawerTokens.headerBorder}`
+          }}>
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 1.5
+            }}>
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minWidth: 0 }}>
+              <Avatar
+                sx={{
+                  width: 42,
+                  height: 42,
+                  bgcolor: drawerTokens.avatarBg,
+                  color: drawerTokens.avatarColor,
+                  fontWeight: 900,
+                  boxShadow: drawerTokens.avatarShadow
+                }}>
+
+                {user?.nombre ? user.nombre.charAt(0).toUpperCase() : "U"}
+              </Avatar>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="h6" fontWeight={900} lineHeight={1.05} noWrap>
+                  Menú
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ display: "block", color: drawerTokens.subtleText, fontWeight: 700 }}
+                  noWrap>
+
+                  {user?.nombre || "Usuario"}
+                  {formattedRoleName ? ` · ${formattedRoleName}` : ""}
+                </Typography>
+              </Box>
+            </Box>
+
+            <IconButton
+              aria-label="Cerrar menú"
+              onClick={() => setMobileMenuOpen(false)}
+              size="small"
+              sx={{
+                width: 38,
+                height: 38,
+                color: drawerTokens.closeColor,
+                bgcolor: drawerTokens.closeBg,
+                "&:hover": { bgcolor: drawerTokens.closeBgHover }
+              }}>
+
+              <CloseRounded fontSize="small" />
+            </IconButton>
+          </Box>
+
           {isAdmin &&
-          <Box sx={{ p: 1.5 }}>
+          <Box
+            sx={{
+              mt: 1.5,
+              p: 0,
+              borderRadius: 0,
+              bgcolor: "transparent"
+            }}>
+
               <ScopeSwitcher />
             </Box>
           }
-          <List>
-            {modulesData.
-            slice(1).
-            filter(
+        </Box>
+
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+            py: 1.25,
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" }
+          }}>
+
+          <List disablePadding>
+            {modulesData
+            .slice(1)
+            .filter(
               (module) =>
               !module.permission || hasPermission(module.permission)
-            ).
-            map((module) =>
-            <Box key={module.name}>
+            )
+            .map((module) => {
+              const visibleChildren = getVisibleChildren(module);
+              const hasChildren = Boolean(module.children && visibleChildren.length);
+
+              if (module.children && !visibleChildren.length) return null;
+
+              return (
+                <Box key={module.name} sx={{ mb: 0.25 }}>
                   <ListItemButton
-                onClick={
-                module.children ?
-                () => handleToggleSection(module.name) :
-                () => navigate(module.path)
-                }>
+                    onClick={
+                    hasChildren ?
+                    () => handleToggleSection(module.name) :
+                    () => handleMobileNavigate(module.path)
+                    }
+                    aria-expanded={hasChildren ? Boolean(openSections[module.name]) : undefined}
+                    sx={drawerItemSx()}>
 
-                    {module.icon && <ListItemIcon>{module.icon}</ListItemIcon>}
+                    <ListItemIcon>
+                      {module.icon || <Box sx={{ width: 22, height: 22 }} />}
+                    </ListItemIcon>
                     <ListItemText
-                  primary={module.name}
-                  sx={{ color: "white" }} />
+                      disableTypography
+                      primary={
+                      <Typography component="span" noWrap sx={{ display: "block" }}>
+                          {module.name}
+                        </Typography>
+                      } />
 
-                    {module.children && (
+                    {hasChildren && (
                 openSections[module.name] ?
                 <ExpandLess /> :
 
@@ -577,46 +829,41 @@ const Navbar = ({ user, rol, setIsSidebarOpen }) => {
                 timeout="auto"
                 unmountOnExit>
 
-                      <List component="div" disablePadding>
-                        {module.children.
-                  filter((child) => hasPermission(child.permission)).
-                  map((child) =>
-                  <ListItemButton
-                    key={child.path}
-                    onClick={() => navigate(child.path)}
-                    sx={{ pl: 4 }}>
+                      <List component="div" disablePadding sx={{ pb: 0.5 }}>
+                        {visibleChildren.map((child) =>
+                        <ListItemButton
+                          key={child.path}
+                          onClick={() => handleMobileNavigate(child.path)}
+                          sx={drawerItemSx(1)}>
 
-                              {child.icon &&
-                    <ListItemIcon sx={{ color: "white" }}>
-                                  {child.icon}
-                                </ListItemIcon>
-                    }
-                              <ListItemText primary={child.text} />
+                            <ListItemIcon>
+                              {child.icon || <Box sx={{ width: 20, height: 20 }} />}
+                            </ListItemIcon>
+                            <ListItemText
+                              disableTypography
+                              primary={
+                              <Typography component="span" noWrap sx={{ display: "block" }}>
+                                  {child.text}
+                                </Typography>
+                              } />
                             </ListItemButton>
-                  )}
+                        )}
                       </List>
                     </Collapse>
               }
                 </Box>
-            )}
+              );
+            })}
           </List>
-          <Box sx={{ p: 2, textAlign: "center" }}>
-            <Divider sx={{ backgroundColor: "#555" }} />
-            <Avatar
-              sx={{
-                bgcolor: "#3F51B5",
-                width: 48,
-                height: 48,
-                margin: "10px auto"
-              }}>
-
-              {user?.nombre ? user.nombre.charAt(0).toUpperCase() : "U"}
-            </Avatar>
-            <Typography variant="body2" textAlign="center">
-              {user?.nombre || "Usuario"}
-            </Typography>
-          </Box>
         </Box>
+
+        <Box
+          sx={{
+            flex: "0 0 auto",
+            height: "max(env(safe-area-inset-bottom, 0px), 12px)",
+            borderTop: `1px solid ${drawerTokens.headerBorder}`,
+            bgcolor: drawerTokens.footerBg
+          }} />
       </Drawer>
     </AppBar>);
 

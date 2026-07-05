@@ -25,6 +25,11 @@ import TextField from "../common/CompatTextField";
 import Box from "../common/CompatBox";
 import Grid from "../common/CompatGrid";
 import Stack from "../common/CompatStack";
+import {
+  darkSwitchSx,
+  primaryActionButtonSx,
+  secondaryActionButtonSx,
+} from "../common/actionStyles";
 
 const METODOS = [
 { id: "efectivo", label: "Efectivo", Icon: MonetizationOnIcon },
@@ -191,8 +196,8 @@ export default function GastoForm({
                     color: theme.palette.text.secondary,
                     bgcolor:
                     theme.palette.mode === "dark" ?
-                    alpha(theme.palette.primary.main, 0.08) :
-                    alpha(theme.palette.primary.main, 0.06),
+                    alpha("#0F172A", 0.16) :
+                    alpha("#0F172A", 0.06),
                     position: "sticky",
                     top: 0,
                     zIndex: 1
@@ -505,7 +510,8 @@ export default function GastoForm({
                 onChange={(_, v) =>
                 onChange("deducible")({ target: { value: v } })
                 }
-                size="small" />
+                size="small"
+                sx={darkSwitchSx} />
 
               }
               label="Deducible de impuestos" />
@@ -541,10 +547,15 @@ export default function GastoForm({
               }}>
 
               <Stack direction="row" alignItems="center" spacing={1.5}>
-                <UploadFileOutlined />
+                <UploadFileOutlined sx={{ color: "#0F172A" }} />
                 <span>Adjuntar comprobantes (PDF/imagen, máx. 10)</span>
               </Stack>
-              <Button variant="outlined" component="label" size="small">
+              <Button
+                variant="outlined"
+                component="label"
+                size="small"
+                sx={(theme) => secondaryActionButtonSx(theme)}>
+
                 Seleccionar archivos
                 <input
                   hidden
@@ -583,7 +594,11 @@ export default function GastoForm({
       <Divider />
       <CardContent>
         <Stack direction="row" spacing={1} justifyContent="flex-end">
-          <Button variant="outlined" onClick={onReset}>
+          <Button
+            variant="outlined"
+            onClick={onReset}
+            sx={(theme) => secondaryActionButtonSx(theme)}>
+
             Limpiar
           </Button>
           <Tooltip title={canSave ? "" : "Completa los campos obligatorios"}>
@@ -591,7 +606,9 @@ export default function GastoForm({
               <Button
                 type="submit"
                 variant="contained"
-                disabled={!canSave || isSaving}>
+                disabled={!canSave || isSaving}
+                disableElevation
+                sx={(theme) => primaryActionButtonSx(theme)}>
 
                 {isSaving ? "Guardando..." : "Guardar Gasto"}
               </Button>

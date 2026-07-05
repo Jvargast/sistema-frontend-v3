@@ -6,6 +6,7 @@ import { Outlet, useLocation, useNavigate } from "react-router";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import Sidebar from "../../components/layout/Sidebar";
 import Navbar from "../../components/layout/Navbar";
+import ScopeTransitionOverlay from "../../components/layout/ScopeTransitionOverlay";
 import { LayoutContext } from "../../context/LayoutContext";
 import Footer from "../../components/common/Footer";
 import DynamicTabsBar from "../../components/layout/DynamicTabsBar";
@@ -136,6 +137,7 @@ const Layout = () => {
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}
           />
+          <ScopeTransitionOverlay />
 
           {isDesktop && openTabs.length > 0 && (
             <DynamicTabsBar isDesktop={isDesktop} />

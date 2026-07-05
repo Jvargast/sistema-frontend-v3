@@ -4,11 +4,15 @@ import { useEffect, useMemo, useState } from "react";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { Button, CircularProgress, Alert, Tab, MenuItem, FormControl, InputLabel, ListItemIcon, ListItemText, FormHelperText, Chip } from "@mui/material";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
+import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { useGetAllChoferesQuery } from "../../store/services/usuariosApi";
 import { useGetAllCamionesQuery } from "../../store/services/camionesApi";
 import { useGetAvailabreProductosQuery } from "../../store/services/productoApi";
@@ -55,6 +59,45 @@ const selectMenuProps = {
     }
   }
 };
+
+const agendaPendingPrimaryButtonSx = (theme) => ({
+  textTransform: "none",
+  minWidth: { xs: "100%", sm: 150 },
+  borderRadius: 1,
+  fontWeight: 800,
+  bgcolor: "#0F172A",
+  color: theme.palette.common.white,
+  boxShadow: "none",
+  "&:hover": {
+    bgcolor: theme.palette.common.black,
+    boxShadow: "none"
+  }
+});
+
+const agendaPendingSecondaryButtonSx = (theme) => ({
+  textTransform: "none",
+  minWidth: { xs: "100%", sm: 130 },
+  borderRadius: 1,
+  fontWeight: 800,
+  color:
+  theme.palette.mode === "dark" ?
+  theme.palette.grey[100] :
+  "#475569",
+  borderColor:
+  theme.palette.mode === "dark" ?
+  theme.palette.grey[600] :
+  "#CBD5E1",
+  "&:hover": {
+    borderColor:
+    theme.palette.mode === "dark" ?
+    theme.palette.grey[400] :
+    "#94A3B8",
+    bgcolor:
+    theme.palette.mode === "dark" ?
+    "rgba(255,255,255,0.06)" :
+    "#F8FAFC"
+  }
+});
 
 const AgendaSection = ({ icon, title, subtitle, action, children }) =>
   <Box component="section" sx={agendaSectionSx}>
@@ -120,6 +163,7 @@ const isCamionDisponible = (camion) =>
   String(camion?.estado ?? "").trim().toLowerCase() === "disponible";
 
 const CreateAgendaCargaForm = () => {
+  const navigate = useNavigate();
   const auth = useSelector((s) => s.auth);
   const roleName = auth?.rol?.nombre || auth?.rol;
   const rutAuth = String(auth?.user?.id ?? auth?.user?.id ?? "");
@@ -164,6 +208,13 @@ const CreateAgendaCargaForm = () => {
     skip: !sucursalReady || !choferReady
   });
   const agendaCargaActual = agendaCarga?.data;
+  const hayAgendaPendiente = Boolean(
+    !loadingAgenda &&
+    (isChofer || idChofer) &&
+    !isError &&
+    agendaCargaActual &&
+    agendaCargaActual.validada_por_chofer === false
+  );
   const dispatch = useDispatch();
   const choferesArg =
   !isChofer && sucursalReady ?
@@ -531,6 +582,13 @@ const CreateAgendaCargaForm = () => {
   }, [openModal, agendaCargaActual]);
 
   useEffect(() => {
+    if (!hayAgendaPendiente) return;
+    setIdCamion("");
+    setProductos([]);
+    setTabIndex(0);
+  }, [hayAgendaPendiente]);
+
+  useEffect(() => {
     if (idChofer && !loadingCaja && cajaAsignada?.asignada === false) {
       setOpenNoCajaModal(true);
       setIdChofer("");
@@ -626,6 +684,17 @@ const CreateAgendaCargaForm = () => {
   }, [productosReservados]);
 
   const handleAddProductRow = () => {
+    if (hayAgendaPendiente) {
+      dispatch(
+        showNotification({
+          message:
+          "Ya existe una agenda pendiente para hoy. Revísala antes de crear otra.",
+          severity: "warning"
+        })
+      );
+      return;
+    }
+
     if (!idCamion || capacidadAdicionales.maxProductosAdicionales === null) {
       dispatch(
         showNotification({
@@ -716,6 +785,17 @@ const CreateAgendaCargaForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (hayAgendaPendiente) {
+      dispatch(
+        showNotification({
+          message:
+          "Ya existe una agenda pendiente para hoy. No se puede crear otra hasta revisarla o completarla.",
+          severity: "warning"
+        })
+      );
+      return;
+    }
 
     if (!loadingCaja && cajaAsignada?.asignada === false) {
       dispatch(
@@ -828,15 +908,9 @@ const CreateAgendaCargaForm = () => {
   const { productos: listaProductosOriginal = [] } = productosDisponibles || {};
   const listaProductos = listaProductosOriginal.filter((p) => p.es_retornable);
 
-  const hayAgendaPendiente =
-  !loadingAgenda &&
-  (isChofer || !isChofer && idChofer) &&
-  !isError &&
-  agendaCargaActual &&
-  agendaCargaActual.validada_por_chofer === false;
-
   const submitDisabled =
   loadingCreate ||
+  hayAgendaPendiente ||
   !puedeCrearAgenda ||
   !safeIdChofer ||
   !idCamion ||
@@ -1007,37 +1081,86 @@ const CreateAgendaCargaForm = () => {
           flexWrap="wrap"
           gap={2}
           sx={(theme) => ({
-            p: 2,
+            p: { xs: 2, sm: 2.25 },
             borderRadius: 2,
             border: "1px solid",
-            borderColor:
-            theme.palette.mode === "dark" ?
-            theme.palette.primary.main :
-            "rgba(90,141,213,0.28)",
+            borderColor: "divider",
             bgcolor:
             theme.palette.mode === "dark" ?
-            "rgba(90,141,213,0.1)" :
-            "rgba(90,141,213,0.06)"
+            "rgba(251,191,36,0.12)" :
+            "rgba(255,247,237,0.92)"
           })}>
 
-          <Box>
-            <Typography variant="subtitle2" fontWeight={800}>
-              Hay una agenda pendiente para hoy
-            </Typography>
-            {agendaCargaActual?.fecha_hora &&
-            <Typography variant="body2" color="text.secondary">
-                Agenda del día: {convertirFechaLocal(agendaCargaActual.fecha_hora)}
+          <Box display="flex" alignItems="flex-start" gap={1.5} minWidth={0}>
+            <Box
+              sx={(theme) => ({
+                width: 38,
+                height: 38,
+                borderRadius: 1.5,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color:
+                theme.palette.mode === "dark" ?
+                theme.palette.warning.light :
+                theme.palette.warning.dark,
+                bgcolor:
+                theme.palette.mode === "dark" ?
+                "rgba(251,191,36,0.18)" :
+                "rgba(245,158,11,0.16)",
+                flex: "0 0 auto"
+              })}>
+
+              <WarningAmberRoundedIcon fontSize="small" />
+            </Box>
+            <Box minWidth={0}>
+              <Typography
+                variant="subtitle1"
+                fontWeight={900}
+                sx={{ lineHeight: 1.2 }}>
+                Ya existe una agenda pendiente para hoy
               </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.4 }}>
+                No puedes seleccionar otro camión ni crear una nueva agenda hasta
+                revisar o completar la pendiente.
+              </Typography>
+              {agendaCargaActual?.fecha_hora &&
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.4 }}>
+                  Agenda del día: {convertirFechaLocal(agendaCargaActual.fecha_hora)}
+                </Typography>
+              }
+            </Box>
+          </Box>
+          <Box
+            display="flex"
+            alignItems={{ xs: "stretch", sm: "center" }}
+            flexDirection={{ xs: "column", sm: "row" }}
+            gap={1}
+            sx={{ width: { xs: "100%", sm: "auto" } }}>
+
+            <Button
+              onClick={() => setOpenModal(true)}
+              size="medium"
+              variant="contained"
+              startIcon={<VisibilityOutlinedIcon fontSize="small" />}
+              sx={agendaPendingPrimaryButtonSx}>
+
+              Ver agenda
+            </Button>
+            {isAdmin && agendaCargaActual?.id_agenda_carga &&
+            <Button
+              onClick={() =>
+              navigate(`/admin/agendas/ver/${agendaCargaActual.id_agenda_carga}`)
+              }
+              size="medium"
+              variant="outlined"
+              startIcon={<OpenInNewOutlinedIcon fontSize="small" />}
+              sx={agendaPendingSecondaryButtonSx}>
+
+                Detalle
+              </Button>
             }
           </Box>
-          <Button
-            onClick={() => setOpenModal(true)}
-            size="small"
-            variant="outlined"
-            startIcon={<CheckCircleOutlineOutlinedIcon fontSize="small" />}>
-
-            Ver agenda
-          </Button>
         </Box>
         }
 
@@ -1073,8 +1196,12 @@ const CreateAgendaCargaForm = () => {
                   camiones={camionesDisponibles}
                   idChofer={isChofer ? idChofer : safeIdChofer}
                   disableChofer={!sucursalReady || choferesFiltrados.length === 0}
-                  disableCamion={!safeIdChofer || camionesDisponibles.length === 0}
-                  disableCargaFields={!idCamion}
+                  disableCamion={
+                  hayAgendaPendiente ||
+                  !safeIdChofer ||
+                  camionesDisponibles.length === 0
+                  }
+                  disableCargaFields={hayAgendaPendiente || !idCamion}
                   setIdChofer={setIdChofer}
                   idCamion={idCamion === "" ? "" : Number(idCamion)}
                   setIdCamion={(value) =>
@@ -1196,6 +1323,7 @@ const CreateAgendaCargaForm = () => {
               espaciosRestantes={capacidadAdicionales.espaciosRestantes}
               cantidadMaximaPorFila={cantidadMaximaPorFila}
               puedeAgregarProducto={
+              !hayAgendaPendiente &&
               Boolean(idCamion) &&
               capacidadAdicionales.maxProductosAdicionales !== null &&
               capacidadAdicionales.espaciosRestantes > 0

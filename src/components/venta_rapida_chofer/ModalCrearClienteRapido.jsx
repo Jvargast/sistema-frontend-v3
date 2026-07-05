@@ -1,5 +1,6 @@
 import Dialog from "../common/CompatDialog";
 import { DialogTitle, DialogContent, DialogActions, Button, IconButton, Chip, InputAdornment, Fade, CircularProgress } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
@@ -132,7 +133,7 @@ const ModalCrearClienteRapido = ({
         sx: {
           borderRadius: 3,
           overflow: "hidden",
-          boxShadow: (t) => `0 12px 32px ${t.palette.primary.main}22`
+          boxShadow: "0 18px 48px rgba(15, 23, 42, 0.18)"
         }
       }}>
 
@@ -141,7 +142,7 @@ const ModalCrearClienteRapido = ({
           m: 0,
           p: 2.5,
           background:
-          "linear-gradient(135deg, rgba(25,118,210,1) 0%, rgba(21,101,192,1) 100%)",
+          "linear-gradient(135deg, #0F172A 0%, #1F2937 100%)",
           color: "#fff",
           display: "flex",
           alignItems: "center",
@@ -179,15 +180,25 @@ const ModalCrearClienteRapido = ({
             gap: 1
           }}>
 
-          <StorefrontRoundedIcon color="primary" fontSize="small" />
+          <StorefrontRoundedIcon sx={{ color: "text.secondary" }} fontSize="small" />
           <Typography variant="body2" color="text.secondary">
             Se registrará en:
           </Typography>
           <Chip
             size="small"
-            color={defaultSucursalId != null ? "primary" : "warning"}
+            color={defaultSucursalId != null ? "default" : "warning"}
+            variant={defaultSucursalId != null ? "outlined" : "filled"}
             label={sucursalLabel}
-            sx={{ fontWeight: 700 }} />
+            sx={{
+              fontWeight: 800,
+              borderRadius: 1,
+              ...(defaultSucursalId != null
+                ? {
+                    color: "text.secondary",
+                    borderColor: "divider",
+                  }
+                : {}),
+            }} />
 
         </Box>
 
@@ -261,7 +272,16 @@ const ModalCrearClienteRapido = ({
           backgroundColor: (t) => t.palette.background.default
         }}>
 
-        <Button onClick={onClose} color="inherit" variant="outlined">
+        <Button
+          onClick={onClose}
+          color="inherit"
+          variant="outlined"
+          sx={{
+            textTransform: "none",
+            fontWeight: 700,
+            borderRadius: 1,
+          }}
+        >
           Cancelar
         </Button>
         <Button
@@ -271,7 +291,21 @@ const ModalCrearClienteRapido = ({
           startIcon={
           isLoading ? <CircularProgress size={18} color="inherit" /> : null
           }
-          sx={{ fontWeight: 700 }}>
+          sx={(theme) => ({
+            fontWeight: 800,
+            textTransform: "none",
+            borderRadius: 1,
+            bgcolor: "#0F172A",
+            color: theme.palette.common.white,
+            boxShadow: "none",
+            "&:hover": {
+              bgcolor: theme.palette.common.black,
+              boxShadow: "none"
+            },
+            "&.Mui-disabled": {
+              bgcolor: alpha("#0F172A", 0.16),
+            }
+          })}>
 
           {isLoading ? "Creando..." : "Guardar"}
         </Button>

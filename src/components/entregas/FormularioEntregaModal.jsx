@@ -1,6 +1,7 @@
 import Dialog from "../common/CompatDialog";
 import StepLabel from "../common/CompatStepLabel";
 import { DialogTitle, DialogContent, DialogActions, Button, CircularProgress, Chip, Divider, Paper, IconButton, Stepper, Step, useTheme } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
@@ -105,8 +106,8 @@ const FormularioEntregaModal = ({
             color: "#fff",
             background:
             theme.palette.mode === "dark" ?
-            "linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)" :
-            "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)"
+            "linear-gradient(135deg, #020617 0%, #1f2937 100%)" :
+            "linear-gradient(135deg, #0F172A 0%, #1F2937 100%)"
           }}>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -158,12 +159,12 @@ const FormularioEntregaModal = ({
             gap: 2,
             backgroundColor:
             theme.palette.mode === "dark" ?
-            "rgba(59,130,246,.08)" :
-            "rgba(59,130,246,.06)",
+            alpha("#0F172A", 0.18) :
+            alpha("#0F172A", 0.04),
             borderColor:
             theme.palette.mode === "dark" ?
-            "rgba(59,130,246,.3)" :
-            "rgba(59,130,246,.25)"
+            alpha("#FFFFFF", 0.12) :
+            alpha("#0F172A", 0.12)
           }}>
 
           <Box>
@@ -237,7 +238,11 @@ const FormularioEntregaModal = ({
         <Button
           onClick={onClose}
           disabled={isLoading}
-          sx={{ textTransform: "none" }}
+          sx={{
+            textTransform: "none",
+            fontWeight: 700,
+            color: "text.secondary",
+          }}
         >
           Cancelar
         </Button>
@@ -248,7 +253,17 @@ const FormularioEntregaModal = ({
             variant="contained"
             endIcon={<ArrowForwardIcon />}
             disabled={detalleNoDisponible}
-            sx={{ textTransform: "none", fontWeight: 700 }}>
+            sx={(theme) => ({
+              textTransform: "none",
+              fontWeight: 800,
+              bgcolor: "#0F172A",
+              color: theme.palette.common.white,
+              boxShadow: "none",
+              "&:hover": {
+                bgcolor: theme.palette.common.black,
+                boxShadow: "none"
+              }
+            })}>
 
             Siguiente
           </Button>
@@ -262,7 +277,17 @@ const FormularioEntregaModal = ({
           loading={isLoading}
           disabled={detalleNoDisponible || isLoading}
           loadingIndicator={<CircularProgress size={20} />}
-          sx={{ textTransform: "none", fontWeight: 700 }}>
+          sx={(theme) => ({
+            textTransform: "none",
+            fontWeight: 800,
+            bgcolor: "#0F172A",
+            color: theme.palette.common.white,
+            boxShadow: "none",
+            "&:hover": {
+              bgcolor: theme.palette.common.black,
+              boxShadow: "none"
+            }
+          })}>
 
             Registrar
           </Button>

@@ -1,6 +1,7 @@
 import Dialog from "../../components/common/CompatDialog";
 import * as React from "react";
 import { InputAdornment, FormControlLabel, Switch, Button, DialogTitle, DialogContent, DialogActions, Autocomplete, useTheme } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
 import Header from "../../components/common/Header";
 import LoaderComponent from "../../components/common/LoaderComponent";
@@ -24,6 +25,10 @@ import Box from "../../components/common/CompatBox";
 import Grid from "../../components/common/CompatGrid";
 import Stack from "../../components/common/CompatStack";
 import Typography from "../../components/common/CompatTypography";
+import {
+  darkSwitchSx,
+  secondaryActionButtonSx,
+} from "../../components/common/actionStyles";
 
 export default function CentroCostoManagement() {
   const theme = useTheme();
@@ -185,7 +190,17 @@ export default function CentroCostoManagement() {
         spacing={2}
         alignItems={{ xs: "stretch", md: "center" }}
         justifyContent="space-between"
-        sx={{ mb: 2 }}>
+        sx={{
+          mb: 2,
+          p: 2,
+          borderRadius: 2,
+          border: `1px solid ${alpha(theme.palette.divider, 0.7)}`,
+          bgcolor: theme.palette.background.paper,
+          boxShadow:
+          theme.palette.mode === "dark" ?
+          "0 10px 30px rgba(0,0,0,.24)" :
+          "0 10px 30px rgba(15,23,42,.06)"
+        }}>
 
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2} flex={1}>
           <TextField
@@ -220,7 +235,8 @@ export default function CentroCostoManagement() {
             <Switch
               checked={soloActivos}
               onChange={(_, v) => setSoloActivos(v)}
-              size="small" />
+              size="small"
+              sx={darkSwitchSx} />
 
             }
             label="Solo activos"
@@ -274,7 +290,11 @@ export default function CentroCostoManagement() {
               <Typography sx={{ mb: 1.5 }}>
                 No hay centros con los filtros actuales.
               </Typography>
-              <Button variant="outlined" onClick={() => setSearch("")}>
+              <Button
+                variant="outlined"
+                onClick={() => setSearch("")}
+                sx={(theme) => secondaryActionButtonSx(theme)}>
+
                 Limpiar filtros
               </Button>
             </Box>
@@ -302,8 +322,29 @@ export default function CentroCostoManagement() {
         }} />
 
 
-      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>Eliminar Centro de Costo</DialogTitle>
+      <Dialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            overflow: "hidden",
+            boxShadow: 24
+          }
+        }}>
+
+        <DialogTitle
+          sx={{
+            color: "#fff",
+            fontWeight: 800,
+            background:
+            theme.palette.mode === "dark" ?
+            "linear-gradient(135deg, #020617 0%, #1f2937 100%)" :
+            "linear-gradient(135deg, #0F172A 0%, #1F2937 100%)"
+          }}>
+
+          Eliminar centro de costo
+        </DialogTitle>
         <DialogContent dividers>
           <Typography>
             ¿Seguro que deseas eliminar{" "}
@@ -311,8 +352,12 @@ export default function CentroCostoManagement() {
             deshacer.
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)} variant="outlined">
+        <DialogActions sx={{ px: 2.5, py: 2 }}>
+          <Button
+            onClick={() => setConfirmOpen(false)}
+            variant="outlined"
+            sx={(theme) => secondaryActionButtonSx(theme)}>
+
             Cancelar
           </Button>
           <Button
@@ -320,7 +365,14 @@ export default function CentroCostoManagement() {
             variant="contained"
             color="error"
             disabled={deleting}
-            autoFocus>
+            autoFocus
+            disableElevation
+            sx={{
+              borderRadius: 1,
+              textTransform: "none",
+              fontWeight: 800,
+              boxShadow: "none"
+            }}>
 
             {deleting ? "Eliminando..." : "Eliminar"}
           </Button>

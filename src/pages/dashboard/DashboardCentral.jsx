@@ -22,23 +22,27 @@ import { useRegisterRefresh } from "../../hooks/useRegisterRefresh";
 import Box from "../../components/common/CompatBox";
 import Grid from "../../components/common/CompatGrid";
 
+const toSucursalId = (value) => {
+  if (value == null || value === "") return null;
+  const id = Number(value);
+  return Number.isFinite(id) && id > 0 ? id : null;
+};
+
 const DashboardCentral = () => {
   const { mode, activeSucursalId } = useSelector((s) => s.scope || {});
   const sucursalActiva = useSucursalActiva();
-  const resolvedSucursalId =
-    activeSucursalId ??
-    sucursalActiva?.id_sucursal ??
-    sucursalActiva?.id ??
-    null;
+  const resolvedSucursalId = toSucursalId(
+    activeSucursalId ?? sucursalActiva?.id_sucursal ?? sucursalActiva?.id
+  );
+  const dashboardSucursalId =
+    mode === "global" ? null : resolvedSucursalId;
 
   const kpiArgs = useMemo(
     () =>
-      mode === "global"
-        ? {}
-        : resolvedSucursalId
-        ? { id_sucursal: resolvedSucursalId }
+      dashboardSucursalId != null
+        ? { id_sucursal: dashboardSucursalId }
         : {},
-    [mode, resolvedSucursalId]
+    [dashboardSucursalId]
   );
 
   const { data: ventas, refetch: refetchVentas } = useGetKpiVentasPorFechaQuery(
@@ -79,7 +83,7 @@ const DashboardCentral = () => {
         id: "chart1",
         component: (
           <SalesChart
-            idSucursal={mode === "global" ? null : resolvedSucursalId}
+            idSucursal={dashboardSucursalId}
           />
         ),
       },
@@ -87,7 +91,7 @@ const DashboardCentral = () => {
         id: "chart2",
         component: (
           <OrdersPieChart
-            idSucursal={mode === "global" ? null : resolvedSucursalId}
+            idSucursal={dashboardSucursalId}
           />
         ),
       },
@@ -95,7 +99,7 @@ const DashboardCentral = () => {
         id: "chart3",
         component: (
           <RevenueTrendChart
-            idSucursal={mode === "global" ? null : resolvedSucursalId}
+            idSucursal={dashboardSucursalId}
           />
         ),
       },
@@ -103,12 +107,12 @@ const DashboardCentral = () => {
         id: "chart4",
         component: (
           <BestSellingProductsChart
-            idSucursal={mode === "global" ? null : resolvedSucursalId}
+            idSucursal={dashboardSucursalId}
           />
         ),
       },
     ],
-    [mode, resolvedSucursalId]
+    [dashboardSucursalId]
   );
 
   const { t } = useTranslation();

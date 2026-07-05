@@ -7,6 +7,7 @@ import PedidoClienteSelector from "./PedidoClienteSelector";
 import PropTypes from "prop-types";
 import AutocompleteDireccion from "./AutocompleteDireccion";
 import MapSelectorGoogle from "../maps/MapSelector";
+import { primaryActionButtonSx } from "../common/actionStyles";
 import TextField from "../common/CompatTextField";
 import Box from "../common/CompatBox";
 import Typography from "../common/CompatTypography";
@@ -135,7 +136,12 @@ const PedidoForm = ({
           variant="contained"
           fullWidth
           onClick={() => setOpenClienteModal(true)}
-          sx={{ textTransform: "none", fontSize: 16, boxShadow: "none" }}
+          sx={(theme) =>
+            primaryActionButtonSx(theme, {
+              fontSize: 16,
+              py: 1,
+            })
+          }
           disabled={!idSucursalFiltro}
         >
           {selectedCliente

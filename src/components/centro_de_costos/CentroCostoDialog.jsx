@@ -1,7 +1,7 @@
 import Dialog from "../common/CompatDialog";
 import * as React from "react";
 import PropTypes from "prop-types";
-import { DialogTitle, DialogContent, DialogActions, Button, Switch, FormControlLabel, Autocomplete, CircularProgress } from "@mui/material";
+import { DialogTitle, DialogContent, DialogActions, Button, Switch, FormControlLabel, Autocomplete, CircularProgress, IconButton } from "@mui/material";
 import AccountTreeOutlined from "@mui/icons-material/AccountTreeOutlined";
 import CloseRounded from "@mui/icons-material/CloseRounded";
 import SaveRounded from "@mui/icons-material/SaveRounded";
@@ -9,6 +9,11 @@ import TextField from "../common/CompatTextField";
 import Box from "../common/CompatBox";
 import Stack from "../common/CompatStack";
 import Typography from "../common/CompatTypography";
+import {
+  darkSwitchSx,
+  primaryActionButtonSx,
+  secondaryActionButtonSx,
+} from "../common/actionStyles";
 
 const TIPOS_CC = [
 "Operativo",
@@ -42,8 +47,9 @@ export default function CentroCostoDialog({
   });
 
   React.useEffect(() => {
-    if (!initialData) {
-      setForm({
+    const timeoutId = setTimeout(() => {
+      if (!initialData) {
+        setForm({
         nombre: "",
         tipo: "",
         id_sucursal:
@@ -51,15 +57,18 @@ export default function CentroCostoDialog({
         Number(activeSucursalId) :
         null,
         activo: true
-      });
-    } else {
-      setForm({
+        });
+      } else {
+        setForm({
         nombre: initialData.nombre || "",
         tipo: initialData.tipo || "",
         id_sucursal: initialData.id_sucursal ?? null,
         activo: initialData.activo !== false
-      });
-    }
+        });
+      }
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, [initialData, isGlobal, activeSucursalId]);
 
   const errors = React.useMemo(() => {
@@ -142,36 +151,62 @@ export default function CentroCostoDialog({
         onExited: () => {onExited?.();}
       }}>
 
-      <DialogTitle
-        sx={(theme) => ({
-          px: 3,
-          py: 2.25,
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          color: theme.palette.getContrastText(theme.palette.primary.main),
-          background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
-        })}>
-
+      <DialogTitle sx={{ m: 0, p: 0 }}>
         <Box
-          sx={{
-            p: 1,
-            borderRadius: 2,
-            bgcolor: "rgba(255,255,255,.15)",
+          sx={(theme) => ({
+            px: 2.5,
+            py: 2,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center"
-          }}>
+            justifyContent: "space-between",
+            gap: 2,
+            color: "#fff",
+            background:
+            theme.palette.mode === "dark" ?
+            "linear-gradient(135deg, #020617 0%, #1f2937 100%)" :
+            "linear-gradient(135deg, #0F172A 0%, #1F2937 100%)"
+          })}>
 
-          <AccountTreeOutlined />
-        </Box>
-        <Box sx={{ lineHeight: 1 }}>
-          <Typography variant="h6" fontWeight={800}>
-            {initialData ? "Editar Centro de Costo" : "Nuevo Centro de Costo"}
-          </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.9 }}>
-            Define nombre, tipo y sucursal del centro
-          </Typography>
+          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ minWidth: 0 }}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 1.5,
+                bgcolor: "rgba(255,255,255,.12)",
+                display: "grid",
+                placeItems: "center",
+                flex: "0 0 auto"
+              }}>
+
+              <AccountTreeOutlined />
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="h6" fontWeight={800} lineHeight={1.1}>
+                {initialData ? "Editar centro de costo" : "Nuevo centro de costo"}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ display: "block", opacity: 0.88, fontWeight: 600 }}>
+
+                Define nombre, tipo y sucursal del centro
+              </Typography>
+            </Box>
+          </Stack>
+
+          <IconButton
+            aria-label="Cerrar"
+            onClick={onClose}
+            disabled={isSaving}
+            size="small"
+            sx={{
+              color: "#fff",
+              bgcolor: "rgba(255,255,255,.12)",
+              "&:hover": { bgcolor: "rgba(255,255,255,.2)" }
+            }}>
+
+            <CloseRounded fontSize="small" />
+          </IconButton>
         </Box>
       </DialogTitle>
 
@@ -253,7 +288,8 @@ export default function CentroCostoDialog({
             <Switch
               checked={!!form.activo}
               onChange={(_, v) => setForm((s) => ({ ...s, activo: v }))}
-              disabled={isSaving} />
+              disabled={isSaving}
+              sx={darkSwitchSx} />
 
             }
             label="Activo" />
@@ -277,7 +313,8 @@ export default function CentroCostoDialog({
           onClick={onClose}
           variant="outlined"
           startIcon={<CloseRounded />}
-          disabled={isSaving}>
+          disabled={isSaving}
+          sx={(theme) => secondaryActionButtonSx(theme)}>
 
           Cancelar
         </Button>
@@ -287,7 +324,9 @@ export default function CentroCostoDialog({
           disabled={!canSave || isSaving}
           startIcon={
           isSaving ? <CircularProgress size={18} /> : <SaveRounded />
-          }>
+          }
+          disableElevation
+          sx={(theme) => primaryActionButtonSx(theme)}>
 
           {isSaving ? "Guardando..." : "Guardar"}
         </Button>

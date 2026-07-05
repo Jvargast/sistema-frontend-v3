@@ -23,15 +23,15 @@ export default function CentroCostoCard({
   const tipoKey = String(centro?.tipo || "").toLowerCase();
   const typeAccent =
     {
-      operativo: theme.palette.info.main,
-      producción: theme.palette.success.main,
-      produccion: theme.palette.success.main,
-      ventas: theme.palette.warning.main,
-      administración: theme.palette.secondary.main,
-      administracion: theme.palette.secondary.main,
-      logística: theme.palette.primary.main,
-      logistica: theme.palette.primary.main,
-      finanzas: theme.palette.success.dark,
+      operativo: "#0F172A",
+      producción: "#047857",
+      produccion: "#047857",
+      ventas: "#B45309",
+      administración: "#6D28D9",
+      administracion: "#6D28D9",
+      logística: "#475569",
+      logistica: "#475569",
+      finanzas: "#047857",
       otros: theme.palette.text.secondary,
     }[tipoKey] || theme.palette.text.secondary;
 
@@ -165,14 +165,17 @@ export default function CentroCostoCard({
         display: "flex",
         flexDirection: "column",
         minHeight: 184,
-        borderRadius: 2,
+        borderRadius: 1,
         border: `1px solid ${theme.palette.divider}`,
         overflow: "hidden",
         transition:
           "transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease",
         "&:hover": {
           transform: "translateY(-2px)",
-          boxShadow: theme.shadows[3],
+          boxShadow:
+            theme.palette.mode === "dark"
+              ? "0 10px 26px rgba(0,0,0,.34)"
+              : "0 10px 26px rgba(15,23,42,.1)",
           borderColor: accent,
         },
         ...(activo

@@ -119,6 +119,15 @@ const AgendaCargaFormInputs = ({
     (camion) => Number(camion.id_camion) === Number(idCamion)
   );
 
+  const handleCamionChange = (event) => {
+    const nextId = event.target.value;
+    const camion = camiones?.find(
+      (item) => Number(item.id_camion) === Number(nextId)
+    );
+    if (camion?.tieneAgenda) return;
+    setIdCamion(nextId);
+  };
+
   const renderSelectValue = ({ icon, primary, secondary }) =>
     <Box
       display="flex"
@@ -213,7 +222,7 @@ const AgendaCargaFormInputs = ({
               labelId="camion-label"
               value={idCamion}
               label="Camión"
-              onChange={(e) => setIdCamion(e.target.value)}
+              onChange={handleCamionChange}
               size="small"
               disabled={disableCamion}
               sx={fieldInputSx}
@@ -243,11 +252,15 @@ const AgendaCargaFormInputs = ({
                   <MenuItem
                     key={camion.id_camion}
                     value={camion.id_camion}
-                    disabled={false}
+                    disabled={estaBloqueado}
                     sx={{
                       ...menuItemSx,
                       color: estaBloqueado ? "error.main" : "inherit",
-                      fontWeight: estaBloqueado ? "bold" : "normal"
+                      fontWeight: estaBloqueado ? "bold" : "normal",
+                      "&.Mui-disabled": {
+                        opacity: 1,
+                        color: "error.main"
+                      }
                     }}>
 
                     <ListItemIcon sx={listItemIconSx}>
@@ -270,7 +283,7 @@ const AgendaCargaFormInputs = ({
             </Select>
             <FormHelperText>
               El camión debe pertenecer a la sucursal seleccionada y no estar en
-              ruta. Los marcados ya tienen agenda hoy.
+              ruta. Los marcados ya tienen agenda hoy y no se pueden seleccionar.
             </FormHelperText>
           </FormControl>
         </FieldShell>

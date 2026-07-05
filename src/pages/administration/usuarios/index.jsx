@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, CardContent, Button, IconButton, useTheme } from "@mui/material";
+import { Button, IconButton, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
@@ -25,8 +25,10 @@ import { useIsMobile } from "../../../utils/useIsMobile";
 import { useSelector } from "react-redux";
 import { useRegisterRefresh } from "../../../hooks/useRegisterRefresh";
 import Box from "../../../components/common/CompatBox";
-import Typography from "../../../components/common/CompatTypography";
-import { getActionIconButtonSx } from "../../../components/common/tableStyles";
+import {
+  getActionIconButtonSx,
+  getStandardDataGridSx,
+} from "../../../components/common/tableStyles";
 
 const UserManagement = () => {
   const theme = useTheme();
@@ -263,44 +265,47 @@ const UserManagement = () => {
     <Box sx={{ padding: 4, minHeight: "100vh" }}>
       <BackButton to="/admin" label="Volver al menú" />
       <Header title="Listado de Usuarios" subtitle="Gestión de Usuarios" />
-      <Card
+      <Box
         sx={{
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-          borderRadius: 2,
-          overflow: "hidden",
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          mb: 2,
         }}
       >
-        <CardContent>
-          <Box display="flex" justifyContent="space-between" mb={3}>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Lista de Usuarios
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              onClick={handleAddUser}
-            >
-              Nuevo Usuario
-            </Button>
-          </Box>
-          <DataGrid
-            rows={usuariosMapped}
-            columns={columns}
-            getRowId={(row) => row?.rut}
-            pagination
-            paginationMode="server"
-            rowCount={paginacion.totalItems}
-            paginationModel={{ page, pageSize }}
-            onPaginationModelChange={({ page, pageSize }) =>
-              handlePageChange(page, pageSize)
-            }
-            rowsPerPageOptions={[5, 10, 20, 50]}
-            pageSizeOptions={[5, 10, 20, 50]}
-            disableSelectionOnClick
-          />
-        </CardContent>
-      </Card>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={handleAddUser}
+          sx={{
+            minHeight: 40,
+            px: 2.5,
+            borderRadius: 1,
+            textTransform: "none",
+            fontWeight: 700,
+            boxShadow: "0 8px 18px rgba(15, 23, 42, 0.16)",
+          }}
+        >
+          Nuevo Usuario
+        </Button>
+      </Box>
+      <DataGrid
+        rows={usuariosMapped}
+        columns={columns}
+        getRowId={(row) => row?.rut}
+        pagination
+        paginationMode="server"
+        rowCount={paginacion.totalItems}
+        paginationModel={{ page, pageSize }}
+        onPaginationModelChange={({ page, pageSize }) =>
+          handlePageChange(page, pageSize)
+        }
+        rowsPerPageOptions={[5, 10, 20, 50]}
+        pageSizeOptions={[5, 10, 20, 50]}
+        disableSelectionOnClick
+        sx={getStandardDataGridSx(theme)}
+      />
       <ModalForm
         open={open}
         onClose={() => setOpen(false)}

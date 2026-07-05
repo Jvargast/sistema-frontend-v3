@@ -26,7 +26,12 @@ import MiniCartSummary from "../../components/pedido/MiniCartSummary";
 import useSucursalActiva from "../../hooks/useSucursalActiva";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import { getStockForSucursal } from "../../utils/inventoryUtils";
+import Header from "../../components/common/Header";
 import SucursalPickerHeader from "../../components/common/SucursalPickerHeader";
+import {
+  primaryActionButtonSx,
+  secondaryActionButtonSx,
+} from "../../components/common/actionStyles";
 import TextField from "../../components/common/CompatTextField";
 import Box from "../../components/common/CompatBox";
 import Stack from "../../components/common/CompatStack";
@@ -382,18 +387,35 @@ const CrearPedido = () => {
   const theme = useTheme();
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: "auto", p: 4, borderRadius: 2 }}>
-      <Typography variant="h4" fontWeight={700} textAlign="center" mb={3}>
-        Crear Pedido
-      </Typography>
-      <SucursalPickerHeader
-        sucursales={sucursales || []}
-        idSucursal={formState.id_sucursal}
-        canChoose={canChooseSucursal}
-        onChange={(id) =>
-        setFormState((p) => ({ ...p, id_sucursal: Number(id) }))
+    <Box
+      sx={{
+        maxWidth: 1200,
+        mx: "auto",
+        p: { xs: 2, md: 4 },
+        borderRadius: 2,
+      }}
+    >
+      <Header
+        eyebrow="Punto de pedido"
+        title="Crear Pedido"
+        subtitle="Cliente, entrega y productos coordinados por sucursal."
+        titleVariant="h4"
+        actions={
+          <SucursalPickerHeader
+            sucursales={sucursales || []}
+            idSucursal={formState.id_sucursal}
+            canChoose={canChooseSucursal}
+            onChange={(id) =>
+              setFormState((p) => ({
+                ...p,
+                id_sucursal: id == null ? null : Number(id),
+              }))
+            }
+            nombreSucursal={sucursalActual?.nombre}
+            sx={{ mb: 0, width: "100%" }}
+          />
         }
-        nombreSucursal={sucursalActual?.nombre} />
+      />
 
       <Stepper
         activeStep={activeStep}
@@ -455,7 +477,8 @@ const CrearPedido = () => {
             <Button
             variant="contained"
             onClick={nextStep}
-            disabled={!puedeAvanzar}>
+            disabled={!puedeAvanzar}
+            sx={(theme) => primaryActionButtonSx(theme, { px: 3 })}>
 
               Siguiente
             </Button>
@@ -482,10 +505,16 @@ const CrearPedido = () => {
 
           <MiniCartSummary onOpenCart={() => setActiveStep(2)} />
           <Stack direction="row" justifyContent="space-between" mt={2}>
-            <Button variant="outlined" onClick={prevStep}>
+            <Button
+              variant="outlined"
+              onClick={prevStep}
+              sx={(theme) => secondaryActionButtonSx(theme, { px: 3 })}>
               Atrás
             </Button>
-            <Button variant="contained" onClick={nextStep}>
+            <Button
+              variant="contained"
+              onClick={nextStep}
+              sx={(theme) => primaryActionButtonSx(theme, { px: 3 })}>
               Siguiente
             </Button>
           </Stack>
@@ -496,13 +525,17 @@ const CrearPedido = () => {
       <Box>
           <PedidoCarrito />
           <Stack direction="row" justifyContent="space-between" mt={2}>
-            <Button variant="outlined" onClick={prevStep}>
+            <Button
+              variant="outlined"
+              onClick={prevStep}
+              sx={(theme) => secondaryActionButtonSx(theme, { px: 3 })}>
               Atrás
             </Button>
             <Button
             variant="contained"
             onClick={nextStep}
-            disabled={cart.length === 0}>
+            disabled={cart.length === 0}
+            sx={(theme) => primaryActionButtonSx(theme, { px: 3 })}>
 
               Siguiente
             </Button>
@@ -520,7 +553,11 @@ const CrearPedido = () => {
           submitLabel="Generar Pedido" />
 
           <Stack direction="row" justifyContent="flex-start" mt={2}>
-            <Button variant="outlined" onClick={prevStep} disabled={isLoading}>
+            <Button
+              variant="outlined"
+              onClick={prevStep}
+              disabled={isLoading}
+              sx={(theme) => secondaryActionButtonSx(theme, { px: 3 })}>
               Atrás
             </Button>
           </Stack>

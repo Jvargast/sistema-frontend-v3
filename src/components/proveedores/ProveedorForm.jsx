@@ -16,6 +16,11 @@ import PhoneTextField from "../common/PhoneTextField";
 import TextField from "../common/CompatTextField";
 import Grid from "../common/CompatGrid";
 import Stack from "../common/CompatStack";
+import {
+  darkSwitchSx,
+  primaryActionButtonSx,
+  secondaryActionButtonSx,
+} from "../common/actionStyles";
 
 const ProveedorForm = ({
   form,
@@ -188,6 +193,7 @@ const ProveedorForm = ({
                     onChange={(_, v) =>
                       onChange("activo")({ target: { value: v } })
                     }
+                    sx={darkSwitchSx}
                   />
                 }
                 label="Activo"
@@ -218,6 +224,7 @@ const ProveedorForm = ({
             variant="outlined"
             startIcon={<RestartAltOutlined />}
             onClick={onReset}
+            sx={(theme) => secondaryActionButtonSx(theme)}
           >
             Limpiar
           </Button>
@@ -226,6 +233,8 @@ const ProveedorForm = ({
             variant="contained"
             startIcon={<SaveOutlined />}
             disabled={!canSave}
+            disableElevation
+            sx={(theme) => primaryActionButtonSx(theme)}
           >
             {isSaving ? "Guardando..." : "Guardar Proveedor"}
           </Button>

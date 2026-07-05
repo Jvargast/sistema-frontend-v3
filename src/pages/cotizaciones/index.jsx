@@ -24,8 +24,13 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { useGetAllSucursalsQuery } from "../../store/services/empresaApi";
 import { getStockForSucursal } from "../../utils/inventoryUtils";
+import Header from "../../components/common/Header";
 import SucursalPickerHeader from "../../components/common/SucursalPickerHeader";
 import MiniCartSummary from "../../components/pedido/MiniCartSummary";
+import {
+  primaryActionButtonSx,
+  secondaryActionButtonSx,
+} from "../../components/common/actionStyles";
 import TextField from "../../components/common/CompatTextField";
 import Box from "../../components/common/CompatBox";
 import Stack from "../../components/common/CompatStack";
@@ -323,16 +328,35 @@ const CrearCotizacion = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: "auto", p: 4, borderRadius: 2 }}>
-      <Typography variant="h4" fontWeight={700} textAlign="center" mb={3}>
-        Crear Cotización
-      </Typography>
-      <SucursalPickerHeader
-        sucursales={sucursales || []}
-        idSucursal={formState.id_sucursal}
-        canChoose={canChooseSucursal}
-        onChange={(id) => setFormState((p) => ({ ...p, id_sucursal: id }))}
-        nombreSucursal={sucursalActual?.nombre} />
+    <Box
+      sx={{
+        maxWidth: 1200,
+        mx: "auto",
+        p: { xs: 2, md: 4 },
+        borderRadius: 2,
+      }}
+    >
+      <Header
+        eyebrow="Punto de cotización"
+        title="Crear Cotización"
+        subtitle="Vencimiento, descuentos e impuestos coordinados por sucursal."
+        titleVariant="h4"
+        actions={
+          <SucursalPickerHeader
+            sucursales={sucursales || []}
+            idSucursal={formState.id_sucursal}
+            canChoose={canChooseSucursal}
+            onChange={(id) =>
+              setFormState((p) => ({
+                ...p,
+                id_sucursal: id == null ? null : Number(id),
+              }))
+            }
+            nombreSucursal={sucursalActual?.nombre}
+            sx={{ mb: 0, width: "100%" }}
+          />
+        }
+      />
 
       <Stepper
         activeStep={activeStep}
@@ -369,13 +393,19 @@ const CrearCotizacion = () => {
                 <Typography sx={{ fontWeight: "bold", mt: 2 }}>
                   Fecha de vencimiento:
                 </Typography>
-                <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+                <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
                   {[15, 30, 60].map((dias) =>
               <Button
                 key={dias}
                 variant="outlined"
                 onClick={() =>
                 setFechaVencimiento(calcularFechaVencimiento(dias))
+                }
+                sx={(theme) =>
+                  secondaryActionButtonSx(theme, {
+                    minWidth: 96,
+                    flex: { xs: "1 1 96px", sm: "0 0 auto" },
+                  })
                 }>
 
                       +{dias} días
@@ -436,7 +466,8 @@ const CrearCotizacion = () => {
             <Button
             variant="contained"
             onClick={nextStep}
-            disabled={mode === "global" && !formState.id_sucursal}>
+            disabled={mode === "global" && !formState.id_sucursal}
+            sx={(theme) => primaryActionButtonSx(theme, { px: 3 })}>
 
               Siguiente
             </Button>
@@ -462,10 +493,16 @@ const CrearCotizacion = () => {
 
           <MiniCartSummary onOpenCart={() => setActiveStep(2)} />
           <Stack direction="row" justifyContent="space-between" mt={2}>
-            <Button variant="outlined" onClick={prevStep}>
+            <Button
+              variant="outlined"
+              onClick={prevStep}
+              sx={(theme) => secondaryActionButtonSx(theme, { px: 3 })}>
               Atrás
             </Button>
-            <Button variant="contained" onClick={nextStep}>
+            <Button
+              variant="contained"
+              onClick={nextStep}
+              sx={(theme) => primaryActionButtonSx(theme, { px: 3 })}>
               Siguiente
             </Button>
           </Stack>
@@ -475,13 +512,17 @@ const CrearCotizacion = () => {
       <Box>
           <PedidoCarrito />
           <Stack direction="row" justifyContent="space-between" mt={2}>
-            <Button variant="outlined" onClick={prevStep}>
+            <Button
+              variant="outlined"
+              onClick={prevStep}
+              sx={(theme) => secondaryActionButtonSx(theme, { px: 3 })}>
               Atrás
             </Button>
             <Button
             variant="contained"
             onClick={nextStep}
-            disabled={cart.length === 0}>
+            disabled={cart.length === 0}
+            sx={(theme) => primaryActionButtonSx(theme, { px: 3 })}>
 
               Siguiente
             </Button>
@@ -498,7 +539,11 @@ const CrearCotizacion = () => {
           submitLabel="Ver Cotización" />
 
           <Stack direction="row" justifyContent="flex-start" mt={2}>
-            <Button variant="outlined" onClick={prevStep} disabled={isLoading}>
+            <Button
+              variant="outlined"
+              onClick={prevStep}
+              disabled={isLoading}
+              sx={(theme) => secondaryActionButtonSx(theme, { px: 3 })}>
               Atrás
             </Button>
           </Stack>

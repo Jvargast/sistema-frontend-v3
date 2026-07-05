@@ -14,6 +14,10 @@ import { showNotification } from "../../store/reducers/notificacionSlice";
 import LoaderComponent from "../../components/common/LoaderComponent";
 import PasswordModal from "../../components/profile/PasswordModal";
 import BackButton from "../../components/common/BackButton";
+import {
+  primaryActionButtonSx,
+  secondaryActionButtonSx,
+} from "../../components/common/actionStyles";
 import { getInitialRoute } from "../../utils/navigationUtils";
 import TextField from "../../components/common/CompatTextField";
 import Box from "../../components/common/CompatBox";
@@ -337,17 +341,25 @@ const PerfilAcciones = ({
       <>
         <Button
           variant="contained"
-          color="primary"
           onClick={handleSave}
-          sx={{ px: 4, width: { xs: "100%", sm: "auto" } }}
+          sx={(theme) =>
+            primaryActionButtonSx(theme, {
+              px: 4,
+              width: { xs: "100%", sm: "auto" },
+            })
+          }
         >
           Guardar
         </Button>
         <Button
           variant="outlined"
-          color="error"
           onClick={() => setEditMode(false)}
-          sx={{ px: 4, width: { xs: "100%", sm: "auto" } }}
+          sx={(theme) =>
+            secondaryActionButtonSx(theme, {
+              px: 4,
+              width: { xs: "100%", sm: "auto" },
+            })
+          }
         >
           Cancelar
         </Button>
@@ -355,9 +367,13 @@ const PerfilAcciones = ({
     ) : (
       <Button
         variant="contained"
-        color="primary"
         onClick={() => setEditMode(true)}
-        sx={{ px: 4, width: { xs: "100%", sm: "auto" } }}
+        sx={(theme) =>
+          primaryActionButtonSx(theme, {
+            px: 4,
+            width: { xs: "100%", sm: "auto" },
+          })
+        }
       >
         Editar Perfil
       </Button>
@@ -365,7 +381,12 @@ const PerfilAcciones = ({
     <Button
       variant="outlined"
       onClick={() => setPasswordModalOpen(true)}
-      sx={{ px: 4, width: { xs: "100%", sm: "auto" } }}
+      sx={(theme) =>
+        secondaryActionButtonSx(theme, {
+          px: 4,
+          width: { xs: "100%", sm: "auto" },
+        })
+      }
     >
       Cambiar Contraseña
     </Button>

@@ -1,4 +1,5 @@
 import { IconButton, Paper } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import PropTypes from "prop-types";
@@ -100,9 +101,11 @@ const PasoSeleccionProductos = ({
                 elevation={1}
                 sx={{
                   p: 2,
-                  border: "1px solid black",
+                  border: "1px solid",
+                  borderColor: "divider",
                   borderRadius: 2,
                   bgcolor: (theme) => theme.palette.background.paper,
+                  boxShadow: "none",
                 }}
               >
                 <Stack
@@ -175,21 +178,20 @@ const PasoSeleccionProductos = ({
                       }}
                     />
 
-                    {/* Botón SUMAR con azul sutil */}
                     <IconButton
                       size="small"
                       onClick={() => actualizarCantidad(producto, 1)}
-                      sx={{
+                      sx={(theme) => ({
                         borderRadius: "50%",
-                        backgroundColor: (theme) =>
-                          theme.palette.background.paper,
-                        color: "primary.main",
+                        backgroundColor: theme.palette.background.paper,
+                        color: "#0F172A",
                         border: "1px solid",
-                        borderColor: "grey.300",
+                        borderColor: alpha("#0F172A", 0.28),
                         "&:hover": {
-                          backgroundColor: "grey.200",
+                          backgroundColor: alpha("#0F172A", 0.06),
+                          borderColor: "#0F172A",
                         },
-                      }}
+                      })}
                     >
                       <AddIcon fontSize="small" />
                     </IconButton>

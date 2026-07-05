@@ -27,6 +27,10 @@ import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import { useNavigate } from "react-router-dom";
 import { useGetAllClientesQuery } from "../../store/services/clientesApi";
 import LoaderComponent from "../common/LoaderComponent";
+import {
+  primaryActionButtonSx,
+  secondaryActionButtonSx,
+} from "../common/actionStyles";
 import TextField from "../common/CompatTextField";
 import Box from "../common/CompatBox";
 import Typography from "../common/CompatTypography";
@@ -270,19 +274,9 @@ const PedidoClienteSelector = ({
               onClose();
               navigate("/clientes/crear");
             }}
-            sx={{
-              borderRadius: 1,
-              bgcolor: "#0F172A",
-              color: theme.palette.common.white,
-              boxShadow: "none",
-              fontWeight: 800,
-              textTransform: "none",
+            sx={primaryActionButtonSx(theme, {
               whiteSpace: "nowrap",
-              "&:hover": {
-                bgcolor: theme.palette.common.black,
-                boxShadow: "none",
-              },
-            }}>
+            })}>
 
             Nuevo cliente
           </Button>
@@ -443,17 +437,7 @@ const PedidoClienteSelector = ({
         <Button
           onClick={onClose}
           variant="outlined"
-          sx={{
-            borderRadius: 1,
-            textTransform: "none",
-            fontWeight: 800,
-            color: theme.palette.error.main,
-            borderColor: alpha(theme.palette.error.main, 0.42),
-            "&:hover": {
-              borderColor: theme.palette.error.main,
-              bgcolor: alpha(theme.palette.error.main, 0.08),
-            },
-          }}>
+          sx={secondaryActionButtonSx(theme)}>
 
           Cancelar
         </Button>
@@ -463,19 +447,9 @@ const PedidoClienteSelector = ({
             onClose();
           }}
           variant="contained"
-          sx={{
-            borderRadius: 1,
-            backgroundColor: "#0F172A",
-            color: theme.palette.common.white,
-            fontWeight: 800,
-            textTransform: "none",
-            boxShadow: "none",
+          sx={primaryActionButtonSx(theme, {
             px: 3,
-            "&:hover": {
-              backgroundColor: theme.palette.common.black,
-              boxShadow: "none",
-            },
-          }}
+          })}
           disabled={!preSelectedCliente}>
 
           Confirmar Cliente

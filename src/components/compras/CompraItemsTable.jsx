@@ -15,6 +15,11 @@ import Box from "../common/CompatBox";
 import Stack from "../common/CompatStack";
 import Typography from "../common/CompatTypography";
 import { getActionIconButtonSx } from "../common/tableStyles";
+import {
+  darkFilledInputSx,
+  darkSwitchSx,
+  secondaryActionButtonSx,
+} from "../common/actionStyles";
 
 const onlyDigits = (s) => (s || "").toString().replace(/[^\d]/g, "");
 const toInt = (s, def = 0) => {
@@ -29,20 +34,6 @@ const COL = {
   iva: { xs: 88, md: 110 },
   subtotal: { xs: 120, md: 100 },
   actions: { xs: 48, md: 64 },
-};
-
-const filledInputSx = {
-  "& .MuiFilledInput-root": {
-    borderRadius: 10,
-    backgroundColor: (t) => alpha(t.palette.primary.main, 0.04),
-    boxShadow: "none",
-    ":hover": { backgroundColor: (t) => alpha(t.palette.primary.main, 0.06) },
-    "&.Mui-focused": {
-      backgroundColor: (t) => alpha(t.palette.primary.main, 0.08),
-      boxShadow: (t) =>
-        `0 0 0 2px ${alpha(t.palette.primary.main, 0.15)} inset`,
-    },
-  },
 };
 
 function QtyStepper({ value, onChange }) {
@@ -86,7 +77,7 @@ function QtyStepper({ value, onChange }) {
           style: { textAlign: "right", width: 64 },
         }}
         InputProps={{ disableUnderline: true }}
-        sx={filledInputSx}
+        sx={darkFilledInputSx}
       />
       <Tooltip title="Sumar 1">
         <IconButton size="small" onClick={() => onChange(v + 1)}>
@@ -124,10 +115,10 @@ const CompraItemsTable = ({ items, addItem, updateItem, removeItem }) => {
         subheader="Registra insumos, cantidades y precio neto (CLP)"
         action={
           <Button
-            variant="text"
+            variant="outlined"
             startIcon={<Add />}
             onClick={() => addItem()}
-            sx={{ textTransform: "none", fontWeight: 700 }}
+            sx={(theme) => secondaryActionButtonSx(theme)}
           >
             Agregar ítem
           </Button>
@@ -149,7 +140,7 @@ const CompraItemsTable = ({ items, addItem, updateItem, removeItem }) => {
                 "& thead th": { bgcolor: "transparent", fontWeight: 700 },
                 "& tbody tr": {
                   "&:hover": {
-                    backgroundColor: (t) => alpha(t.palette.primary.main, 0.03),
+                    backgroundColor: alpha("#0F172A", 0.03),
                   },
                 },
               }}
@@ -237,7 +228,7 @@ const CompraItemsTable = ({ items, addItem, updateItem, removeItem }) => {
                               })
                             }
                             InputProps={{ disableUnderline: true }}
-                            sx={filledInputSx}
+                            sx={darkFilledInputSx}
                             size="small"
                             placeholder="Descripción (opcional si seleccionaste un insumo)"
                             error={invalid}
@@ -275,7 +266,7 @@ const CompraItemsTable = ({ items, addItem, updateItem, removeItem }) => {
                           }
                           size="small"
                           InputProps={{ disableUnderline: true }}
-                          sx={filledInputSx}
+                          sx={darkFilledInputSx}
                           placeholder="0"
                           fullWidth
                         />
@@ -294,6 +285,7 @@ const CompraItemsTable = ({ items, addItem, updateItem, removeItem }) => {
                                 afecta_iva: e.target.checked,
                               })
                             }
+                            sx={darkSwitchSx}
                           />
                         </Tooltip>
                       </TableCell>

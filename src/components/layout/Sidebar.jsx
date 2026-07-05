@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { BottomNavigationAction, BottomNavigation, Divider, Drawer, List, ListItemButton, ListItemIcon, ListItemText, useTheme, Collapse, useMediaQuery, alpha } from "@mui/material";
 import {
   HomeOutlined,
@@ -33,6 +33,8 @@ import Typography from "../common/CompatTypography";
 
 const ANDROID_FALLBACK = 16;
 const BASE_H = 64;
+const ACTION_H = 56;
+const NAV_DARK = "#0F172A";
 
 const itemStyles = (t, isActive) => ({
   mx: 1,
@@ -78,31 +80,69 @@ const itemStyles = (t, isActive) => ({
     : {}),
 });
 
-const navActionSx = (t, isActive) => ({
-  flex: 1,
-  color: isActive ? t.palette.primary.main : t.palette.text.secondary,
-  transition: "color .15s ease, transform .15s ease",
-  "& .MuiSvgIcon-root": {
-    fontSize: 24,
-    transform: isActive ? "translateY(-1px)" : "none",
-  },
-  "& .MuiBottomNavigationAction-label": {
-    fontSize: 11.5,
-    fontWeight: isActive ? 700 : 600,
-    letterSpacing: 0.1,
-    marginTop: 2,
-  },
-  "&:hover": {
-    backgroundColor:
-      t.palette.mode === "light"
-        ? alpha(t.palette.primary.main, 0.06)
-        : alpha("#fff", 0.06),
-  },
-  "& .MuiTouchRipple-root": {
-    color: isActive ? t.palette.primary.main : t.palette.text.secondary,
-    opacity: 0.18,
-  },
-});
+const navActionSx = (t, isActive, intent = "default") => {
+  const activeColor = intent === "danger" ? t.palette.error.main : NAV_DARK;
+  const inactiveColor =
+    t.palette.mode === "light" ? t.palette.text.secondary : alpha("#fff", 0.68);
+
+  return {
+    flex: 1,
+    minWidth: 0,
+    maxWidth: "none",
+    height: ACTION_H,
+    px: 0.25,
+    pt: 0.75,
+    pb: 0.4,
+    color: isActive ? activeColor : inactiveColor,
+    transition: "color .15s ease, background-color .15s ease",
+    "&.MuiBottomNavigationAction-iconOnly": {
+      paddingTop: 0,
+    },
+    "& .MuiBottomNavigationAction-label": {
+      fontSize: 11,
+      lineHeight: 1.08,
+      fontWeight: isActive ? 800 : 650,
+      letterSpacing: 0,
+      mt: 0.15,
+      whiteSpace: "nowrap",
+      opacity: 1,
+    },
+    "&:hover": {
+      backgroundColor:
+        t.palette.mode === "light" ? alpha(NAV_DARK, 0.04) : alpha("#fff", 0.06),
+    },
+    "&.Mui-selected": {
+      color: activeColor,
+    },
+    "& .MuiTouchRipple-root": {
+      color: isActive ? activeColor : inactiveColor,
+      opacity: 0.18,
+    },
+  };
+};
+
+const navIconSx = (t, isActive, intent = "default") => {
+  const activeColor = intent === "danger" ? t.palette.error.main : NAV_DARK;
+  const inactiveColor =
+    t.palette.mode === "light" ? t.palette.text.secondary : alpha("#fff", 0.68);
+  const activeBg =
+    intent === "danger" ? alpha(t.palette.error.main, 0.1) : alpha(NAV_DARK, 0.09);
+
+  return {
+    width: 34,
+    height: 30,
+    borderRadius: 999,
+    display: "inline-grid",
+    placeItems: "center",
+    mb: 0.25,
+    color: isActive ? activeColor : inactiveColor,
+    bgcolor: isActive ? activeBg : "transparent",
+    transition: "background-color .15s ease, color .15s ease",
+    "& .MuiSvgIcon-root": {
+      fontSize: 22,
+    },
+  };
+};
 
 const Sidebar = ({
   rol,
@@ -116,7 +156,6 @@ const Sidebar = ({
   const navigate = useNavigate();
   const theme = useTheme();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-  const [active, setActive] = useState("");
   const [openSections, setOpenSections] = useState({});
   const permisos = useSelector((state) => state.auth.permisos);
   const [logout] = useLogoutMutation();
@@ -126,10 +165,7 @@ const Sidebar = ({
   const getActiveModule = () =>
     modulesData.find((m) => currentPath.startsWith(m.path))?.path || null;
   const activeModulePath = getActiveModule();
-
-  useEffect(() => {
-    setActive(pathname.substring(1));
-  }, [pathname]);
+  const active = pathname.substring(1);
 
   const hasPermission = (permission) => permisos.includes(permission);
 
@@ -162,7 +198,6 @@ const Sidebar = ({
 
     if (!isDesktop) {
       navigate("/" + raw);
-      setActive(path);
       return;
     }
 
@@ -197,6 +232,12 @@ const Sidebar = ({
 
   const initialHomePath = getInitialRoute(rol, permisos);
   const initialHomeValue = initialHomePath.replace("/", "");
+  const currentBottomPath = pathname.substring(1);
+  const navIcon = (icon, isActive, intent = "default") => (
+    <Box component="span" sx={(t) => navIconSx(t, isActive, intent)}>
+      {icon}
+    </Box>
+  );
 
   return (
     <Box component="nav">
@@ -345,10 +386,8 @@ const Sidebar = ({
           onChange={(event, newValue) => {
             if (newValue === initialHomeValue) {
               navigate(initialHomePath);
-              setActive(newValue);
             } else if (newValue !== "logout") {
               navigate(`/${newValue}`);
-              setActive(newValue);
             }
           }}
           showLabels
@@ -358,15 +397,23 @@ const Sidebar = ({
             left: 0,
             right: 0,
             zIndex: 1200,
+            boxSizing: "border-box",
+            alignItems: "flex-start",
             backgroundColor:
               t.palette.mode === "light"
-                ? t.palette.background.paper
-                : t.palette.background.default,
+                ? "rgba(255,255,255,0.96)"
+                : "rgba(15,23,42,0.96)",
+            backdropFilter: "saturate(180%) blur(14px)",
             borderTop: `1px solid ${
               t.palette.roles?.border || "rgba(2,6,23,0.08)"
             }`,
-            boxShadow: "0 -4px 18px rgba(2,6,23,0.08)",
+            boxShadow:
+              t.palette.mode === "light"
+                ? "0 -10px 28px rgba(15,23,42,0.1)"
+                : "0 -10px 28px rgba(0,0,0,0.35)",
             height: `calc(${BASE_H}px + max(env(safe-area-inset-bottom, 0px), ${ANDROID_FALLBACK}px))`,
+            px: 0.75,
+            pt: 0.5,
             paddingBottom: `max(env(safe-area-inset-bottom, 0px), ${ANDROID_FALLBACK}px)`,
             WebkitTransform: "translateZ(0)",
             "&::before": {
@@ -375,26 +422,34 @@ const Sidebar = ({
               top: 0,
               left: 0,
               right: 0,
-              height: 2,
-              background: `linear-gradient(90deg, ${t.palette.primary.main}, ${t.palette.secondary.main})`,
-              opacity: 0.25,
+              height: 1,
+              background: alpha(NAV_DARK, t.palette.mode === "light" ? 0.16 : 0.34),
+            },
+            "& .MuiBottomNavigationAction-root": {
+              borderRadius: 1,
             },
           })}
         >
           <BottomNavigationAction
-            label="Home"
+            label="Inicio"
             value={initialHomeValue}
-            icon={<HomeOutlined />}
+            icon={navIcon(
+              <HomeOutlined />,
+              currentBottomPath === initialHomeValue
+            )}
             sx={(t) =>
-              navActionSx(t, pathname.substring(1) === initialHomeValue)
+              navActionSx(t, currentBottomPath === initialHomeValue)
             }
           />
           {rol === "chofer" && (
             <BottomNavigationAction
-              label="Mis Ventas"
+              label="Ventas"
               value="misventas"
-              icon={<ShoppingCartOutlined />}
-              sx={(t) => navActionSx(t, pathname.substring(1) === "misventas")}
+              icon={navIcon(
+                <ShoppingCartOutlined />,
+                currentBottomPath === "misventas"
+              )}
+              sx={(t) => navActionSx(t, currentBottomPath === "misventas")}
             />
           )}
 
@@ -402,24 +457,27 @@ const Sidebar = ({
             <BottomNavigationAction
               label="Pedidos"
               value="punto-pedido"
-              icon={<ShoppingCartOutlined />}
+              icon={navIcon(
+                <ShoppingCartOutlined />,
+                currentBottomPath === "punto-pedido"
+              )}
               sx={(t) =>
-                navActionSx(t, pathname.substring(1) === "punto-pedido")
+                navActionSx(t, currentBottomPath === "punto-pedido")
               }
             />
           )}
           <BottomNavigationAction
             label="Perfil"
             value="miperfil"
-            icon={<AccountCircle />}
-            sx={(t) => navActionSx(t, pathname.substring(1) === "miperfil")}
+            icon={navIcon(<AccountCircle />, currentBottomPath === "miperfil")}
+            sx={(t) => navActionSx(t, currentBottomPath === "miperfil")}
           />
           <BottomNavigationAction
-            label="Cerrar Sesión"
+            label="Salir"
             value="logout"
-            icon={<LogoutOutlined />}
+            icon={navIcon(<LogoutOutlined />, false, "danger")}
             onClick={handleLogout}
-            sx={(t) => navActionSx(t, pathname.substring(1) === "logout")}
+            sx={(t) => navActionSx(t, false, "danger")}
           />
         </BottomNavigation>
       )}

@@ -1,4 +1,6 @@
 import { Button } from "@mui/material";
+import SaveOutlined from "@mui/icons-material/SaveOutlined";
+import RestartAltOutlined from "@mui/icons-material/RestartAltOutlined";
 import { useDispatch, useSelector } from "react-redux";
 import Header from "../../components/common/Header";
 import { showNotification } from "../../store/reducers/notificacionSlice";
@@ -17,6 +19,10 @@ import { useEffect } from "react";
 import Box from "../../components/common/CompatBox";
 import Grid from "../../components/common/CompatGrid";
 import Stack from "../../components/common/CompatStack";
+import {
+  primaryActionButtonSx,
+  secondaryActionButtonSx,
+} from "../../components/common/actionStyles";
 
 export default function RegistrarCompra() {
   const dispatch = useDispatch();
@@ -117,10 +123,18 @@ export default function RegistrarCompra() {
               variant="contained"
               onClick={handleSubmit}
               disabled={!canSave || isSaving}
+              startIcon={<SaveOutlined />}
+              disableElevation
+              sx={(theme) => primaryActionButtonSx(theme)}
             >
               {isSaving ? "Guardando…" : "Registrar compra"}
             </Button>
-            <Button variant="outlined" onClick={reset}>
+            <Button
+              variant="outlined"
+              onClick={reset}
+              startIcon={<RestartAltOutlined />}
+              sx={(theme) => secondaryActionButtonSx(theme)}
+            >
               Limpiar
             </Button>
           </Stack>

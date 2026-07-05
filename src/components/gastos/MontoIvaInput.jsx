@@ -7,6 +7,7 @@ import { formatCLP } from "../../utils/formatUtils";
 import TextField from "../common/CompatTextField";
 import Box from "../common/CompatBox";
 import Stack from "../common/CompatStack";
+import { darkSwitchSx } from "../common/actionStyles";
 
 export default function MontoIvaInput({
   value,
@@ -70,6 +71,7 @@ export default function MontoIvaInput({
             checked={ivaIncluido}
             onChange={(_, v) => onToggleIva(v)}
             size="small"
+            sx={darkSwitchSx}
           />
         }
         label={ivaIncluido ? "Incluye IVA (19%)" : "Monto sin IVA"}

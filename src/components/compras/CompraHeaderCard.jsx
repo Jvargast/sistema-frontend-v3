@@ -10,6 +10,16 @@ import "dayjs/locale/es";
 import TextField from "../common/CompatTextField";
 import Grid from "../common/CompatGrid";
 import Stack from "../common/CompatStack";
+import { neutralStateChipSx } from "../common/actionStyles";
+
+const getEstadoChipProps = (estado) => {
+  const useNeutral = ["info", "primary"].includes(estado?.color);
+
+  return {
+    color: useNeutral ? "default" : estado?.color || "default",
+    sx: useNeutral ? neutralStateChipSx : { fontWeight: 700 },
+  };
+};
 
 const CompraHeaderCard = ({ header, setHeader, onProveedor }) => {
   return (
@@ -144,7 +154,8 @@ const CompraHeaderCard = ({ header, setHeader, onProveedor }) => {
                         <Chip
                           size="small"
                           label={s.label}
-                          color={s.color}
+                          color={getEstadoChipProps(s).color}
+                          sx={getEstadoChipProps(s).sx}
                           variant="outlined"
                         />
                       </Stack>
@@ -160,7 +171,12 @@ const CompraHeaderCard = ({ header, setHeader, onProveedor }) => {
                         <Icon fontSize="small" />
                       </ListItemIcon>
                       <ListItemText primary={s.label} />
-                      <Chip size="small" label={s.value} sx={{ ml: 1 }} />
+                      <Chip
+                        size="small"
+                        label={s.value}
+                        color={getEstadoChipProps(s).color}
+                        sx={{ ml: 1, ...getEstadoChipProps(s).sx }}
+                      />
                     </MenuItem>
                   );
                 })}

@@ -31,10 +31,11 @@ export const ventasEstadisticasApi = createApi({
       providesTags: ["VentasEstadisticas"],
     }),
     getVentasResumenSemanal: builder.query({
-      query: (/* { id_sucursal } = {} */) => ({
+      query: ({ id_sucursal } = {}) => ({
         url: "/analisis/ventas/resumen-semanal",
-        // params: id_sucursal != null ? { id_sucursal } : undefined,
+        params: id_sucursal != null ? { id_sucursal } : undefined,
       }),
+      providesTags: ["VentasEstadisticas"],
     }),
 
     getVentasTendenciaMensual: builder.query({

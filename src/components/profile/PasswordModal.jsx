@@ -3,6 +3,10 @@ import { DialogTitle, DialogContent, DialogActions, Button, IconButton } from "@
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useState } from "react";
 import PropTypes from "prop-types";
+import {
+  primaryActionButtonSx,
+  secondaryActionButtonSx,
+} from "../common/actionStyles";
 import TextField from "../common/CompatTextField";
 import Box from "../common/CompatBox";
 import Typography from "../common/CompatTypography";
@@ -42,7 +46,12 @@ const PasswordModal = ({ open, onClose, onSave }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle
-        sx={{ bgcolor: "primary.main", color: "white", textAlign: "center" }}>
+        sx={{
+          bgcolor: "#0F172A",
+          color: "white",
+          textAlign: "center",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+        }}>
 
         <Typography variant="h6" fontWeight="bold">
           Cambiar Contraseña
@@ -85,22 +94,23 @@ const PasswordModal = ({ open, onClose, onSave }) => {
           justifyContent: "space-between",
           px: 4,
           py: 2,
-          bgcolor: "grey.100"
+          bgcolor: (theme) =>
+            theme.palette.mode === "dark"
+              ? theme.palette.background.paper
+              : "grey.100",
         }}>
 
         <Button
           variant="outlined"
-          color="error"
           onClick={onClose}
-          sx={{ px: 3, fontWeight: "bold", borderRadius: 2 }}>
+          sx={(theme) => secondaryActionButtonSx(theme, { px: 3 })}>
 
           Cancelar
         </Button>
         <Button
           variant="contained"
-          color="primary"
           onClick={handleSave}
-          sx={{ px: 3, fontWeight: "bold", borderRadius: 2 }}>
+          sx={(theme) => primaryActionButtonSx(theme, { px: 3 })}>
 
           Guardar
         </Button>

@@ -11,6 +11,7 @@ import {
   Paper,
   Chip,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
@@ -77,6 +78,48 @@ const destinationScrollSx = {
   overscrollBehavior: "contain",
   WebkitOverflowScrolling: "touch",
 };
+
+const deliveryActionButtonSx = (theme) => ({
+  textTransform: "none",
+  fontWeight: 800,
+  borderRadius: 1,
+  bgcolor: "#0F172A",
+  color: theme.palette.common.white,
+  border: "1px solid #0F172A",
+  boxShadow: "none",
+  "&:hover": {
+    bgcolor: theme.palette.common.black,
+    borderColor: theme.palette.common.black,
+    boxShadow: "none",
+  },
+});
+
+const detailActionButtonSx = (theme) => ({
+  textTransform: "none",
+  fontWeight: 800,
+  borderRadius: 1,
+  color: "#0F172A",
+  bgcolor: theme.palette.background.paper,
+  border: `1px solid ${alpha("#0F172A", 0.28)}`,
+  boxShadow: "none",
+  "&:hover": {
+    bgcolor: alpha("#0F172A", 0.06),
+    borderColor: "#0F172A",
+    boxShadow: "none",
+  },
+});
+
+const navigationActionButtonSx = (theme) => ({
+  textTransform: "none",
+  fontWeight: 800,
+  borderRadius: 1,
+  color: theme.palette.text.primary,
+  borderColor: alpha("#0F172A", 0.24),
+  "&:hover": {
+    borderColor: alpha("#0F172A", 0.44),
+    bgcolor: alpha("#0F172A", 0.04),
+  },
+});
 
 function getDestinoKey(destino) {
   if (destino?.id_pedido != null) return `pedido-${destino.id_pedido}`;
@@ -306,11 +349,14 @@ const ListaDestinos = ({
   useEffect(() => {
     if (!origenPendiente || !destinosPendientesRuteables.length) {
       lastParamsRef.current = { origen: null, pendientesKey: "" };
-      if (rutaOptimizada.length > 0) setRutaOptimizada([]);
-      if (routePath.length > 0) setRoutePath([]);
-      if (currentLegPath.length > 0) setCurrentLegPath([]);
-      if (futureLegPath.length > 0) setFutureLegPath([]);
-      return;
+      const resetTimer = window.setTimeout(() => {
+        setRutaOptimizada((current) => (current.length > 0 ? [] : current));
+        setRoutePath((current) => (current.length > 0 ? [] : current));
+        setCurrentLegPath((current) => (current.length > 0 ? [] : current));
+        setFutureLegPath((current) => (current.length > 0 ? [] : current));
+      }, 0);
+
+      return () => window.clearTimeout(resetTimer);
     }
     if (
       lastParamsRef.current.origen &&
@@ -387,13 +433,24 @@ const ListaDestinos = ({
       <Box sx={{ mb: 2 }}>
         <Button
           variant={usarGeolocalizacion ? "contained" : "outlined"}
-          color="primary"
-          sx={{
+          sx={(theme) => ({
             width: { xs: "100%", sm: "auto" },
             minHeight: 44,
             textTransform: "none",
-            fontWeight: 700,
-          }}
+            fontWeight: 800,
+            borderRadius: 1,
+            ...(usarGeolocalizacion
+              ? {
+                  bgcolor: "#0F172A",
+                  color: theme.palette.common.white,
+                  boxShadow: "none",
+                  "&:hover": {
+                    bgcolor: theme.palette.common.black,
+                    boxShadow: "none",
+                  },
+                }
+              : navigationActionButtonSx(theme)),
+          })}
           onClick={() => {
             if (usarGeolocalizacion) {
               setUsarGeolocalizacion(false);
@@ -462,49 +519,43 @@ const ListaDestinos = ({
             >
               <Button
                 variant="contained"
-                color="info"
                 size="large"
                 startIcon={<LocalShippingIcon />}
                 onClick={() => onOpenEntrega(proximoDestino)}
-                sx={{
-                  textTransform: "none",
-                  fontWeight: 700,
+                sx={(theme) => ({
+                  ...deliveryActionButtonSx(theme),
                   minHeight: 46,
                   flex: 1,
-                }}
+                })}
               >
                 Entregar
               </Button>
               <Button
                 variant="outlined"
-                color="inherit"
                 size="large"
                 startIcon={<ReceiptLongIcon />}
                 onClick={() => onVerDetallePedido(proximoDestino)}
-                sx={{
-                  textTransform: "none",
-                  fontWeight: 700,
+                sx={(theme) => ({
+                  ...detailActionButtonSx(theme),
                   minHeight: 46,
                   flex: 1,
-                }}
+                })}
               >
                 Detalle
               </Button>
               {proximoDestinoUrl && (
                 <Button
                   variant="outlined"
-                  color="primary"
                   size="large"
                   startIcon={<NavigationIcon />}
                   href={proximoDestinoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  sx={{
-                    textTransform: "none",
-                    fontWeight: 700,
+                  sx={(theme) => ({
+                    ...navigationActionButtonSx(theme),
                     minHeight: 46,
                     flex: 1,
-                  }}
+                  })}
                 >
                   Navegar
                 </Button>
@@ -584,7 +635,11 @@ const ListaDestinos = ({
                 >
                   <Box sx={destinationScrollSx}>
                     <List disablePadding>
-                      {destinosPendientesOrdenados.map((destino, index) => (
+                      {destinosPendientesOrdenados.map((destino, index) => {
+                        const esProximoDestino =
+                          proximoDestino?.id_pedido === destino.id_pedido;
+
+                        return (
                         <Box key={destino.id_pedido}>
                           <ListItem sx={{ px: 0, py: 1.25 }}>
                             <Paper
@@ -676,7 +731,8 @@ const ListaDestinos = ({
                                     </Typography>
                                   </Box>
                                 </Stack>
-                                <Box
+                                {!esProximoDestino && (
+                                  <Box
                                   sx={{
                                     display: "flex",
                                     flexDirection: { xs: "column", sm: "row" },
@@ -695,33 +751,31 @@ const ListaDestinos = ({
                                   <Button
                                     size="small"
                                     variant="contained"
-                                    color="info"
                                     startIcon={<LocalShippingIcon />}
                                     onClick={() => onOpenEntrega(destino)}
-                                    sx={{
-                                      textTransform: "none",
-                                      fontWeight: 700,
+                                    sx={(theme) => ({
+                                      ...deliveryActionButtonSx(theme),
                                       minHeight: 44,
                                       width: { xs: "100%", sm: "auto" },
-                                    }}
+                                    })}
                                   >
                                     Registrar Entrega
                                   </Button>
                                   <Button
                                     size="small"
-                                    variant="contained"
-                                    color="inherit"
-                                    sx={{
-                                      textTransform: "none",
-                                      fontWeight: 700,
+                                    variant="outlined"
+                                    startIcon={<ReceiptLongIcon />}
+                                    sx={(theme) => ({
+                                      ...detailActionButtonSx(theme),
                                       minHeight: 44,
                                       width: { xs: "100%", sm: "auto" },
-                                    }}
+                                    })}
                                     onClick={() => onVerDetallePedido(destino)}
                                   >
                                     Ver Detalle
                                   </Button>
                                 </Box>
+                                )}
                               </Stack>
                             </Paper>
                           </ListItem>
@@ -729,7 +783,8 @@ const ListaDestinos = ({
                             <Divider />
                           )}
                         </Box>
-                      ))}
+                        );
+                      })}
                     </List>
                   </Box>
                 </AccordionDetails>
@@ -880,20 +935,13 @@ const ListaDestinos = ({
                                 >
                                   <Button
                                     size="medium"
-                                    variant="contained"
-                                    sx={{
-                                      textTransform: "none",
-                                      fontWeight: 700,
+                                    variant="outlined"
+                                    startIcon={<ReceiptLongIcon />}
+                                    sx={(theme) => ({
+                                      ...detailActionButtonSx(theme),
                                       minHeight: 44,
                                       width: { xs: "100%", sm: "auto" },
-                                      color: "inherit",
-                                      borderColor: "success.main",
-                                      "&:hover": {
-                                        borderColor: "success.dark",
-                                        backgroundColor:
-                                          "rgba(46, 125, 50, 0.08)",
-                                      },
-                                    }}
+                                    })}
                                     onClick={() =>
                                       onVerDetallePedido(destino)
                                     }

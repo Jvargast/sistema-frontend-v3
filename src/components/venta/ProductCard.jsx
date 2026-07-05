@@ -2,8 +2,9 @@ import { Card, CardContent, CardMedia, Button, Chip, Tooltip, useTheme } from "@
 import BrokenImageIcon from "@mui/icons-material/BrokenImage";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import PropTypes from "prop-types";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getImageUrl } from "../../store/services/apiBase";
+import { primaryActionButtonSx } from "../common/actionStyles";
 import Box from "../common/CompatBox";
 import Typography from "../common/CompatTypography";
 
@@ -12,6 +13,7 @@ const ProductCard = ({
   onAddToCart,
   stock = 0,
   disableAdd = false,
+  sx,
 }) => {
   const theme = useTheme();
   const [imageError, setImageError] = useState(false);
@@ -23,9 +25,25 @@ const ProductCard = ({
   const tipoColor = product.tipo === "insumo" ? "default" : "primary";
 
   const imageSrc = useMemo(() => {
-    const raw = product.image_url || "";
+    const raw =
+      product.image_url ||
+      product.imageUrl ||
+      product.imagen_url ||
+      product.imagen ||
+      product.foto_url ||
+      "";
     return raw ? getImageUrl(raw) : "";
-  }, [product.image_url]);
+  }, [
+    product.foto_url,
+    product.imageUrl,
+    product.image_url,
+    product.imagen,
+    product.imagen_url,
+  ]);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [imageSrc]);
 
   return (
     <Card
@@ -44,21 +62,30 @@ const ProductCard = ({
         overflow: "hidden",
         minHeight: 340,
         background: theme.palette.background.paper,
+        ...sx,
       }}
     >
       <Box
         position="absolute"
-        top={10}
-        left={10}
-        zIndex={1}
+        top={14}
+        left={22}
+        zIndex={2}
         display="flex"
         gap={1}
+        sx={{ pointerEvents: "none" }}
       >
         <Chip
           label={tipoLabel}
           size="small"
           color={tipoColor}
-          sx={{ fontSize: "0.72rem", fontWeight: 700 }}
+          sx={{
+            fontSize: "0.72rem",
+            fontWeight: 700,
+            bgcolor:
+              product.tipo === "insumo"
+                ? theme.palette.background.paper
+                : undefined,
+          }}
         />
       </Box>
 
@@ -74,6 +101,8 @@ const ProductCard = ({
             borderTopLeftRadius: 16,
             borderTopRightRadius: 16,
             gap: 0.5,
+            position: "relative",
+            zIndex: 0,
           }}
         >
           {imageError ? (
@@ -101,6 +130,8 @@ const ProductCard = ({
             objectFit: "cover",
             borderTopLeftRadius: 16,
             borderTopRightRadius: 16,
+            position: "relative",
+            zIndex: 0,
           }}
         />
       )}
@@ -155,17 +186,9 @@ const ProductCard = ({
           fullWidth
           onClick={() => onAddToCart(product)}
           disabled={sinStock || disableAdd}
-          sx={{
-            fontWeight: "bold",
-            borderRadius: 2,
+          sx={primaryActionButtonSx(theme, {
             py: 1,
-            backgroundColor:
-              stockInv > 0 ? theme.palette.primary.main : "#bdbdbd",
-            "&:hover": {
-              backgroundColor:
-                stockInv > 0 ? theme.palette.primary.dark : "#9e9e9e",
-            },
-          }}
+          })}
         >
           {stockInv > 0 ? "Agregar" : "Agotado"}
         </Button>
@@ -177,6 +200,10 @@ const ProductCard = ({
 ProductCard.propTypes = {
   product: PropTypes.shape({
     image_url: PropTypes.string,
+    imageUrl: PropTypes.string,
+    imagen_url: PropTypes.string,
+    imagen: PropTypes.string,
+    foto_url: PropTypes.string,
     nombre_producto: PropTypes.string.isRequired,
     precio: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     inventario: PropTypes.arrayOf(
@@ -190,6 +217,7 @@ ProductCard.propTypes = {
   onAddToCart: PropTypes.func.isRequired,
   stock: PropTypes.number,
   disableAdd: PropTypes.bool,
+  sx: PropTypes.object,
 };
 
 export default ProductCard;

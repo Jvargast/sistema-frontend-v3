@@ -1,4 +1,5 @@
 import { Divider, List, ListItem, ListItemText, Chip, Button } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import PropTypes from "prop-types";
 import Box from "../common/CompatBox";
 import Stack from "../common/CompatStack";
@@ -12,6 +13,7 @@ const PasoResumenFinal = ({
   montoRecibido,
   onConfirmar,
   loading,
+  disabled = false,
 }) => {
   const metodosDePago = {
     1: "Efectivo",
@@ -25,7 +27,7 @@ const PasoResumenFinal = ({
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        🧾 Resumen de la Venta
+        Resumen de la venta
       </Typography>
 
       <Box sx={{ mb: 2 }}>
@@ -60,7 +62,16 @@ const PasoResumenFinal = ({
 
       <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
         <Typography variant="body1">Método de Pago:</Typography>
-        <Chip label={metodosDePago[metodoPago] || "Desconocido"} />
+        <Chip
+          label={metodosDePago[metodoPago] || "Desconocido"}
+          variant="outlined"
+          sx={{
+            fontWeight: 800,
+            borderRadius: 1,
+            color: "text.secondary",
+            borderColor: "divider",
+          }}
+        />
       </Stack>
 
       <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
@@ -91,9 +102,23 @@ const PasoResumenFinal = ({
       <Box textAlign="center" sx={{ mt: 3 }}>
         <Button
           variant="contained"
-          color="success"
           onClick={onConfirmar}
-          disabled={loading}
+          disabled={loading || disabled}
+          sx={(theme) => ({
+            textTransform: "none",
+            fontWeight: 800,
+            borderRadius: 1,
+            bgcolor: "#0F172A",
+            color: theme.palette.common.white,
+            boxShadow: "none",
+            "&:hover": {
+              bgcolor: theme.palette.common.black,
+              boxShadow: "none",
+            },
+            "&.Mui-disabled": {
+              bgcolor: alpha("#0F172A", 0.16),
+            },
+          })}
         >
           {loading ? "Registrando..." : "Confirmar Venta"}
         </Button>
@@ -110,6 +135,7 @@ PasoResumenFinal.propTypes = {
   montoRecibido: PropTypes.number.isRequired,
   onConfirmar: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool,
 };
 
 export default PasoResumenFinal;

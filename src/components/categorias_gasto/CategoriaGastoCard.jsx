@@ -18,18 +18,15 @@ import { getActionIconButtonSx } from "../common/tableStyles";
 
 function tipoMeta(tipo, theme) {
   const map = {
-    operativo: { label: "Operativo", color: "primary", Icon: OperativoIcon },
-    personal: { label: "Personal", color: "secondary", Icon: PersonalIcon },
-    financiero: { label: "Financiero", color: "info", Icon: FinancieroIcon },
-    impuestos: { label: "Impuestos", color: "warning", Icon: ImpuestosIcon },
-    logistica: { label: "Logística", color: "success", Icon: LogisticaIcon },
-    otros: { label: "Otros", color: "default", Icon: OtrosIcon },
+    operativo: { label: "Operativo", main: "#0F172A", Icon: OperativoIcon },
+    personal: { label: "Personal", main: "#6D28D9", Icon: PersonalIcon },
+    financiero: { label: "Financiero", main: "#047857", Icon: FinancieroIcon },
+    impuestos: { label: "Impuestos", main: "#B45309", Icon: ImpuestosIcon },
+    logistica: { label: "Logística", main: "#475569", Icon: LogisticaIcon },
+    otros: { label: "Otros", main: theme.palette.text.secondary, Icon: OtrosIcon },
   };
   const def = map[tipo] || map.otros;
-  const main =
-    def.color === "default"
-      ? theme.palette.text.secondary
-      : theme.palette[def.color].main;
+  const main = def.main;
   const bg = alpha(main, 0.12);
   return { ...def, main, bg };
 }
@@ -49,7 +46,7 @@ export default function CategoriaGastoCard({
       sx={{
         position: "relative",
         overflow: "hidden",
-        borderRadius: 3,
+        borderRadius: 1,
         bgcolor: theme.palette.background.paper,
         border: `1px solid ${alpha(theme.palette.divider, 0.7)}`,
         boxShadow:
@@ -82,7 +79,7 @@ export default function CategoriaGastoCard({
               flexShrink: 0,
               width: 44,
               height: 44,
-              borderRadius: "14px",
+              borderRadius: 1,
               display: "grid",
               placeItems: "center",
               bgcolor: meta.bg,

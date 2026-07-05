@@ -4,7 +4,7 @@ import { apiUrl } from "./apiBase";
 
 function getScope(state) {
   const role = state?.auth?.rol?.nombre || state?.auth?.rol;
-  const isAdmin = role === "administrador";
+  const isAdmin = String(role || "").toLowerCase() === "administrador";
 
   const activeSucursalId =
     state?.scope?.activeSucursalId ?? state?.auth?.user?.id_sucursal ?? null;

@@ -1,10 +1,12 @@
 import Dialog from "../common/CompatDialog";
 import Select from "../common/CompatSelect";
 import PropTypes from "prop-types";
-import { DialogTitle, DialogContent, DialogActions, Button, FormControl, InputLabel, MenuItem, FormControlLabel, Switch, FormHelperText, Chip, useTheme, InputAdornment, ListItemIcon, Divider } from "@mui/material";
+import { DialogTitle, DialogContent, DialogActions, Button, FormControl, InputLabel, MenuItem, FormControlLabel, Switch, FormHelperText, Chip, useTheme, InputAdornment, ListItemIcon, IconButton } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 import CategoryOutlined from "@mui/icons-material/CategoryOutlined";
+import CloseRounded from "@mui/icons-material/CloseRounded";
+import SaveRounded from "@mui/icons-material/SaveRounded";
 import NotesOutlined from "@mui/icons-material/NotesOutlined";
 import LocalShipping from "@mui/icons-material/LocalShipping";
 import WorkOutlineOutlined from "@mui/icons-material/WorkOutlineOutlined";
@@ -13,9 +15,15 @@ import RequestQuote from "@mui/icons-material/RequestQuote";
 import ReceiptLong from "@mui/icons-material/ReceiptLong";
 import StyleOutlined from "@mui/icons-material/StyleOutlined";
 import TextField from "../common/CompatTextField";
+import Box from "../common/CompatBox";
 import Grid from "../common/CompatGrid";
 import Stack from "../common/CompatStack";
 import Typography from "../common/CompatTypography";
+import {
+  darkSwitchSx,
+  primaryActionButtonSx,
+  secondaryActionButtonSx,
+} from "../common/actionStyles";
 
 const TIPOS_CATEGORIA = [
 { id: "operativo", label: "Operativo", Icon: WorkOutlineOutlined, color: "primary" },
@@ -34,7 +42,10 @@ const TIPOS_CATEGORIA = [
 function metaTipo(tipoId, theme) {
   const found =
   TIPOS_CATEGORIA.find((t) => t.id === tipoId) || TIPOS_CATEGORIA.at(-1);
+  const useNeutralAccent = ["primary", "info"].includes(found.color);
   const main =
+  useNeutralAccent ?
+  "#0F172A" :
   found.color === "default" ?
   theme.palette.text.secondary :
   theme.palette[found.color].main;
@@ -60,8 +71,9 @@ export default function CategoriaGastoDialog({
 
   useEffect(() => {
     if (!open) return;
-    if (initialData) {
-      setForm({
+    const timeoutId = setTimeout(() => {
+      if (initialData) {
+        setForm({
         nombre_categoria: initialData.nombre_categoria || "",
         descripcion: initialData.descripcion || "",
         tipo_categoria: initialData.tipo_categoria || "",
@@ -71,16 +83,19 @@ export default function CategoriaGastoDialog({
         true,
         activo:
         typeof initialData.activo === "boolean" ? initialData.activo : true
-      });
-    } else {
-      setForm({
+        });
+      } else {
+        setForm({
         nombre_categoria: "",
         descripcion: "",
         tipo_categoria: "",
         deducible: true,
         activo: true
-      });
-    }
+        });
+      }
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, [open, initialData]);
 
   const [touched, setTouched] = useState(false);
@@ -122,52 +137,88 @@ export default function CategoriaGastoDialog({
         onSubmit: handleSubmit,
         sx: {
           bgcolor: theme.palette.background.paper,
-          borderRadius: 2,
+          borderRadius: 3,
           overflow: "hidden",
-          border: `1px solid ${alpha(theme.palette.divider, 0.7)}`
+          border: `1px solid ${alpha(theme.palette.divider, 0.7)}`,
+          boxShadow: 24
         }
       }}>
 
-      <DialogTitle
-        sx={{
-          fontWeight: 800,
-          pb: 1,
-          display: "flex",
-          alignItems: "center",
-          gap: 1
-        }}>
-
-        <CategoryOutlined
+      <DialogTitle sx={{ m: 0, p: 0 }}>
+        <Box
           sx={{
-            color: tipoMeta.main,
-            background: tipoMeta.bg,
-            p: 0.75,
-            borderRadius: 2,
-            fontSize: 28
-          }} />
+            px: 2.5,
+            py: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            color: "#fff",
+            background:
+            theme.palette.mode === "dark" ?
+            "linear-gradient(135deg, #020617 0%, #1f2937 100%)" :
+            "linear-gradient(135deg, #0F172A 0%, #1F2937 100%)"
+          }}>
 
-        <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
-          <Typography component="span" variant="h6" fontWeight={800}>
-            {initialData ?
-            "Editar Categoría de Gasto" :
-            "Nueva Categoría de Gasto"}
-          </Typography>
-          {form.tipo_categoria &&
-          <Chip
-            label={tipoMeta.label}
-            size="small"
-            sx={{
-              bgcolor: tipoMeta.bg,
-              color: tipoMeta.main,
-              borderColor: alpha(tipoMeta.main, 0.35)
-            }}
-            variant="outlined" />
+          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ minWidth: 0 }}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 1.5,
+                bgcolor: "rgba(255,255,255,.12)",
+                display: "grid",
+                placeItems: "center",
+                flex: "0 0 auto"
+              }}>
 
-          }
-        </Stack>
+              <CategoryOutlined />
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="h6" fontWeight={800} lineHeight={1.1}>
+                {initialData ?
+                "Editar categoría de gasto" :
+                "Nueva categoría de gasto"}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ display: "block", opacity: 0.88, fontWeight: 600 }}>
+
+                Define tipo, deducibilidad y estado
+              </Typography>
+            </Box>
+          </Stack>
+
+          <Stack direction="row" alignItems="center" spacing={1}>
+            {form.tipo_categoria &&
+            <Chip
+              label={tipoMeta.label}
+              size="small"
+              sx={{
+                bgcolor: "rgba(255,255,255,.12)",
+                color: "#fff",
+                borderColor: "rgba(255,255,255,.28)",
+                fontWeight: 800
+              }}
+              variant="outlined" />
+
+            }
+            <IconButton
+              aria-label="Cerrar"
+              onClick={onClose}
+              disabled={isSaving}
+              size="small"
+              sx={{
+                color: "#fff",
+                bgcolor: "rgba(255,255,255,.12)",
+                "&:hover": { bgcolor: "rgba(255,255,255,.2)" }
+              }}>
+
+              <CloseRounded fontSize="small" />
+            </IconButton>
+          </Stack>
+        </Box>
       </DialogTitle>
-
-      <Divider />
 
       <DialogContent
         dividers
@@ -276,7 +327,8 @@ export default function CategoriaGastoDialog({
                   onChange={(_, v) =>
                   onChange("deducible")({ target: { value: v } })
                   }
-                  size="small" />
+                  size="small"
+                  sx={darkSwitchSx} />
 
                 }
                 label="Deducible de impuestos" />
@@ -288,7 +340,8 @@ export default function CategoriaGastoDialog({
                   onChange={(_, v) =>
                   onChange("activo")({ target: { value: v } })
                   }
-                  size="small" />
+                  size="small"
+                  sx={darkSwitchSx} />
 
                 }
                 label="Activo" />
@@ -298,11 +351,33 @@ export default function CategoriaGastoDialog({
         </Grid>
       </DialogContent>
 
-      <DialogActions sx={{ px: 2, py: 1.5 }}>
-        <Button onClick={onClose} variant="outlined">
+      <DialogActions
+        sx={(theme) => ({
+          px: 2.5,
+          py: 2,
+          borderTop: `1px solid ${theme.palette.divider}`,
+          bgcolor:
+          theme.palette.mode === "dark" ?
+          "rgba(0,0,0,.36)" :
+          "rgba(248,250,252,.72)"
+        })}>
+
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          disabled={isSaving}
+          sx={(theme) => secondaryActionButtonSx(theme)}>
+
           Cancelar
         </Button>
-        <Button type="submit" variant="contained" disabled={!canSave}>
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={!canSave}
+          disableElevation
+          startIcon={<SaveRounded />}
+          sx={(theme) => primaryActionButtonSx(theme)}>
+
           {isSaving ? "Guardando..." : "Guardar"}
         </Button>
       </DialogActions>

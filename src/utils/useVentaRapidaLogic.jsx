@@ -34,8 +34,16 @@ const useVentaRapidaFormLogic = () => {
         return productosSeleccionados.length > 0;
       case 2:
         return true;
-      case 3:
-        return metodoPago !== null && getTotal() > 0;
+      case 3: {
+        const total = getTotal();
+        const esEfectivo = Number(metodoPago) === 1;
+
+        return (
+          metodoPago !== null &&
+          total > 0 &&
+          (!esEfectivo || Number(montoRecibido) >= total)
+        );
+      }
       default:
         return false;
     }

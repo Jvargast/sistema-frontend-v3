@@ -20,8 +20,9 @@ const PasoPago = ({
   total
 }) => {
   const esEfectivo = metodoPago === 1;
-  const vuelto = esEfectivo && montoRecibido ? montoRecibido - total : 0;
-  const esMontoInsuficiente = esEfectivo && montoRecibido < total;
+  const montoRecibidoSeguro = Math.max(0, Number(montoRecibido) || 0);
+  const vuelto = esEfectivo ? montoRecibidoSeguro - total : 0;
+  const esMontoInsuficiente = esEfectivo && montoRecibidoSeguro < total;
 
   return (
     <Box>
@@ -34,7 +35,7 @@ const PasoPago = ({
         <Select
           value={metodoPago || ""}
           label="Método"
-          onChange={(e) => setMetodoPago(e.target.value)}>
+          onChange={(e) => setMetodoPago(Number(e.target.value))}>
 
           {metodosDePago.map((m) =>
           <MenuItem key={m.id} value={m.id}>
@@ -58,21 +59,35 @@ const PasoPago = ({
           label="Monto recibido"
           type="number"
           value={montoRecibido}
-          onChange={(e) => setMontoRecibido(Number(e.target.value))}
+          onChange={(e) =>
+          setMontoRecibido(Math.max(0, Number(e.target.value) || 0))
+          }
+          inputProps={{ min: 0 }}
           fullWidth
           sx={{ mb: 2 }} />
 
 
-          {montoRecibido > 0 &&
+          {esMontoInsuficiente &&
         <Alert
-          severity={esMontoInsuficiente ? "error" : "info"}
+          severity="error"
           sx={{ mt: -1, mb: 2 }}>
 
-              {esMontoInsuficiente ?
+              {montoRecibidoSeguro > 0 ?
           `Monto insuficiente, faltan $${(
-          total - montoRecibido).
+          total - montoRecibidoSeguro).
           toLocaleString("es-CL")}` :
-          `Vuelto: $${vuelto.toLocaleString("es-CL")}`}
+          `Ingresa al menos $${total.toLocaleString("es-CL")} para continuar`}
+            </Alert>
+        }
+
+          {!esMontoInsuficiente &&
+        <Alert
+          severity="success"
+          sx={{ mt: -1, mb: 2 }}>
+
+              {vuelto > 0 ?
+          `Vuelto: $${vuelto.toLocaleString("es-CL")}` :
+          "Pago exacto: sin vuelto"}
             </Alert>
         }
         </>
